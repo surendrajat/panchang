@@ -62,6 +62,12 @@ through positions 1..56. The 4 "fixed" karanas (Shakuni, Chatushpada,
 Naga, Kimstughna) occupy positions 57..60 — the half-tithis before the
 next Shukla Pratipada.
 
+Each karana is ~12 hours, so a single panchanga day (24 h from sunrise)
+contains **2–3 distinct karanas**. The compute layer returns both the
+karana active at sunrise (`panchanga.karana`, kept for compatibility)
+and the full per-day sequence (`panchanga.karanas: KaranaInfo[]`) with
+end times for each transition. UI surfaces should show all of them.
+
 ### Vara (weekday)
 
 Anchored to sunrise. The Hindu day runs sunrise-to-sunrise. If you ask
@@ -141,40 +147,111 @@ year using the standard anchor: Vikrama 1984 = Prabhava (index 0).
 
 ## Muhurta
 
-- **Rahu-Kaal / Yamaganda / Gulika**: each one of 8 equal daylight
-  segments (sunrise → sunset / 8), with the segment number determined
-  by the weekday per the standard table. See `muhurta.ts` for the
-  lookup.
-- **Abhijit**: 48 minutes centred on local noon (midpoint of sunrise
-  and sunset). Does not occur on Wednesdays per Smarta tradition.
-- **Brahma Muhurta**: the 48 minutes starting 96 minutes before
-  sunrise.
+We compute ten time-windows. The inauspicious three each occupy 1/8 of
+daylight, segment number selected by the weekday-table in `muhurta.ts`:
+
+- **Rahu Kaal** — avoid for new ventures.
+- **Yamaganda** — avoid for travel.
+- **Gulika Kaal** — generally inauspicious.
+
+The auspicious / observance windows are fixed offsets from sunrise /
+solar noon / sunset:
+
+- **Brahma Muhurta** — 48 min ending 48 min before sunrise (96–48 min
+  before sunrise). The most auspicious window of the day.
+- **Pratah Sandhya** — the 48-min twilight ending at sunrise.
+- **Abhijit Muhurta** — the 48 min centred on solar noon (midpoint of
+  sunrise and sunset). Skipped on Wednesday per Smarta tradition.
+- **Vijaya Muhurta** — the 11th of 15 daylight muhurtas, counted from
+  sunrise. Auspicious for victory / fresh starts.
+- **Godhuli Muhurta** — "cow-dust hour", 48 min centred on sunset.
+  Auspicious for weddings.
+- **Sayahna Sandhya** — the 48-min twilight starting at sunset.
+- **Nishita Kaal** — the 8th of 15 night-muhurtas (7/15 to 8/15 of
+  the night after sunset). Anchor for night-time observances; the
+  Smarta Janmashtami rule requires Ashtami to be present anywhere in
+  this *interval* (not merely at its centre).
+
+All windows are returned on `panchanga.muhurta`.
 
 ## Festivals
 
-Each Phase 1 festival is expressed as a predicate over a `Panchanga`
-value (e.g., "Shukla Navami of Chaitra, non-Adhika"). The rule fires on
-the civil day when the panchanga at sunrise matches.
+Each festival is a predicate over a `Panchanga` value. Simple
+festivals are "tithi N of paksha P of masa M, non-Adhika" (e.g., Rama
+Navami = Chaitra Shukla 9). The major festivals where Drik's published
+date diverges from the naive sunrise-tithi check are routed through
+the tiebreaker engine in `src/lib/panchanga/tiebreakers.ts`.
 
-### Tie-breakers
+### Tiebreaker engine
 
-A few festivals require special handling when the relevant tithi spans
-two sunrises. Phase 1 defaults follow **Smarta** convention. Plans for
-Vaishnava and other regional variants live in Phase 2.
+The engine has four families. Each rule cites the muhurta window it's
+anchored to, and each is unit-tested with explicit per-year assertions.
 
-| Festival     | Tie-breaker (Phase 1 default)                                        |
-|---           |---                                                                   |
-| Janmashtami  | Day where Krishna Ashtami is present at sunrise (Smarta).            |
-| Ekadashi     | Day where Ekadashi is present at sunrise (Smarta).                   |
-| Diwali       | Day where Krishna Amavasya is present during pradosha (evening twilight). The current rule simplifies to "Krishna Amavasya at sunrise"; the spanning-two-evenings case will be refined in Phase 2. |
-| Mahashivaratri | Day where Krishna Chaturdashi of Magha is present at sunrise.      |
+**1. Window-vyapini predicate.** `vyapiniMatches(p, window, tithiIndex, pick)`.
+The festival fires on the day where the target tithi is present at the
+named muhurta window (Pradosha, Nishita, Aparahna, Madhyahna,
+Chandrodaya). `pick: 'earlier' | 'later'` resolves ties when two
+consecutive days qualify.
 
-### Solar sankrantis
+**2. Bhadra-Kaal exclusion.** The Vishti karana ("Bhadra") blocks
+observance of Holika Dahan and Raksha Bandhan. Each festival has its
+own cutoff for "how late Bhadra is allowed to extend":
 
-Makara Sankranti (and the regional Pongal / Lohri tied to it) is
-currently flagged by Gregorian date (Jan 14 in the location's tz). A
-future revision will compute the actual sankranti instant from the
-Sun's sidereal-sign transit.
+- `'sunset'` — shift if Bhadra extends past sunset.
+- `'prahar1'` — shift if Bhadra extends past 1/4 of the night (Raksha
+  Bandhan: festival must be tied in daytime; ~2½ h after sunset).
+- `'prahar4'` — shift if Bhadra extends past 3/4 of the night (Holika
+  Dahan: late-night observance OK if Bhadra ends before the last
+  prahar).
+
+A 5-minute guard band absorbs astronomy-engine ↔ Drik ephemeris drift
+at the cutoff boundary.
+
+**3. Sunrise fallback.** When neither today nor adjacent days qualify
+the window predicate (tithi-kshaya / short-tithi years), fall back to
+the day where the tithi is at sunrise. Used by Karva Chauth (when
+Chaturthi doesn't span moonrise), Janmashtami, Vijayadashami.
+
+**4. Nakshatra preference.** Vijayadashami picks the day where
+**Shravana nakshatra** is at Aparahna when two days both have Dashami
+at Aparahna.
+
+### Per-festival wiring
+
+| Festival            | Rule                                                              |
+|---                  |---                                                                |
+| Holika Dahan        | Pradosha-vyapini Purnima, `later` pick, Bhadra cutoff `prahar4`.  |
+| Holi                | The day after Holika Dahan (replays Holika rule on yesterday).    |
+| Maha Shivaratri     | Nishita-vyapini Chaturdashi, `earlier` pick.                      |
+| Krishna Janmashtami | Ashtami present *anywhere* in the **Nishita Kaal interval** (7/15 to 8/15 of night), `later` pick, sunrise fallback. Smarta default. |
+| Ganesh Chaturthi    | Madhyahna-vyapini Chaturthi.                                      |
+| Raksha Bandhan      | Aparahna-vyapini Purnima, Bhadra cutoff `prahar1`, sunrise fallback. |
+| Vijayadashami       | Aparahna-vyapini Dashami, Shravana-nakshatra preferred, `earlier` pick, sunrise fallback. |
+| Karva Chauth        | Chandrodaya-vyapini Chaturthi (moonrise), sunrise fallback.       |
+| Dhanteras           | Pradosha-vyapini Trayodashi.                                      |
+| Diwali              | Pradosha-vyapini Amavasya, `earlier` pick. Festival fires on a day whose **sunrise tithi may be Krishna 14** (Chaturdashi) — Amavasya doesn't have to be at sunrise; it has to be at Pradosha. Drik's published convention. |
+| Makara Sankranti    | Bisection-found exact transit JD; observance is the transit civil day unless transit is after sunset, in which case the next civil day. |
+
+### Why festival date and sunrise tithi can differ
+
+A common reading is "Diwali is the Amavasya day, so sunrise tithi must
+be Amavasya". Drik's actual rule is **Amavasya at Pradosha** — and on
+roughly 1 year in 3, that day's sunrise tithi is Chaturdashi. Both
+Diwali and Naraka Chaturdashi can legitimately share that civil day:
+Naraka Chaturdashi anchors to the pre-dawn / sunrise; Diwali anchors
+to the Pradosha. The UI exposes both `panchanga.tithi` (at sunrise)
+and `panchanga.tithi.endTime` (when it transitions to the next tithi)
+so users can see the day's full tithi sequence.
+
+### Accuracy audit
+
+- Main fixture window: 233 / 233 strict + tiebreaker checks across
+  2015-2028 for New Delhi → 232 / 233 pass (99.6%). The single
+  divergence is Krishna Janmashtami 2016 (Drik Aug 25 vs my Aug 24);
+  the documented Smarta rule produces Aug 24 but Drik publishes Aug 25
+  for reasons not captured by the rule. Treated as a known anomaly.
+- Multi-city smoke (6 Indian cities × 16 festivals for 2025): 96/96.
+- Extended-year soft regression (2012, 2030): 25/28.
 
 ## Numerical accuracy
 

@@ -23,6 +23,7 @@ import {
   bhadraAwareVyapiniWithSunriseFallback,
   vyapiniWithSunriseFallback,
   vyapiniWithNakshatraPreference,
+  smartaJanmashtamiMatches,
   sankrantiInto,
 } from '../tiebreakers';
 
@@ -299,15 +300,17 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     },
   },
 
-  // Krishna Janmashtami — Shravana Krishna 8. Smarta convention picks
-  // the LATER night when Ashtami covers two midnights. Falls back to
-  // tithi-at-sunrise day in tithi-kshaya years where Nishita doesn't
-  // qualify on any day.
+  // Krishna Janmashtami — Shravana Krishna 8 (Smarta). Drik rule:
+  // Ashtami must prevail during the Nishita Kaal INTERVAL (8th of 15
+  // night-muhurtas, ~44 min wide), not just at its center. Critical
+  // for locations east of Delhi where Nishita is ~45 min earlier and
+  // a center-point check misses Ashtami's late-night entry. 'later'
+  // pick when both days qualify; sunrise fallback otherwise.
   {
     key: 'krishna_janmashtami',
     displayName: 'Krishna Janmashtami',
     displayNameHi: 'कृष्ण जन्माष्टमी',
-    matches: vyapiniKrishna(8, 'Shravana', 'nishita', 'later', 'sunrise'),
+    matches: (p) => smartaJanmashtamiMatches(p, 'Shravana'),
   },
 
   // Ganesh Chaturthi — Bhadrapada Shukla 4 (Madhyahna-vyapini).

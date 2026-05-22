@@ -84,6 +84,81 @@ function isBhadraAtJD(jd: number): boolean {
   return pos >= 1 && pos <= 56 && (pos - 1) % 7 === 6;
 }
 
+// Nishita Kaal is the 8th muhurta of the 15-muhurta night. As an
+// *interval* (not just a center point), it runs from 7/15 of the
+// night after sunset to 8/15. Returns true iff the target tithi is
+// present at any instant within this interval. Tithi is monotonic
+// in elongation, so we just check the interval's endpoints.
+//
+// Used by Smarta Janmashtami: Drik's rule is "Ashtami prevails during
+// Nishita Kaal", not "Ashtami at the center". Centerpoint check
+// misses cases where Ashtami starts late in the muhurta window
+// (e.g., Kolkata 2025: Ashtami starts 23:50 IST, Kolkata's Nishita
+// center is 23:40 → center says miss, but interval [23:19, 00:03]
+// catches it).
+export function tithiOverlapsNishitaKaal(
+  loc: Location,
+  date: Date,
+  tithiIndex: number,
+): boolean {
+  const events = sunRiseSet(loc, date);
+  if (!events.rise || !events.set) return false;
+  const nextEvents = sunRiseSet(loc, new Date(date.getTime() + MS_PER_DAY));
+  const nextRise = nextEvents.rise ?? new Date(events.rise.getTime() + MS_PER_DAY);
+  const nightMs = nextRise.getTime() - events.set.getTime();
+  const kaalStart = new Date(events.set.getTime() + (7 * nightMs) / 15);
+  const kaalEnd = new Date(events.set.getTime() + (8 * nightMs) / 15);
+  const startTithi = tithiIndexAtJD(dateToJulian(kaalStart));
+  const endTithi = tithiIndexAtJD(dateToJulian(kaalEnd));
+  // Tithi is monotonic in elongation → check the [start, end] range.
+  return tithiIndex >= startTithi && tithiIndex <= endTithi;
+}
+
+// Smarta Janmashtami rule (Drik default):
+//   1. Ashtami (Krishna 8 = tithi index 23) must prevail during the
+//      Nishita Kaal of the night following the candidate day.
+//   2. If two consecutive days both qualify, pick the LATER day.
+//   3. If neither qualifies, fall back to the day with Ashtami at
+//      sunrise (= the day after Ashtami enters the night).
+//
+// Verified against drikpanchang.com Indian-calendar pages for
+// Delhi 2025 (Aug 15) and Kolkata 2025 (Aug 15) — both pick the
+// same civil day even though local Nishita differs by ~45 min.
+//
+// Known limitation: Delhi 2016 (Drik Aug 25, mine Aug 24). Ashtami
+// has Nishita Kaal overlap only on Aug 24 in 2016 but Drik publishes
+// Aug 25. The Smarta rule may have an additional condition
+// (perhaps "Ashtami end during Aug 25's day") that's not documented
+// here; leaving as a single-year known divergence.
+export function smartaJanmashtamiMatches(
+  p: Panchanga,
+  masa: string,
+): boolean {
+  if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
+  const target = 23; // Krishna Ashtami
+  const todayAtKaal = tithiOverlapsNishitaKaal(p.location, p.date, target);
+  const tomorrowAtKaal = tithiOverlapsNishitaKaal(
+    p.location,
+    new Date(p.date.getTime() + MS_PER_DAY),
+    target,
+  );
+  if (todayAtKaal) {
+    // 'later' pick: defer to tomorrow if it also qualifies.
+    return !tomorrowAtKaal;
+  }
+  // Sunrise fallback: today has Ashtami at sunrise AND no neighbor
+  // qualified via Nishita Kaal.
+  if (p.tithi.index !== target) return false;
+  const yesterdayAtKaal = tithiOverlapsNishitaKaal(
+    p.location,
+    new Date(p.date.getTime() - MS_PER_DAY),
+    target,
+  );
+  if (yesterdayAtKaal) return false;
+  if (tomorrowAtKaal) return false;
+  return true;
+}
+
 // Returns the canonical instant at the center of the named muhurta
 // window for a given sunrise/sunset pair (and optional moonrise for
 // the Chandrodaya case). Returns null when the window can't be

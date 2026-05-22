@@ -61,10 +61,15 @@
       value: yogaNameByIndex(panchanga.yoga.index, preferences.language),
       endsAt: panchanga.yoga.endTime,
     },
+    // Karana — a panchanga day spans 2-3 karanas (each ~12 h). Show
+    // the full sequence joined with " · ". The end time of the LAST
+    // karana in the day is the one users care about.
     {
       labelKey: 'anga.karana' as const,
-      value: karanaNameByPosition(panchanga.karana.positionInCycle, preferences.language),
-      endsAt: panchanga.karana.endTime,
+      value: panchanga.karanas
+        .map((k) => karanaNameByPosition(k.positionInCycle, preferences.language))
+        .join(' · '),
+      endsAt: panchanga.karanas[panchanga.karanas.length - 1].endTime,
     },
     {
       labelKey: 'anga.vara' as const,

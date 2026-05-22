@@ -103,12 +103,21 @@ export const hi: Record<TranslationKey, string> = {
   // ── muhurta
   'muhurta.rahuKaal': 'राहु काल',
   'muhurta.yamaganda': 'यमगण्ड',
-  'muhurta.gulika': 'गुलिक',
-  'muhurta.abhijit': 'अभिजित',
+  'muhurta.gulika': 'गुलिक काल',
+  'muhurta.abhijit': 'अभिजित मुहूर्त',
   'muhurta.brahmaMuhurta': 'ब्रह्म मुहूर्त',
+  'muhurta.pratahSandhya': 'प्रातः सन्ध्या',
+  'muhurta.vijayaMuhurta': 'विजय मुहूर्त',
+  'muhurta.godhuli': 'गोधूलि मुहूर्त',
+  'muhurta.sayahnaSandhya': 'सायं सन्ध्या',
+  'muhurta.nishitaKaal': 'निशीथ काल',
   'muhurta.inauspicious': 'अशुभ',
   'muhurta.auspicious': 'शुभ',
   'muhurta.preDawn': 'प्रातः पूर्व',
+  'muhurta.twilight': 'सन्ध्या',
+  'muhurta.afternoon': 'अपराह्न',
+  'muhurta.sunset': 'सूर्यास्त समय',
+  'muhurta.night': 'मध्य रात्रि',
 
   // ── year card
   'year.vikrama': 'विक्रम',

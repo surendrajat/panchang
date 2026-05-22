@@ -94,12 +94,21 @@ export const en = {
   // ── muhurta
   'muhurta.rahuKaal': 'Rahu Kaal',
   'muhurta.yamaganda': 'Yamaganda',
-  'muhurta.gulika': 'Gulika',
-  'muhurta.abhijit': 'Abhijit',
+  'muhurta.gulika': 'Gulika Kaal',
+  'muhurta.abhijit': 'Abhijit Muhurta',
   'muhurta.brahmaMuhurta': 'Brahma Muhurta',
+  'muhurta.pratahSandhya': 'Pratah Sandhya',
+  'muhurta.vijayaMuhurta': 'Vijaya Muhurta',
+  'muhurta.godhuli': 'Godhuli Muhurta',
+  'muhurta.sayahnaSandhya': 'Sayahna Sandhya',
+  'muhurta.nishitaKaal': 'Nishita Kaal',
   'muhurta.inauspicious': 'inauspicious',
   'muhurta.auspicious': 'auspicious',
   'muhurta.preDawn': 'pre-dawn',
+  'muhurta.twilight': 'twilight',
+  'muhurta.afternoon': 'afternoon',
+  'muhurta.sunset': 'around sunset',
+  'muhurta.night': 'midnight',
 
   // ── year card
   'year.vikrama': 'Vikrama',

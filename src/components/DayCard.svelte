@@ -151,40 +151,38 @@
   }
   const muhurtaItems = $derived.by<MuhurtaRow[]>(() => {
     if (!hasDaylight) return [];
+    const m = panchanga.muhurta;
+    // Order chronologically through the day so the table reads
+    // top-to-bottom as sunrise → night.
     const rows: MuhurtaRow[] = [
-      {
-        labelKey: 'muhurta.rahuKaal',
-        subKey: 'muhurta.inauspicious',
-        interval: panchanga.muhurta.rahuKaal,
-        tone: 'bad',
-      },
-      {
-        labelKey: 'muhurta.yamaganda',
-        subKey: 'muhurta.inauspicious',
-        interval: panchanga.muhurta.yamaganda,
-        tone: 'bad',
-      },
-      {
-        labelKey: 'muhurta.gulika',
-        subKey: 'muhurta.inauspicious',
-        interval: panchanga.muhurta.gulika,
-        tone: 'bad',
-      },
+      { labelKey: 'muhurta.brahmaMuhurta', subKey: 'muhurta.preDawn',
+        interval: m.brahmaMuhurta, tone: 'good' },
+      { labelKey: 'muhurta.pratahSandhya', subKey: 'muhurta.twilight',
+        interval: m.pratahSandhya, tone: 'good' },
+      { labelKey: 'muhurta.rahuKaal', subKey: 'muhurta.inauspicious',
+        interval: m.rahuKaal, tone: 'bad' },
+      { labelKey: 'muhurta.yamaganda', subKey: 'muhurta.inauspicious',
+        interval: m.yamaganda, tone: 'bad' },
+      { labelKey: 'muhurta.gulika', subKey: 'muhurta.inauspicious',
+        interval: m.gulika, tone: 'bad' },
     ];
-    if (panchanga.muhurta.abhijit) {
-      rows.push({
-        labelKey: 'muhurta.abhijit',
-        subKey: 'muhurta.auspicious',
-        interval: panchanga.muhurta.abhijit,
-        tone: 'good',
-      });
+    if (m.abhijit) {
+      rows.push({ labelKey: 'muhurta.abhijit', subKey: 'muhurta.auspicious',
+        interval: m.abhijit, tone: 'good' });
     }
-    rows.push({
-      labelKey: 'muhurta.brahmaMuhurta',
-      subKey: 'muhurta.preDawn',
-      interval: panchanga.muhurta.brahmaMuhurta,
-      tone: 'good',
-    });
+    rows.push(
+      { labelKey: 'muhurta.vijayaMuhurta', subKey: 'muhurta.afternoon',
+        interval: m.vijayaMuhurta, tone: 'good' },
+      { labelKey: 'muhurta.godhuli', subKey: 'muhurta.sunset',
+        interval: m.godhuli, tone: 'good' },
+      { labelKey: 'muhurta.sayahnaSandhya', subKey: 'muhurta.twilight',
+        interval: m.sayahnaSandhya, tone: 'good' },
+      { labelKey: 'muhurta.nishitaKaal', subKey: 'muhurta.night',
+        interval: m.nishitaKaal, tone: 'good' },
+    );
+    // Sort by start time so muhurtas read chronologically regardless
+    // of how Brahma's pre-sunrise window relates to the previous row.
+    rows.sort((a, b) => a.interval.start.getTime() - b.interval.start.getTime());
     return rows;
   });
 

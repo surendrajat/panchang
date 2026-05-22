@@ -1,0 +1,15 @@
+{
+  "label": "Bengaluru — 2024-08-26 (Krishna Janmashtami, Smarta)",
+  "location": {
+    "name": "Bengaluru, India",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "altitude": 920,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-08-26",
+  "expect": {
+    "tithi": { "name": "Ashtami", "paksha": "krishna" },
+    "festivals": ["krishna_janmashtami"]
+  }
+}

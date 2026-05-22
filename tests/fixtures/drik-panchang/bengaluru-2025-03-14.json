@@ -1,0 +1,16 @@
+{
+  "label": "Bengaluru — 2025-03-14 (Holika Dahan / Phalguna Purnima)",
+  "location": {
+    "name": "Bengaluru, India",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "altitude": 920,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-03-14",
+  "expect": {
+    "tithi": { "name": "Purnima", "paksha": "shukla" },
+    "masa": { "name": "Phalguna" },
+    "festivals": ["holika_dahan"]
+  }
+}

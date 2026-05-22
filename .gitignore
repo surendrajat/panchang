@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-types
+.DS_Store
+*.log
+.env
+.env.local
+.vite
+coverage
+.svelte-kit
+.idea
+.vscode
+.design

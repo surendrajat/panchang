@@ -8,11 +8,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "pnpm run build && wrangler dev",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit && svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier --write \"src/**/*.{ts,svelte,css}\""
+    "format": "prettier --write \"src/**/*.{ts,svelte,css}\"",
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "astronomy-engine": "2.1.19",
@@ -20,6 +21,7 @@
     "svelte-routing": "2.13.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.37.3",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "@tsconfig/svelte": "5.0.4",
     "@types/node": "22.10.5",
@@ -30,10 +32,11 @@
     "svelte-check": "4.1.4",
     "tsx": "^4.22.3",
     "typescript": "5.7.3",
-    "vite": "6.0.7",
+    "vite": "6.4.2",
     "vite-plugin-pwa": "0.21.1",
     "vitest": "2.1.8",
-    "workbox-window": "7.3.0"
+    "workbox-window": "7.3.0",
+    "wrangler": "^4.93.1"
   },
   "packageManager": "pnpm@10.33.4",
   "engines": {

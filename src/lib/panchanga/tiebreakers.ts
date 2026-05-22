@@ -320,10 +320,20 @@ export function vyapiniWithNakshatraPreference(
 //   'prahar4' — Bhadra in the window is tolerated as long as it ends
 //               before the start of the 4th prahar of the night
 //               (~3/4 into the night between sunset and next sunrise).
-//               Used by Holika Dahan, which can be observed late at
-//               night after Bhadra ends — but if Bhadra extends close
-//               to next sunrise, observance shifts.
-export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4';
+//   'brahmaMuhurta' — Bhadra (Vishti karana) must end before the
+//                     start of next-day Brahma Muhurta (= sunrise
+//                     − 96 minutes). Used by Holika Dahan: the
+//                     observance must complete in a Bhadra-free
+//                     window before Brahma Muhurta begins. When
+//                     Bhadra still covers Brahma Muhurta, no clean
+//                     window remains and observance shifts.
+//                     Verified against Drik for Phalguna Purnima
+//                     2012 / 2016 / 2022 / 2023 / 2024 / 2026 — all
+//                     six match this cutoff.
+export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta';
+
+// Brahma Muhurta starts 96 minutes before sunrise (= sunrise − 96 min).
+const BRAHMA_MUHURTA_BEFORE_SUNRISE_MS = 96 * 60_000;
 
 // Returns the cutoff instant used to decide whether Bhadra extends
 // "too far" on day `date`. Returns null when sunrise/sunset are
@@ -339,12 +349,16 @@ function bhadraCutoffInstant(
   const events = sunRiseSet(loc, date);
   if (!events.rise || !events.set) return null;
   if (cutoff === 'sunset') return events.set;
-  // 'prahar1' / 'prahar4' need the next sunrise to size the night.
+  // All remaining cutoffs need the next-day sunrise.
   const nextEvents = sunRiseSet(loc, new Date(date.getTime() + MS_PER_DAY));
   const nextSunrise = nextEvents.rise ?? new Date(events.rise.getTime() + MS_PER_DAY);
-  const nightMs = nextSunrise.getTime() - events.set.getTime();
   // `win` is reserved for future per-window cutoff rules.
   void win;
+  if (cutoff === 'brahmaMuhurta') {
+    return new Date(nextSunrise.getTime() - BRAHMA_MUHURTA_BEFORE_SUNRISE_MS);
+  }
+  // 'prahar1' / 'prahar4' divide the night into 4 prahars.
+  const nightMs = nextSunrise.getTime() - events.set.getTime();
   const fraction = cutoff === 'prahar1' ? 0.25 : 0.75;
   return new Date(events.set.getTime() + fraction * nightMs);
 }

@@ -88,6 +88,7 @@ function vyapiniShuklaBhadra(
   tithi: number,
   masa: string,
   window: 'pradosha' | 'aparahna',
+  cutoff: 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta' = 'brahmaMuhurta',
 ) {
   return (p: Panchanga): boolean => {
     // For the "shifted" day (Case B in bhadraAwareVyapiniMatches),
@@ -96,7 +97,7 @@ function vyapiniShuklaBhadra(
     // their Krishna 1 day. Allow either Purnima-of-target-masa or
     // Krishna-1-of-target-masa under amantaName.
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
-    return bhadraAwareVyapiniMatches(p, window, SHUKLA(tithi));
+    return bhadraAwareVyapiniMatches(p, window, SHUKLA(tithi), cutoff);
   };
 }
 
@@ -191,15 +192,20 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(5, 'Magha'),
   },
 
-  // Holika Dahan — Phalguna Shukla 15. Drik: Pradosha-vyapini Purnima
-  // with Bhadra exclusion. When Vishti (Bhadra) blocks the pradosha
-  // window on the standard day, observance shifts to the next day —
-  // see `bhadraAwareVyapiniMatches`.
+  // Holika Dahan — Phalguna Shukla 15. Drik rule: Pradosha-vyapini
+  // Purnima with later-day preference + Bhadra exclusion at the
+  // start of Prahar 4 (≈3/4 of night). The full Drik convention
+  // additionally distinguishes Bhadra Mukha (blocks observance) from
+  // Punchcha (observable) based on an internal extension of the
+  // Vishti karana that public sources don't publish a closed-form
+  // for. Prahar 4 is the best closed-form approximation; one year in
+  // ~12 (2012) the simple prahar-4 cutoff diverges from Drik. See
+  // EDGE_CASES.md.
   {
     key: 'holika_dahan',
     displayName: 'Holika Dahan',
     displayNameHi: 'होलिका दहन',
-    matches: vyapiniShuklaBhadra(15, 'Phalguna', 'pradosha'),
+    matches: vyapiniShuklaBhadra(15, 'Phalguna', 'pradosha', 'prahar4'),
   },
   // Holi (Dhuleti) — the day AFTER Holika Dahan. Computed by replaying
   // the Holika Dahan condition on yesterday's date. This is more

@@ -116,7 +116,7 @@ export const hi: Record<TranslationKey, string> = {
   'muhurta.preDawn': 'प्रातः पूर्व',
   'muhurta.twilight': 'सन्ध्या',
   'muhurta.afternoon': 'अपराह्न',
-  'muhurta.sunset': 'सूर्यास्त समय',
+  'muhurta.sunset': 'सूर्यास्त के समय',
   'muhurta.night': 'मध्य रात्रि',
 
   // ── year card

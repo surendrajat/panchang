@@ -111,6 +111,27 @@ export const CITIES: readonly City[] = [
   city('Doha', 'Qatar', 25.2854, 51.531, 10, 'Asia/Qatar'),
   city('Frankfurt', 'Germany', 50.1109, 8.6821, 112, 'Europe/Berlin'),
   city('Paris', 'France', 48.8566, 2.3522, 35, 'Europe/Paris'),
+  // Southeast Asia + nearby — significant Hindu populations:
+  // Indonesia (Bali ~85% Hindu), Malaysia (Tamil Hindu diaspora ~7%),
+  // Thailand (Hindu minority + tourists), Philippines (Indian
+  // expat community), Vietnam (Cham Hindu communities), Myanmar.
+  city('Denpasar', 'Indonesia', -8.6705, 115.2126, 4, 'Asia/Makassar'),
+  city('Jakarta', 'Indonesia', -6.2088, 106.8456, 8, 'Asia/Jakarta'),
+  city('Kuala Lumpur', 'Malaysia', 3.139, 101.6869, 60, 'Asia/Kuala_Lumpur'),
+  city('George Town', 'Malaysia', 5.4141, 100.3288, 5, 'Asia/Kuala_Lumpur'),
+  city('Bangkok', 'Thailand', 13.7563, 100.5018, 2, 'Asia/Bangkok'),
+  city('Manila', 'Philippines', 14.5995, 120.9842, 16, 'Asia/Manila'),
+  city('Cebu', 'Philippines', 10.3157, 123.8854, 16, 'Asia/Manila'),
+  city('Ho Chi Minh City', 'Vietnam', 10.8231, 106.6297, 19, 'Asia/Ho_Chi_Minh'),
+  city('Yangon', 'Myanmar', 16.8409, 96.1735, 23, 'Asia/Yangon'),
+  city('Phnom Penh', 'Cambodia', 11.5564, 104.9282, 12, 'Asia/Phnom_Penh'),
+  // Other diaspora centres with prominent Hindu populations.
+  city('Port Louis', 'Mauritius', -20.1609, 57.5012, 5, 'Indian/Mauritius'),
+  city('Suva', 'Fiji', -18.1248, 178.4501, 6, 'Pacific/Fiji'),
+  city('Durban', 'South Africa', -29.8587, 31.0218, 14, 'Africa/Johannesburg'),
+  city('Port of Spain', 'Trinidad and Tobago', 10.6549, -61.5019, 12, 'America/Port_of_Spain'),
+  city('Paramaribo', 'Suriname', 5.852, -55.2038, 3, 'America/Paramaribo'),
+  city('Auckland', 'New Zealand', -36.8485, 174.7633, 30, 'Pacific/Auckland'),
 ];
 
 // Naïve substring search, sorted by population-ish proxy (declaration order).

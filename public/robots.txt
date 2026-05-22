@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# Static panchanga app, no user data collected.

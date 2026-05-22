@@ -1,0 +1,14 @@
+{
+  "label": "Bengaluru — 2023-08-01 (Adhika Shravana)",
+  "location": {
+    "name": "Bengaluru, India",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "altitude": 920,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2023-08-01",
+  "expect": {
+    "masa": { "name": "Shravana", "isAdhika": true }
+  }
+}

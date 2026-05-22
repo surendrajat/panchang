@@ -1,0 +1,47 @@
+{
+  "name": "panchanga",
+  "version": "0.1.0",
+  "description": "Hindu calendar (panchanga)",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit && svelte-check --tsconfig ./tsconfig.json",
+    "format": "prettier --write \"src/**/*.{ts,svelte,css}\""
+  },
+  "dependencies": {
+    "astronomy-engine": "2.1.19",
+    "dexie": "4.0.10",
+    "svelte-routing": "2.13.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "5.0.3",
+    "@tsconfig/svelte": "5.0.4",
+    "@types/node": "22.10.5",
+    "prettier": "3.4.2",
+    "prettier-plugin-svelte": "3.3.3",
+    "sharp": "^0.34.5",
+    "svelte": "5.16.6",
+    "svelte-check": "4.1.4",
+    "tsx": "^4.22.3",
+    "typescript": "5.7.3",
+    "vite": "6.0.7",
+    "vite-plugin-pwa": "0.21.1",
+    "vitest": "2.1.8",
+    "workbox-window": "7.3.0"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

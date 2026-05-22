@@ -1,0 +1,15 @@
+{
+  "label": "Varanasi — 2024-11-01 (Diwali Amavasya)",
+  "location": {
+    "name": "Varanasi, India",
+    "latitude": 25.3176,
+    "longitude": 82.9739,
+    "altitude": 80,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-11-01",
+  "expect": {
+    "tithi": { "name": "Amavasya", "paksha": "krishna" },
+    "festivals": ["diwali"]
+  }
+}

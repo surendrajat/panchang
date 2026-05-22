@@ -90,7 +90,7 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
     // regressed even in the no-tiebreaker majority of cases.
     const soft = results.filter((r) => r.isKnownLimitation);
     const passes = soft.filter((r) => r.matched).length;
-    const BASELINE_MIN_PASSES = 70; // Current accuracy floor; bump as rules land.
+    const BASELINE_MIN_PASSES = 140; // Tightened after Pradosha/Nishita/Aparahna/Chandrodaya wiring (was 70 / 88.3% baseline 143).
     expect(passes, `${passes} / ${soft.length} tiebreaker-dependent festivals match`).toBeGreaterThanOrEqual(
       BASELINE_MIN_PASSES,
     );

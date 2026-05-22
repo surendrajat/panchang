@@ -16,6 +16,88 @@
 
 import type { Panchanga } from '../types';
 import type { FestivalRule } from './rules';
+import {
+  vyapiniMatches,
+  bhadraAwareVyapiniMatches,
+  bhadraAwareVyapiniMatchesForDate,
+  bhadraAwareVyapiniWithSunriseFallback,
+  vyapiniWithSunriseFallback,
+  vyapiniWithNakshatraPreference,
+  sankrantiInto,
+} from '../tiebreakers';
+
+// Nakshatra index for Shravana (used by Vijayadashami).
+const NAK_SHRAVANA = 22;
+
+// Tithi index helpers for the vyapini rules:
+//   - shukla N → index N        (1..15)
+//   - krishna N → index 15 + N  (16..30; krishna 15 = 30 = Amavasya)
+const SHUKLA = (n: number) => n; // shukla 1..15
+const KRISHNA = (n: number) => 15 + n; // krishna 1..15 → 16..30
+
+// Shukla-paksha vyapini festival in a given Amanta month. The window
+// names map directly to Drik's standard convention for each festival.
+// `pick` chooses earlier-vs-later when two consecutive days both have
+// the tithi at the window (see `vyapiniMatches`).
+//
+// `fallback`:
+//   'strict'   — only the named-window check (default).
+//   'sunrise'  — adds a tithi-at-sunrise fallback for kshaya tithis
+//                where the window-strict rule produces NO match in
+//                this paksha. Used by festivals like Vijayadashami /
+//                Janmashtami / Karva Chauth where Drik defers to
+//                sunrise observance in tithi-kshaya years.
+function vyapiniShukla(
+  tithi: number,
+  masa: string,
+  window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna',
+  pick: 'earlier' | 'later' = 'earlier',
+  fallback: 'strict' | 'sunrise' = 'strict',
+) {
+  return (p: Panchanga): boolean => {
+    if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
+    if (fallback === 'sunrise') {
+      return vyapiniWithSunriseFallback(p, window, SHUKLA(tithi), pick);
+    }
+    return vyapiniMatches(p, window, SHUKLA(tithi), pick);
+  };
+}
+
+function vyapiniKrishna(
+  tithi: number,
+  masa: string,
+  window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'chandrodaya',
+  pick: 'earlier' | 'later' = 'earlier',
+  fallback: 'strict' | 'sunrise' = 'strict',
+) {
+  return (p: Panchanga): boolean => {
+    if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
+    if (fallback === 'sunrise') {
+      return vyapiniWithSunriseFallback(p, window, KRISHNA(tithi), pick);
+    }
+    return vyapiniMatches(p, window, KRISHNA(tithi), pick);
+  };
+}
+
+// Bhadra-Kaal aware Shukla-paksha festival rule (used by Holika Dahan
+// and Raksha Bandhan). When Vishti (Bhadra) is active at the window
+// center on day X, observance shifts to day X+1 even if the target
+// tithi isn't at X+1's window. See `bhadraAwareVyapiniMatches`.
+function vyapiniShuklaBhadra(
+  tithi: number,
+  masa: string,
+  window: 'pradosha' | 'aparahna',
+) {
+  return (p: Panchanga): boolean => {
+    // For the "shifted" day (Case B in bhadraAwareVyapiniMatches),
+    // today's masa might already have ticked over to the next krishna
+    // half — but in Amanta convention Phalguna/Shravana still own
+    // their Krishna 1 day. Allow either Purnima-of-target-masa or
+    // Krishna-1-of-target-masa under amantaName.
+    if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
+    return bhadraAwareVyapiniMatches(p, window, SHUKLA(tithi));
+  };
+}
 
 // Shukla-paksha festivals: month name is the same in Amanta and
 // Purnimanta, so we can match either `masa.name` or `masa.amantaName` —
@@ -42,15 +124,10 @@ function inKrishna(tithiNumber: number, amantaMasa: string) {
     !p.masa.isAdhika;
 }
 
-// Solar sankrantis: detect the civil date on which the Sun crosses
-// into the target sidereal sign. `signAtDayStart` is the sign as the
-// civil day begins; `signAtDayEnd` is the sign as it ends. A
-// transition into `targetSign` between those two instants is the
-// sankranti for that sign.
-function isSankrantiInto(targetSign: number): (p: Panchanga) => boolean {
-  return (p) =>
-    p.solar.signAtDayStart !== p.solar.signAtDayEnd && p.solar.signAtDayEnd === targetSign;
-}
+// Solar sankrantis use the Drik "Punya Kaal" sunset rule: if the Sun
+// enters the target sidereal sign *after* sunset on day N, observance
+// shifts to day N+1. See `sankrantiInto` in tiebreakers.ts.
+const isSankrantiInto = sankrantiInto;
 
 // Lohri is the day before Makara Sankranti. Detect it the same way
 // but one sign earlier: today both starts and ends in Dhanu (8), AND
@@ -97,10 +174,15 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'maha_shivaratri',
     displayName: 'Maha Shivaratri',
     displayNameHi: 'महा शिवरात्रि',
-    matches: inKrishna(14, 'Magha'),
+    // Drik: Nishita-vyapini Chaturdashi. Earlier-day winner when the
+    // tithi spans two midnights — the Pradosh-Nishita Mukhya rule
+    // prefers the day where Chaturdashi has been longer in nishita.
+    matches: vyapiniKrishna(14, 'Magha', 'nishita', 'earlier'),
   },
 
-  // Vasant Panchami — Magha Shukla 5
+  // Vasant Panchami — Magha Shukla 5. Drik uses Purvahna-vyapini
+  // (morning) Panchami, which for the years we audit matches the
+  // simple "tithi at sunrise" rule exactly. Keep the simpler rule.
   {
     key: 'vasant_panchami',
     displayName: 'Vasant Panchami',
@@ -108,20 +190,35 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(5, 'Magha'),
   },
 
-  // Holika Dahan — Phalguna Shukla 15 (Purnima)
+  // Holika Dahan — Phalguna Shukla 15. Drik: Pradosha-vyapini Purnima
+  // with Bhadra exclusion. When Vishti (Bhadra) blocks the pradosha
+  // window on the standard day, observance shifts to the next day —
+  // see `bhadraAwareVyapiniMatches`.
   {
     key: 'holika_dahan',
     displayName: 'Holika Dahan',
     displayNameHi: 'होलिका दहन',
-    matches: inShukla(15, 'Phalguna'),
+    matches: vyapiniShuklaBhadra(15, 'Phalguna', 'pradosha'),
   },
-  // Holi (Dhuleti) — Phalguna Krishna 1 (Amanta).
-  // Purnimanta reads this same day as Chaitra Krishna 1.
+  // Holi (Dhuleti) — the day AFTER Holika Dahan. Computed by replaying
+  // the Holika Dahan condition on yesterday's date. This is more
+  // accurate than "Phalguna Krishna 1 at sunrise" because in
+  // Bhadra-shift years and tithi-kshaya years the simple sunrise rule
+  // diverges by ±1 day.
   {
     key: 'holi',
     displayName: 'Holi (Dhuleti)',
     displayNameHi: 'होली (धुलेटी)',
-    matches: inKrishna(1, 'Phalguna'),
+    matches: (p) => {
+      // In Amanta convention, Holi falls on a day whose amantaName is
+      // still Phalguna (Krishna 1 of Phalguna), so we don't need to
+      // load yesterday's masa — we can gate on today's masa.
+      if (p.masa.amantaName !== 'Phalguna' || p.masa.isAdhika) return false;
+      const yesterday = new Date(p.date.getTime() - 86_400_000);
+      // Replay the Bhadra-aware Holika Dahan check for `yesterday`
+      // using the date-based primitive (no yesterday-Panchanga needed).
+      return bhadraAwareVyapiniMatchesForDate(p.location, yesterday, 'pradosha', SHUKLA(15));
+    },
   },
 
   // Ugadi / Gudi Padwa — Chaitra Shukla 1
@@ -148,7 +245,8 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Chaitra'),
   },
 
-  // Akshaya Tritiya — Vaishakha Shukla 3
+  // Akshaya Tritiya — Vaishakha Shukla 3. Sunrise rule matches Drik
+  // for the audit window.
   {
     key: 'akshaya_tritiya',
     displayName: 'Akshaya Tritiya',
@@ -172,7 +270,7 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Ashadha'),
   },
 
-  // Nag Panchami — Shravana Shukla 5
+  // Nag Panchami — Shravana Shukla 5. Sunrise rule matches Drik.
   {
     key: 'nag_panchami',
     displayName: 'Nag Panchami',
@@ -180,29 +278,44 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(5, 'Shravana'),
   },
 
-  // Raksha Bandhan — Shravana Shukla 15 (Purnima)
+  // Raksha Bandhan — Shravana Shukla 15. Aparahna-vyapini Purnima.
+  // Any Bhadra at Aparahna shifts to next day (Raksha must be done in
+  // daytime — no late-night fallback like Holika). Sunrise fallback
+  // covers tithi-kshaya years where Purnima doesn't span Aparahna on
+  // either side (e.g., 2025).
   {
     key: 'raksha_bandhan',
     displayName: 'Raksha Bandhan',
     displayNameHi: 'रक्षा बंधन',
-    matches: inShukla(15, 'Shravana'),
+    // Drik rule: Bhadra at Aparahna only blocks if it extends past
+    // the end of Prahar 1 of the night (~2h30m after sunset). Bhadra
+    // ending in Prahar 1 is acceptable — Rakhi can be tied during
+    // the late-afternoon / early-evening Pradosha after Bhadra ends.
+    // Sunrise fallback covers tithi-kshaya years (e.g., 2025) where
+    // Purnima doesn't span Aparahna on either side.
+    matches: (p) => {
+      if (p.masa.amantaName !== 'Shravana' || p.masa.isAdhika) return false;
+      return bhadraAwareVyapiniWithSunriseFallback(p, 'aparahna', SHUKLA(15), 'prahar1');
+    },
   },
 
-  // Krishna Janmashtami — Shravana Krishna 8 (Amanta).
-  // Purnimanta reads this as Bhadrapada Krishna 8.
+  // Krishna Janmashtami — Shravana Krishna 8. Smarta convention picks
+  // the LATER night when Ashtami covers two midnights. Falls back to
+  // tithi-at-sunrise day in tithi-kshaya years where Nishita doesn't
+  // qualify on any day.
   {
     key: 'krishna_janmashtami',
     displayName: 'Krishna Janmashtami',
     displayNameHi: 'कृष्ण जन्माष्टमी',
-    matches: inKrishna(8, 'Shravana'),
+    matches: vyapiniKrishna(8, 'Shravana', 'nishita', 'later', 'sunrise'),
   },
 
-  // Ganesh Chaturthi — Bhadrapada Shukla 4
+  // Ganesh Chaturthi — Bhadrapada Shukla 4 (Madhyahna-vyapini).
   {
     key: 'ganesh_chaturthi',
     displayName: 'Ganesh Chaturthi',
     displayNameHi: 'गणेश चतुर्थी',
-    matches: inShukla(4, 'Bhadrapada'),
+    matches: vyapiniShukla(4, 'Bhadrapada', 'madhyahna'),
   },
 
   // Thiruvonam (Onam) — Shravana nakshatra falling in the Amanta
@@ -223,32 +336,42 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(1, 'Ashvina'),
   },
 
-  // Vijayadashami / Dussehra — Ashvina Shukla 10
+  // Vijayadashami / Dussehra — Ashvina Shukla 10. Drik's rule prefers
+  // the Aparahna-vyapini Dashami day on which **Shravana nakshatra**
+  // is also present at Aparahna. Without Shravana, the earlier of two
+  // qualifying days wins. Sunrise fallback for tithi-kshaya years.
   {
     key: 'vijayadashami',
     displayName: 'Vijayadashami (Dussehra)',
     displayNameHi: 'विजयदशमी (दशहरा)',
-    matches: inShukla(10, 'Ashvina'),
+    matches: (p) => {
+      if (p.masa.amantaName !== 'Ashvina' || p.masa.isAdhika) return false;
+      return vyapiniWithNakshatraPreference(p, 'aparahna', SHUKLA(10), NAK_SHRAVANA);
+    },
   },
 
-  // Karva Chauth — Ashvina Krishna 4 (Amanta).
-  // Purnimanta reads this as Kartika Krishna 4.
+  // Karva Chauth — Ashvina Krishna 4 (Chandrodaya-vyapini Chaturthi:
+  // Chaturthi must be present at moonrise). Sunrise fallback when
+  // Chaturthi doesn't span moonrise on either side (tithi-kshaya
+  // years like 2016, 2025).
   {
     key: 'karva_chauth',
     displayName: 'Karva Chauth',
     displayNameHi: 'करवा चौथ',
-    matches: inKrishna(4, 'Ashvina'),
+    matches: vyapiniKrishna(4, 'Ashvina', 'chandrodaya', 'earlier', 'sunrise'),
   },
 
-  // Dhanteras — Ashvina Krishna 13 (Amanta)
+  // Dhanteras — Ashvina Krishna 13 (Pradosha-vyapini Trayodashi).
   {
     key: 'dhanteras',
     displayName: 'Dhanteras',
     displayNameHi: 'धनतेरस',
-    matches: inKrishna(13, 'Ashvina'),
+    matches: vyapiniKrishna(13, 'Ashvina', 'pradosha'),
   },
 
-  // Naraka Chaturdashi — Ashvina Krishna 14 (Amanta)
+  // Naraka Chaturdashi — Ashvina Krishna 14. Drik observes Abhyanga
+  // Snan at Chandrodaya in the early-morning hours; we approximate
+  // with the sunrise tithi which matches Drik in most years.
   {
     key: 'naraka_chaturdashi',
     displayName: 'Naraka Chaturdashi',
@@ -256,16 +379,14 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inKrishna(14, 'Ashvina'),
   },
 
-  // Diwali / Lakshmi Puja — Ashvina Krishna Amavasya (Amanta).
-  // Purnimanta reads this as Kartika Krishna Amavasya. Tie-breaker
-  // (per METHODOLOGY): when Amavasya spans two evenings, pick the day
-  // it is present during pradosha. The current rule simplifies to
-  // sunrise-tithi; will be refined in Phase 2.
+  // Diwali / Lakshmi Puja — Ashvina Krishna Amavasya (Pradosha-vyapini
+  // Amavasya). Picks the day where Amavasya is present at the evening
+  // pradosha window.
   {
     key: 'diwali',
     displayName: 'Diwali (Lakshmi Puja)',
     displayNameHi: 'दीवाली (लक्ष्मी पूजा)',
-    matches: inKrishna(15, 'Ashvina'),
+    matches: vyapiniKrishna(15, 'Ashvina', 'pradosha'),
   },
 
   // Govardhan Puja — Kartika Shukla 1
@@ -292,7 +413,10 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(12, 'Kartika'),
   },
 
-  // Kartik Purnima — Kartika Shukla 15
+  // Kartik Purnima — Kartika Shukla 15. Sunrise rule matches Drik
+  // across the audit window; the Pradosha-vyapini variant
+  // over-corrects because Drik anchors observance to Krittika
+  // nakshatra rather than Pradosha for this festival.
   {
     key: 'kartik_purnima',
     displayName: 'Kartik Purnima',

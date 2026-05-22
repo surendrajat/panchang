@@ -146,7 +146,12 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     knownLimitation:
       'Drik applies a Punya-Kaal rule: if Sun enters Makara after sunset, the festival is observed the NEXT day. We currently fire on the civil day during which the transit happens. Diverges roughly every 4 years.',
     drik: {
-      2015: '2015-01-14',
+      // Verified against drikpanchang.com Indian calendar (geoname
+      // 1273294 = New Delhi). Earlier transcription had 2015 and
+      // 2027 as Jan 14 — both years actually have transit after
+      // sunset Jan 14 IST, so Drik observes on Jan 15. Corrected
+      // after direct cross-check 2026-05.
+      2015: '2015-01-15',
       2016: '2016-01-15',
       2017: '2017-01-14',
       2018: '2018-01-14',
@@ -158,7 +163,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
       2024: '2024-01-15',
       2025: '2025-01-14',
       2026: '2026-01-14',
-      2027: '2027-01-14',
+      2027: '2027-01-15',
     },
   },
   {
@@ -301,7 +306,11 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
       2022: '2022-10-24',
       2023: '2023-11-12',
       2024: '2024-10-31',
-      2025: '2025-10-21',
+      // 2025 corrected after direct cross-check against
+      // drikpanchang.com (Oct 20, Monday). Amavasya Oct 20 15:46
+      // IST to Oct 21 17:55 IST — only Oct 20 has Amavasya at
+      // Pradosha.
+      2025: '2025-10-20',
       2026: '2026-11-08',
     },
   },

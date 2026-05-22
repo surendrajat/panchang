@@ -1,11 +1,26 @@
 // Muhurta — auspicious / inauspicious time slices of the day.
 //
-// Rahu-kaal, Yamaganda, Gulika each occupy one of 8 equal divisions of
-// daylight (sunrise → sunset). Abhijit is a 48-minute window centered on
-// local noon (the midpoint of sunrise and sunset). Brahma Muhurta is the
-// 48 minutes that begin 96 minutes before sunrise.
+// Inauspicious segment-based (1/8 of daylight each, weekday-mapped per Drik):
+//   - Rahu Kaal — bad for new ventures
+//   - Yamaganda — bad for travel
+//   - Gulika Kaal — generally avoided
 //
-// The weekday-to-segment mapping below is the standard one used by Drik
+// Auspicious fixed windows around solar events:
+//   - Brahma Muhurta — 48 min ending 48 min before sunrise (96–48 min
+//                     before sunrise). The most auspicious of all.
+//   - Pratah Sandhya — twilight from 48 min before sunrise to sunrise.
+//   - Abhijit Muhurta — 48 min centered on solar noon (midpoint of sun
+//                     events). Null on Wednesday per Smarta tradition.
+//   - Vijaya Muhurta — the 11th muhurta of the day (10/15 to 11/15 of
+//                     daylight); auspicious for victory / new starts.
+//   - Godhuli Muhurta — 24 min before to 24 min after sunset
+//                     ("cow-dust hour"); auspicious for weddings.
+//   - Sayahna Sandhya — evening twilight, sunset to 48 min after.
+//   - Nishita Kaal — the 8th of 15 muhurtas of the night (7/15 to 8/15
+//                     of the night after sunset). Anchor for night-time
+//                     observances like Janmashtami and Maha Shivaratri.
+//
+// The weekday-to-segment mapping is the standard one used by Drik
 // Panchang. Segment 1 = first 1/8 of daylight, segment 8 = last.
 
 import type { MuhurtaInfo, Vara } from './types';
@@ -21,9 +36,10 @@ const SEGMENT_BY_WEEKDAY: Record<Vara, { rahuKaal: number; yamaganda: number; gu
 };
 
 const SEGMENT_COUNT = 8;
-const ABHIJIT_HALF_MS = 24 * 60 * 1000; // 24 min half-window (48 min total)
+const MUHURTA_MS = 48 * 60 * 1000; // 1 muhurta = 48 minutes
+const ABHIJIT_HALF_MS = 24 * 60 * 1000; // half of one muhurta
 const BRAHMA_BEFORE_SUNRISE_MS = 96 * 60 * 1000;
-const BRAHMA_DURATION_MS = 48 * 60 * 1000;
+const GODHULI_HALF_MS = 24 * 60 * 1000; // 24 min half-window around sunset
 
 function segment(sunrise: Date, sunset: Date, segmentNumber: number) {
   const dayMs = sunset.getTime() - sunrise.getTime();
@@ -38,7 +54,28 @@ function segment(sunrise: Date, sunset: Date, segmentNumber: number) {
 export function computeMuhurta(vara: Vara, sunrise: Date, sunset: Date): MuhurtaInfo {
   const map = SEGMENT_BY_WEEKDAY[vara];
 
-  const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
+  const sunriseMs = sunrise.getTime();
+  const sunsetMs = sunset.getTime();
+  const dayMs = sunsetMs - sunriseMs;
+  const muhurtaOfDay = dayMs / 15; // 15 muhurtas of daylight
+
+  // Brahma Muhurta — runs from 96 to 48 min before sunrise.
+  const brahmaStart = sunriseMs - BRAHMA_BEFORE_SUNRISE_MS;
+  const brahmaMuhurta = {
+    start: new Date(brahmaStart),
+    end: new Date(brahmaStart + MUHURTA_MS),
+  };
+
+  // Pratah Sandhya — last 48 min before sunrise (twilight).
+  const pratahSandhya = {
+    start: new Date(sunriseMs - MUHURTA_MS),
+    end: new Date(sunriseMs),
+  };
+
+  // Abhijit — 11th muhurta if you count from sunrise; classically taken
+  // as the muhurta centred on solar noon. Skipped on Wednesday per
+  // Smarta tradition.
+  const noonMs = (sunriseMs + sunsetMs) / 2;
   const abhijit =
     vara === 'wednesday'
       ? null
@@ -47,10 +84,33 @@ export function computeMuhurta(vara: Vara, sunrise: Date, sunset: Date): Muhurta
           end: new Date(noonMs + ABHIJIT_HALF_MS),
         };
 
-  const brahmaStart = sunrise.getTime() - BRAHMA_BEFORE_SUNRISE_MS;
-  const brahmaMuhurta = {
-    start: new Date(brahmaStart),
-    end: new Date(brahmaStart + BRAHMA_DURATION_MS),
+  // Vijaya Muhurta — the 11th muhurta of daylight, counted from sunrise
+  // (between Aparahna and Sayahna). Best for new ventures.
+  const vijayaMuhurta = {
+    start: new Date(sunriseMs + 10 * muhurtaOfDay),
+    end: new Date(sunriseMs + 11 * muhurtaOfDay),
+  };
+
+  // Godhuli — 24 min centred on sunset.
+  const godhuli = {
+    start: new Date(sunsetMs - GODHULI_HALF_MS),
+    end: new Date(sunsetMs + GODHULI_HALF_MS),
+  };
+
+  // Sayahna Sandhya — twilight from sunset to 48 min after.
+  const sayahnaSandhya = {
+    start: new Date(sunsetMs),
+    end: new Date(sunsetMs + MUHURTA_MS),
+  };
+
+  // Nishita Kaal — the 8th of 15 night-muhurtas. Approximates next
+  // sunrise as sunrise + 24h (good to a few minutes; precise sunrise
+  // would require sunRiseSet which isn't injected here).
+  const nightMs = sunriseMs + 24 * 3600_000 - sunsetMs;
+  const muhurtaOfNight = nightMs / 15;
+  const nishitaKaal = {
+    start: new Date(sunsetMs + 7 * muhurtaOfNight),
+    end: new Date(sunsetMs + 8 * muhurtaOfNight),
   };
 
   return {
@@ -59,5 +119,10 @@ export function computeMuhurta(vara: Vara, sunrise: Date, sunset: Date): Muhurta
     gulika: segment(sunrise, sunset, map.gulika),
     abhijit,
     brahmaMuhurta,
+    pratahSandhya,
+    vijayaMuhurta,
+    godhuli,
+    sayahnaSandhya,
+    nishitaKaal,
   };
 }

@@ -57,3 +57,26 @@ export function karanaAtInstant(instant: Date): KaranaInfo {
     fraction,
   };
 }
+
+// Returns every karana active during the panchanga day [anchor, anchor+24h).
+// A typical day spans 2 or 3 karanas (each karana is ~12 hours). The first
+// entry is the karana at the panchanga anchor (sunrise); subsequent entries
+// are the karanas that start before the next sunrise. `endTime` on each
+// element is when that karana ends.
+export function karanaSequenceForDay(anchor: Date): KaranaInfo[] {
+  const sequence: KaranaInfo[] = [];
+  const dayEndMs = anchor.getTime() + 24 * 3600_000;
+  let current = karanaAtInstant(anchor);
+  sequence.push(current);
+  // Step just past each karana's end to pick up the next one. Karanas
+  // span 6° of elongation each (~12h), so at most ~3 transitions fit
+  // in a 24h window even with the Moon at max speed.
+  for (let safety = 0; safety < 5; safety++) {
+    if (current.endTime.getTime() >= dayEndMs) break;
+    // Probe 1 minute past the end to land cleanly in the next karana.
+    const probe = new Date(current.endTime.getTime() + 60_000);
+    current = karanaAtInstant(probe);
+    sequence.push(current);
+  }
+  return sequence;
+}

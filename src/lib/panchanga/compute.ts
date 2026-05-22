@@ -13,7 +13,7 @@ import { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
 import { tithiAtInstant } from './tithi';
 import { nakshatraAtInstant } from './nakshatra';
 import { yogaAtInstant } from './yoga';
-import { karanaAtInstant } from './karana';
+import { karanaAtInstant, karanaSequenceForDay } from './karana';
 import { varaAtSunrise } from './vara';
 import { computeMasa, masaContext } from './masa';
 import { computeSamvat } from './samvat';
@@ -63,6 +63,9 @@ export function computePanchanga(
   const nakshatra = nakshatraAtInstant(anchor, opts.ayanamsa);
   const yoga = yogaAtInstant(anchor, opts.ayanamsa);
   const karana = karanaAtInstant(anchor);
+  // A panchanga day spans 24h from the anchor (sunrise) and typically
+  // contains 2–3 karanas, since each karana is ~12h (half a tithi).
+  const karanas = karanaSequenceForDay(anchor);
   const vara = varaAtSunrise(sunrise, anchor, location);
   const moonPhase = moonPhaseAtInstant(anchor);
 
@@ -116,6 +119,7 @@ export function computePanchanga(
     nakshatra,
     yoga,
     karana,
+    karanas,
     vara,
     masa,
     samvat,

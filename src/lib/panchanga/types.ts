@@ -106,11 +106,18 @@ export interface MuhurtaInterval {
 }
 
 export interface MuhurtaInfo {
+  // Inauspicious (1/8 of daylight each).
   rahuKaal: MuhurtaInterval;
   yamaganda: MuhurtaInterval;
   gulika: MuhurtaInterval;
+  // Auspicious / observance windows.
   abhijit: MuhurtaInterval | null; // null on Wednesdays per Smarta tradition
-  brahmaMuhurta: MuhurtaInterval;
+  brahmaMuhurta: MuhurtaInterval; // 96–48 min before sunrise
+  pratahSandhya: MuhurtaInterval; // last 48 min before sunrise
+  vijayaMuhurta: MuhurtaInterval; // 11th of 15 daylight muhurtas
+  godhuli: MuhurtaInterval; // 24 min around sunset
+  sayahnaSandhya: MuhurtaInterval; // 48 min after sunset
+  nishitaKaal: MuhurtaInterval; // 8th of 15 night muhurtas (midnight period)
 }
 
 export interface Panchanga {
@@ -124,7 +131,8 @@ export interface Panchanga {
   tithi: TithiInfo;
   nakshatra: NakshatraInfo;
   yoga: YogaInfo;
-  karana: KaranaInfo;
+  karana: KaranaInfo; // karana active at sunrise (backward-compat)
+  karanas: KaranaInfo[]; // all karanas active during this panchanga day (2-3)
   vara: Vara;
   masa: MasaInfo;
   samvat: SamvatInfo;

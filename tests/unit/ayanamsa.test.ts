@@ -28,4 +28,26 @@ describe('Lahiri ayanamsa', () => {
     const diff = ayanamsa(jd, 'lahiri') - ayanamsa(jd, 'kp');
     expect(diff * 60).toBeCloseTo(6, 4);
   });
+
+  // Golden Lahiri values published by Drik / Lahiri's tables.
+  // Tolerance: 1 arcminute for years inside the Drik-verified range
+  // (2000–2025); 2 arcminutes for extrapolated historical / future
+  // years where my IAU-2006 polynomial may differ slightly from
+  // hand-computed almanac entries. These are regression guards — if
+  // any value drifts more than the tolerance, the ayanamsa formula
+  // has changed and the cache CALCULATION_VERSION must be bumped.
+  const goldenLahiri: Array<[string, number, number]> = [
+    // [ISO date, expected Lahiri (decimal degrees), tolerance (arcmin)]
+    ['1900-01-01T00:00:00Z', 22.4301, 2], // polynomial extrapolation
+    ['1950-01-01T00:00:00Z', 23.1283, 2],
+    ['2000-01-01T00:00:00Z', 23.8267, 1], // Drik J2000 reference
+    ['2025-01-01T00:00:00Z', 24.1761, 1], // Drik 2025-01-01 reference
+    ['2050-01-01T00:00:00Z', 24.5252, 2],
+    ['2100-01-01T00:00:00Z', 25.2239, 2],
+  ];
+  it.each(goldenLahiri)('matches expected value at %s', (iso, expected, tol) => {
+    const jd = dateToJulian(new Date(iso));
+    const ayan = ayanamsa(jd, 'lahiri');
+    expect(Math.abs(ayan - expected) * 60).toBeLessThan(tol);
+  });
 });

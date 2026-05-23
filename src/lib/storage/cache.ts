@@ -17,6 +17,7 @@
 // the cap. We also auto-evict entries older than 30 days at startup.
 
 import { db, type CachedPanchangaRow } from './db';
+import { civilYMDInZone } from '$lib/astro';
 import type { Location, Panchanga, PanchangaOptions } from '$lib/panchanga';
 
 export const CALCULATION_VERSION = 2;
@@ -26,8 +27,10 @@ const MAX_AGE_DAYS = 30;
 const MS_PER_DAY = 86_400_000;
 
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
-  const ymd = date.toISOString().slice(0, 10);
-  const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${location.timezone}`;
+  const { year, month, day } = civilYMDInZone(date, location.timezone);
+  const ymd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const altitude = location.altitude ?? 0;
+  const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
   const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}/${options.sunriseHorizon}`;
   return `v${CALCULATION_VERSION}|${ymd}|${loc}|${opts}`;
 }

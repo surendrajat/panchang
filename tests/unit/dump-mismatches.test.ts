@@ -20,7 +20,8 @@ function ymd(d: Date): string {
 describe('mismatches dump', () => {
   it('list all divergences', () => {
     const years = new Set<number>();
-    for (const f of FESTIVAL_FIXTURES) for (const y of Object.keys(f.expected)) years.add(Number(y));
+    for (const f of FESTIVAL_FIXTURES)
+      for (const y of Object.keys(f.expected)) years.add(Number(y));
     const computed = new Map<number, Map<string, string>>();
     for (const year of Array.from(years).sort()) {
       const occ = findFestivals(

@@ -76,7 +76,9 @@ export function civilTimeInZone(
     actual.minute !== minute ||
     actual.second !== second
   ) {
-    throw new RangeError(`Civil time does not exist in ${timezone}: ${year}-${month}-${day} ${hour}:${minute}:${second}`);
+    throw new RangeError(
+      `Civil time does not exist in ${timezone}: ${year}-${month}-${day} ${hour}:${minute}:${second}`,
+    );
   }
   return result;
 }

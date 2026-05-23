@@ -21,9 +21,19 @@
       "number": 14
     },
     "festivals": ["naraka_chaturdashi", "diwali"],
-    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
-    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
-    "karana": { "name": "Shakuni" },
-    "masa": { "name": "Ashvina" }
+    "nakshatra": {
+      "name": "Chitra",
+      "endTime": "2024-11-01T00:45:00+05:30"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "09:51"
+    },
+    "karana": {
+      "name": "Shakuni"
+    },
+    "masa": {
+      "name": "Ashvina"
+    }
   }
 }

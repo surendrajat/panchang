@@ -78,7 +78,11 @@ describe('Drik-Panchang fixture regression', () => {
 
     for (const fx of fixtures) {
       if (!fx.location?.timezone) invalid.push(`${fixtureName(fx)}: missing timezone`);
-      if (!Number.isFinite(fx.location?.latitude) || fx.location.latitude < -90 || fx.location.latitude > 90) {
+      if (
+        !Number.isFinite(fx.location?.latitude) ||
+        fx.location.latitude < -90 ||
+        fx.location.latitude > 90
+      ) {
         invalid.push(`${fixtureName(fx)}: invalid latitude ${fx.location?.latitude}`);
       }
       if (
@@ -91,7 +95,8 @@ describe('Drik-Panchang fixture regression', () => {
       if (fx.location.altitude !== undefined && !Number.isFinite(fx.location.altitude)) {
         invalid.push(`${fixtureName(fx)}: invalid altitude ${fx.location.altitude}`);
       }
-      if (Object.keys(fx.expect ?? {}).length === 0) invalid.push(`${fixtureName(fx)}: empty expect object`);
+      if (Object.keys(fx.expect ?? {}).length === 0)
+        invalid.push(`${fixtureName(fx)}: empty expect object`);
     }
 
     expect(invalid).toEqual([]);
@@ -107,7 +112,8 @@ describe('Drik-Panchang fixture regression', () => {
         }
       }
       for (const key of fx.expect.festivals ?? []) {
-        if (!FESTIVAL_KEYS.has(key)) invalid.push(`${fixtureName(fx)}: unknown festival key ${key}`);
+        if (!FESTIVAL_KEYS.has(key))
+          invalid.push(`${fixtureName(fx)}: unknown festival key ${key}`);
       }
     }
 
@@ -116,7 +122,9 @@ describe('Drik-Panchang fixture regression', () => {
 
   it('timed fixture corpus covers both sun events and limb end times', () => {
     const timed = fixtures.filter(hasTimedAssertion);
-    const hasSunEvent = timed.some((fx) => fx.expect.sunrise !== undefined || fx.expect.sunset !== undefined);
+    const hasSunEvent = timed.some(
+      (fx) => fx.expect.sunrise !== undefined || fx.expect.sunset !== undefined,
+    );
     const hasLimbEnd = timed.some(
       (fx) =>
         fx.expect.tithi?.endTime ||
@@ -125,26 +133,39 @@ describe('Drik-Panchang fixture regression', () => {
         fx.expect.karana?.endTime,
     );
 
-    expect(hasSunEvent, 'Timed fixtures should include at least one sunrise/sunset assertion.').toBe(true);
-    expect(hasLimbEnd, 'Timed fixtures should include at least one tithi/nakshatra/yoga/karana end assertion.').toBe(
-      true,
-    );
+    expect(
+      hasSunEvent,
+      'Timed fixtures should include at least one sunrise/sunset assertion.',
+    ).toBe(true);
+    expect(
+      hasLimbEnd,
+      'Timed fixtures should include at least one tithi/nakshatra/yoga/karana end assertion.',
+    ).toBe(true);
   });
 
   it('timed fixture corpus covers multiple locations', () => {
     const locations = new Set(
       fixtures
         .filter(hasTimedAssertion)
-        .map((fx) => `${fx.location.latitude.toFixed(4)},${fx.location.longitude.toFixed(4)},${fx.location.timezone}`),
+        .map(
+          (fx) =>
+            `${fx.location.latitude.toFixed(4)},${fx.location.longitude.toFixed(4)},${fx.location.timezone}`,
+        ),
     );
 
-    expect(locations.size, 'Timed fixtures should cover at least three distinct locations.').toBeGreaterThanOrEqual(3);
+    expect(
+      locations.size,
+      'Timed fixtures should cover at least three distinct locations.',
+    ).toBeGreaterThanOrEqual(3);
   });
 
   it('timed fixture corpus covers multiple civil dates', () => {
     const dates = new Set(fixtures.filter(hasTimedAssertion).map((fx) => fx.civilDate));
 
-    expect(dates.size, 'Timed fixtures should cover at least two civil dates.').toBeGreaterThanOrEqual(2);
+    expect(
+      dates.size,
+      'Timed fixtures should cover at least two civil dates.',
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it('fixtures with timed assertions include usable source metadata', () => {
@@ -153,7 +174,9 @@ describe('Drik-Panchang fixture regression', () => {
       .filter((fx) => !hasUsableSourceMetadata(fx))
       .map((fx) => fx.label);
 
-    expect(missing, `Timed fixtures missing usable source metadata: ${missing.join(', ')}`).toEqual([]);
+    expect(missing, `Timed fixtures missing usable source metadata: ${missing.join(', ')}`).toEqual(
+      [],
+    );
   });
 
   for (const fx of fixtures) {
@@ -189,7 +212,13 @@ describe('Drik-Panchang fixture regression', () => {
       );
 
       if (e.yoga?.name) expect(p.yoga.name).toBe(e.yoga.name);
-      expectOptionalInstant(p.yoga.endTime, e.yoga?.endTime, fx, 'yoga.endTime', LIMB_END_TOLERANCE_MS);
+      expectOptionalInstant(
+        p.yoga.endTime,
+        e.yoga?.endTime,
+        fx,
+        'yoga.endTime',
+        LIMB_END_TOLERANCE_MS,
+      );
       if (e.karana?.name) expect(p.karana.name).toBe(e.karana.name);
       expectOptionalInstant(
         p.karana.endTime,
@@ -216,13 +245,13 @@ function hasTimedAssertion(fx: Fixture): boolean {
   const e = fx.expect;
   return Boolean(
     e.sunrise !== undefined ||
-      e.sunset !== undefined ||
-      e.moonrise !== undefined ||
-      e.moonset !== undefined ||
-      e.tithi?.endTime ||
-      e.nakshatra?.endTime ||
-      e.yoga?.endTime ||
-      e.karana?.endTime,
+    e.sunset !== undefined ||
+    e.moonrise !== undefined ||
+    e.moonset !== undefined ||
+    e.tithi?.endTime ||
+    e.nakshatra?.endTime ||
+    e.yoga?.endTime ||
+    e.karana?.endTime,
   );
 }
 
@@ -257,15 +286,15 @@ function expectedTimeFields(fx: Fixture): Array<[string, string | null]> {
 function hasUsableSourceMetadata(fx: Fixture): boolean {
   return Boolean(
     fx.source?.notes?.trim() &&
-      fx.source.urls?.length &&
-      fx.source.urls.every((url) => {
-        try {
-          const parsed = new URL(url);
-          return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-        } catch {
-          return false;
-        }
-      }),
+    fx.source.urls?.length &&
+    fx.source.urls.every((url) => {
+      try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+      } catch {
+        return false;
+      }
+    }),
   );
 }
 
@@ -349,7 +378,10 @@ function instantInZone(civilDate: string, time: string, timeZone: string): Date 
   return guess;
 }
 
-function zonedParts(date: Date, timeZone: string): {
+function zonedParts(
+  date: Date,
+  timeZone: string,
+): {
   year: number;
   month: number;
   day: number;

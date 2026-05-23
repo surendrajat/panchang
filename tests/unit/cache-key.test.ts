@@ -52,7 +52,9 @@ describe('panchanga cache keys', () => {
 
     expect(cacheKey(date, { ...DELHI, latitude: DELHI.latitude + 0.01 }, OPTIONS)).not.toBe(base);
     expect(cacheKey(date, { ...DELHI, longitude: DELHI.longitude + 0.01 }, OPTIONS)).not.toBe(base);
-    expect(cacheKey(date, { ...DELHI, altitude: (DELHI.altitude ?? 0) + 100 }, OPTIONS)).not.toBe(base);
+    expect(cacheKey(date, { ...DELHI, altitude: (DELHI.altitude ?? 0) + 100 }, OPTIONS)).not.toBe(
+      base,
+    );
     expect(cacheKey(date, { ...DELHI, timezone: 'Asia/Kathmandu' }, OPTIONS)).not.toBe(base);
   });
 });

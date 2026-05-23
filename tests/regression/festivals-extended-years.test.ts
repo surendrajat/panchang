@@ -139,12 +139,48 @@ describe('Festival accuracy — extended years (Delhi)', () => {
 describe('Festival accuracy — multi-city smoke (2025)', () => {
   it('reports per-city accuracy for 6 Indian cities', () => {
     const CITIES = [
-      { name: 'New Delhi', latitude: 28.6139, longitude: 77.209, altitude: 216, timezone: 'Asia/Kolkata' },
-      { name: 'Mumbai', latitude: 19.076, longitude: 72.8777, altitude: 14, timezone: 'Asia/Kolkata' },
-      { name: 'Bengaluru', latitude: 12.9716, longitude: 77.5946, altitude: 920, timezone: 'Asia/Kolkata' },
-      { name: 'Chennai', latitude: 13.0827, longitude: 80.2707, altitude: 6, timezone: 'Asia/Kolkata' },
-      { name: 'Kolkata', latitude: 22.5726, longitude: 88.3639, altitude: 9, timezone: 'Asia/Kolkata' },
-      { name: 'Ahmedabad', latitude: 23.0225, longitude: 72.5714, altitude: 53, timezone: 'Asia/Kolkata' },
+      {
+        name: 'New Delhi',
+        latitude: 28.6139,
+        longitude: 77.209,
+        altitude: 216,
+        timezone: 'Asia/Kolkata',
+      },
+      {
+        name: 'Mumbai',
+        latitude: 19.076,
+        longitude: 72.8777,
+        altitude: 14,
+        timezone: 'Asia/Kolkata',
+      },
+      {
+        name: 'Bengaluru',
+        latitude: 12.9716,
+        longitude: 77.5946,
+        altitude: 920,
+        timezone: 'Asia/Kolkata',
+      },
+      {
+        name: 'Chennai',
+        latitude: 13.0827,
+        longitude: 80.2707,
+        altitude: 6,
+        timezone: 'Asia/Kolkata',
+      },
+      {
+        name: 'Kolkata',
+        latitude: 22.5726,
+        longitude: 88.3639,
+        altitude: 9,
+        timezone: 'Asia/Kolkata',
+      },
+      {
+        name: 'Ahmedabad',
+        latitude: 23.0225,
+        longitude: 72.5714,
+        altitude: 53,
+        timezone: 'Asia/Kolkata',
+      },
     ];
     const drik2025: Record<string, string> = {
       makara_sankranti: '2025-01-14',

@@ -8,8 +8,11 @@ import { computePanchanga } from '$lib/panchanga';
 import { karanaSequenceForDay } from '$lib/panchanga/karana';
 
 const DELHI = {
-  name: 'New Delhi', latitude: 28.6139, longitude: 77.209,
-  altitude: 216, timezone: 'Asia/Kolkata',
+  name: 'New Delhi',
+  latitude: 28.6139,
+  longitude: 77.209,
+  altitude: 216,
+  timezone: 'Asia/Kolkata',
 };
 
 describe('karana sequence', () => {
@@ -26,7 +29,9 @@ describe('karana sequence', () => {
     for (let i = 1; i < seq.length; i++) {
       // The probe steps 1 min past endTime so the next karana begins
       // within 1 min of prev.endTime — allow that small jitter.
-      expect(Math.abs(seq[i - 1].endTime.getTime() - seq[i].endTime.getTime() + 12 * 3600_000)).toBeLessThan(2 * 60 * 60_000);
+      expect(
+        Math.abs(seq[i - 1].endTime.getTime() - seq[i].endTime.getTime() + 12 * 3600_000),
+      ).toBeLessThan(2 * 60 * 60_000);
     }
   });
 
@@ -86,6 +91,8 @@ describe('muhurta expansion', () => {
 
   it('Rahu Kaal occupies 1/8 of daylight', () => {
     const day = p.sunset!.getTime() - p.sunrise!.getTime();
-    expect(Math.abs(m.rahuKaal.end.getTime() - m.rahuKaal.start.getTime() - day / 8)).toBeLessThan(1000);
+    expect(Math.abs(m.rahuKaal.end.getTime() - m.rahuKaal.start.getTime() - day / 8)).toBeLessThan(
+      1000,
+    );
   });
 });

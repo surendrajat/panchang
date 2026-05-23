@@ -155,30 +155,65 @@
     // Order chronologically through the day so the table reads
     // top-to-bottom as sunrise → night.
     const rows: MuhurtaRow[] = [
-      { labelKey: 'muhurta.brahmaMuhurta', subKey: 'muhurta.preDawn',
-        interval: m.brahmaMuhurta, tone: 'good' },
-      { labelKey: 'muhurta.pratahSandhya', subKey: 'muhurta.twilight',
-        interval: m.pratahSandhya, tone: 'good' },
-      { labelKey: 'muhurta.rahuKaal', subKey: 'muhurta.inauspicious',
-        interval: m.rahuKaal, tone: 'bad' },
-      { labelKey: 'muhurta.yamaganda', subKey: 'muhurta.inauspicious',
-        interval: m.yamaganda, tone: 'bad' },
-      { labelKey: 'muhurta.gulika', subKey: 'muhurta.inauspicious',
-        interval: m.gulika, tone: 'bad' },
+      {
+        labelKey: 'muhurta.brahmaMuhurta',
+        subKey: 'muhurta.preDawn',
+        interval: m.brahmaMuhurta,
+        tone: 'good',
+      },
+      {
+        labelKey: 'muhurta.pratahSandhya',
+        subKey: 'muhurta.twilight',
+        interval: m.pratahSandhya,
+        tone: 'good',
+      },
+      {
+        labelKey: 'muhurta.rahuKaal',
+        subKey: 'muhurta.inauspicious',
+        interval: m.rahuKaal,
+        tone: 'bad',
+      },
+      {
+        labelKey: 'muhurta.yamaganda',
+        subKey: 'muhurta.inauspicious',
+        interval: m.yamaganda,
+        tone: 'bad',
+      },
+      {
+        labelKey: 'muhurta.gulika',
+        subKey: 'muhurta.inauspicious',
+        interval: m.gulika,
+        tone: 'bad',
+      },
     ];
     if (m.abhijit) {
-      rows.push({ labelKey: 'muhurta.abhijit', subKey: 'muhurta.auspicious',
-        interval: m.abhijit, tone: 'good' });
+      rows.push({
+        labelKey: 'muhurta.abhijit',
+        subKey: 'muhurta.auspicious',
+        interval: m.abhijit,
+        tone: 'good',
+      });
     }
     rows.push(
-      { labelKey: 'muhurta.vijayaMuhurta', subKey: 'muhurta.afternoon',
-        interval: m.vijayaMuhurta, tone: 'good' },
-      { labelKey: 'muhurta.godhuli', subKey: 'muhurta.sunset',
-        interval: m.godhuli, tone: 'good' },
-      { labelKey: 'muhurta.sayahnaSandhya', subKey: 'muhurta.twilight',
-        interval: m.sayahnaSandhya, tone: 'good' },
-      { labelKey: 'muhurta.nishitaKaal', subKey: 'muhurta.night',
-        interval: m.nishitaKaal, tone: 'good' },
+      {
+        labelKey: 'muhurta.vijayaMuhurta',
+        subKey: 'muhurta.afternoon',
+        interval: m.vijayaMuhurta,
+        tone: 'good',
+      },
+      { labelKey: 'muhurta.godhuli', subKey: 'muhurta.sunset', interval: m.godhuli, tone: 'good' },
+      {
+        labelKey: 'muhurta.sayahnaSandhya',
+        subKey: 'muhurta.twilight',
+        interval: m.sayahnaSandhya,
+        tone: 'good',
+      },
+      {
+        labelKey: 'muhurta.nishitaKaal',
+        subKey: 'muhurta.night',
+        interval: m.nishitaKaal,
+        tone: 'good',
+      },
     );
     // Sort by start time so muhurtas read chronologically regardless
     // of how Brahma's pre-sunrise window relates to the previous row.
@@ -256,7 +291,14 @@
   <div class="timings">
     <div class="t">
       <div class="ic" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M12 4v3" />
           <path d="M5.6 11.6L7 13" />
           <path d="M18.4 11.6L17 13" />
@@ -271,7 +313,14 @@
     </div>
     <div class="t">
       <div class="ic" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M12 11v-3" />
           <path d="M5.6 9L7 7.5" />
           <path d="M18.4 9L17 7.5" />
@@ -286,11 +335,22 @@
     </div>
     <div class="t">
       <div class="ic" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M3 21h18" />
           <path d="M9 21l3-3 3 3" />
           <!-- Crescent moon — clipping a small circle out of a larger one. -->
-          <path d="M9 13a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 13z" fill="currentColor" fill-opacity="0.18" />
+          <path
+            d="M9 13a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 13z"
+            fill="currentColor"
+            fill-opacity="0.18"
+          />
         </svg>
       </div>
       <div class="lab">{tr('timing.moonrise')}</div>
@@ -298,10 +358,21 @@
     </div>
     <div class="t">
       <div class="ic" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M3 21h18" />
           <path d="M9 17l3 3 3-3" />
-          <path d="M9 9a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 9z" fill="currentColor" fill-opacity="0.18" />
+          <path
+            d="M9 9a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 9z"
+            fill="currentColor"
+            fill-opacity="0.18"
+          />
         </svg>
       </div>
       <div class="lab">{tr('timing.moonset')}</div>
@@ -386,15 +457,53 @@
         <!-- Lotus-style 8-petal flower — replaces the generic ✦ glyph
              with something rooted in Indian iconography. Two layers
              of four petals each, offset by 45°, around a central seed. -->
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
-          <path d="M16 4c2.2 4 2.2 8 0 12-2.2-4-2.2-8 0-12z" fill="currentColor" fill-opacity="0.22" />
-          <path d="M16 28c-2.2-4-2.2-8 0-12 2.2 4 2.2 8 0 12z" fill="currentColor" fill-opacity="0.22" />
-          <path d="M4 16c4-2.2 8-2.2 12 0-4 2.2-8 2.2-12 0z" fill="currentColor" fill-opacity="0.22" />
-          <path d="M28 16c-4 2.2-8 2.2-12 0 4-2.2 8-2.2 12 0z" fill="currentColor" fill-opacity="0.22" />
-          <path d="M7.5 7.5c3.3 1.4 6.1 4.3 7.5 7.5-3.3-1.4-6.1-4.3-7.5-7.5z" fill="currentColor" fill-opacity="0.12" />
-          <path d="M24.5 24.5c-3.3-1.4-6.1-4.3-7.5-7.5 3.3 1.4 6.1 4.3 7.5 7.5z" fill="currentColor" fill-opacity="0.12" />
-          <path d="M24.5 7.5c-1.4 3.3-4.3 6.1-7.5 7.5 1.4-3.3 4.3-6.1 7.5-7.5z" fill="currentColor" fill-opacity="0.12" />
-          <path d="M7.5 24.5c1.4-3.3 4.3-6.1 7.5-7.5-1.4 3.3-4.3 6.1-7.5 7.5z" fill="currentColor" fill-opacity="0.12" />
+        <svg
+          viewBox="0 0 32 32"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M16 4c2.2 4 2.2 8 0 12-2.2-4-2.2-8 0-12z"
+            fill="currentColor"
+            fill-opacity="0.22"
+          />
+          <path
+            d="M16 28c-2.2-4-2.2-8 0-12 2.2 4 2.2 8 0 12z"
+            fill="currentColor"
+            fill-opacity="0.22"
+          />
+          <path
+            d="M4 16c4-2.2 8-2.2 12 0-4 2.2-8 2.2-12 0z"
+            fill="currentColor"
+            fill-opacity="0.22"
+          />
+          <path
+            d="M28 16c-4 2.2-8 2.2-12 0 4-2.2 8-2.2 12 0z"
+            fill="currentColor"
+            fill-opacity="0.22"
+          />
+          <path
+            d="M7.5 7.5c3.3 1.4 6.1 4.3 7.5 7.5-3.3-1.4-6.1-4.3-7.5-7.5z"
+            fill="currentColor"
+            fill-opacity="0.12"
+          />
+          <path
+            d="M24.5 24.5c-3.3-1.4-6.1-4.3-7.5-7.5 3.3 1.4 6.1 4.3 7.5 7.5z"
+            fill="currentColor"
+            fill-opacity="0.12"
+          />
+          <path
+            d="M24.5 7.5c-1.4 3.3-4.3 6.1-7.5 7.5 1.4-3.3 4.3-6.1 7.5-7.5z"
+            fill="currentColor"
+            fill-opacity="0.12"
+          />
+          <path
+            d="M7.5 24.5c1.4-3.3 4.3-6.1 7.5-7.5-1.4 3.3-4.3 6.1-7.5 7.5z"
+            fill="currentColor"
+            fill-opacity="0.12"
+          />
           <circle cx="16" cy="16" r="2.2" fill="currentColor" />
         </svg>
       </span>

@@ -96,11 +96,7 @@ function isBhadraAtJD(jd: number): boolean {
 // (e.g., Kolkata 2025: Ashtami starts 23:50 IST, Kolkata's Nishita
 // center is 23:40 → center says miss, but interval [23:19, 00:03]
 // catches it).
-export function tithiOverlapsNishitaKaal(
-  loc: Location,
-  date: Date,
-  tithiIndex: number,
-): boolean {
+export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: number): boolean {
   const events = sunRiseSet(loc, date);
   if (!events.rise || !events.set) return false;
   const nextEvents = sunRiseSet(loc, new Date(date.getTime() + MS_PER_DAY));
@@ -129,10 +125,7 @@ export function tithiOverlapsNishitaKaal(
 // date (e.g. Aug 25 in 2016). The app's single default remains Smarta;
 // Vaishnava should be added as an explicit variant, not folded into
 // this predicate.
-export function smartaJanmashtamiMatches(
-  p: Panchanga,
-  masa: string,
-): boolean {
+export function smartaJanmashtamiMatches(p: Panchanga, masa: string): boolean {
   if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
   const target = 23; // Krishna Ashtami
   const todayAtKaal = tithiOverlapsNishitaKaal(p.location, p.date, target);
@@ -203,11 +196,7 @@ interface WindowProbe {
   instant: Date;
   tithiIndex: number;
 }
-function probeWindow(
-  loc: Location,
-  date: Date,
-  win: Window,
-): WindowProbe | null {
+function probeWindow(loc: Location, date: Date, win: Window): WindowProbe | null {
   const events = sunRiseSet(loc, date);
   if (!events.rise || !events.set) return null;
   const moonrise = win === 'chandrodaya' ? moonRiseSet(loc, date).rise : null;
@@ -279,7 +268,8 @@ export function vyapiniWithNakshatraPreference(
 
   const hasTithi = (probe: typeof today) => probe?.tithiIndex === tithiIndex;
   const hasNak = (probe: typeof today) =>
-    probe && nakshatraIndexAtJD(dateToJulian(probe.instant), p.options.ayanamsa) === preferredNakshatra;
+    probe &&
+    nakshatraIndexAtJD(dateToJulian(probe.instant), p.options.ayanamsa) === preferredNakshatra;
 
   if (hasTithi(today)) {
     // If today has both tithi + nakshatra → fire.
@@ -333,7 +323,13 @@ export function vyapiniWithNakshatraPreference(
 //                       handles 2012/2013 but regresses 2016 (2016 gap
 //                       is ~121 min, only ~3 min above threshold — within
 //                       ephemeris uncertainty). Not wired to any festival.
-export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta' | 'sunriseMinus120';
+export type BhadraCutoff =
+  | 'window'
+  | 'sunset'
+  | 'prahar1'
+  | 'prahar4'
+  | 'brahmaMuhurta'
+  | 'sunriseMinus120';
 
 // Brahma Muhurta starts 96 minutes before sunrise (= sunrise − 96 min).
 const BRAHMA_MUHURTA_BEFORE_SUNRISE_MS = 96 * 60_000;
@@ -394,11 +390,7 @@ export function bhadraAwareVyapiniMatchesForDate(
   const todayProbe = probeWindow(loc, date, win);
   if (todayProbe && todayProbe.tithiIndex === tithiIndex) {
     // Later-pick: if tomorrow also has tithi at window, defer.
-    const tomorrowProbe = probeWindow(
-      loc,
-      new Date(date.getTime() + MS_PER_DAY),
-      win,
-    );
+    const tomorrowProbe = probeWindow(loc, new Date(date.getTime() + MS_PER_DAY), win);
     if (tomorrowProbe && tomorrowProbe.tithiIndex === tithiIndex) return false;
     if (!isBhadraAtJD(dateToJulian(todayProbe.instant))) return true;
     // Bhadra at window. Check cutoff (with guard band — see comment
@@ -452,7 +444,8 @@ export function bhadraAwareVyapiniWithSunriseFallback(
   if (p.tithi.index !== tithiIndex) return false;
   const yesterday = new Date(p.date.getTime() - MS_PER_DAY);
   const tomorrow = new Date(p.date.getTime() + MS_PER_DAY);
-  if (bhadraAwareVyapiniMatchesForDate(p.location, yesterday, win, tithiIndex, cutoff)) return false;
+  if (bhadraAwareVyapiniMatchesForDate(p.location, yesterday, win, tithiIndex, cutoff))
+    return false;
   if (bhadraAwareVyapiniMatchesForDate(p.location, tomorrow, win, tithiIndex, cutoff)) return false;
   return true;
 }
@@ -565,10 +558,7 @@ export function sankrantiInto(targetSign: number): (p: Panchanga) => boolean {
     if (!p.sunrise || !p.sunset) return false;
     // Pre-filter: the transit happens once per year. If today's solar
     // sign is unrelated to the target on either day-boundary, skip.
-    if (
-      p.solar.signAtDayStart !== targetSign &&
-      p.solar.signAtDayEnd !== targetSign
-    ) {
+    if (p.solar.signAtDayStart !== targetSign && p.solar.signAtDayEnd !== targetSign) {
       return false;
     }
     const transitJD = findSankrantiTransitJD(

@@ -44,7 +44,7 @@ describe('Lahiri ayanamsa', () => {
     ['1950-01-01T00:00:00Z', 23.1651, 2],
     ['2000-01-01T00:00:00Z', 23.8635, 1], // SE_SIDM_LAHIRI J2000 anchor
     ['2025-01-01T00:00:00Z', 24.2129, 1], // verified vs Drik 24.213073°
-    ['2050-01-01T00:00:00Z', 24.5620, 2],
+    ['2050-01-01T00:00:00Z', 24.562, 2],
     ['2100-01-01T00:00:00Z', 25.2607, 2],
   ];
   it.each(goldenLahiri)('matches expected value at %s', (iso, expected, tol) => {

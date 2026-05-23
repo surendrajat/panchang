@@ -97,8 +97,7 @@ export function ayanamsa(jd: number, system: AyanamsaSystem = 'lahiri'): number 
   // IAU 2006 form: PA(T) = a₁·T + a₂·T². Quadratic stays under 2″ over
   // the 1900–2100 window but is a free win in accuracy.
   const T = (jd - JD_J2000) / JULIAN_CENTURY_DAYS;
-  const arcsec =
-    c.precessionArcsecPerCenturyT * T + c.precessionArcsecPerCenturyTSq * T * T;
+  const arcsec = c.precessionArcsecPerCenturyT * T + c.precessionArcsecPerCenturyTSq * T * T;
   return c.baseDegreesAtJ2000 + arcsec / SECONDS_PER_DEGREE;
 }
 

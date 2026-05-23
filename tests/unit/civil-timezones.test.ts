@@ -26,7 +26,9 @@ describe('civil time construction across bundled city timezones', () => {
             noonParts.day !== day ||
             noonParts.hour !== 12
           ) {
-            failures.push(`${city.name} ${city.timezone}: noon ${year}-${month}-${day} -> ${JSON.stringify(noonParts)}`);
+            failures.push(
+              `${city.name} ${city.timezone}: noon ${year}-${month}-${day} -> ${JSON.stringify(noonParts)}`,
+            );
           }
 
           const midnight = civilMidnightInZone(noon, city.timezone);

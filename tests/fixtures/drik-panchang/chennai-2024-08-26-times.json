@@ -23,8 +23,14 @@
       "number": 8,
       "endTime": "2024-08-27T02:20:00+05:30"
     },
-    "nakshatra": { "name": "Krittika", "endTime": "15:55" },
-    "yoga": { "name": "Vyaghata", "endTime": "22:17" },
+    "nakshatra": {
+      "name": "Krittika",
+      "endTime": "15:55"
+    },
+    "yoga": {
+      "name": "Vyaghata",
+      "endTime": "22:17"
+    },
     "karana": {
       "name": "Balava",
       "endTime": "14:55"

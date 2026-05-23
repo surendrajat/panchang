@@ -36,10 +36,22 @@ describe('Bhadra-aware Holika Dahan (prahar4 cutoff)', () => {
   // ~03:30 Mar 25). Same-day observance.
   it('2024 fires on Mar 24 (Bhadra ends before Prahar 4)', () => {
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-24'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2024-03-24'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(true);
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-25'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2024-03-25'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(false);
   });
 
@@ -47,10 +59,22 @@ describe('Bhadra-aware Holika Dahan (prahar4 cutoff)', () => {
   // day — Drik fires Mar 23.
   it('2016 shifts to Mar 23 (Bhadra extends into Prahar 4)', () => {
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2016-03-22'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2016-03-22'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(false);
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2016-03-23'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2016-03-23'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(true);
   });
 
@@ -58,10 +82,22 @@ describe('Bhadra-aware Holika Dahan (prahar4 cutoff)', () => {
   // Drik fires Mar 17 — same day as Bhadra ends within Prahar 3.
   it('2022 fires on Mar 17 (Bhadra ends before Prahar 4)', () => {
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2022-03-17'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2022-03-17'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(true);
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2022-03-18'), 'pradosha', 15, 'prahar4'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2022-03-18'),
+        'pradosha',
+        15,
+        'prahar4',
+      ),
     ).toBe(false);
   });
 });
@@ -70,10 +106,22 @@ describe('Bhadra-aware Raksha Bandhan (prahar1 cutoff)', () => {
   // 2022: Bhadra at Aparahna, ends 20:51 (Prahar 1 end ~21:45). Same day.
   it('2022 fires on Aug 11 (Bhadra ends within Prahar 1)', () => {
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2022-08-11'), 'aparahna', 15, 'prahar1'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2022-08-11'),
+        'aparahna',
+        15,
+        'prahar1',
+      ),
     ).toBe(true);
     expect(
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2022-08-12'), 'aparahna', 15, 'prahar1'),
+      bhadraAwareVyapiniMatchesForDate(
+        DELHI,
+        delhiMidnight('2022-08-12'),
+        'aparahna',
+        15,
+        'prahar1',
+      ),
     ).toBe(false);
   });
 
@@ -81,13 +129,11 @@ describe('Bhadra-aware Raksha Bandhan (prahar1 cutoff)', () => {
   // Sunrise fallback fires Aug 9 (Purnima at sunrise).
   it('2025 fires on Aug 9 via sunrise fallback (tithi-kshaya)', () => {
     const p = computePanchanga(delhiMidnight('2025-08-09'), DELHI);
-    expect(
-      bhadraAwareVyapiniWithSunriseFallback(p, 'aparahna', 15, 'prahar1'),
-    ).toBe(true);
+    expect(bhadraAwareVyapiniWithSunriseFallback(p, 'aparahna', 15, 'prahar1')).toBe(true);
     const pYesterday = computePanchanga(delhiMidnight('2025-08-08'), DELHI);
-    expect(
-      bhadraAwareVyapiniWithSunriseFallback(pYesterday, 'aparahna', 15, 'prahar1'),
-    ).toBe(false);
+    expect(bhadraAwareVyapiniWithSunriseFallback(pYesterday, 'aparahna', 15, 'prahar1')).toBe(
+      false,
+    );
   });
 });
 
@@ -133,20 +179,29 @@ describe('Vyapini pick semantics', () => {
   // Mar 25 has Krishna 1 (16). With 'later' pick, Mar 24 fires
   // (today qualifies, tomorrow doesn't).
   it("'later' pick picks today when tomorrow's window has next tithi", () => {
-    expect(
-      vyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-24'), 'pradosha', 15, 'later'),
-    ).toBe(true);
-    expect(
-      vyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-25'), 'pradosha', 15, 'later'),
-    ).toBe(false);
+    expect(vyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-24'), 'pradosha', 15, 'later')).toBe(
+      true,
+    );
+    expect(vyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-25'), 'pradosha', 15, 'later')).toBe(
+      false,
+    );
   });
 });
 
 describe('BhadraCutoff matrix', () => {
   // Sanity: a Bhadra cutoff parameter accepts each documented value.
-  it.each<BhadraCutoff>(['window', 'sunset', 'prahar1', 'prahar4', 'brahmaMuhurta'])('accepts %s', (cutoff) => {
-    expect(() =>
-      bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-24'), 'pradosha', 15, cutoff),
-    ).not.toThrow();
-  });
+  it.each<BhadraCutoff>(['window', 'sunset', 'prahar1', 'prahar4', 'brahmaMuhurta'])(
+    'accepts %s',
+    (cutoff) => {
+      expect(() =>
+        bhadraAwareVyapiniMatchesForDate(
+          DELHI,
+          delhiMidnight('2024-03-24'),
+          'pradosha',
+          15,
+          cutoff,
+        ),
+      ).not.toThrow();
+    },
+  );
 });

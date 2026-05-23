@@ -17,10 +17,24 @@
   "expect": {
     "sunrise": "07:15",
     "sunset": "17:46",
-    "tithi": { "name": "Dwitiya", "paksha": "krishna", "number": 2 },
-    "nakshatra": { "name": "Pushya", "endTime": "10:28" },
-    "yoga": { "name": "Priti", "endTime": "2025-01-16T01:47:00+05:30" },
-    "karana": { "name": "Taitila" },
-    "masa": { "name": "Pausha" }
+    "tithi": {
+      "name": "Dwitiya",
+      "paksha": "krishna",
+      "number": 2
+    },
+    "nakshatra": {
+      "name": "Pushya",
+      "endTime": "10:28"
+    },
+    "yoga": {
+      "name": "Priti",
+      "endTime": "2025-01-16T01:47:00+05:30"
+    },
+    "karana": {
+      "name": "Taitila"
+    },
+    "masa": {
+      "name": "Pausha"
+    }
   }
 }

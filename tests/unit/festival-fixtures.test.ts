@@ -30,16 +30,16 @@ describe('festival fixture metadata', () => {
   });
 
   it('documents every soft tiebreaker fixture with a rule note', () => {
-    const missing = FESTIVAL_FIXTURES.filter((f) => f.auditTier === 'tiebreaker' && !f.ruleNote).map(
-      (f) => f.key,
-    );
+    const missing = FESTIVAL_FIXTURES.filter(
+      (f) => f.auditTier === 'tiebreaker' && !f.ruleNote,
+    ).map((f) => f.key);
     expect(missing).toEqual([]);
   });
 
   it('keeps unresolved known issues out of strict fixtures', () => {
-    const invalid = FESTIVAL_FIXTURES.filter((f) => (f.auditTier ?? 'strict') === 'strict' && f.knownIssue).map(
-      (f) => f.key,
-    );
+    const invalid = FESTIVAL_FIXTURES.filter(
+      (f) => (f.auditTier ?? 'strict') === 'strict' && f.knownIssue,
+    ).map((f) => f.key);
     expect(invalid).toEqual([]);
   });
 });

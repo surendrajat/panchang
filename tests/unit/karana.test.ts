@@ -23,13 +23,7 @@ describe('karana naming', () => {
       'Naga',
       'Kimstughna',
     ]);
-    for (const isoDate of [
-      '2024-08-26',
-      '2025-03-14',
-      '2025-11-01',
-      '2026-01-14',
-      '2026-05-20',
-    ]) {
+    for (const isoDate of ['2024-08-26', '2025-03-14', '2025-11-01', '2026-01-14', '2026-05-20']) {
       const p = computePanchanga(new Date(`${isoDate}T06:00:00+05:30`), BENGALURU);
       expect(p.karana.positionInCycle).toBeGreaterThanOrEqual(0);
       expect(p.karana.positionInCycle).toBeLessThanOrEqual(59);

@@ -7,7 +7,13 @@
 //
 // Pure function. No I/O, no caching. Memoization is the storage layer's job.
 
-import { civilMidnightInZone, civilTimeInZone, sunRiseSet, moonRiseSet, dateToJulian } from '$lib/astro';
+import {
+  civilMidnightInZone,
+  civilTimeInZone,
+  sunRiseSet,
+  moonRiseSet,
+  dateToJulian,
+} from '$lib/astro';
 import { evaluateFestivals } from './festivals/rules';
 import { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
 import { tithiAtInstant } from './tithi';
@@ -207,7 +213,6 @@ export function findFestivals(
   }
   return out;
 }
-
 
 // findNextTithi: scan day-by-day forward looking for a matching civil
 // date. This is intentionally simple — for the criteria we care about

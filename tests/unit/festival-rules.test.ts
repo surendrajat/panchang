@@ -37,7 +37,9 @@ describe('festival rule engine', () => {
 
     expect(matches(base)).toBe(true);
     expect(matches({ ...base, masa: { ...base.masa, isAdhika: true } } as Panchanga)).toBe(false);
-    expect(matches({ ...base, tithi: { ...base.tithi, paksha: 'shukla' } } as Panchanga)).toBe(false);
+    expect(matches({ ...base, tithi: { ...base.tithi, paksha: 'shukla' } } as Panchanga)).toBe(
+      false,
+    );
   });
 });
 

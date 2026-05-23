@@ -74,9 +74,10 @@ describe('Festival accuracy (2015-2028 default-convention comparison)', () => {
     const msg = failures
       .map((r) => `${r.key} ${r.year}: expected ${r.expected}, got ${r.actual ?? 'MISSING'}`)
       .join('\n');
-    expect(failures.length, `\n${msg}\n(${failures.length} of ${strict.length} strict checks)`).toBe(
-      0,
-    );
+    expect(
+      failures.length,
+      `\n${msg}\n(${failures.length} of ${strict.length} strict checks)`,
+    ).toBe(0);
   });
 
   it('tiebreaker-dependent festivals match expected dates exactly', () => {
@@ -89,7 +90,10 @@ describe('Festival accuracy (2015-2028 default-convention comparison)', () => {
     const msg = failures
       .map((r) => `${r.key} ${r.year}: expected ${r.expected}, got ${r.actual ?? 'MISSING'}`)
       .join('\n');
-    expect(failures.length, `\n${msg}\n(${failures.length} of ${soft.length} tiebreaker checks)`).toBe(0);
+    expect(
+      failures.length,
+      `\n${msg}\n(${failures.length} of ${soft.length} tiebreaker checks)`,
+    ).toBe(0);
   });
 
   it('pins the default Janmashtami convention to Smarta dates', () => {

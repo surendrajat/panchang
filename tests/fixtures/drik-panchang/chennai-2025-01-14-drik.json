@@ -17,11 +17,25 @@
   "expect": {
     "sunrise": "06:35",
     "sunset": "18:01",
-    "tithi": { "name": "Pratipada", "paksha": "krishna", "number": 1 },
-    "nakshatra": { "name": "Punarvasu", "endTime": "10:17" },
-    "yoga": { "name": "Vishkambha", "endTime": "2025-01-15T02:58:00+05:30" },
-    "karana": { "name": "Balava" },
-    "masa": { "name": "Pausha" },
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1
+    },
+    "nakshatra": {
+      "name": "Punarvasu",
+      "endTime": "10:17"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "2025-01-15T02:58:00+05:30"
+    },
+    "karana": {
+      "name": "Balava"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
     "festivals": ["makara_sankranti", "pongal"]
   }
 }

@@ -10,8 +10,8 @@
   font-display: swap;
   src: url('/fonts/noto-sans-devanagari-devanagari.woff2') format('woff2');
   unicode-range:
-    U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839,
-    U+A8E0-A8FF, U+11B00-11B09;
+    U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF,
+    U+11B00-11B09;
 }
 
 @font-face {
@@ -21,8 +21,8 @@
   font-display: swap;
   src: url('/fonts/noto-serif-devanagari-devanagari.woff2') format('woff2');
   unicode-range:
-    U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839,
-    U+A8E0-A8FF, U+11B00-11B09;
+    U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF,
+    U+11B00-11B09;
 }
 
 :root {
@@ -45,10 +45,12 @@
   --ok: #2f6133;
 
   /* Type */
-  --font-serif: 'Noto Serif Devanagari', ui-serif, 'Iowan Old Style', 'Palatino Linotype',
-    Palatino, Georgia, 'Times New Roman', serif;
-  --font-sans: 'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif:
+    'Noto Serif Devanagari', ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+    'Times New Roman', serif;
+  --font-sans:
+    'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   --font-size-xs: 0.75rem;

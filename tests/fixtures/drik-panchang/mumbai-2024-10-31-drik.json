@@ -16,11 +16,25 @@
   "civilDate": "2024-10-31",
   "expect": {
     "sunset": "18:05",
-    "tithi": { "name": "Chaturdashi", "paksha": "krishna", "number": 14 },
-    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
-    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
-    "karana": { "name": "Shakuni" },
-    "masa": { "name": "Ashvina" },
+    "tithi": {
+      "name": "Chaturdashi",
+      "paksha": "krishna",
+      "number": 14
+    },
+    "nakshatra": {
+      "name": "Chitra",
+      "endTime": "2024-11-01T00:45:00+05:30"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "09:51"
+    },
+    "karana": {
+      "name": "Shakuni"
+    },
+    "masa": {
+      "name": "Ashvina"
+    },
     "festivals": ["naraka_chaturdashi", "diwali"]
   }
 }

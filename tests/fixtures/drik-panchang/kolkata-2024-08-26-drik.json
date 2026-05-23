@@ -17,11 +17,25 @@
   "expect": {
     "sunrise": "05:17",
     "sunset": "17:59",
-    "tithi": { "name": "Ashtami", "paksha": "krishna", "number": 8 },
-    "nakshatra": { "name": "Krittika", "endTime": "15:55" },
-    "yoga": { "name": "Vyaghata", "endTime": "22:17" },
-    "karana": { "name": "Balava" },
-    "masa": { "name": "Shravana" },
+    "tithi": {
+      "name": "Ashtami",
+      "paksha": "krishna",
+      "number": 8
+    },
+    "nakshatra": {
+      "name": "Krittika",
+      "endTime": "15:55"
+    },
+    "yoga": {
+      "name": "Vyaghata",
+      "endTime": "22:17"
+    },
+    "karana": {
+      "name": "Balava"
+    },
+    "masa": {
+      "name": "Shravana"
+    },
     "festivals": ["krishna_janmashtami"]
   }
 }

@@ -19,12 +19,20 @@
       "number": 14,
       "endTime": "15:53"
     },
-    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
-    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
+    "nakshatra": {
+      "name": "Chitra",
+      "endTime": "2024-11-01T00:45:00+05:30"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "09:51"
+    },
     "karana": {
       "name": "Shakuni",
       "endTime": "15:53"
     },
-    "masa": { "name": "Ashvina" }
+    "masa": {
+      "name": "Ashvina"
+    }
   }
 }

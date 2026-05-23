@@ -4,9 +4,10 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { computePanchanga, type Location } from '$lib/panchanga';
+import { computePanchanga, PAN_INDIA_FESTIVALS, type Location } from '$lib/panchanga';
 
 interface Fixture {
+  fileName?: string;
   label: string;
   source?: {
     urls?: string[];
@@ -35,12 +36,14 @@ interface Fixture {
 
 const SUN_EVENT_TOLERANCE_MS = 30_000;
 const LIMB_END_TOLERANCE_MS = 2 * 60_000;
+const FESTIVAL_KEYS = new Set(PAN_INDIA_FESTIVALS.map((f) => f.key));
 
 function loadFixtures(): Fixture[] {
   const dir = join(__dirname, '..', 'fixtures', 'drik-panchang');
   return readdirSync(dir)
     .filter((f) => f.endsWith('.json'))
-    .map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8')) as Fixture);
+    .sort()
+    .map((f) => ({ ...(JSON.parse(readFileSync(join(dir, f), 'utf8')) as Fixture), fileName: f }));
 }
 
 describe('Drik-Panchang fixture regression', () => {
@@ -54,12 +57,78 @@ describe('Drik-Panchang fixture regression', () => {
     ).toBeGreaterThanOrEqual(1);
   });
 
+  it('fixture labels and files are unique', () => {
+    const duplicateLabels = duplicates(fixtures.map((fx) => fx.label));
+    const duplicateFiles = duplicates(fixtures.map((fx) => fx.fileName ?? ''));
+
+    expect(duplicateLabels, `Duplicate fixture labels: ${duplicateLabels.join(', ')}`).toEqual([]);
+    expect(duplicateFiles, `Duplicate fixture files: ${duplicateFiles.join(', ')}`).toEqual([]);
+  });
+
   it('fixtures use valid civil dates', () => {
     const invalid = fixtures
       .filter((fx) => !isExactISODate(fx.civilDate))
       .map((fx) => `${fx.label}: ${fx.civilDate}`);
 
     expect(invalid, `Invalid fixture civil dates: ${invalid.join(', ')}`).toEqual([]);
+  });
+
+  it('fixtures use valid locations and non-empty expectations', () => {
+    const invalid: string[] = [];
+
+    for (const fx of fixtures) {
+      if (!fx.location?.timezone) invalid.push(`${fixtureName(fx)}: missing timezone`);
+      if (!Number.isFinite(fx.location?.latitude) || fx.location.latitude < -90 || fx.location.latitude > 90) {
+        invalid.push(`${fixtureName(fx)}: invalid latitude ${fx.location?.latitude}`);
+      }
+      if (
+        !Number.isFinite(fx.location?.longitude) ||
+        fx.location.longitude < -180 ||
+        fx.location.longitude > 180
+      ) {
+        invalid.push(`${fixtureName(fx)}: invalid longitude ${fx.location?.longitude}`);
+      }
+      if (fx.location.altitude !== undefined && !Number.isFinite(fx.location.altitude)) {
+        invalid.push(`${fixtureName(fx)}: invalid altitude ${fx.location.altitude}`);
+      }
+      if (Object.keys(fx.expect ?? {}).length === 0) invalid.push(`${fixtureName(fx)}: empty expect object`);
+    }
+
+    expect(invalid).toEqual([]);
+  });
+
+  it('fixtures use valid expected time fields and festival keys', () => {
+    const invalid: string[] = [];
+
+    for (const fx of fixtures) {
+      for (const [label, value] of expectedTimeFields(fx)) {
+        if (value !== null && !isExpectedInstantShape(value)) {
+          invalid.push(`${fixtureName(fx)}: ${label} has invalid time "${value}"`);
+        }
+      }
+      for (const key of fx.expect.festivals ?? []) {
+        if (!FESTIVAL_KEYS.has(key)) invalid.push(`${fixtureName(fx)}: unknown festival key ${key}`);
+      }
+    }
+
+    expect(invalid).toEqual([]);
+  });
+
+  it('timed fixture corpus covers both sun events and limb end times', () => {
+    const timed = fixtures.filter(hasTimedAssertion);
+    const hasSunEvent = timed.some((fx) => fx.expect.sunrise !== undefined || fx.expect.sunset !== undefined);
+    const hasLimbEnd = timed.some(
+      (fx) =>
+        fx.expect.tithi?.endTime ||
+        fx.expect.nakshatra?.endTime ||
+        fx.expect.yoga?.endTime ||
+        fx.expect.karana?.endTime,
+    );
+
+    expect(hasSunEvent, 'Timed fixtures should include at least one sunrise/sunset assertion.').toBe(true);
+    expect(hasLimbEnd, 'Timed fixtures should include at least one tithi/nakshatra/yoga/karana end assertion.').toBe(
+      true,
+    );
   });
 
   it('fixtures with timed assertions include usable source metadata', () => {
@@ -141,6 +210,33 @@ function hasTimedAssertion(fx: Fixture): boolean {
   );
 }
 
+function duplicates(values: string[]): string[] {
+  const seen = new Set<string>();
+  const dupes = new Set<string>();
+  for (const value of values) {
+    if (seen.has(value)) dupes.add(value);
+    seen.add(value);
+  }
+  return Array.from(dupes).sort();
+}
+
+function fixtureName(fx: Fixture): string {
+  return fx.fileName ?? fx.label;
+}
+
+function expectedTimeFields(fx: Fixture): Array<[string, string | null | undefined]> {
+  return [
+    ['sunrise', fx.expect.sunrise],
+    ['sunset', fx.expect.sunset],
+    ['moonrise', fx.expect.moonrise],
+    ['moonset', fx.expect.moonset],
+    ['tithi.endTime', fx.expect.tithi?.endTime],
+    ['nakshatra.endTime', fx.expect.nakshatra?.endTime],
+    ['yoga.endTime', fx.expect.yoga?.endTime],
+    ['karana.endTime', fx.expect.karana?.endTime],
+  ].filter(([, value]) => value !== undefined);
+}
+
 function hasUsableSourceMetadata(fx: Fixture): boolean {
   return Boolean(
     fx.source?.notes?.trim() &&
@@ -160,6 +256,13 @@ function isExactISODate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function isExpectedInstantShape(value: string): boolean {
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) return true;
+  if (!value.includes('T')) return false;
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime());
 }
 
 function expectOptionalInstant(

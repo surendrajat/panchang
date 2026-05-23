@@ -1,0 +1,34 @@
+{
+  "label": "Ujjain — 2024-10-31 (Amavasya transition with timed references)",
+  "source": {
+    "urls": ["https://www.prokerala.com/astrology/panchang/2024-october-31.html"],
+    "notes": "Prokerala Ujjain Panchang gives Krishna Chaturdashi ending 15:53, Amavasya starting 15:53, Chitra, Vishkambha, Shakuni ending 15:53, and Chatushpada ending Nov 1 05:07. Sun and moon events are not pinned here because the previous Ujjain source values missed the strict rise/set tolerance. Chitra and Vishkambha end times are not pinned because they missed the strict limb-end tolerance."
+  },
+  "location": {
+    "name": "Ujjain, India",
+    "latitude": 23.1765,
+    "longitude": 75.7885,
+    "altitude": 491,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-10-31",
+  "expect": {
+    "tithi": {
+      "name": "Chaturdashi",
+      "paksha": "krishna",
+      "number": 14,
+      "endTime": "15:53"
+    },
+    "nakshatra": {
+      "name": "Chitra"
+    },
+    "yoga": {
+      "name": "Vishkambha"
+    },
+    "karana": {
+      "name": "Shakuni",
+      "endTime": "15:53"
+    },
+    "masa": { "name": "Ashvina" }
+  }
+}

@@ -4,16 +4,16 @@
 //
 // Two tiers:
 //
-//   `strict`: festivals where my "tithi at sunrise" rule consistently
+//   `strict`: festivals where the current rule consistently
 //             agrees with Drik across the year window. A mismatch
 //             here is a hard regression failure.
 //
 //   `tiebreaker`: festivals whose published date is decided by an
 //             additional rule (Pradosha / Madhyahna / Nishita /
-//             Aparahna / Chandrodaya) that our compute layer does
-//             not yet implement. We pin Drik values so the gap is
-//             visible and the test catches accuracy improvements as
-//             rules land — but a mismatch is reported, not failed.
+//             Aparahna / Chandrodaya / Bhadra / Sankranti cutoff).
+//             Most are now implemented; this bucket stays soft while
+//             convention-sensitive cases such as Janmashtami are still
+//             being split into explicit variants.
 //
 // Sources: drikpanchang.com year-list pages and per-festival archive
 // entries. Dates are YYYY-MM-DD in Asia/Kolkata civil time.
@@ -22,12 +22,12 @@ export interface FestivalFixture {
   key: string;
   /** Map of year → expected Drik date. */
   drik: Record<number, string>;
-  /**
-   * Documents the Drik tiebreaker rule when our sunrise-only
-   * implementation can diverge. When set, mismatches are reported
-   * but don't fail the strict suite.
-   */
-  knownLimitation?: string;
+  /** Strict fixtures must match exactly; tiebreaker fixtures use a baseline floor. */
+  auditTier?: 'strict' | 'tiebreaker';
+  /** Describes the implemented/expected rule for tiebreaker-dependent dates. */
+  ruleNote?: string;
+  /** Real unresolved mismatch or convention problem, if any. */
+  knownIssue?: string;
 }
 
 export const FESTIVAL_FIXTURES: FestivalFixture[] = [
@@ -143,8 +143,9 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
 
   {
     key: 'makara_sankranti',
-    knownLimitation:
-      'Drik applies a Punya-Kaal rule: if Sun enters Makara after sunset, the festival is observed the NEXT day. We currently fire on the civil day during which the transit happens. Diverges roughly every 4 years.',
+    auditTier: 'tiebreaker',
+    ruleNote:
+      'Implemented: bisection-found sidereal Makara transit with sunset cutoff; if transit is after sunset, observance shifts to next civil day.',
     drik: {
       // Verified against drikpanchang.com Indian calendar (geoname
       // 1273294 = New Delhi). Earlier transcription had 2015 and
@@ -168,8 +169,9 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'vasant_panchami',
-    knownLimitation:
-      'Drik uses Madhyahna (midday)-vyapini Panchami when the tithi spans two sunrises. Some years (2016, 2025) we miss the festival entirely because Panchami is a tithi-kshaya in our sunrise scan.',
+    auditTier: 'tiebreaker',
+    ruleNote:
+      'Rule note: Drik uses a daytime/Purvahna-Madhyahna Panchami rule; pinned years currently match the sunrise rule, but short-tithi years still need explicit fixtures.',
     drik: {
       2015: '2015-01-24',
       2017: '2017-02-01',
@@ -187,7 +189,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'akshaya_tritiya',
-    knownLimitation: 'Drik uses Madhyahna (midday)-vyapini Tritiya for the tiebreaker.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Rule note: Drik uses Madhyahna-vyapini Tritiya; pinned years currently match.',
     drik: {
       2015: '2015-04-21',
       2016: '2016-05-09',
@@ -202,7 +205,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'nag_panchami',
-    knownLimitation: 'Drik uses Madhyahna-vyapini Panchami of Shravana.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Rule note: Drik uses Madhyahna-vyapini Panchami of Shravana; pinned years currently match.',
     drik: {
       2016: '2016-08-07',
       2018: '2018-08-15',
@@ -218,8 +222,9 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'raksha_bandhan',
-    knownLimitation:
-      'Drik applies a Bhadra Kaal exception: if Purnima is in Bhadra-tithi-half during the day, observance shifts. In 2022/2023 Drik chose the previous day; our code follows the sunrise rule and picks the later day.',
+    auditTier: 'tiebreaker',
+    ruleNote:
+      'Implemented: Aparahna-vyapini Purnima with Bhadra cutoff and sunrise fallback for short-tithi years.',
     drik: {
       2015: '2015-08-29',
       2016: '2016-08-18',
@@ -237,7 +242,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'ganesh_chaturthi',
-    knownLimitation: 'Drik uses Madhyahna-vyapini Chaturthi.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented: Madhyahna-vyapini Chaturthi.',
     drik: {
       2015: '2015-09-17',
       2016: '2016-09-05',
@@ -255,7 +261,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'vijayadashami',
-    knownLimitation: 'Drik uses Aparahna (late-afternoon)-vyapini Dashami.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented: Aparahna-vyapini Dashami with Shravana-nakshatra preference and sunrise fallback.',
     drik: {
       2015: '2015-10-22',
       2016: '2016-10-11',
@@ -273,7 +280,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'kartik_purnima',
-    knownLimitation: 'Drik uses Pradosha-vyapini Purnima of Kartika.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Rule note: pinned years match the sunrise Purnima rule; some traditions use Pradosha/Krittika refinements.',
     drik: {
       2016: '2016-11-14',
       2017: '2017-11-04',
@@ -294,7 +302,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
 
   {
     key: 'diwali',
-    knownLimitation: 'Drik: Pradosha-vyapini Amavasya (evening rule).',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented: Pradosha-vyapini Amavasya.',
     drik: {
       2015: '2015-11-11',
       2016: '2016-10-30',
@@ -316,7 +325,9 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'holika_dahan',
-    knownLimitation: 'Drik: Pradosha-vyapini Purnima of Phalguna.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented for main fixtures: Pradosha-vyapini Phalguna Purnima with Prahar-4 Bhadra cutoff.',
+    knownIssue: '2012 remains an extended-year Holika/Holi edge case outside the main audit window.',
     drik: {
       2015: '2015-03-05',
       2016: '2016-03-23',
@@ -333,8 +344,9 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'holi',
-    knownLimitation:
-      'Day after Holika Dahan by convention. Our Krishna-1-at-sunrise rule misses tithi-kshaya days.',
+    auditTier: 'tiebreaker',
+    ruleNote:
+      'Implemented: day after computed Holika Dahan.',
     drik: {
       2015: '2015-03-06',
       2016: '2016-03-24',
@@ -352,7 +364,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'maha_shivaratri',
-    knownLimitation: 'Drik: Nishita (midnight)-vyapini Chaturdashi.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented for pinned years: Nishita-vyapini Chaturdashi.',
     drik: {
       2015: '2015-02-17',
       2016: '2016-03-07',
@@ -370,7 +383,10 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'krishna_janmashtami',
-    knownLimitation: 'Drik (Smarta default): Nishita-vyapini Ashtami.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Smarta Nishita-interval Ashtami with sunrise fallback.',
+    knownIssue:
+      'Current Smarta Nishita-interval rule returns 2016-08-24, while the pinned Drik fixture is 2016-08-25.',
     drik: {
       2015: '2015-09-05',
       2016: '2016-08-25',
@@ -388,7 +404,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'karva_chauth',
-    knownLimitation: 'Drik: Chandrodaya (moonrise)-vyapini Chaturthi of Krishna paksha.',
+    auditTier: 'tiebreaker',
+    ruleNote: 'Implemented: Chandrodaya-vyapini Krishna Chaturthi with sunrise fallback.',
     drik: {
       2015: '2015-10-30',
       2016: '2016-10-19',

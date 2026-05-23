@@ -5,10 +5,10 @@
 // Two-tier verdict:
 //   - For festivals without a known tiebreaker limitation, a mismatch
 //     is a hard FAIL.
-//   - For festivals with `knownLimitation` set, a mismatch is recorded
-//     and reported as a SOFT failure (the test does NOT fail, but the
-//     count is asserted to not silently grow). This lets us track
-//     accuracy progress without breaking CI on a documented gap.
+//   - For fixtures with `auditTier: "tiebreaker"`, mismatches are
+//     reported but the test uses a floor instead of exact equality so
+//     documented convention gaps remain visible without blocking
+//     unrelated work.
 
 import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
@@ -32,7 +32,7 @@ interface YearResult {
   expected: string;
   actual: string | null;
   matched: boolean;
-  isKnownLimitation: boolean;
+  auditTier: 'strict' | 'tiebreaker';
 }
 
 describe('Festival accuracy (2015-2028 Drik comparison)', () => {
@@ -67,13 +67,13 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
         expected,
         actual,
         matched: actual === expected,
-        isKnownLimitation: !!f.knownLimitation,
+        auditTier: f.auditTier ?? 'strict',
       });
     }
   }
 
   it('strict festivals (no known tiebreaker) match Drik exactly', () => {
-    const strict = results.filter((r) => !r.isKnownLimitation);
+    const strict = results.filter((r) => r.auditTier === 'strict');
     const failures = strict.filter((r) => !r.matched);
     const msg = failures
       .map((r) => `${r.key} ${r.year}: expected ${r.expected}, got ${r.actual ?? 'MISSING'}`)
@@ -85,21 +85,21 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
 
   it('tiebreaker-dependent festivals: documented Drik dates pin baseline accuracy', () => {
     // Festivals whose Drik date uses Pradosha / Madhyahna / Nishita /
-    // Aparahna / Chandrodaya rules we have not implemented yet. The
-    // baseline pass count is recorded; if it drops, something
-    // regressed even in the no-tiebreaker majority of cases.
-    const soft = results.filter((r) => r.isKnownLimitation);
+    // Aparahna / Chandrodaya / Bhadra rules. Most are implemented now,
+    // but this bucket remains soft because Janmashtami convention
+    // handling is still unresolved.
+    const soft = results.filter((r) => r.auditTier === 'tiebreaker');
     const passes = soft.filter((r) => r.matched).length;
-    const BASELINE_MIN_PASSES = 140; // Tightened after Pradosha/Nishita/Aparahna/Chandrodaya wiring (was 70 / 88.3% baseline 143).
+    const BASELINE_MIN_PASSES = 161; // Current baseline: 161 / 162; only Janmashtami 2016 diverges.
     expect(passes, `${passes} / ${soft.length} tiebreaker-dependent festivals match`).toBeGreaterThanOrEqual(
       BASELINE_MIN_PASSES,
     );
   });
 
   it('summary', () => {
-    const strict = results.filter((r) => !r.isKnownLimitation);
+    const strict = results.filter((r) => r.auditTier === 'strict');
     const strictPass = strict.filter((r) => r.matched).length;
-    const soft = results.filter((r) => r.isKnownLimitation);
+    const soft = results.filter((r) => r.auditTier === 'tiebreaker');
     const softPass = soft.filter((r) => r.matched).length;
     const total = results.length;
     const totalPass = strictPass + softPass;

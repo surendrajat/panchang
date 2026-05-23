@@ -245,13 +245,19 @@ so users can see the day's full tithi sequence.
 
 ### Accuracy audit
 
-- Main fixture window: 233 / 233 strict + tiebreaker checks across
-  2015-2028 for New Delhi → 232 / 233 pass (99.6%). The single
+- Main fixture window: 233 festival-date checks across 2015-2028 for
+  New Delhi → 232 / 233 pass (99.6%). The single
   divergence is Krishna Janmashtami 2016 (Drik Aug 25 vs my Aug 24);
   the documented Smarta rule produces Aug 24 but Drik publishes Aug 25
   for reasons not captured by the rule. Treated as a known anomaly.
 - Multi-city smoke (6 Indian cities × 16 festivals for 2025): 96/96.
 - Extended-year soft regression (2012, 2030): 25/28.
+- Daily limb fixture coverage is still sparse. Current JSON fixtures
+  mostly assert names, masa flags, and festival presence; sunrise,
+  sunset, moonrise, moonset, and limb end-time tolerances still need a
+  larger reference corpus before the app can claim full Drik parity.
+  The regression suite enforces the documented tolerances whenever a
+  fixture includes those time fields.
 
 ## Numerical accuracy
 
@@ -266,9 +272,9 @@ so users can see the day's full tithi sequence.
   precision is whatever the ephemeris supplies.
 
 The published acceptance criterion from `ARCHITECTURE.md` is ±2 minutes
-on tithi/nakshatra/yoga end times. The regression test suite enforces
-exact-match on names and indices and ±2-minute tolerance on times for
-every committed fixture.
+on tithi/nakshatra/yoga end times. That remains the target. The current
+fixture runner supports those assertions, but most committed Drik
+fixtures do not yet carry the time fields needed to exercise them.
 
 ## Open methodological choices
 
@@ -276,8 +282,9 @@ These are deliberately left as user-changeable settings (or open
 issues), not hard-coded:
 
 - Smarta vs. Vaishnava convention for Janmashtami / Ekadashi
-- Diwali tie-breaker when Amavasya spans two evenings (current code
-  uses sunrise-tithi; pradosha-tithi is the more authoritative rule)
+- Janmashtami edge years where published Drik dates appear to follow
+  a later observance than the current Smarta Nishita-interval rule
+  (notably 2016 in the main audit and 2030 in the soft extended audit)
 - Which Onam: the rule fires on Shravana nakshatra in Bhadrapada/
   Shravana, which gives the Malayalam Thiruvonam
 - Whether to bundle Hijri/Jewish/etc. dates as cross-references —

@@ -320,16 +320,12 @@ export function vyapiniWithNakshatraPreference(
 //   'prahar4' — Bhadra in the window is tolerated as long as it ends
 //               before the start of the 4th prahar of the night
 //               (~3/4 into the night between sunset and next sunrise).
-//   'brahmaMuhurta' — Bhadra (Vishti karana) must end before the
-//                     start of next-day Brahma Muhurta (= sunrise
-//                     − 96 minutes). Used by Holika Dahan: the
-//                     observance must complete in a Bhadra-free
-//                     window before Brahma Muhurta begins. When
-//                     Bhadra still covers Brahma Muhurta, no clean
-//                     window remains and observance shifts.
-//                     Verified against Drik for Phalguna Purnima
-//                     2012 / 2016 / 2022 / 2023 / 2024 / 2026 — all
-//                     six match this cutoff.
+//   'brahmaMuhurta' — Experimental cutoff: Bhadra must end before
+//                     next-day Brahma Muhurta (= sunrise − 96 min).
+//                     This was tested for Holika Dahan but is NOT
+//                     wired to any festival because it regresses 2016.
+//                     Keep it available for diagnostics unless a
+//                     documented Drik rule makes it authoritative.
 export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta';
 
 // Brahma Muhurta starts 96 minutes before sunrise (= sunrise − 96 min).

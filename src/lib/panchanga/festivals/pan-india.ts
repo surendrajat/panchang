@@ -82,12 +82,15 @@ function vyapiniKrishna(
 
 // Bhadra-Kaal aware Shukla-paksha festival rule (used by Holika Dahan
 // and Raksha Bandhan). When Vishti (Bhadra) is active at the window
-// center on day X, observance shifts to day X+1 even if the target
-// tithi isn't at X+1's window. See `bhadraAwareVyapiniMatches`.
+// center on day X, observance may shift to day X+1 depending on the
+// caller's cutoff.
 function vyapiniShuklaBhadra(
   tithi: number,
   masa: string,
   window: 'pradosha' | 'aparahna',
+  // Current festival wiring passes this explicitly. The default is
+  // preserved for experiments and should not be read as the Holika
+  // Dahan convention.
   cutoff: 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta' = 'brahmaMuhurta',
 ) {
   return (p: Panchanga): boolean => {
@@ -195,12 +198,11 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
   // Holika Dahan — Phalguna Shukla 15. Drik rule: Pradosha-vyapini
   // Purnima with later-day preference + Bhadra exclusion at the
   // start of Prahar 4 (≈3/4 of night). The full Drik convention
-  // additionally distinguishes Bhadra Mukha (blocks observance) from
-  // Punchcha (observable) based on an internal extension of the
-  // Vishti karana that public sources don't publish a closed-form
-  // for. Prahar 4 is the best closed-form approximation; one year in
-  // ~12 (2012) the simple prahar-4 cutoff diverges from Drik. See
-  // EDGE_CASES.md.
+  // appears to distinguish Bhadra Mukha (blocks observance) from
+  // Punchcha (observable) using internal Vishti-karana edge logic
+  // that public sources don't publish as a closed-form rule. Prahar
+  // 4 is the best current approximation: it passes all main fixtures
+  // and leaves 2012 as the known extended-year divergence.
   {
     key: 'holika_dahan',
     displayName: 'Holika Dahan',

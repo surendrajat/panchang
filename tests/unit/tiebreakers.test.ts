@@ -1,5 +1,5 @@
 // Unit tests for tiebreaker primitives. Each test pins the documented
-// behavior of a specific rule (Bhadra cutoff, sankranti Madhya Nishi,
+// behavior of a specific rule (Bhadra cutoff, sankranti sunset cutoff,
 // sunrise fallback) with explicit input/output assertions on real
 // astronomical instants.
 //
@@ -91,8 +91,9 @@ describe('Bhadra-aware Raksha Bandhan (prahar1 cutoff)', () => {
   });
 });
 
-describe('Sankranti Madhya Nishi rule', () => {
-  // Bisection-based transit JD compared against midpoint of night.
+describe('Sankranti sunset cutoff rule', () => {
+  // Bisection-based transit JD compared against sunset of the transit
+  // civil day.
   // 2017: transit Jan 14 06:58 — well before any night cutoff.
   it('2017: transit at sunrise → Jan 14', () => {
     const match = sankrantiInto(9);
@@ -100,8 +101,8 @@ describe('Sankranti Madhya Nishi rule', () => {
     expect(match(p)).toBe(true);
   });
 
-  // 2020: transit Jan 15 01:31 — after Madhya Nishi (00:30 IST).
-  it('2020: transit after Madhya Nishi → Jan 15', () => {
+  // 2020: transit Jan 15 01:31 — civil transit date is Jan 15.
+  it('2020: transit civil date is Jan 15', () => {
     const match = sankrantiInto(9);
     const p14 = computePanchanga(delhiMidnight('2020-01-14'), DELHI);
     const p15 = computePanchanga(delhiMidnight('2020-01-15'), DELHI);
@@ -143,7 +144,7 @@ describe('Vyapini pick semantics', () => {
 
 describe('BhadraCutoff matrix', () => {
   // Sanity: a Bhadra cutoff parameter accepts each documented value.
-  it.each<BhadraCutoff>(['window', 'sunset', 'prahar1', 'prahar4'])('accepts %s', (cutoff) => {
+  it.each<BhadraCutoff>(['window', 'sunset', 'prahar1', 'prahar4', 'brahmaMuhurta'])('accepts %s', (cutoff) => {
     expect(() =>
       bhadraAwareVyapiniMatchesForDate(DELHI, delhiMidnight('2024-03-24'), 'pradosha', 15, cutoff),
     ).not.toThrow();

@@ -28,7 +28,7 @@ const MS_PER_DAY = 86_400_000;
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
   const ymd = date.toISOString().slice(0, 10);
   const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${location.timezone}`;
-  const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}`;
+  const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}/${options.sunriseHorizon}`;
   return `v${CALCULATION_VERSION}|${ymd}|${loc}|${opts}`;
 }
 

@@ -10,6 +10,7 @@
 import type { Location } from '$lib/panchanga';
 
 export interface City extends Location {
+  name: string;
   country: string;
   // Lowercased name for search; recomputed eagerly.
   searchKey: string;
@@ -107,7 +108,6 @@ export const CITIES: readonly City[] = [
   city('Singapore', 'Singapore', 1.3521, 103.8198, 15, 'Asia/Singapore'),
   city('Hong Kong', 'Hong Kong', 22.3193, 114.1694, 30, 'Asia/Hong_Kong'),
   city('Tokyo', 'Japan', 35.6762, 139.6503, 40, 'Asia/Tokyo'),
-  city('Dubai', 'UAE', 25.2048, 55.2708, 2, 'Asia/Dubai'),
   city('Doha', 'Qatar', 25.2854, 51.531, 10, 'Asia/Qatar'),
   city('Frankfurt', 'Germany', 50.1109, 8.6821, 112, 'Europe/Berlin'),
   city('Paris', 'France', 48.8566, 2.3522, 35, 'Europe/Paris'),

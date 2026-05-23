@@ -7,7 +7,7 @@
 //
 // Pure function. No I/O, no caching. Memoization is the storage layer's job.
 
-import { civilMidnightInZone, sunRiseSet, moonRiseSet, dateToJulian } from '$lib/astro';
+import { civilMidnightInZone, civilTimeInZone, sunRiseSet, moonRiseSet, dateToJulian } from '$lib/astro';
 import { evaluateFestivals } from './festivals/rules';
 import { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
 import { tithiAtInstant } from './tithi';
@@ -156,8 +156,7 @@ export function computeMonth(
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const result: Panchanga[] = [];
   for (let d = 1; d <= daysInMonth; d++) {
-    // Build the civil midnight in the location's tz for this Gregorian date.
-    const guess = new Date(Date.UTC(year, month - 1, d, 12, 0, 0)); // noon UTC as a safe anchor
+    const guess = civilTimeInZone(year, month, d, location.timezone, 12);
     result.push(computePanchanga(guess, location, options));
   }
   return result;
@@ -224,14 +223,15 @@ export function findNextTithi(
   const startMs = civilMidnightInZone(fromDate, location.timezone).getTime();
   const MAX_DAYS = 400; // covers any tithi+masa pairing across an Adhik year
 
+  let cursor = startMs;
   for (let i = 0; i < MAX_DAYS; i++) {
-    const t = startMs + i * MS_PER_DAY;
-    const p = computePanchanga(new Date(t), location, opts);
-    if (p.tithi.index !== criteria.tithiIndex) continue;
-    if (criteria.masaIndex !== undefined && p.masa.index !== criteria.masaIndex) continue;
-    if (criteria.nakshatraIndex !== undefined && p.nakshatra.index !== criteria.nakshatraIndex)
-      continue;
-    return p.date;
+    const p = computePanchanga(new Date(cursor), location, opts);
+    const matches =
+      p.tithi.index === criteria.tithiIndex &&
+      (criteria.masaIndex === undefined || p.masa.index === criteria.masaIndex) &&
+      (criteria.nakshatraIndex === undefined || p.nakshatra.index === criteria.nakshatraIndex);
+    if (matches) return p.date;
+    cursor = civilMidnightInZone(new Date(cursor + 28 * 3600_000), location.timezone).getTime();
   }
   return null;
 }

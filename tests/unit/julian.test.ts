@@ -3,7 +3,9 @@ import {
   dateToJulian,
   julianToDate,
   civilMidnightInZone,
+  civilTimeInZone,
   civilYMDInZone,
+  isValidCivilDate,
   JD_J2000,
 } from '$lib/astro';
 
@@ -40,5 +42,33 @@ describe('civilMidnightInZone', () => {
     expect(ymd.month).toBe(5);
     expect(ymd.day).toBe(19);
     expect(ymd.hour).toBe(0);
+  });
+});
+
+describe('civilTimeInZone', () => {
+  it('builds the requested civil date in extreme positive offsets', () => {
+    const d = civilTimeInZone(2026, 1, 1, 'Pacific/Kiritimati', 12);
+    expect(civilYMDInZone(d, 'Pacific/Kiritimati')).toMatchObject({
+      year: 2026,
+      month: 1,
+      day: 1,
+      hour: 12,
+    });
+  });
+
+  it('builds the requested civil date in extreme negative offsets', () => {
+    const d = civilTimeInZone(2026, 1, 1, 'Etc/GMT+12', 12);
+    expect(civilYMDInZone(d, 'Etc/GMT+12')).toMatchObject({
+      year: 2026,
+      month: 1,
+      day: 1,
+      hour: 12,
+    });
+  });
+
+  it('rejects impossible Gregorian dates instead of normalizing them', () => {
+    expect(isValidCivilDate(2026, 2, 29)).toBe(false);
+    expect(isValidCivilDate(2028, 2, 29)).toBe(true);
+    expect(() => civilTimeInZone(2026, 2, 29, 'Asia/Kolkata')).toThrow(RangeError);
   });
 });

@@ -34,8 +34,23 @@ export function julianYearsSinceJ2000(jd: number): number {
 // even across DST boundaries because the formatter is exact at each step.
 export function civilMidnightInZone(date: Date, timezone: string): Date {
   const { year, month, day } = civilYMDInZone(date, timezone);
-  const targetAsFakeUtc = Date.UTC(year, month - 1, day, 0, 0, 0);
+  return civilTimeInZone(year, month, day, timezone);
+}
 
+export function civilTimeInZone(
+  year: number,
+  month: number,
+  day: number,
+  timezone: string,
+  hour = 0,
+  minute = 0,
+  second = 0,
+): Date {
+  if (!isValidCivilDate(year, month, day)) {
+    throw new RangeError(`Invalid civil date: ${year}-${month}-${day}`);
+  }
+
+  const targetAsFakeUtc = Date.UTC(year, month - 1, day, hour, minute, second);
   let guess = targetAsFakeUtc;
   for (let i = 0; i < 4; i++) {
     const here = civilYMDInZone(new Date(guess), timezone);
@@ -51,7 +66,25 @@ export function civilMidnightInZone(date: Date, timezone: string): Date {
     if (delta === 0) break;
     guess += delta;
   }
-  return new Date(guess);
+  const result = new Date(guess);
+  const actual = civilYMDInZone(result, timezone);
+  if (
+    actual.year !== year ||
+    actual.month !== month ||
+    actual.day !== day ||
+    actual.hour !== hour ||
+    actual.minute !== minute ||
+    actual.second !== second
+  ) {
+    throw new RangeError(`Civil time does not exist in ${timezone}: ${year}-${month}-${day} ${hour}:${minute}:${second}`);
+  }
+  return result;
+}
+
+export function isValidCivilDate(year: number, month: number, day: number): boolean {
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
+  const d = new Date(Date.UTC(year, month - 1, day));
+  return d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day;
 }
 
 export interface CivilYMD {

@@ -3,7 +3,8 @@
 // we layer on the regression fixture suite.
 
 import { describe, it, expect } from 'vitest';
-import { computePanchanga } from '$lib/panchanga';
+import { civilYMDInZone } from '$lib/astro';
+import { computeMonth, computePanchanga } from '$lib/panchanga';
 
 const BENGALURU = {
   name: 'Bengaluru, India',
@@ -51,5 +52,36 @@ describe('computePanchanga smoke', () => {
     const dt = p.tithi.endTime.getTime() - anchor.getTime();
     expect(dt).toBeGreaterThan(0);
     expect(dt).toBeLessThan(30 * 3600_000);
+  });
+
+  it('computeMonth preserves civil month boundaries in extreme time zones', () => {
+    const kiritimati = {
+      name: 'Kiritimati',
+      latitude: 1.8721,
+      longitude: -157.4278,
+      altitude: 0,
+      timezone: 'Pacific/Kiritimati',
+    };
+    const baker = {
+      name: 'Baker Island',
+      latitude: 0.1936,
+      longitude: -176.4769,
+      altitude: 0,
+      timezone: 'Etc/GMT+12',
+    };
+
+    for (const location of [kiritimati, baker]) {
+      const days = computeMonth(2026, 1, location);
+      expect(civilYMDInZone(days[0].date, location.timezone)).toMatchObject({
+        year: 2026,
+        month: 1,
+        day: 1,
+      });
+      expect(civilYMDInZone(days[days.length - 1].date, location.timezone)).toMatchObject({
+        year: 2026,
+        month: 1,
+        day: 31,
+      });
+    }
   });
 });

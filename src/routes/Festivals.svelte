@@ -1,5 +1,6 @@
 <script lang="ts">
   import { findFestivals, PAN_INDIA_FESTIVALS, type FestivalOccurrence } from '$lib/panchanga';
+  import { civilTimeInZone } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import { formatDate, localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
@@ -39,8 +40,8 @@
 
   const occurrences = $derived.by(() => {
     if (!parsedYear || !preferences.location || !preferences.hydrated) return [];
-    const from = new Date(Date.UTC(parsedYear, 0, 1));
-    const to = new Date(Date.UTC(parsedYear, 11, 31));
+    const from = civilTimeInZone(parsedYear, 1, 1, preferences.location.timezone, 12);
+    const to = civilTimeInZone(parsedYear, 12, 31, preferences.location.timezone, 12);
     const all = findFestivals(from, to, preferences.location, {
       ayanamsa: preferences.ayanamsa,
       monthSystem: preferences.monthSystem,

@@ -27,12 +27,7 @@ export interface FestivalRule {
 export function evaluateFestivals(rules: readonly FestivalRule[], p: Panchanga): string[] {
   const out: string[] = [];
   for (const rule of rules) {
-    try {
-      if (rule.matches(p)) out.push(rule.key);
-    } catch {
-      // A rule shouldn't throw, but defensive: skip silently if it does so
-      // a single bad rule doesn't break the whole day.
-    }
+    if (rule.matches(p)) out.push(rule.key);
   }
   return out;
 }

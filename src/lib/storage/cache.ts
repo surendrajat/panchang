@@ -20,7 +20,7 @@ import { db, type CachedPanchangaRow } from './db';
 import { civilYMDInZone } from '$lib/astro';
 import type { Location, Panchanga, PanchangaOptions } from '$lib/panchanga';
 
-export const CALCULATION_VERSION = 2;
+export const CALCULATION_VERSION = 3;
 
 const MAX_ENTRIES = 1000;
 const MAX_AGE_DAYS = 30;

@@ -28,13 +28,18 @@ const JULIAN_CENTURY_DAYS = 36525;
 // plus per-system precession coefficients in arcseconds per Julian
 // century (T) and arcseconds per T² for the second-order correction.
 //
-// The Lahiri J2000 anchor (23.8267°) is back-derived from Drik
-// Panchang's modern published values: 24°09'42.16" at Jan 1 2024 and
-// 24°10'34.04" at Jan 1 2025; subtracting the IAU rate × years-since-
-// J2000 gives a consistent base near 23.8267°. KP shifts Lahiri by
-// 6′ to align with Krishnamurti; Raman uses a different reference
-// star; Yukteshwar uses the "Sri Yukteshwar" reference (~22.46° at
-// 1900) with his own rate.
+// The Lahiri J2000 anchor (23.8635°) is back-derived from Drik
+// Panchang's computational ayanamsa values read from their 'Other
+// Calendars and Epoch' section:
+//   2024-10-31 → 24.210700°  (JD 2460614.5)  ⟹ J2000 base 23.8633°
+//   2025-01-01 → 24.213073°  (JD 2460676.5)  ⟹ J2000 base 23.8636°
+// Mean: 23.8635°. These are the values Drik uses internally (Swiss
+// Ephemeris SE_SIDM_LAHIRI). The previous value (23.8267°) had been
+// back-derived from a *different* Drik page section (ayanamsa display
+// text) which is 2.2 arcminutes lower than their computational value,
+// causing nakshatra/yoga end times to be ~4–7 min early vs Drik.
+// KP shifts Lahiri by 6′ (Krishnamurti); Raman and Yukteshwar use
+// independent reference values.
 interface AyanamsaCoeffs {
   baseDegreesAtJ2000: number;
   // Arcseconds per Julian century (T) — the leading-order precession.
@@ -47,7 +52,7 @@ interface AyanamsaCoeffs {
   precessionArcsecPerCenturyTSq: number;
 }
 
-const LAHIRI_J2000_DEG = 23.8267;
+const LAHIRI_J2000_DEG = 23.8635;
 const IAU_PRECESSION_T = 5028.796195; // arcsec/century
 const IAU_PRECESSION_T_SQ = 1.1054348; // arcsec/century²
 

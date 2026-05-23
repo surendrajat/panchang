@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { ayanamsa, dateToJulian } from '$lib/astro';
 
 describe('Lahiri ayanamsa', () => {
-  it('is ~23.827° at J2000 (Drik-Swiss Ephemeris alignment)', () => {
+  it('is ~23.864° at J2000 (Swiss Ephemeris SE_SIDM_LAHIRI)', () => {
     const jd = dateToJulian(new Date('2000-01-01T12:00:00Z'));
-    expect(ayanamsa(jd, 'lahiri')).toBeCloseTo(23.8267, 3);
+    expect(ayanamsa(jd, 'lahiri')).toBeCloseTo(23.8635, 3);
   });
 
   it('drifts at ~50.29 arcseconds/year', () => {
@@ -15,12 +15,12 @@ describe('Lahiri ayanamsa', () => {
     expect(drift * 3600).toBeCloseTo(expectedArcsec, 0);
   });
 
-  it('matches Drik published value within 1 arcminute (Jan 2025)', () => {
-    // Drik Panchang publishes Lahiri ayanamsa = 24°10'34.04" for
-    // 2025-01-01 = 24.17612°.
+  it('matches Drik computational value within 1 arcminute (Jan 2025)', () => {
+    // Drik Panchang "Other Calendars and Epoch" section shows
+    // Lahiri Ayanamsha = 24.213073 for 2025-01-01 (New Delhi).
     const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
     const ayan = ayanamsa(jd, 'lahiri');
-    expect(Math.abs(ayan - 24.17612) * 60).toBeLessThan(1);
+    expect(Math.abs(ayan - 24.213073) * 60).toBeLessThan(1);
   });
 
   it('KP is exactly 6 arcminutes less than Lahiri', () => {
@@ -38,12 +38,14 @@ describe('Lahiri ayanamsa', () => {
   // has changed and the cache CALCULATION_VERSION must be bumped.
   const goldenLahiri: Array<[string, number, number]> = [
     // [ISO date, expected Lahiri (decimal degrees), tolerance (arcmin)]
-    ['1900-01-01T00:00:00Z', 22.4301, 2], // polynomial extrapolation
-    ['1950-01-01T00:00:00Z', 23.1283, 2],
-    ['2000-01-01T00:00:00Z', 23.8267, 1], // Drik J2000 reference
-    ['2025-01-01T00:00:00Z', 24.1761, 1], // Drik 2025-01-01 reference
-    ['2050-01-01T00:00:00Z', 24.5252, 2],
-    ['2100-01-01T00:00:00Z', 25.2239, 2],
+    // Values computed from base 23.8635° + IAU 2006 precession polynomial.
+    // 2025 row independently verified against Drik's displayed 24.213073°.
+    ['1900-01-01T00:00:00Z', 22.4669, 2], // polynomial extrapolation
+    ['1950-01-01T00:00:00Z', 23.1651, 2],
+    ['2000-01-01T00:00:00Z', 23.8635, 1], // SE_SIDM_LAHIRI J2000 anchor
+    ['2025-01-01T00:00:00Z', 24.2129, 1], // verified vs Drik 24.213073°
+    ['2050-01-01T00:00:00Z', 24.5620, 2],
+    ['2100-01-01T00:00:00Z', 25.2607, 2],
   ];
   it.each(goldenLahiri)('matches expected value at %s', (iso, expected, tol) => {
     const jd = dateToJulian(new Date(iso));

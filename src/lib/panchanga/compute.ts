@@ -94,9 +94,14 @@ export function computePanchanga(
   const masaCtx = masaContext(anchorJD, opts.ayanamsa);
   const masa = computeMasa(masaCtx, tithi.paksha, opts.monthSystem);
 
-  // Samvat — uses the Gregorian year and month at the location.
+  // Samvat — switches on Chaitra Shukla Pratipada. Outside the
+  // March/April boundary window the Gregorian month is decisive; inside
+  // it, use the computed Amanta lunar month at sunrise.
   const ymd = civilYMDInZone(anchor, location.timezone);
-  const samvat = computeSamvat(ymd.year, ymd.month);
+  const afterChaitraNewYear =
+    ymd.month > 4 ||
+    (ymd.month >= 3 && (masa.amantaName === 'Chaitra' || masa.amantaName === 'Vaishakha'));
+  const samvat = computeSamvat(ymd.year, afterChaitraNewYear);
 
   // Muhurta requires concrete sunrise/sunset. If polar, skip and produce
   // degenerate intervals so downstream code doesn't have to special-case.

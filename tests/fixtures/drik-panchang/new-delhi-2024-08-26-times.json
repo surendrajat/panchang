@@ -1,0 +1,34 @@
+{
+  "label": "New Delhi — 2024-08-26 (Janmashtami with timed references)",
+  "source": {
+    "urls": [
+      "https://www.monthlycalendars.in/city/new_delhi/2024-08-26",
+      "https://zodii.in/panchang/2024/august/26",
+      "https://hindupad.com/panchang-26-august-2024/"
+    ],
+    "notes": "External panchang references agree on Ashtami ending about 02:20 on Aug 27, Balava ending about 14:55-14:56, sunrise 05:56, and sunset 18:49 for New Delhi. Yoga/nakshatra end times vary by source and are intentionally not pinned here."
+  },
+  "location": {
+    "name": "New Delhi, India",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "altitude": 216,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-08-26",
+  "expect": {
+    "sunrise": "05:56",
+    "sunset": "18:49",
+    "tithi": {
+      "name": "Ashtami",
+      "paksha": "krishna",
+      "number": 8,
+      "endTime": "2024-08-27T02:20:00+05:30"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "14:56"
+    },
+    "festivals": ["krishna_janmashtami"]
+  }
+}

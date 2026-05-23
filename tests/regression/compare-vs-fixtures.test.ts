@@ -8,6 +8,10 @@ import { computePanchanga, type Location } from '$lib/panchanga';
 
 interface Fixture {
   label: string;
+  source?: {
+    urls?: string[];
+    notes?: string;
+  };
   location: Location;
   civilDate: string; // YYYY-MM-DD
   expect: {
@@ -40,9 +44,28 @@ function loadFixtures(): Fixture[] {
 }
 
 describe('Drik-Panchang fixture regression', () => {
+  const fixtures = loadFixtures();
+
+  it('fixture corpus includes timed assertions', () => {
+    const timed = fixtures.filter(hasTimedAssertion);
+    expect(
+      timed.length,
+      'At least one committed fixture must assert sunrise/sunset or limb end times.',
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it('fixtures with timed assertions include source metadata', () => {
+    const missing = fixtures
+      .filter(hasTimedAssertion)
+      .filter((fx) => !fx.source?.urls?.length)
+      .map((fx) => fx.label);
+
+    expect(missing, `Timed fixtures missing source URLs: ${missing.join(', ')}`).toEqual([]);
+  });
+
   for (const fx of loadFixtures()) {
     it(fx.label, () => {
-      const date = new Date(`${fx.civilDate}T06:00:00${tzOffset(fx.location.timezone, fx.civilDate)}`);
+      const date = instantInZone(fx.civilDate, '06:00:00', fx.location.timezone);
       const p = computePanchanga(date, fx.location);
       const e = fx.expect;
 
@@ -96,6 +119,20 @@ describe('Drik-Panchang fixture regression', () => {
   }
 });
 
+function hasTimedAssertion(fx: Fixture): boolean {
+  const e = fx.expect;
+  return Boolean(
+    e.sunrise !== undefined ||
+      e.sunset !== undefined ||
+      e.moonrise !== undefined ||
+      e.moonset !== undefined ||
+      e.tithi?.endTime ||
+      e.nakshatra?.endTime ||
+      e.yoga?.endTime ||
+      e.karana?.endTime,
+  );
+}
+
 function expectOptionalInstant(
   actual: Date | null,
   expected: string | null | undefined,
@@ -132,27 +169,64 @@ function parseExpectedInstant(value: string, fx: Fixture): Date {
   }
   if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
     const withSeconds = value.length === 5 ? `${value}:00` : value;
-    return new Date(`${fx.civilDate}T${withSeconds}${tzOffset(fx.location.timezone, fx.civilDate)}`);
+    return instantInZone(fx.civilDate, withSeconds, fx.location.timezone);
   }
   throw new Error(
     `${fx.label}: invalid expected instant "${value}". Use ISO datetime or HH:mm[:ss].`,
   );
 }
 
-// Approximate offset string for a tz on a given civil date. We only need
-// it to construct an anchor Date inside the civil day; computePanchanga
-// re-anchors precisely. "+05:30" for India works for any city in IST.
-function tzOffset(tz: string, _ymd: string): string {
-  switch (tz) {
-    case 'Asia/Kolkata':
-      return '+05:30';
-    case 'Asia/Kathmandu':
-      return '+05:45';
-    case 'America/New_York':
-      return '-05:00';
-    case 'Europe/London':
-      return '+00:00';
-    default:
-      return 'Z';
+function instantInZone(civilDate: string, time: string, timeZone: string): Date {
+  const [year, month, day] = civilDate.split('-').map(Number);
+  const [hour, minute, second = 0] = time.split(':').map(Number);
+  const desiredUtc = Date.UTC(year, month - 1, day, hour, minute, second);
+  let guess = new Date(desiredUtc);
+
+  for (let i = 0; i < 3; i++) {
+    const actual = zonedParts(guess, timeZone);
+    const actualUtc = Date.UTC(
+      actual.year,
+      actual.month - 1,
+      actual.day,
+      actual.hour,
+      actual.minute,
+      actual.second,
+    );
+    const delta = desiredUtc - actualUtc;
+    if (delta === 0) return guess;
+    guess = new Date(guess.getTime() + delta);
   }
+
+  return guess;
+}
+
+function zonedParts(date: Date, timeZone: string): {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+} {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    hourCycle: 'h23',
+  }).formatToParts(date);
+
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return {
+    year: get('year'),
+    month: get('month'),
+    day: get('day'),
+    hour: get('hour'),
+    minute: get('minute'),
+    second: get('second'),
+  };
 }

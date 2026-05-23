@@ -16,7 +16,8 @@ describe('festival fixture metadata', () => {
     for (const fixture of FESTIVAL_FIXTURES) {
       for (const [year, date] of Object.entries(fixture.expected)) {
         const parsed = new Date(`${date}T00:00:00Z`);
-        if (!DATE_RE.test(date) || Number.isNaN(parsed.getTime())) {
+        const normalized = parsed.toISOString().slice(0, 10);
+        if (!DATE_RE.test(date) || Number.isNaN(parsed.getTime()) || normalized !== date) {
           invalid.push(`${fixture.key} ${year}: invalid date ${date}`);
           continue;
         }

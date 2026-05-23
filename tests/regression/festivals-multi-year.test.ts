@@ -2,13 +2,9 @@
 // 2015-2028 and compares the computed festival dates to authoritative
 // fixture values from `tests/fixtures/festivals-multi-year.ts`.
 //
-// Two-tier verdict:
-//   - For strict festival fixtures, a mismatch
-//     is a hard FAIL.
-//   - For fixtures with `auditTier: "tiebreaker"`, mismatches are
-//     reported but the test uses a floor instead of exact equality so
-//     documented convention gaps remain visible without blocking
-//     unrelated work.
+// Two-tier labels remain useful in the summary, but both tiers are now hard
+// failures for this default-convention corpus. Known unresolved edge cases
+// belong in separate extended-year fixtures, not as tolerated drift here.
 
 import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
@@ -83,17 +79,17 @@ describe('Festival accuracy (2015-2028 default-convention comparison)', () => {
     );
   });
 
-  it('tiebreaker-dependent festivals: documented expected dates pin baseline accuracy', () => {
+  it('tiebreaker-dependent festivals match expected dates exactly', () => {
     // Festivals whose date uses Pradosha / Madhyahna / Nishita /
-    // Aparahna / Chandrodaya / Bhadra rules. Most are implemented now,
-    // but this bucket remains soft while convention variants are still
-    // being expanded.
+    // Aparahna / Chandrodaya / Bhadra rules. They are more fragile than
+    // sunrise-tithi fixtures, so keep the label in summary output, but
+    // fail the test on any mismatch.
     const soft = results.filter((r) => r.auditTier === 'tiebreaker');
-    const passes = soft.filter((r) => r.matched).length;
-    const BASELINE_MIN_PASSES = 162; // Current Smarta-default baseline: 162 / 162.
-    expect(passes, `${passes} / ${soft.length} tiebreaker-dependent festivals match`).toBeGreaterThanOrEqual(
-      BASELINE_MIN_PASSES,
-    );
+    const failures = soft.filter((r) => !r.matched);
+    const msg = failures
+      .map((r) => `${r.key} ${r.year}: expected ${r.expected}, got ${r.actual ?? 'MISSING'}`)
+      .join('\n');
+    expect(failures.length, `\n${msg}\n(${failures.length} of ${soft.length} tiebreaker checks)`).toBe(0);
   });
 
   it('pins the default Janmashtami convention to Smarta dates', () => {

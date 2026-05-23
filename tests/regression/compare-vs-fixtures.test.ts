@@ -54,16 +54,24 @@ describe('Drik-Panchang fixture regression', () => {
     ).toBeGreaterThanOrEqual(1);
   });
 
-  it('fixtures with timed assertions include source metadata', () => {
-    const missing = fixtures
-      .filter(hasTimedAssertion)
-      .filter((fx) => !fx.source?.urls?.length)
-      .map((fx) => fx.label);
+  it('fixtures use valid civil dates', () => {
+    const invalid = fixtures
+      .filter((fx) => !isExactISODate(fx.civilDate))
+      .map((fx) => `${fx.label}: ${fx.civilDate}`);
 
-    expect(missing, `Timed fixtures missing source URLs: ${missing.join(', ')}`).toEqual([]);
+    expect(invalid, `Invalid fixture civil dates: ${invalid.join(', ')}`).toEqual([]);
   });
 
-  for (const fx of loadFixtures()) {
+  it('fixtures with timed assertions include usable source metadata', () => {
+    const missing = fixtures
+      .filter(hasTimedAssertion)
+      .filter((fx) => !hasUsableSourceMetadata(fx))
+      .map((fx) => fx.label);
+
+    expect(missing, `Timed fixtures missing usable source metadata: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  for (const fx of fixtures) {
     it(fx.label, () => {
       const date = instantInZone(fx.civilDate, '06:00:00', fx.location.timezone);
       const p = computePanchanga(date, fx.location);
@@ -131,6 +139,27 @@ function hasTimedAssertion(fx: Fixture): boolean {
       e.yoga?.endTime ||
       e.karana?.endTime,
   );
+}
+
+function hasUsableSourceMetadata(fx: Fixture): boolean {
+  return Boolean(
+    fx.source?.notes?.trim() &&
+      fx.source.urls?.length &&
+      fx.source.urls.every((url) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+        } catch {
+          return false;
+        }
+      }),
+  );
+}
+
+function isExactISODate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
 function expectOptionalInstant(

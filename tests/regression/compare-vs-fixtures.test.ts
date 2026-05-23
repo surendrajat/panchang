@@ -53,8 +53,8 @@ describe('Drik-Panchang fixture regression', () => {
     const timed = fixtures.filter(hasTimedAssertion);
     expect(
       timed.length,
-      'At least one committed fixture must assert sunrise/sunset or limb end times.',
-    ).toBeGreaterThanOrEqual(1);
+      'At least two committed fixtures must assert sunrise/sunset or limb end times.',
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it('fixture labels and files are unique', () => {
@@ -129,6 +129,16 @@ describe('Drik-Panchang fixture regression', () => {
     expect(hasLimbEnd, 'Timed fixtures should include at least one tithi/nakshatra/yoga/karana end assertion.').toBe(
       true,
     );
+  });
+
+  it('timed fixture corpus covers multiple locations', () => {
+    const locations = new Set(
+      fixtures
+        .filter(hasTimedAssertion)
+        .map((fx) => `${fx.location.latitude.toFixed(4)},${fx.location.longitude.toFixed(4)},${fx.location.timezone}`),
+    );
+
+    expect(locations.size, 'Timed fixtures should cover at least two distinct locations.').toBeGreaterThanOrEqual(2);
   });
 
   it('fixtures with timed assertions include usable source metadata', () => {

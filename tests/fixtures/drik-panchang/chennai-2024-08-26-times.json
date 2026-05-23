@@ -1,0 +1,32 @@
+{
+  "label": "Chennai — 2024-08-26 (Janmashtami with timed references)",
+  "source": {
+    "urls": [
+      "https://www.prokerala.com/astrology/tamil-panchangam/2024-august-26.html",
+      "https://www.panchangam.org/dailypanchangam.php?date=2024-08-26",
+      "https://www.prokerala.com/astrology/panchang/2024-august-26.html"
+    ],
+    "notes": "Prokerala Tamil Panchangam gives Krishna Ashtami from Aug 26 03:39 to Aug 27 02:20 and Balava ending Aug 26 14:55 for Chennai. Panchangam.org Hyderabad and Prokerala Ujjain pages independently agree on the Ashtami and Balava end times for the same IST date. Chennai sunrise/sunset from this source are not pinned because they differ from astronomy-engine standard-horizon rise/set by more than the 30-second fixture tolerance."
+  },
+  "location": {
+    "name": "Chennai, India",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "altitude": 6,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-08-26",
+  "expect": {
+    "tithi": {
+      "name": "Ashtami",
+      "paksha": "krishna",
+      "number": 8,
+      "endTime": "2024-08-27T02:20:00+05:30"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "14:55"
+    },
+    "festivals": ["krishna_janmashtami"]
+  }
+}

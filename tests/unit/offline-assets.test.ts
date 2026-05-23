@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -6,6 +6,20 @@ const ROOT = process.cwd();
 
 function read(path: string): string {
   return readFileSync(join(ROOT, path), 'utf8');
+}
+
+function sourceFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(join(ROOT, dir))) {
+    const path = join(dir, entry);
+    const stat = statSync(join(ROOT, path));
+    if (stat.isDirectory()) {
+      out.push(...sourceFiles(path));
+    } else if (/\.(ts|svelte|css)$/.test(path)) {
+      out.push(path);
+    }
+  }
+  return out;
 }
 
 describe('offline asset contract', () => {
@@ -43,5 +57,31 @@ describe('offline asset contract', () => {
     expect(existsSync(join(ROOT, 'public/fonts/OFL.txt')), 'font license should be bundled').toBe(
       true,
     );
+  });
+
+  it('does not use runtime network request APIs', () => {
+    const forbidden = [
+      /\bfetch\s*\(/,
+      /\bXMLHttpRequest\b/,
+      /\bnavigator\.sendBeacon\b/,
+      /\bWebSocket\b/,
+      /\bEventSource\b/,
+      /\bimportScripts\s*\(/,
+      /\bgtag\b/,
+      /\bgoogle-analytics\b/i,
+      /\bgoogletagmanager\b/i,
+      /\bposthog\b/i,
+      /\bsentry\b/i,
+    ];
+    const violations: string[] = [];
+
+    for (const path of sourceFiles('src')) {
+      const contents = read(path);
+      for (const pattern of forbidden) {
+        if (pattern.test(contents)) violations.push(`${path}: ${pattern}`);
+      }
+    }
+
+    expect(violations).toEqual([]);
   });
 });

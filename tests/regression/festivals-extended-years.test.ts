@@ -160,6 +160,7 @@ describe('Festival accuracy — multi-city smoke (2025)', () => {
       // eslint-disable-next-line no-console
       console.log(`${city.name.padEnd(12)}: ${hits}/${total} match`);
       for (const m of ms) console.log(m);
+      expect(hits, `${city.name}: ${ms.join('\n')}`).toBe(total);
     }
   });
 });

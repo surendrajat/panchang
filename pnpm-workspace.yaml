@@ -1,0 +1,8 @@
+nodeVersion: 24.16.0
+engineStrict: true
+
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - tinyexec@1.2.2

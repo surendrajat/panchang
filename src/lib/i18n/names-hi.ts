@@ -4,8 +4,8 @@
 // Source of truth for the indices is `src/lib/panchanga/names.ts`
 // (English/Sanskrit transliteration). Every array here MUST be the
 // same length and use the same ordering so a single index works for
-// both languages. A unit test in tests/unit/names.test.ts pins this
-// invariant.
+// both languages. A unit test in tests/unit/names-i18n.test.ts pins
+// this invariant.
 
 export const TITHI_NAMES_HI: readonly string[] = [
   'प्रतिपदा',

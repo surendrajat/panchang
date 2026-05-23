@@ -234,8 +234,8 @@ function fixtureName(fx: Fixture): string {
   return fx.fileName ?? fx.label;
 }
 
-function expectedTimeFields(fx: Fixture): Array<[string, string | null | undefined]> {
-  return [
+function expectedTimeFields(fx: Fixture): Array<[string, string | null]> {
+  const fields: Array<[string, string | null | undefined]> = [
     ['sunrise', fx.expect.sunrise],
     ['sunset', fx.expect.sunset],
     ['moonrise', fx.expect.moonrise],
@@ -244,7 +244,8 @@ function expectedTimeFields(fx: Fixture): Array<[string, string | null | undefin
     ['nakshatra.endTime', fx.expect.nakshatra?.endTime],
     ['yoga.endTime', fx.expect.yoga?.endTime],
     ['karana.endTime', fx.expect.karana?.endTime],
-  ].filter(([, value]) => value !== undefined);
+  ];
+  return fields.filter((field): field is [string, string | null] => field[1] !== undefined);
 }
 
 function hasUsableSourceMetadata(fx: Fixture): boolean {

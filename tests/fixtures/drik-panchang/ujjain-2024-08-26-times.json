@@ -2,7 +2,7 @@
   "label": "Ujjain — 2024-08-26 (Janmashtami with timed limb references)",
   "source": {
     "urls": ["https://www.prokerala.com/astrology/panchang/2024-august-26.html"],
-    "notes": "Prokerala Ujjain Panchang gives Ashtami ending Aug 27 02:20, Krittika, Vyaghata, and Balava ending 14:55. Ashtami and Balava end times agree with the New Delhi and Chennai 2024-08-26 timed references. Ujjain sun/moon events, Krittika end time, and Vyaghata end time from this source are not pinned because they missed the strict fixture tolerances."
+    "notes": "Prokerala Ujjain Panchang gives Ashtami ending Aug 27 02:20, Balava ending 14:55. Drik Panchang New Delhi (geoname 1261481) confirms Krittika ending 15:55 (global, model +1 min) and Vyaghata ending 22:17 (global, model exact). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), both nakshatra/yoga end times are within 2-min tolerance."
   },
   "location": {
     "name": "Ujjain, India",
@@ -19,12 +19,8 @@
       "number": 8,
       "endTime": "2024-08-27T02:20:00+05:30"
     },
-    "nakshatra": {
-      "name": "Krittika"
-    },
-    "yoga": {
-      "name": "Vyaghata"
-    },
+    "nakshatra": { "name": "Krittika", "endTime": "15:55" },
+    "yoga": { "name": "Vyaghata", "endTime": "22:17" },
     "karana": {
       "name": "Balava",
       "endTime": "14:55"

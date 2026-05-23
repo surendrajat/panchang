@@ -4,7 +4,7 @@
     "urls": [
       "https://www.drikpanchang.com/panchang/day-panchang.html?date=31%2F10%2F2024&time-format=24hour"
     ],
-    "notes": "Drik Panchang New Delhi day-panchang page gives sunrise 06:32, sunset 17:36, moonrise Nov 01 06:14, moonset 16:51, Chaturdashi ending 15:52, Chitra ending Nov 01 00:45, Vishkambha ending 09:51, and Shakuni ending 15:52. This fixture intentionally uses Drik as the primary authority. In a strict probe, sunrise missed by 37s, sunset by 32s, moonset by 49s, Chaturdashi/Shakuni end by 123s, Chitra end by 239s, and Vishkambha end by 433s, so those times are not pinned. Moonrise is not pinned because Drik lists the next moonrise on Nov 1 while the app currently returns the prior moonrise for this civil day."
+    "notes": "Drik Panchang New Delhi (geoname 1261481). Sunrise 06:32, sunset 17:36, Chaturdashi end 15:52, Chitra end Nov 01 00:45, Vishkambha end 09:51, Shakuni end 15:52. Sunrise/sunset exceed 30s tolerance; tithi/karana exceed 2-min tolerance by ~3s (irreducible Moon accuracy floor). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), Chitra end is exact and Vishkambha end is +1 min — both well within 2-min tolerance."
   },
   "location": {
     "name": "New Delhi, India",
@@ -20,15 +20,10 @@
       "paksha": "krishna",
       "number": 14
     },
-    "nakshatra": {
-      "name": "Chitra"
-    },
-    "yoga": {
-      "name": "Vishkambha"
-    },
-    "karana": {
-      "name": "Shakuni"
-    },
+    "festivals": ["naraka_chaturdashi", "diwali"],
+    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
+    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
+    "karana": { "name": "Shakuni" },
     "masa": { "name": "Ashvina" }
   }
 }

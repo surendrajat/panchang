@@ -1,5 +1,11 @@
 {
   "label": "Varanasi — 2024-10-31 (Diwali / Pradosha-vyapini Amavasya)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=31%2F10%2F2024&geoname-id=1244926&time-format=24hour"
+    ],
+    "notes": "Drik Panchang reference for Oct 31 2024. Global ephemeris values — Chitra end Nov 01 00:45, Vishkambha end 09:51 — are location-independent and verified against New Delhi and Mumbai Drik pages for the same date. Varanasi sunrise/sunset and tithi/karana endTimes are not pinned (sunrise unverified, tithi Moon accuracy floor)."
+  },
   "location": {
     "name": "Varanasi, India",
     "latitude": 25.3176,
@@ -9,7 +15,11 @@
   },
   "civilDate": "2024-10-31",
   "expect": {
-    "tithi": { "paksha": "krishna" },
-    "festivals": ["diwali"]
+    "tithi": { "name": "Chaturdashi", "paksha": "krishna", "number": 14 },
+    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
+    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
+    "karana": { "name": "Shakuni" },
+    "masa": { "name": "Ashvina" },
+    "festivals": ["naraka_chaturdashi", "diwali"]
   }
 }

@@ -6,7 +6,7 @@
       "https://www.panchangam.org/dailypanchangam.php?date=2024-08-26",
       "https://www.prokerala.com/astrology/panchang/2024-august-26.html"
     ],
-    "notes": "Prokerala Tamil Panchangam gives Krishna Ashtami from Aug 26 03:39 to Aug 27 02:20 and Balava ending Aug 26 14:55 for Chennai. Panchangam.org Hyderabad and Prokerala Ujjain pages independently agree on the Ashtami and Balava end times for the same IST date. Chennai sunrise/sunset from this source are not pinned because they differ from astronomy-engine standard-horizon rise/set by more than the 30-second fixture tolerance."
+    "notes": "Prokerala Tamil Panchangam gives Ashtami ending Aug 27 02:20, Balava ending 14:55. Drik Panchang New Delhi (geoname 1261481) confirms Krittika ending 15:55 (global, model +1 min) and Vyaghata ending 22:17 (global, model exact). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), nakshatra/yoga end times are within 2-min tolerance."
   },
   "location": {
     "name": "Chennai, India",
@@ -23,6 +23,8 @@
       "number": 8,
       "endTime": "2024-08-27T02:20:00+05:30"
     },
+    "nakshatra": { "name": "Krittika", "endTime": "15:55" },
+    "yoga": { "name": "Vyaghata", "endTime": "22:17" },
     "karana": {
       "name": "Balava",
       "endTime": "14:55"

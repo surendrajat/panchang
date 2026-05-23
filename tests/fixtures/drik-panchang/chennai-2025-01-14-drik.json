@@ -1,0 +1,27 @@
+{
+  "label": "Chennai — 2025-01-14 (Thai Pongal / Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=1264527&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Chennai (geoname 1264527). Sunrise 06:35, sunset 18:01. Pratipada end 03:21 Jan 15, Punarvasu end 10:17, Vishkambha end 02:58 Jan 15, Balava end 15:34. Ayanamsha 24.213569. Model sunrise -1 min (06:34 vs 06:35), sunset exact. Punarvasu end exact, Vishkambha end exact — both within 2-min tolerance. Tithi/karana endTimes not pinned (irreducible Moon accuracy floor)."
+  },
+  "location": {
+    "name": "Chennai, India",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "altitude": 6,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "06:35",
+    "sunset": "18:01",
+    "tithi": { "name": "Pratipada", "paksha": "krishna", "number": 1 },
+    "nakshatra": { "name": "Punarvasu", "endTime": "10:17" },
+    "yoga": { "name": "Vishkambha", "endTime": "2025-01-15T02:58:00+05:30" },
+    "karana": { "name": "Balava" },
+    "masa": { "name": "Pausha" },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "label": "New Delhi — 2025-01-15 (day after Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=15%2F01%2F2025&geoname-id=1261481&time-format=24hour"
+    ],
+    "notes": "Drik Panchang New Delhi (geoname 1261481). Sunrise 07:15, sunset 17:46. Dwitiya end 03:23 Jan 16, Pushya end 10:28, Priti end 01:47 Jan 16, Taitila end 15:17. Ayanamsha 24.213608. Model sunrise/sunset exact. Pushya end exact, Priti end exact — both within 2-min tolerance. Tithi/karana endTimes not pinned (irreducible Moon accuracy floor)."
+  },
+  "location": {
+    "name": "New Delhi, India",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "altitude": 216,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-01-15",
+  "expect": {
+    "sunrise": "07:15",
+    "sunset": "17:46",
+    "tithi": { "name": "Dwitiya", "paksha": "krishna", "number": 2 },
+    "nakshatra": { "name": "Pushya", "endTime": "10:28" },
+    "yoga": { "name": "Priti", "endTime": "2025-01-16T01:47:00+05:30" },
+    "karana": { "name": "Taitila" },
+    "masa": { "name": "Pausha" }
+  }
+}

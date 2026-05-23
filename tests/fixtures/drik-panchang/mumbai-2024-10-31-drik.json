@@ -1,0 +1,26 @@
+{
+  "label": "Mumbai — 2024-10-31 (Naraka Chaturdashi / Diwali)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=31%2F10%2F2024&geoname-id=1275339&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Mumbai (geoname 1275339). Sunrise 06:38, sunset 18:05, Chaturdashi end 15:52, Chitra end Nov 01 00:45, Vishkambha end 09:51, Shakuni end 15:52. Ayanamsha 24.210700. Model sunset exact (18:05). Model sunrise 32s after Drik (just over 30s tolerance) so not pinned. Chitra end exact, Vishkambha end +1 min — both well within 2-min tolerance. Tithi/karana exceed 2-min tolerance by ~3s (irreducible Moon accuracy floor), so endTimes not pinned."
+  },
+  "location": {
+    "name": "Mumbai, India",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "altitude": 14,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-10-31",
+  "expect": {
+    "sunset": "18:05",
+    "tithi": { "name": "Chaturdashi", "paksha": "krishna", "number": 14 },
+    "nakshatra": { "name": "Chitra", "endTime": "2024-11-01T00:45:00+05:30" },
+    "yoga": { "name": "Vishkambha", "endTime": "09:51" },
+    "karana": { "name": "Shakuni" },
+    "masa": { "name": "Ashvina" },
+    "festivals": ["naraka_chaturdashi", "diwali"]
+  }
+}

@@ -57,8 +57,9 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          ephemeris: ['astronomy-engine'],
+        manualChunks(id) {
+          if (id.includes('astronomy-engine')) return 'ephemeris';
+          return undefined;
         },
       },
     },

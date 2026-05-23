@@ -11,7 +11,7 @@
 // 2020s have astronomical extrapolation risk; tightening to a hard
 // floor would over-pin the rules.
 
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
 
 const DELHI = {
@@ -68,6 +68,11 @@ const EXTENDED: YearFixture[] = [
   },
 ];
 
+const BASELINE_MIN_PASSES: Record<number, number> = {
+  2012: 12,
+  2030: 13,
+};
+
 function fmt(d: Date): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: DELHI.timezone,
@@ -99,6 +104,9 @@ describe('Festival accuracy — extended years (Delhi)', () => {
       // eslint-disable-next-line no-console
       console.log(`\n${year}: ${hits}/${total} match (${((hits / total) * 100).toFixed(1)}%)`);
       for (const m of mismatches) console.log(m);
+      expect(hits, `${year}: extended-year festival matches`).toBeGreaterThanOrEqual(
+        BASELINE_MIN_PASSES[year],
+      );
     }
   });
 });

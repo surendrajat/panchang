@@ -197,12 +197,20 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
 
   // Holika Dahan — Phalguna Shukla 15. Drik rule: Pradosha-vyapini
   // Purnima with later-day preference + Bhadra exclusion at the
-  // start of Prahar 4 (≈3/4 of night). The full Drik convention
-  // appears to distinguish Bhadra Mukha (blocks observance) from
-  // Punchcha (observable) using internal Vishti-karana edge logic
-  // that public sources don't publish as a closed-form rule. Prahar
-  // 4 is the best current approximation: it passes all main fixtures
-  // and leaves 2012 as the known extended-year divergence.
+  // start of Prahar 4 (≈3/4 of night).
+  //
+  // Known divergences (years where prahar4 gives ±1 day vs Drik):
+  //   2012: app=Mar 8, Drik=Mar 7 — Bhadra ends 04:35 (past prahar4
+  //         03:35), gap to sunrise 123.8 min; Drik doesn't shift.
+  //   2013: app=Mar 27, Drik=Mar 26 — Bhadra ends 03:45 (past prahar4
+  //         03:22), gap to sunrise 151.9 min; Drik doesn't shift.
+  //   Both cases: Bhadra extends past Prahar 4 but ends ~25-28 min
+  //   before Brahma Muhurta, and Drik fires on the same day. In 2016
+  //   (Bhadra ends ~25 min before BM, Drik shifts) the pattern is
+  //   almost identical. The discriminating margin is ≤3 min — below
+  //   ephemeris precision. No robust closed-form rule distinguishes
+  //   these cases. Prahar 4 is the best approximation: it is correct
+  //   for all years in the main 2015-2028 audit window.
   {
     key: 'holika_dahan',
     displayName: 'Holika Dahan',
@@ -393,12 +401,14 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
 
   // Diwali / Lakshmi Puja — Ashvina Krishna Amavasya (Pradosha-vyapini
   // Amavasya). Picks the day where Amavasya is present at the evening
-  // pradosha window.
+  // pradosha window. Uses sunrise fallback for rare years (e.g. 2013)
+  // when the new moon occurs between sunrise and pradosha, so the strict
+  // pradosha probe finds Pratipada instead of Amavasya.
   {
     key: 'diwali',
     displayName: 'Diwali (Lakshmi Puja)',
     displayNameHi: 'दीवाली (लक्ष्मी पूजा)',
-    matches: vyapiniKrishna(15, 'Ashvina', 'pradosha'),
+    matches: vyapiniKrishna(15, 'Ashvina', 'pradosha', 'earlier', 'sunrise'),
   },
 
   // Govardhan Puja — Kartika Shukla 1

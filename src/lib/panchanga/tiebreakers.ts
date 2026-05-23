@@ -319,16 +319,27 @@ export function vyapiniWithNakshatraPreference(
 //   'prahar4' — Bhadra in the window is tolerated as long as it ends
 //               before the start of the 4th prahar of the night
 //               (~3/4 into the night between sunset and next sunrise).
-//   'brahmaMuhurta' — Experimental cutoff: Bhadra must end before
-//                     next-day Brahma Muhurta (= sunrise − 96 min).
-//                     This was tested for Holika Dahan but is NOT
-//                     wired to any festival because it regresses 2016.
-//                     Keep it available for diagnostics unless a
-//                     documented Drik rule makes it authoritative.
-export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta';
+//   'brahmaMuhurta' — Bhadra must end before next-day Brahma Muhurta
+//                     (= sunrise − 96 min). Not wired to any festival.
+//                     For Holika Dahan: correctly handles 2012/2013
+//                     (no shift) but regresses 2016 (incorrectly no-
+//                     shift when Drik shifts). Gap between 2016 Bhadra
+//                     end and BM start is only ~25 min; 2012 is ~28 min
+//                     — indistinguishable within ephemeris precision.
+//   'sunriseMinus120' — Bhadra must end at least 120 min before next
+//                       sunrise (nominal cutoff sunrise−115 min, with
+//                       5-min guard → effective check at sunrise−120 min).
+//                       Same failure mode as brahmaMuhurta: correctly
+//                       handles 2012/2013 but regresses 2016 (2016 gap
+//                       is ~121 min, only ~3 min above threshold — within
+//                       ephemeris uncertainty). Not wired to any festival.
+export type BhadraCutoff = 'window' | 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta' | 'sunriseMinus120';
 
 // Brahma Muhurta starts 96 minutes before sunrise (= sunrise − 96 min).
 const BRAHMA_MUHURTA_BEFORE_SUNRISE_MS = 96 * 60_000;
+// sunriseMinus120 nominal offset: with the 5-min guard band, the
+// effective check lands at sunrise − 120 min (2 hours before sunrise).
+const SUNRISE_MINUS_120_NOMINAL_MS = 115 * 60_000;
 
 // Returns the cutoff instant used to decide whether Bhadra extends
 // "too far" on day `date`. Returns null when sunrise/sunset are
@@ -351,6 +362,9 @@ function bhadraCutoffInstant(
   void win;
   if (cutoff === 'brahmaMuhurta') {
     return new Date(nextSunrise.getTime() - BRAHMA_MUHURTA_BEFORE_SUNRISE_MS);
+  }
+  if (cutoff === 'sunriseMinus120') {
+    return new Date(nextSunrise.getTime() - SUNRISE_MINUS_120_NOMINAL_MS);
   }
   // 'prahar1' / 'prahar4' divide the night into 4 prahars.
   const nightMs = nextSunrise.getTime() - events.set.getTime();

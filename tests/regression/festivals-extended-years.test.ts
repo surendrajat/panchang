@@ -49,6 +49,29 @@ const EXTENDED: YearFixture[] = [
     },
   },
   {
+    // 2013: all dates Drik-verified (Delhi). holika_dahan (Mar 26) and
+    // holi (Mar 27) are KNOWN DIVERGENCES — prahar4 cutoff incorrectly
+    // shifts both by 1 day. BASELINE_MIN_PASSES[2013] = 12 accommodates
+    // the 2 failures. All other dates confirmed via Drik 2013 calendar.
+    year: 2013,
+    expected: {
+      makara_sankranti: '2013-01-14',
+      maha_shivaratri: '2013-03-10',
+      holika_dahan: '2013-03-26',
+      holi: '2013-03-27',
+      rama_navami: '2013-04-20',
+      buddha_purnima: '2013-05-25',
+      guru_purnima: '2013-07-22',
+      raksha_bandhan: '2013-08-20',
+      krishna_janmashtami: '2013-08-28',
+      ganesh_chaturthi: '2013-09-09',
+      vijayadashami: '2013-10-14',
+      karva_chauth: '2013-10-22',
+      diwali: '2013-11-03',
+      govardhan_puja: '2013-11-04',
+    },
+  },
+  {
     year: 2030,
     expected: {
       makara_sankranti: '2030-01-14',
@@ -71,6 +94,7 @@ const EXTENDED: YearFixture[] = [
 
 const BASELINE_MIN_PASSES: Record<number, number> = {
   2012: 12,
+  2013: 12, // holika_dahan and holi off by 1 day due to prahar4 cutoff limitation
   2030: 14,
 };
 
@@ -84,7 +108,7 @@ function fmt(d: Date): string {
 }
 
 describe('Festival accuracy — extended years (Delhi)', () => {
-  it('reports per-year accuracy across 2012 and 2030', () => {
+  it('reports per-year accuracy across 2012, 2013 and 2030', () => {
     for (const { year, expected } of EXTENDED) {
       const occ = findFestivals(
         new Date(`${year}-01-01T00:00:00+05:30`),

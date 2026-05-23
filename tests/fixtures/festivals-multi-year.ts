@@ -328,7 +328,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'holika_dahan',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented for main fixtures: Pradosha-vyapini Phalguna Purnima with Prahar-4 Bhadra cutoff.',
-    knownIssue: '2012 remains an extended-year Holika/Holi edge case outside the main audit window.',
+    knownIssue: '2012 and 2013 are known extended-year Holika/Holi edge cases where the Prahar-4 cutoff incorrectly shifts by 1 day (Drik: 2012=Mar 7, 2013=Mar 26; app gives Mar 8 and Mar 27). Both years have Bhadra extending past Prahar 4 but ending ~25-28 min before Brahma Muhurta — a 3-minute discriminating margin below ephemeris precision.',
     expected: {
       2015: '2015-03-05',
       2016: '2016-03-23',

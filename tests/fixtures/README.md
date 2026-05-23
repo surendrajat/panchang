@@ -13,6 +13,10 @@ tolerance.
 - Names and indices: exact match
 - Festival dates: exact match
 
+The regression test enforces time tolerances only when the fixture
+includes the corresponding fields. Existing seed fixtures are mostly
+name/festival fixtures; add time fields as Drik values are captured.
+
 ## Capturing a fixture (manual workflow)
 
 1. Open the Drik Panchang page for the location and date.
@@ -42,6 +46,10 @@ tolerance.
 ```
 
 Fields under `expect` are optional — only what you've captured is checked.
+Captured time fields such as `sunrise`, `sunset`, or `tithi.endTime` may
+be full ISO strings (preferred for limb end times) or `HH:mm` /
+`HH:mm:ss` local civil times for the fixture date. Use full ISO strings
+for non-IST or DST-sensitive fixtures.
 
 ## Phase 1 seed set
 

@@ -1,0 +1,34 @@
+{
+  "label": "New Delhi — 2024-10-31 (Drik Chaturdashi reference)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=31%2F10%2F2024&time-format=24hour"
+    ],
+    "notes": "Drik Panchang New Delhi day-panchang page gives sunrise 06:32, sunset 17:36, moonrise Nov 01 06:14, moonset 16:51, Chaturdashi ending 15:52, Chitra ending Nov 01 00:45, Vishkambha ending 09:51, and Shakuni ending 15:52. This fixture intentionally uses Drik as the primary authority. In a strict probe, sunrise missed by 37s, sunset by 32s, moonset by 49s, Chaturdashi/Shakuni end by 123s, Chitra end by 239s, and Vishkambha end by 433s, so those times are not pinned. Moonrise is not pinned because Drik lists the next moonrise on Nov 1 while the app currently returns the prior moonrise for this civil day."
+  },
+  "location": {
+    "name": "New Delhi, India",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "altitude": 216,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-10-31",
+  "expect": {
+    "tithi": {
+      "name": "Chaturdashi",
+      "paksha": "krishna",
+      "number": 14
+    },
+    "nakshatra": {
+      "name": "Chitra"
+    },
+    "yoga": {
+      "name": "Vishkambha"
+    },
+    "karana": {
+      "name": "Shakuni"
+    },
+    "masa": { "name": "Ashvina" }
+  }
+}

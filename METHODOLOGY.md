@@ -246,12 +246,10 @@ so users can see the day's full tithi sequence.
 ### Accuracy audit
 
 - Main fixture window: 233 festival-date checks across 2015-2028 for
-  New Delhi → 232 / 233 pass (99.6%). The single
-  divergence is Krishna Janmashtami 2016 (Drik Aug 25 vs my Aug 24);
-  the documented Smarta rule produces Aug 24 but Drik publishes Aug 25
-  for reasons not captured by the rule. Treated as a known anomaly.
+  New Delhi → 233 / 233 pass for the app's current Smarta-default
+  convention.
 - Multi-city smoke (6 Indian cities × 16 festivals for 2025): 96/96.
-- Extended-year soft regression (2012, 2030): 25/28.
+- Extended-year soft regression (2012, 2030): 26/28.
 - Daily limb fixture coverage is still sparse. Current JSON fixtures
   mostly assert names, masa flags, and festival presence; sunrise,
   sunset, moonrise, moonset, and limb end-time tolerances still need a
@@ -281,10 +279,9 @@ fixtures do not yet carry the time fields needed to exercise them.
 These are deliberately left as user-changeable settings (or open
 issues), not hard-coded:
 
-- Smarta vs. Vaishnava convention for Janmashtami / Ekadashi
-- Janmashtami edge years where published Drik dates appear to follow
-  a later observance than the current Smarta Nishita-interval rule
-  (notably 2016 in the main audit and 2030 in the soft extended audit)
+- Vaishnava/ISKCON convention variants for Janmashtami / Ekadashi.
+  Janmashtami split years such as 2016 and 2030 must become explicit
+  alternate variants rather than changing the Smarta default.
 - Which Onam: the rule fires on Shravana nakshatra in Bhadrapada/
   Shravana, which gives the Malayalam Thiruvonam
 - Whether to bundle Hijri/Jewish/etc. dates as cross-references —

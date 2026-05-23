@@ -1,9 +1,9 @@
 // Multi-year festival regression. Runs `computePanchanga` across
 // 2015-2028 and compares the computed festival dates to authoritative
-// Drik Panchang values from `tests/fixtures/festivals-multi-year.ts`.
+// fixture values from `tests/fixtures/festivals-multi-year.ts`.
 //
 // Two-tier verdict:
-//   - For festivals without a known tiebreaker limitation, a mismatch
+//   - For strict festival fixtures, a mismatch
 //     is a hard FAIL.
 //   - For fixtures with `auditTier: "tiebreaker"`, mismatches are
 //     reported but the test uses a floor instead of exact equality so
@@ -35,12 +35,12 @@ interface YearResult {
   auditTier: 'strict' | 'tiebreaker';
 }
 
-describe('Festival accuracy (2015-2028 Drik comparison)', () => {
+describe('Festival accuracy (2015-2028 default-convention comparison)', () => {
   // Pre-compute all years once so the test is fast.
   const COMPUTED_BY_YEAR = new Map<number, Map<string, string>>();
   const allYears = new Set<number>();
   for (const f of FESTIVAL_FIXTURES) {
-    for (const y of Object.keys(f.drik)) allYears.add(Number(y));
+    for (const y of Object.keys(f.expected)) allYears.add(Number(y));
   }
   for (const year of Array.from(allYears).sort()) {
     const occ = findFestivals(
@@ -58,7 +58,7 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
 
   const results: YearResult[] = [];
   for (const f of FESTIVAL_FIXTURES) {
-    for (const [yearStr, expected] of Object.entries(f.drik)) {
+    for (const [yearStr, expected] of Object.entries(f.expected)) {
       const year = Number(yearStr);
       const actual = COMPUTED_BY_YEAR.get(year)?.get(f.key) ?? null;
       results.push({
@@ -72,7 +72,7 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
     }
   }
 
-  it('strict festivals (no known tiebreaker) match Drik exactly', () => {
+  it('strict festivals (no known tiebreaker) match expected dates exactly', () => {
     const strict = results.filter((r) => r.auditTier === 'strict');
     const failures = strict.filter((r) => !r.matched);
     const msg = failures
@@ -83,17 +83,22 @@ describe('Festival accuracy (2015-2028 Drik comparison)', () => {
     );
   });
 
-  it('tiebreaker-dependent festivals: documented Drik dates pin baseline accuracy', () => {
-    // Festivals whose Drik date uses Pradosha / Madhyahna / Nishita /
+  it('tiebreaker-dependent festivals: documented expected dates pin baseline accuracy', () => {
+    // Festivals whose date uses Pradosha / Madhyahna / Nishita /
     // Aparahna / Chandrodaya / Bhadra rules. Most are implemented now,
-    // but this bucket remains soft because Janmashtami convention
-    // handling is still unresolved.
+    // but this bucket remains soft while convention variants are still
+    // being expanded.
     const soft = results.filter((r) => r.auditTier === 'tiebreaker');
     const passes = soft.filter((r) => r.matched).length;
-    const BASELINE_MIN_PASSES = 161; // Current baseline: 161 / 162; only Janmashtami 2016 diverges.
+    const BASELINE_MIN_PASSES = 162; // Current Smarta-default baseline: 162 / 162.
     expect(passes, `${passes} / ${soft.length} tiebreaker-dependent festivals match`).toBeGreaterThanOrEqual(
       BASELINE_MIN_PASSES,
     );
+  });
+
+  it('pins the default Janmashtami convention to Smarta dates', () => {
+    expect(COMPUTED_BY_YEAR.get(2016)?.get('krishna_janmashtami')).toBe('2016-08-24');
+    expect(COMPUTED_BY_YEAR.get(2020)?.get('krishna_janmashtami')).toBe('2020-08-11');
   });
 
   it('summary', () => {

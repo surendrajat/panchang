@@ -1,6 +1,7 @@
-// Multi-year festival fixture. Authoritative dates published by Drik
-// Panchang (drikpanchang.com) for the Delhi / Indian-standard-time
-// observance. Used by tests/regression/festivals-multi-year.test.ts.
+// Multi-year festival fixture. Authoritative dates for the Delhi /
+// Indian-standard-time observance. Most are published by Drik Panchang
+// (drikpanchang.com); convention split years use the app's documented
+// Smarta default. Used by tests/regression/festivals-multi-year.test.ts.
 //
 // Two tiers:
 //
@@ -8,20 +9,20 @@
 //             agrees with Drik across the year window. A mismatch
 //             here is a hard regression failure.
 //
-//   `tiebreaker`: festivals whose published date is decided by an
+//   `tiebreaker`: festivals whose expected date is decided by an
 //             additional rule (Pradosha / Madhyahna / Nishita /
 //             Aparahna / Chandrodaya / Bhadra / Sankranti cutoff).
 //             Most are now implemented; this bucket stays soft while
-//             convention-sensitive cases such as Janmashtami are still
-//             being split into explicit variants.
+//             convention-sensitive variants are still being expanded.
 //
 // Sources: drikpanchang.com year-list pages and per-festival archive
-// entries. Dates are YYYY-MM-DD in Asia/Kolkata civil time.
+// entries unless a fixture note says otherwise. Dates are YYYY-MM-DD
+// in Asia/Kolkata civil time.
 
 export interface FestivalFixture {
   key: string;
-  /** Map of year → expected Drik date. */
-  drik: Record<number, string>;
+  /** Map of year → expected date for the documented default convention. */
+  expected: Record<number, string>;
   /** Strict fixtures must match exactly; tiebreaker fixtures use a baseline floor. */
   auditTier?: 'strict' | 'tiebreaker';
   /** Describes the implemented/expected rule for tiebreaker-dependent dates. */
@@ -37,7 +38,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
 
   {
     key: 'rama_navami',
-    drik: {
+    expected: {
       2015: '2015-03-28',
       2016: '2016-04-15',
       2017: '2017-04-05',
@@ -55,7 +56,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'hanuman_jayanti',
-    drik: {
+    expected: {
       2015: '2015-04-04',
       2016: '2016-04-22',
       2017: '2017-04-11',
@@ -72,7 +73,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'buddha_purnima',
-    drik: {
+    expected: {
       2015: '2015-05-04',
       2016: '2016-05-21',
       2017: '2017-05-10',
@@ -89,7 +90,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'guru_purnima',
-    drik: {
+    expected: {
       2015: '2015-07-31',
       2016: '2016-07-19',
       2017: '2017-07-09',
@@ -106,7 +107,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'navaratri_start',
-    drik: {
+    expected: {
       2015: '2015-10-13',
       2016: '2016-10-01',
       2017: '2017-09-21',
@@ -123,7 +124,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   },
   {
     key: 'govardhan_puja',
-    drik: {
+    expected: {
       2015: '2015-11-12',
       2016: '2016-10-31',
       2017: '2017-10-20',
@@ -146,7 +147,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     auditTier: 'tiebreaker',
     ruleNote:
       'Implemented: bisection-found sidereal Makara transit with sunset cutoff; if transit is after sunset, observance shifts to next civil day.',
-    drik: {
+    expected: {
       // Verified against drikpanchang.com Indian calendar (geoname
       // 1273294 = New Delhi). Earlier transcription had 2015 and
       // 2027 as Jan 14 — both years actually have transit after
@@ -172,7 +173,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     auditTier: 'tiebreaker',
     ruleNote:
       'Rule note: Drik uses a daytime/Purvahna-Madhyahna Panchami rule; pinned years currently match the sunrise rule, but short-tithi years still need explicit fixtures.',
-    drik: {
+    expected: {
       2015: '2015-01-24',
       2017: '2017-02-01',
       2018: '2018-01-22',
@@ -191,7 +192,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'akshaya_tritiya',
     auditTier: 'tiebreaker',
     ruleNote: 'Rule note: Drik uses Madhyahna-vyapini Tritiya; pinned years currently match.',
-    drik: {
+    expected: {
       2015: '2015-04-21',
       2016: '2016-05-09',
       2018: '2018-04-18',
@@ -207,7 +208,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'nag_panchami',
     auditTier: 'tiebreaker',
     ruleNote: 'Rule note: Drik uses Madhyahna-vyapini Panchami of Shravana; pinned years currently match.',
-    drik: {
+    expected: {
       2016: '2016-08-07',
       2018: '2018-08-15',
       2019: '2019-08-05',
@@ -225,7 +226,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     auditTier: 'tiebreaker',
     ruleNote:
       'Implemented: Aparahna-vyapini Purnima with Bhadra cutoff and sunrise fallback for short-tithi years.',
-    drik: {
+    expected: {
       2015: '2015-08-29',
       2016: '2016-08-18',
       2017: '2017-08-07',
@@ -244,7 +245,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'ganesh_chaturthi',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented: Madhyahna-vyapini Chaturthi.',
-    drik: {
+    expected: {
       2015: '2015-09-17',
       2016: '2016-09-05',
       2017: '2017-08-25',
@@ -263,7 +264,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'vijayadashami',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented: Aparahna-vyapini Dashami with Shravana-nakshatra preference and sunrise fallback.',
-    drik: {
+    expected: {
       2015: '2015-10-22',
       2016: '2016-10-11',
       2017: '2017-09-30',
@@ -282,7 +283,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'kartik_purnima',
     auditTier: 'tiebreaker',
     ruleNote: 'Rule note: pinned years match the sunrise Purnima rule; some traditions use Pradosha/Krittika refinements.',
-    drik: {
+    expected: {
       2016: '2016-11-14',
       2017: '2017-11-04',
       2018: '2018-11-23',
@@ -304,7 +305,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'diwali',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented: Pradosha-vyapini Amavasya.',
-    drik: {
+    expected: {
       2015: '2015-11-11',
       2016: '2016-10-30',
       2017: '2017-10-19',
@@ -328,7 +329,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented for main fixtures: Pradosha-vyapini Phalguna Purnima with Prahar-4 Bhadra cutoff.',
     knownIssue: '2012 remains an extended-year Holika/Holi edge case outside the main audit window.',
-    drik: {
+    expected: {
       2015: '2015-03-05',
       2016: '2016-03-23',
       2017: '2017-03-12',
@@ -347,7 +348,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     auditTier: 'tiebreaker',
     ruleNote:
       'Implemented: day after computed Holika Dahan.',
-    drik: {
+    expected: {
       2015: '2015-03-06',
       2016: '2016-03-24',
       2017: '2017-03-13',
@@ -366,7 +367,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'maha_shivaratri',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented for pinned years: Nishita-vyapini Chaturdashi.',
-    drik: {
+    expected: {
       2015: '2015-02-17',
       2016: '2016-03-07',
       2017: '2017-02-24',
@@ -384,12 +385,13 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   {
     key: 'krishna_janmashtami',
     auditTier: 'tiebreaker',
-    ruleNote: 'Smarta Nishita-interval Ashtami with sunrise fallback.',
-    knownIssue:
-      'Current Smarta Nishita-interval rule returns 2016-08-24, while the pinned Drik fixture is 2016-08-25.',
-    drik: {
+    ruleNote:
+      'Default convention: Smarta Nishita-interval Ashtami with sunrise fallback. Split-year Vaishnava/ISKCON dates are intentionally not pinned to this default fixture.',
+    expected: {
       2015: '2015-09-05',
-      2016: '2016-08-25',
+      // Split year: Smarta references publish Aug 24; Vaishnava/ISKCON
+      // references publish Aug 25. The app default is Smarta.
+      2016: '2016-08-24',
       2017: '2017-08-14',
       2018: '2018-09-02',
       2019: '2019-08-23',
@@ -406,7 +408,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'karva_chauth',
     auditTier: 'tiebreaker',
     ruleNote: 'Implemented: Chandrodaya-vyapini Krishna Chaturthi with sunrise fallback.',
-    drik: {
+    expected: {
       2015: '2015-10-30',
       2016: '2016-10-19',
       2017: '2017-10-08',

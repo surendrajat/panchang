@@ -308,12 +308,13 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     },
   },
 
-  // Krishna Janmashtami — Shravana Krishna 8 (Smarta). Drik rule:
+  // Krishna Janmashtami — Shravana Krishna 8 (Smarta default).
   // Ashtami must prevail during the Nishita Kaal INTERVAL (8th of 15
   // night-muhurtas, ~44 min wide), not just at its center. Critical
   // for locations east of Delhi where Nishita is ~45 min earlier and
-  // a center-point check misses Ashtami's late-night entry. 'later'
-  // pick when both days qualify; sunrise fallback otherwise.
+  // a center-point check misses Ashtami's late-night entry. Split-year
+  // Vaishnava/ISKCON dates should be added as explicit variants rather
+  // than changing this default.
   {
     key: 'krishna_janmashtami',
     displayName: 'Krishna Janmashtami',

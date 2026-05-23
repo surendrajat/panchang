@@ -90,8 +90,8 @@ function isBhadraAtJD(jd: number): boolean {
 // present at any instant within this interval. Tithi is monotonic
 // in elongation, so we just check the interval's endpoints.
 //
-// Used by Smarta Janmashtami: Drik's rule is "Ashtami prevails during
-// Nishita Kaal", not "Ashtami at the center". Centerpoint check
+// Used by Smarta Janmashtami: the default rule is "Ashtami prevails
+// during Nishita Kaal", not "Ashtami at the center". Centerpoint check
 // misses cases where Ashtami starts late in the muhurta window
 // (e.g., Kolkata 2025: Ashtami starts 23:50 IST, Kolkata's Nishita
 // center is 23:40 → center says miss, but interval [23:19, 00:03]
@@ -114,7 +114,7 @@ export function tithiOverlapsNishitaKaal(
   return tithiIndex >= startTithi && tithiIndex <= endTithi;
 }
 
-// Smarta Janmashtami rule (Drik default):
+// Smarta Janmashtami rule (app default):
 //   1. Ashtami (Krishna 8 = tithi index 23) must prevail during the
 //      Nishita Kaal of the night following the candidate day.
 //   2. If two consecutive days both qualify, pick the LATER day.
@@ -125,11 +125,10 @@ export function tithiOverlapsNishitaKaal(
 // Delhi 2025 (Aug 15) and Kolkata 2025 (Aug 15) — both pick the
 // same civil day even though local Nishita differs by ~45 min.
 //
-// Known limitation: Delhi 2016 (Drik Aug 25, mine Aug 24). Ashtami
-// has Nishita Kaal overlap only on Aug 24 in 2016 but Drik publishes
-// Aug 25. The Smarta rule may have an additional condition
-// (perhaps "Ashtami end during Aug 25's day") that's not documented
-// here; leaving as a single-year known divergence.
+// Split years: some public calendars publish a later Vaishnava/ISKCON
+// date (e.g. Aug 25 in 2016). The app's single default remains Smarta;
+// Vaishnava should be added as an explicit variant, not folded into
+// this predicate.
 export function smartaJanmashtamiMatches(
   p: Panchanga,
   masa: string,

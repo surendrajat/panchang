@@ -38,7 +38,7 @@
   font-family: var(--font-serif);
 }
 
-/* Headings inherit Fraunces with optical-size enabled. */
+/* Headings use the local/system serif stack. */
 h1,
 h2,
 h3,

@@ -437,8 +437,8 @@
     font-weight: 700;
   }
   /* The 60-year Jovian cycle name (Vishvavasu, Parabhava…) gets
-     italic Fraunces — the only italic in the masthead, so it reads as
-     a name rather than chrome. */
+     the only italic treatment in the masthead, so it reads as a name
+     rather than chrome. */
   .subline__yearname {
     font-family: var(--font-serif);
     font-style: italic;

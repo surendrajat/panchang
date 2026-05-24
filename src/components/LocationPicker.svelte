@@ -2,6 +2,7 @@
   import type { Location } from '$lib/panchanga';
   import { searchCities, nearestCity, type City } from '$lib/location/cities';
   import { requestGeolocation } from '$lib/location/geolocation';
+  import { browserTimezone } from '$lib/location/timezone';
   import { preferences } from '$lib/state/preferences.svelte';
   import { t, type TranslationKey } from '$lib/i18n';
 
@@ -38,12 +39,17 @@
     try {
       const pos = await requestGeolocation();
       const city = nearestCity(pos.latitude, pos.longitude);
+      // Use the browser's own IANA timezone (device setting) — more
+      // accurate than deriving from nearest-city distance, especially
+      // near timezone boundaries. Fall back to nearest city's zone if
+      // the browser returns nothing meaningful.
+      const tz = browserTimezone() || city.timezone;
       onChange({
         name: `${city.name} (near)`,
         latitude: pos.latitude,
         longitude: pos.longitude,
         altitude: pos.altitude ?? city.altitude,
-        timezone: city.timezone,
+        timezone: tz,
       });
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not determine your location.';

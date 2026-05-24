@@ -11,7 +11,7 @@ No accounts. No ads. No tracking. Install it once and it works on a plane.
 - **Daily panchanga** — Tithi, Nakshatra, Yoga, Karana (all of them, with end times), and Vara, anchored to sunrise at your location.
 - **Lunar month** — Masa with Adhik Maas detection; switch between Amanta and Purnimanta conventions.
 - **Muhurta** — 10 windows surfaced for any day: Brahma Muhurta, Pratah Sandhya, Abhijit, Vijaya Muhurta, Godhuli, Sayahna Sandhya, Nishita Kaal, plus the inauspicious Rahu Kaal / Yamaganda / Gulika.
-- **Festivals** — Pan-India set with Drik-aligned rules (Pradosha, Nishita Kaal interval, Aparahna with Shravana-nakshatra preference, Bhadra-aware Holika/Raksha Bandhan, sunset-cutoff Sankranti). Verified against drikpanchang.com across 14 years and 6 Indian cities at 99% accuracy.
+- **Festivals** — Pan-India set with Drik-aligned rules (Pradosha, Nishita Kaal interval, Aparahna with Shravana-nakshatra preference, Bhadra-aware Holika/Raksha Bandhan, sunset-cutoff Sankranti). Verified against drikpanchang.com across the supported default-convention corpus, with documented Holika/Holi edge-case divergences in 2012 and 2013.
 - **Year context** — Vikram Samvat, Shaka Samvat, Kaliyuga, plus current Ritu and Ayana.
 - **Sun/Moon** — sunrise, sunset, moonrise, moonset, moon phase with illumination %.
 
@@ -28,7 +28,7 @@ Bundled city list covers India's major metros, plus Hindu-population centres acr
 ## Calculation conventions
 
 - **Ephemeris**: [astronomy-engine](https://github.com/cosinekitty/astronomy) — apparent geocentric Sun/Moon, sub-arcsecond accuracy.
-- **Ayanamsa**: Lahiri default (Chitra Paksha), tuned to match Drik Panchang within ~1 arcminute over 1900–2100. KP, Raman, Yukteshwar, True Chitra also available.
+- **Ayanamsa**: Lahiri default (Chitra Paksha), tuned to Drik Panchang's computational Lahiri values. KP, Raman, Yukteshwar, True Chitra also available.
 - **Sunrise**: Upper edge with atmospheric refraction, matching the Drik default.
 - **Festival tiebreakers**: Documented in [METHODOLOGY.md](./METHODOLOGY.md) — every rule cites the muhurta window it's anchored to.
 
@@ -45,7 +45,7 @@ pnpm test       # unit + regression
 pnpm build      # static output in ./dist
 ```
 
-Requires Node ≥ 20 (pinned in `.nvmrc`) and pnpm 10.
+Requires Node 24 (pinned in `.nvmrc`) and pnpm 11.
 
 ## Contributing
 
@@ -57,4 +57,6 @@ Bug reports, accuracy reports against your local panchang, and translations for 
 
 ## Acknowledgements
 
-Festival-date conventions verified against [drikpanchang.com](https://www.drikpanchang.com/). Lahiri ayanamsa per the Indian Astronomical Ephemeris. Sanskrit term spellings cross-checked with standard panchanga references. See [METHODOLOGY.md](./METHODOLOGY.md) for the full source list.
+- [astronomy-engine](https://github.com/cosinekitty/astronomy) for accurate ephemeris calculations and timezone handling.
+- Festival-date conventions verified against [drikpanchang.com](https://www.drikpanchang.com/).
+- Lahiri ayanamsa per the Indian Astronomical Ephemeris. Sanskrit term spellings cross-checked with standard panchanga references. See [METHODOLOGY.md](./METHODOLOGY.md) for the full source list.

@@ -13,9 +13,10 @@ tolerance.
 - Names and indices: exact match
 - Festival dates: exact match
 
-The regression test enforces time tolerances only when the fixture
-includes the corresponding fields. Existing seed fixtures are mostly
-name/festival fixtures; add time fields as Drik values are captured.
+The regression test enforces time tolerances only when the fixture includes the
+corresponding fields. The current corpus includes name/festival fixtures plus a
+growing timed subset. Do not add fields from secondary sources unless they agree
+with the chosen strict tolerance.
 
 ## Capturing a fixture (manual workflow)
 
@@ -51,7 +52,13 @@ be full ISO strings (preferred for limb end times) or `HH:mm` /
 `HH:mm:ss` local civil times for the fixture date. Use full ISO strings
 for non-IST or DST-sensitive fixtures.
 
-## Phase 1 seed set
+## Current corpus status
 
-The seed set is intentionally small (~10 entries). Phase 2 expands to the
-full 260-entry suite described in ARCHITECTURE.md §12.
+The corpus currently has 26 fixtures, 24 of which include at least one timed
+assertion, across 15 locations and 6 civil dates. Strict moonrise/moonset
+coverage is still absent, so chandrodaya-sensitive behavior needs more fixture
+evidence before it can be called fully proven.
+
+The long-term target remains a larger 100+ timed-fixture suite covering India,
+diaspora/DST zones, adhika masa, festivals near midnight, short tithis,
+moonrise/moonset, and high-latitude edge cases.

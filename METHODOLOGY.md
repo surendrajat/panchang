@@ -12,9 +12,9 @@ is the page to read.
   longitudes match Drik Panchang's Swiss-Ephemeris-derived values to
   within a few arcseconds across 1900–2100.
 - **Ayanamsa**: Lahiri by default (the convention of the Indian
-  Astronomical Ephemeris). The base value at J2000 is tuned (23.8267°)
-  to match Drik Panchang's published modern values within ~1′; the
-  annual drift is the standard 50.2879″.
+  Astronomical Ephemeris). The base value at J2000 is tuned (23.8635°)
+  to match Drik Panchang's computational Lahiri values; the annual
+  drift is the standard ~50.29″.
 - **Festivals**: rule-based, with conventions documented in this file.
   Smarta defaults where Smarta/Vaishnava disagree.
 
@@ -128,10 +128,10 @@ to the display label.
 ## Samvat (year systems)
 
 We display three:
-- **Vikrama Samvat** = Gregorian + 56 or + 57 (boundary at Chaitra
-  Shukla 1, approximated as April 1)
-- **Shaka Samvat** = Gregorian − 78 or − 79
-- **Kaliyuga Era** = Gregorian + 3101 or + 3102
+- **Vikrama Samvat** = Gregorian + 56 or + 57, switching at Chaitra
+  Shukla Pratipada using the computed lunar month around March/April.
+- **Shaka Samvat** = Gregorian − 78 or − 79.
+- **Kaliyuga Era** = Gregorian + 3101 or + 3102.
 
 The 60-year Jovian cycle name (Samvatsara) is keyed off the Vikrama
 year using the standard anchor: Vikrama 1984 = Prabhava (index 0).
@@ -249,13 +249,14 @@ so users can see the day's full tithi sequence.
   New Delhi → 233 / 233 pass for the app's current Smarta-default
   convention.
 - Multi-city smoke (6 Indian cities × 16 festivals for 2025): 96/96.
-- Extended-year soft regression (2012, 2030): 26/28.
-- Daily limb fixture coverage is still sparse. Current JSON fixtures
-  mostly assert names, masa flags, and festival presence; sunrise,
-  sunset, moonrise, moonset, and limb end-time tolerances still need a
-  larger reference corpus before the app can claim full Drik parity.
-  The regression suite enforces the documented tolerances whenever a
-  fixture includes those time fields.
+- Extended-year regression (2012, 2013, 2030): all non-Holika/Holi
+  checks pass; Holika Dahan and Holi remain documented divergences for
+  2012 and 2013.
+- Daily limb fixture coverage is improved but still not complete: the
+  current corpus includes 24 timed fixtures across 15 locations and 6
+  civil dates. Moonrise/moonset still need strict Drik reference
+  coverage before chandrodaya-sensitive behavior can be called fully
+  proven.
 
 ## Numerical accuracy
 
@@ -263,9 +264,8 @@ so users can see the day's full tithi sequence.
   into the ecliptic of date are accurate to ≪ 1 arcsec for Sun and
   ~1 arcmin for Moon — translating to tithi-end-time errors of
   < 5 seconds.
-- **Ayanamsa**: linear-in-time approximation, ±1 arcmin vs. Drik
-  Panchang's polynomial across 1900–2100. Net contribution to
-  nakshatra-end-time error: ≲ 4 minutes worst case.
+- **Ayanamsa**: tuned Lahiri J2000 anchor plus IAU-2006 precession
+  polynomial, checked against Drik computational values in unit tests.
 - **Bisection**: stops when `hi − lo < 1e-7` days ≈ 8.6 ms. Effective
   precision is whatever the ephemeris supplies.
 

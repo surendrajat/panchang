@@ -3,9 +3,9 @@
 > An open, accessible, long-lasting Hindu calendar app. Static PWA, all
 > computation in the browser, no backend, deployable for $0 forever.
 
-This document is the source of truth for the project. Implementation should
-follow it. Where it's silent, prefer the simplest possible solution. Where it
-conflicts with personal preference, change the doc first, then the code.
+This document is the long-range architecture target for the project.
+Implementation should follow it where it matches the current product contract.
+For details on the current implementation, see `METHODOLOGY.md`.
 
 ## 1. Goals & Non-Goals
 
@@ -26,10 +26,9 @@ conflicts with personal preference, change the doc first, then the code.
 
 - Horoscope / kundali / birth charts
 - Dasha / antardasha / vimshottari
-- Muhurta selection for events (just display rahu-kaal etc., don't pick auspicious times)
+- Muhurta selection for events
 - User accounts, sync, cloud storage
 - Push notifications (defer to Phase 3)
-- Multi-language UI (English first; Phase 2 for Hindi/Sanskrit/regional)
 - Native mobile apps (Phase 3 via Bubblewrap if warranted)
 - Astrological predictions or "rashiphal"
 - Monetization features
@@ -45,8 +44,8 @@ conflicts with personal preference, change the doc first, then the code.
 | State | Svelte runes + stores | Built-in, no extra dep |
 | Persistence | Dexie (IndexedDB) | Thin wrapper, future-proof, widely supported |
 | Service worker | Workbox | Battle-tested, declarative caching strategies |
-| Routing | `svelte-routing` or hash routing | Static-hosting-compatible |
-| Date math | Native `Date` + `Temporal` polyfill if needed | Avoid moment/dayjs bloat |
+| Routing | Local hash router | Static-hosting-compatible |
+| Date math | Native `Date` plus timezone-aware helpers | Avoid moment/dayjs bloat |
 | Testing | Vitest (unit) + Playwright (E2E, later) | Standard, fast |
 | Hosting | Cloudflare Pages (primary) | Free, Indian edge POPs, no rate limits, simple |
 | CI | GitHub Actions | Free for public repos |
@@ -545,7 +544,7 @@ Five routes, hash-based (for static hosting compatibility):
 | `/day/:yyyy-mm-dd` | Single day full detail |
 | `/festivals/:yyyy` | Year's festival list with countdowns |
 | `/settings` | Location, ayanamsa, month system, theme |
-| `/about` | Methodology, credits, source link, license |
+| `/about` | Methodology, credits, source link, license (planned) |
 
 ### Today view layout
 
@@ -762,26 +761,26 @@ Each release, manually verify:
 
 ## 13. Phases / Roadmap
 
-### Phase 1 — MVP (target: 6 weeks of evening work)
+### Phase 1 — MVP / current beta baseline
 - Tech stack scaffolded, CI green
 - `lib/astro` + `lib/panchanga` complete with unit tests
-- Today view, Month view, Day view, Settings, About
-- Lahiri ayanamsa only
+- Today view, Month view, Day view, Festivals, Settings
+- Lahiri ayanamsa default with additional selectable systems
 - Amanta + Purnimanta selectable
-- English only
+- English and Hindi UI
 - ~30 pan-India festivals
 - Offline-first PWA
 - Deployed to Cloudflare Pages, public URL
 - METHODOLOGY.md published
 
 ### Phase 2 — Polish & expand
-- Devanagari/Tamil/Telugu/Kannada UI translations
-- Additional ayanamsa systems
+- Tamil/Telugu/Kannada and other regional UI translations
 - Regional festival packs (selectable)
-- Festival year view with countdowns
 - Saved locations
 - Vedic clock display (ghati/pala)
 - Better moon phase visualization
+- In-app About/Methodology route
+- Browser-level offline smoke tests
 - A11y audit pass
 
 ### Phase 3 — Distribution & notifications
@@ -808,7 +807,8 @@ These are deliberately left open for implementation-time discussion:
 3. **Cities database source**: GeoNames (CC-BY) cities500.txt seems best;
    filter to ~10K most populous to keep bundle small. C: cities500.txt
 4. **Whether to bundle Noto fonts** (heavy, ~500KB each) or lazy-load by
-   selected language. C: lazy-load by language
+   selected language. C: bundle small Devanagari subsets locally; revisit for
+   additional scripts.
 5. **Whether to include hijri/jewish/etc. dates** in passing on the day
    view — interesting cross-cultural feature, defer to Phase 2. C: No
 

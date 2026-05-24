@@ -17,7 +17,7 @@ mechanics.
 
 ## Setup
 
-Requires Node ≥ 20 (pinned via `.nvmrc`) and pnpm 10.
+Requires Node 24 (pinned via `.nvmrc`) and pnpm 11.
 
 ```bash
 pnpm install

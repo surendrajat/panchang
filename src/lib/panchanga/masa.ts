@@ -68,8 +68,7 @@ function newMoonsAround(jd: number): number[] {
   const winStart = bucket * BUCKET_DAYS - 40;
   const winEnd = (bucket + 1) * BUCKET_DAYS + 40;
   const jds: number[] = [];
-  let cursor = new Date((winStart - JD_UNIX_EPOCH * -1 + JD_UNIX_EPOCH) * 0 + 0); // typed placeholder
-  cursor = new Date((winStart - JD_UNIX_EPOCH) * MS_PER_DAY);
+  let cursor = new Date((winStart - JD_UNIX_EPOCH) * MS_PER_DAY);
   let safety = 6; // ~6 new moons in an 80-day window — plenty.
   while (safety-- > 0) {
     const limit = winEnd - dateToJulian(cursor);

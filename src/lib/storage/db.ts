@@ -3,7 +3,8 @@
 // Three tables:
 //   - preferences (singleton row, the user's settings)
 //   - savedLocations (list of bookmarked cities)
-//   - cachedPanchangas (memoized compute results, LRU)
+//   - cachedPanchangas (optional memoized compute results; not wired into route
+//     calculations yet)
 
 import Dexie, { type Table } from 'dexie';
 import type { AyanamsaSystem, Location, MonthSystem, Panchanga } from '$lib/panchanga';

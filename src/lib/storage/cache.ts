@@ -1,5 +1,6 @@
-// Compute-result cache. Keyed by date + location + options +
-// CALCULATION_VERSION.
+// Optional compute-result cache. Keyed by date + location + options +
+// CALCULATION_VERSION. The helpers are tested and the Settings screen can clear
+// the table, but route-level calculations currently compute directly.
 //
 // CALCULATION_VERSION must be bumped whenever any of the following
 // change in a way that affects computed values:
@@ -13,8 +14,9 @@
 // be overwritten on next compute) — no migration needed because every
 // value is a pure function of the cache-key inputs.
 //
-// LRU semantics: max 1000 entries; we evict oldest createdAt when over
-// the cap. We also auto-evict entries older than 30 days at startup.
+// LRU semantics: max 1000 entries; putCached() evicts oldest createdAt when
+// over the cap. evictStale() is available to remove entries older than 30 days
+// when the cache is wired into startup.
 
 import { db, type CachedPanchangaRow } from './db';
 import { civilYMDInZone } from '$lib/astro';

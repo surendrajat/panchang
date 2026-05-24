@@ -25,6 +25,7 @@ import {
   vyapiniWithNakshatraPreference,
   smartaJanmashtamiMatches,
   sankrantiInto,
+  kartikaPratipadaBridgeDay,
 } from '../tiebreakers';
 
 // Nakshatra index for Shravana (used by Vijayadashami).
@@ -411,12 +412,27 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: vyapiniKrishna(15, 'Ashvina', 'pradosha', 'earlier', 'sunrise'),
   },
 
-  // Govardhan Puja — Kartika Shukla 1
+  // Govardhan Puja — Kartika Shukla 1, madhyahna-vyapini, later pick.
+  //
+  // The classical rule: Govardhan is observed on the day when Kartika
+  // Shukla Pratipada (Shukla 1) is present at MADHYAHNA (midday).
+  // 'Later' pick: when Pratipada spans two consecutive middays, the
+  // later (clean Kartika) day wins.
+  //
+  // kartikaPratipadaBridgeDay handles edge cases where the panchanga
+  // masa is still 'Ashvina' at sunrise (Pratipada starts after sunrise):
+  //   Vyapini (2010-11-06): Pratipada starts 10:22 AM < noon. Madhyahna
+  //     = Pratipada ✓. Nov 7 madhyahna = Dvitiya. Bridge fires. ✓
+  //   Kshaya (2029-11-06): Pratipada starts 09:53 AM < noon. Bridge. ✓
+  //   Non-bridge (2022, 2023): Amavasya ends after noon → bridge does
+  //     NOT fire; clean Kartika day has Pratipada at noon instead. ✓
   {
     key: 'govardhan_puja',
     displayName: 'Govardhan Puja',
     displayNameHi: 'गोवर्धन पूजा',
-    matches: inShukla(1, 'Kartika'),
+    matches: (p: Panchanga) =>
+      vyapiniShukla(1, 'Kartika', 'madhyahna', 'later', 'sunrise')(p) ||
+      kartikaPratipadaBridgeDay(p),
   },
 
   // Bhai Dooj — Kartika Shukla 2

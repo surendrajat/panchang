@@ -552,6 +552,42 @@ function findSankrantiTransitJD(
 //   2027   Jan 14 20:23      Jan 15       after sunset → next ✓
 //
 // All 13 years match Drik with the sunset cutoff.
+// "Bridge-day" rule for Kartika Shukla 1 (Govardhan Puja):
+//
+// When Kartika Pratipada begins AFTER sunrise the standard masa-gated
+// vyapini rule fails because the panchanga masa is still 'Ashvina' at
+// sunrise.  The correct window is MADHYAHNA (midday): Govardhan Puja
+// falls on the day when Kartika Shukla Pratipada is present at midday.
+//
+//   Vyapini (e.g. 2010): Pratipada starts Nov 6 at 10:22 AM (< noon).
+//   Nov 6 madhyahna = Pratipada ✓.  Nov 7 madhyahna = Dvitiya (ends
+//   08:06 AM).  'Later' = only qualifying day = Nov 6.  Drik: ✓
+//
+//   Kshaya (e.g. 2029): Pratipada starts Nov 6 at 09:53 AM (< noon).
+//   Nov 6 madhyahna = Pratipada ✓.  Nov 7 madhyahna = Dvitiya.  ✓
+//
+//   Non-bridge years (e.g. 2022, 2023): Amavasya ends at 4:18 PM / 2:56 PM
+//   — both AFTER madhyahna.  Nov 6/Nov 13 madhyahna = Amavasya ✗.
+//   Bridge day does NOT fire; the clean Kartika day has Pratipada past
+//   noon and wins via vyapiniShukla instead.  No false firing. ✓
+//
+// Complement: for years where Pratipada arrives before or exactly at
+// sunrise (the common case), the sunrise panchanga masa is already
+// 'Kartika' and the standard vyapiniShukla path handles it.
+export function kartikaPratipadaBridgeDay(p: Panchanga): boolean {
+  // Sunrise masa must still be Ashvina — Kartika hasn't started yet.
+  if (p.masa.amantaName !== 'Ashvina' || p.masa.isAdhika) return false;
+  if (!p.sunrise) return false;
+  // Sunrise tithi must be Amavasya (last tithi of Ashvina, index 30).
+  if (p.tithi.index !== 30) return false;
+  // Amavasya must end AFTER sunrise so Pratipada starts today.
+  if (p.tithi.endTime <= p.sunrise) return false;
+  // Pratipada (index 1) must be present at today's madhyahna (midday).
+  // 'Later' pick: if an extraordinary long Pratipada also reaches the
+  // next Kartika day's madhyahna, that clean day wins instead.
+  return vyapiniMatchesForDate(p.location, p.date, 'madhyahna', 1, 'later');
+}
+
 export function sankrantiInto(targetSign: number): (p: Panchanga) => boolean {
   const targetDeg = targetSign * 30;
   return (p) => {

@@ -1,5 +1,11 @@
 {
   "label": "Bengaluru — 2025-03-13 (Holika Dahan / Pradosha-vyapini Phalguna Purnima)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=13%2F03%2F2025&geoname-id=1277333&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Bengaluru (geoname 1277333). Sunrise 06:28 (model +34s, outside 30s tolerance — not pinned), Sunset 18:30 (model -18s). Chaturdashi end 10:35 (model +123s, just over 2-min — not pinned). Purva Phalguni end Mar 14 06:19 (model +77s). Dhriti end 13:03 (model +58s). Vanija end 10:35 (model +123s — not pinned). Ayanamsha 24.215788."
+  },
   "location": {
     "name": "Bengaluru, India",
     "latitude": 12.9716,
@@ -9,7 +15,25 @@
   },
   "civilDate": "2025-03-13",
   "expect": {
-    "masa": { "name": "Phalguna" },
-    "festivals": ["holika_dahan"]
+    "sunset": "18:30",
+    "tithi": {
+      "name": "Chaturdashi",
+      "paksha": "shukla",
+      "number": 14
+    },
+    "nakshatra": {
+      "name": "Purva Phalguni",
+      "endTime": "2025-03-14T06:19:00+05:30"
+    },
+    "yoga": {
+      "name": "Dhriti",
+      "endTime": "13:03"
+    },
+    "masa": {
+      "name": "Phalguna"
+    },
+    "festivals": [
+      "holika_dahan"
+    ]
   }
 }

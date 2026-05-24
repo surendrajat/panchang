@@ -53,8 +53,8 @@ describe('Drik-Panchang fixture regression', () => {
     const timed = fixtures.filter(hasTimedAssertion);
     expect(
       timed.length,
-      'At least four committed fixtures must assert sunrise/sunset or limb end times.',
-    ).toBeGreaterThanOrEqual(4);
+      'At least ten committed fixtures must assert sunrise/sunset or limb end times.',
+    ).toBeGreaterThanOrEqual(10);
   });
 
   it('fixture labels and files are unique', () => {
@@ -155,8 +155,8 @@ describe('Drik-Panchang fixture regression', () => {
 
     expect(
       locations.size,
-      'Timed fixtures should cover at least three distinct locations.',
-    ).toBeGreaterThanOrEqual(3);
+      'Timed fixtures should cover at least six distinct locations.',
+    ).toBeGreaterThanOrEqual(6);
   });
 
   it('timed fixture corpus covers multiple civil dates', () => {
@@ -164,8 +164,8 @@ describe('Drik-Panchang fixture regression', () => {
 
     expect(
       dates.size,
-      'Timed fixtures should cover at least two civil dates.',
-    ).toBeGreaterThanOrEqual(2);
+      'Timed fixtures should cover at least four civil dates.',
+    ).toBeGreaterThanOrEqual(4);
   });
 
   it('fixtures with timed assertions include usable source metadata', () => {

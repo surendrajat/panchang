@@ -1,5 +1,11 @@
 {
   "label": "Bengaluru — 2026-01-14 (Makara Sankranti / Pongal)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2026&geoname-id=1277333&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Bengaluru (geoname 1277333). Sunrise 06:46 (model -21s). Sunset 18:12 (model -25s). Ekadashi end 17:52 (model +117s — borderline, not pinned). Anuradha end Jan 15 03:03 (model +85s). Ganda end 19:56 (model +48s). Balava end 17:52 (model +117s — not pinned). Ayanamsha 24.227531."
+  },
   "location": {
     "name": "Bengaluru, India",
     "latitude": 12.9716,
@@ -9,6 +15,27 @@
   },
   "civilDate": "2026-01-14",
   "expect": {
-    "festivals": ["makara_sankranti", "pongal"]
+    "sunrise": "06:46",
+    "sunset": "18:12",
+    "tithi": {
+      "name": "Ekadashi",
+      "paksha": "krishna",
+      "number": 11
+    },
+    "nakshatra": {
+      "name": "Anuradha",
+      "endTime": "2026-01-15T03:03:00+05:30"
+    },
+    "yoga": {
+      "name": "Ganda",
+      "endTime": "19:56"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": [
+      "makara_sankranti",
+      "pongal"
+    ]
   }
 }

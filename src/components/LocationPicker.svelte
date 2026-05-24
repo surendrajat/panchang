@@ -1,8 +1,19 @@
 <script lang="ts">
   import type { Location } from '$lib/panchanga';
-  import { searchCities, nearestCity, type City } from '$lib/location/cities';
+  import { searchCities, nearestCityWithDistance, type City } from '$lib/location/cities';
   import { requestGeolocation } from '$lib/location/geolocation';
   import { browserTimezone } from '$lib/location/timezone';
+
+  // If GPS fix is within this radius of a known city, label it with the
+  // city name; otherwise show bare coordinates (avoids misleading "Paris
+  // (near)" when the user is actually in rural Burgundy or eastern Turkey).
+  const NEAR_CITY_THRESHOLD_KM = 50;
+
+  function formatCoords(lat: number, lon: number): string {
+    const ns = lat >= 0 ? 'N' : 'S';
+    const ew = lon >= 0 ? 'E' : 'W';
+    return `${Math.abs(lat).toFixed(2)}°${ns}, ${Math.abs(lon).toFixed(2)}°${ew}`;
+  }
   import { preferences } from '$lib/state/preferences.svelte';
   import { t, type TranslationKey } from '$lib/i18n';
 
@@ -38,14 +49,20 @@
     busy = true;
     try {
       const pos = await requestGeolocation();
-      const city = nearestCity(pos.latitude, pos.longitude);
+      const { city, distanceKm } = nearestCityWithDistance(pos.latitude, pos.longitude);
       // Use the browser's own IANA timezone (device setting) — more
       // accurate than deriving from nearest-city distance, especially
       // near timezone boundaries. Fall back to nearest city's zone if
       // the browser returns nothing meaningful.
       const tz = browserTimezone() || city.timezone;
+      // Only name after the nearest city when the GPS fix is actually
+      // close to it; otherwise show coordinates to avoid misleading labels.
+      const name =
+        distanceKm <= NEAR_CITY_THRESHOLD_KM
+          ? `${city.name} (near)`
+          : formatCoords(pos.latitude, pos.longitude);
       onChange({
-        name: `${city.name} (near)`,
+        name,
         latitude: pos.latitude,
         longitude: pos.longitude,
         altitude: pos.altitude ?? city.altitude,

@@ -142,7 +142,12 @@ export function searchCities(query: string, limit = 12): City[] {
 }
 
 // Find the closest city to a given lat/lon (used after geolocation).
-export function nearestCity(latitude: number, longitude: number): City {
+// Returns both the city and the distance in km so callers can decide
+// whether the match is close enough to use the city name.
+export function nearestCityWithDistance(
+  latitude: number,
+  longitude: number,
+): { city: City; distanceKm: number } {
   let best = CITIES[0];
   let bestDist = Number.POSITIVE_INFINITY;
   for (const c of CITIES) {
@@ -152,7 +157,13 @@ export function nearestCity(latitude: number, longitude: number): City {
       bestDist = d;
     }
   }
-  return best;
+  return { city: best, distanceKm: bestDist };
+}
+
+// Convenience wrapper (keeps the original one-value return for callers
+// that only need the city object).
+export function nearestCity(latitude: number, longitude: number): City {
+  return nearestCityWithDistance(latitude, longitude).city;
 }
 
 function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {

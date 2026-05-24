@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CITIES, nearestCity, searchCities } from '$lib/location/cities';
+import { CITIES, nearestCity, nearestCityWithDistance, searchCities } from '$lib/location/cities';
 import { browserTimezone } from '$lib/location/timezone';
 
 describe('offline location data', () => {
@@ -23,6 +23,19 @@ describe('offline location data', () => {
     const city = nearestCity(28.61, 77.2);
     expect(city.name).toBe('New Delhi, India');
     expect(city.timezone).toBe('Asia/Kolkata');
+  });
+
+  it('nearestCityWithDistance returns city and km for central Delhi coords', () => {
+    const { city, distanceKm } = nearestCityWithDistance(28.61, 77.2);
+    expect(city.name).toBe('New Delhi, India');
+    // Central Delhi is within a few km of the bundled coordinate
+    expect(distanceKm).toBeLessThan(5);
+  });
+
+  it('nearestCityWithDistance returns large distance for a remote location', () => {
+    // Middle of the Sahara — far from any bundled city
+    const { distanceKm } = nearestCityWithDistance(23.0, 12.0);
+    expect(distanceKm).toBeGreaterThan(500);
   });
 });
 

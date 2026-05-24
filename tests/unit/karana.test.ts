@@ -1,12 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
-
-const BENGALURU = {
-  latitude: 12.9716,
-  longitude: 77.5946,
-  altitude: 920,
-  timezone: 'Asia/Kolkata',
-};
+import { BENGALURU } from '../helpers';
 
 describe('karana naming', () => {
   it('position is in 0..59 and name is one of the 11 names', () => {

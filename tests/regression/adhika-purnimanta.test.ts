@@ -7,14 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI } from '../helpers';
 
 const MASA_ORDER = [
   'Chaitra',

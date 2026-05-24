@@ -4,18 +4,7 @@
 import { describe, it } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
 import { FESTIVAL_FIXTURES } from '../fixtures/festivals-multi-year';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
-
-function ymd(d: Date): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: DELHI.timezone }).format(d);
-}
+import { DELHI, toYMD } from '../helpers';
 
 describe('mismatches dump', () => {
   it('list all divergences', () => {
@@ -31,7 +20,7 @@ describe('mismatches dump', () => {
         { monthSystem: 'purnimanta' },
       );
       const m = new Map<string, string>();
-      for (const o of occ) if (!m.has(o.key)) m.set(o.key, ymd(o.date));
+      for (const o of occ) if (!m.has(o.key)) m.set(o.key, toYMD(o.date, DELHI.timezone));
       computed.set(year, m);
     }
     for (const f of FESTIVAL_FIXTURES) {

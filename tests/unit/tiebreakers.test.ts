@@ -17,14 +17,7 @@ import {
   type BhadraCutoff,
 } from '$lib/panchanga/tiebreakers';
 import { computePanchanga } from '$lib/panchanga';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI } from '../helpers';
 
 // Builds a civil-midnight Date in Asia/Kolkata for the given YYYY-MM-DD.
 function delhiMidnight(ymd: string): Date {

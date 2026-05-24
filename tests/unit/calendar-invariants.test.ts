@@ -22,18 +22,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
-
-function ymd(d: Date): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: DELHI.timezone }).format(d);
-}
+import { DELHI, toYMD } from '../helpers';
 
 // Years in 1976-2075 where Makara Sankranti falls on Jan 15 in IST.
 // All other years in the range fall on Jan 14.
@@ -56,7 +45,7 @@ describe('Makara Sankranti structural invariant (1976–2075)', () => {
 
       expect(occ.length, `${year}: expected exactly 1 makara_sankranti`).toBe(1);
 
-      const civil = ymd(occ[0].date); // "YYYY-MM-DD" in IST
+      const civil = toYMD(occ[0].date, DELHI.timezone); // "YYYY-MM-DD" in IST
       const day = Number(civil.slice(8, 10));
       const expectedDay = JAN_15_YEARS.has(year) ? 15 : 14;
       expect(

@@ -1,13 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
-
-const BENGALURU = {
-  name: 'Bengaluru, India',
-  latitude: 12.9716,
-  longitude: 77.5946,
-  altitude: 920,
-  timezone: 'Asia/Kolkata',
-};
+import { BENGALURU } from '../helpers';
 
 describe('tithi computation', () => {
   it('Krishna Janmashtami 2024 falls on 26 August at Bengaluru', () => {

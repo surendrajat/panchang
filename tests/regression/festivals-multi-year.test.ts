@@ -9,18 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
 import { FESTIVAL_FIXTURES } from '../fixtures/festivals-multi-year';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
-
-function ymd(d: Date): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: DELHI.timezone }).format(d);
-}
+import { DELHI, toYMD } from '../helpers';
 
 interface YearResult {
   key: string;
@@ -47,7 +36,7 @@ describe('Festival accuracy (2015-2028 default-convention comparison)', () => {
     );
     const byKey = new Map<string, string>();
     for (const o of occ) {
-      if (!byKey.has(o.key)) byKey.set(o.key, ymd(o.date));
+      if (!byKey.has(o.key)) byKey.set(o.key, toYMD(o.date, DELHI.timezone));
     }
     COMPUTED_BY_YEAR.set(year, byKey);
   }

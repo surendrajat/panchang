@@ -1,15 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { describe, expect, it } from 'vitest';
 import { computeMonth, findFestivals } from '$lib/panchanga';
-import type { Location } from '$lib/panchanga';
-
-const DELHI: Location = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI } from '../helpers';
 
 function timed<T>(fn: () => T): { value: T; ms: number } {
   const start = performance.now();

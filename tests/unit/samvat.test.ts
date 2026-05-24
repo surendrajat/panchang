@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI } from '../helpers';
 
 describe('Samvat year boundary', () => {
   it('stays in the old Vikrama/Shaka year in early March', () => {

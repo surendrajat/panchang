@@ -6,14 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
 import { karanaSequenceForDay } from '$lib/panchanga/karana';
-
-const DELHI = {
-  name: 'New Delhi',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI } from '../helpers';
 
 describe('karana sequence', () => {
   it('returns 2 or 3 karanas for a typical day (each ~12h)', () => {

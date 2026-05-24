@@ -1,12 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
-
-const BENGALURU = {
-  latitude: 12.9716,
-  longitude: 77.5946,
-  altitude: 920,
-  timezone: 'Asia/Kolkata',
-};
+import { BENGALURU } from '../helpers';
 
 describe('masa (lunar month) detection', () => {
   it('Adhik Maas detected in 2026 (Jyeshtha Adhika)', () => {

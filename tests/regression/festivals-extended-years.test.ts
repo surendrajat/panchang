@@ -16,14 +16,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { findFestivals } from '$lib/panchanga';
-
-const DELHI = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import { DELHI, toYMD } from '../helpers';
 
 interface YearFixture {
   year: number;
@@ -99,15 +92,6 @@ const KNOWN_DIVERGENCES: Record<number, ReadonlySet<string>> = {
   2013: new Set(['holika_dahan', 'holi']),
 };
 
-function fmt(d: Date): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: DELHI.timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(d);
-}
-
 describe('Festival accuracy — extended years (Delhi)', () => {
   for (const { year, expected } of EXTENDED) {
     it(`${year}`, () => {
@@ -117,7 +101,8 @@ describe('Festival accuracy — extended years (Delhi)', () => {
         DELHI,
       );
       const firstByKey = new Map<string, string>();
-      for (const o of occ) if (!firstByKey.has(o.key)) firstByKey.set(o.key, fmt(o.date));
+      for (const o of occ)
+        if (!firstByKey.has(o.key)) firstByKey.set(o.key, toYMD(o.date, DELHI.timezone));
 
       const skip = KNOWN_DIVERGENCES[year] ?? new Set<string>();
       for (const [key, expectedDate] of Object.entries(expected)) {
@@ -201,7 +186,8 @@ describe('Festival accuracy — multi-city smoke (2025)', () => {
         city,
       );
       const firstByKey = new Map<string, string>();
-      for (const o of occ) if (!firstByKey.has(o.key)) firstByKey.set(o.key, fmt(o.date));
+      for (const o of occ)
+        if (!firstByKey.has(o.key)) firstByKey.set(o.key, toYMD(o.date, DELHI.timezone));
       let hits = 0;
       const total = Object.keys(drik2025).length;
       const ms: string[] = [];

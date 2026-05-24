@@ -5,14 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { civilYMDInZone } from '$lib/astro';
 import { computeMonth, computePanchanga } from '$lib/panchanga';
-
-const BENGALURU = {
-  name: 'Bengaluru, India',
-  latitude: 12.9716,
-  longitude: 77.5946,
-  altitude: 920,
-  timezone: 'Asia/Kolkata',
-};
+import { BENGALURU } from '../helpers';
 
 describe('computePanchanga smoke', () => {
   it('produces a fully-populated panchanga for Bengaluru today', () => {

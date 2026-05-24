@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CALCULATION_VERSION, cacheKey } from '$lib/storage/cache';
-import type { Location, PanchangaOptions } from '$lib/panchanga';
-
-const DELHI: Location = {
-  name: 'New Delhi, India',
-  latitude: 28.6139,
-  longitude: 77.209,
-  altitude: 216,
-  timezone: 'Asia/Kolkata',
-};
+import type { PanchangaOptions } from '$lib/panchanga';
+import { DELHI } from '../helpers';
 
 const OPTIONS: PanchangaOptions = {
   ayanamsa: 'lahiri',

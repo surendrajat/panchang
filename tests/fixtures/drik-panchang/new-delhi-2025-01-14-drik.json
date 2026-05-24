@@ -1,0 +1,41 @@
+{
+  "label": "New Delhi — 2025-01-14 (Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=1261481&time-format=24hour"
+    ],
+    "notes": "Drik Panchang New Delhi (geoname 1261481). Sunrise 07:15, sunset 17:46. Pratipada end 03:21 Jan 15, Punarvasu end 10:17, Vishkambha end 02:59 Jan 15, Balava end 15:34. Model sunrise/sunset expected exact (matching the Jan 15 fixture where model is exact). Limb end times cross-verified via UTC computation; all within 2-min tolerance."
+  },
+  "location": {
+    "name": "New Delhi, India",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "altitude": 216,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "07:15",
+    "sunset": "17:46",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1
+    },
+    "nakshatra": {
+      "name": "Punarvasu",
+      "endTime": "10:17"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "2025-01-15T02:59:00+05:30"
+    },
+    "karana": {
+      "name": "Balava"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

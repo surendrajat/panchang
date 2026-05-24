@@ -1,0 +1,43 @@
+{
+  "label": "Mumbai — 2025-01-14 (Makara Sankranti / Thai Pongal)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=1275339&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Mumbai (geoname 1275339). Sunrise 07:15, sunset 18:21. Pratipada end 03:21 Jan 15, Punarvasu end 10:17, Vishkambha end 02:59 Jan 15, Balava end 15:34. Model sunrise/sunset within 30s tolerance. Punarvasu end δ=36s, Vishkambha end δ=26s — both well within 2-min tolerance. Pratipada end δ=79s, Balava end δ=96s — within 2-min tolerance."
+  },
+  "location": {
+    "name": "Mumbai, India",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "altitude": 14,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "07:15",
+    "sunset": "18:21",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1,
+      "endTime": "2025-01-15T03:21:00+05:30"
+    },
+    "nakshatra": {
+      "name": "Punarvasu",
+      "endTime": "10:17"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "2025-01-15T02:59:00+05:30"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "15:34"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

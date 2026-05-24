@@ -1,0 +1,43 @@
+{
+  "label": "London — 2025-01-14 (Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=2643743&time-format=24hour"
+    ],
+    "notes": "Drik Panchang London (geoname 2643743, UTC+0 in January). Sunrise 08:00 GMT (Pratah Sandhya end), sunset 16:20 GMT (Dinamana 08h19m34s). At 6am GMT Punarvasu has already ended (ended 04:47 UTC) so Pushya is active; Pushya end 2025-01-15T04:58 UTC (δ=44s ✓). Vishkambha end 21:29 GMT (=UTC 21:29, δ=26s ✓). Pratipada end 21:51 GMT (=UTC 21:51, δ=79s ✓). Balava end 10:04 GMT (=UTC 10:04, δ=96s ✓)."
+  },
+  "location": {
+    "name": "London, UK",
+    "latitude": 51.50853,
+    "longitude": -0.12574,
+    "altitude": 25,
+    "timezone": "Europe/London"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "08:00",
+    "sunset": "16:20",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1,
+      "endTime": "21:51"
+    },
+    "nakshatra": {
+      "name": "Pushya",
+      "endTime": "2025-01-15T04:58:00+00:00"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "21:29"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "10:04"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

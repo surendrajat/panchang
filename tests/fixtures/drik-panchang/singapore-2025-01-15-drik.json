@@ -1,0 +1,38 @@
+{
+  "label": "Singapore — 2025-01-15 (Pratipada ended before dawn, Dwitiya at sunrise)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=15%2F01%2F2025&geoname-id=1880252&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Singapore (geoname 1880252, SGT=UTC+8). civilDate 2025-01-15 because 6am SGT Jan 15 = UTC 22:00 Jan 14. Pratipada ended at UTC 21:52 Jan 14 (05:52 SGT Jan 15), before 6am SGT, so Dwitiya is the active tithi at dawn. Sunrise 07:12 SGT, sunset 19:16 SGT. Pushya end 12:58 SGT Jan 15 (=UTC 04:58 Jan 15, δ=44s ✓). Karana Taitila active (Kaulava ended at UTC 21:52 = 05:52 SGT). This fixture exercises the cross-midnight tithi-transition scenario."
+  },
+  "location": {
+    "name": "Singapore",
+    "latitude": 1.28967,
+    "longitude": 103.85007,
+    "altitude": 15,
+    "timezone": "Asia/Singapore"
+  },
+  "civilDate": "2025-01-15",
+  "expect": {
+    "sunrise": "07:12",
+    "tithi": {
+      "name": "Dwitiya",
+      "paksha": "krishna",
+      "number": 2
+    },
+    "nakshatra": {
+      "name": "Pushya",
+      "endTime": "12:58"
+    },
+    "yoga": {
+      "name": "Priti"
+    },
+    "karana": {
+      "name": "Taitila"
+    },
+    "masa": {
+      "name": "Pausha"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "label": "Kolkata — 2025-01-14 (Makara Sankranti / Thai Pongal)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=1275004&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Kolkata (geoname 1275004). Sunrise 06:19 (Pratah Sandhya end). Sunset derived as 17:13 (Dinamana 10h53m37s) but model gives 17:12:27, delta 32s just over 30s tolerance, not pinned. Pratipada end 03:21 Jan 15, Punarvasu end 10:17, Vishkambha end 02:59 Jan 15, Balava end 15:34. Limb end times are timezone-invariant for all IST locations; cross-verified via UTC computation. All within 2-min tolerance."
+  },
+  "location": {
+    "name": "Kolkata, India",
+    "latitude": 22.5726,
+    "longitude": 88.3639,
+    "altitude": 9,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "06:19",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1
+    },
+    "nakshatra": {
+      "name": "Punarvasu",
+      "endTime": "10:17"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "2025-01-15T02:59:00+05:30"
+    },
+    "karana": {
+      "name": "Balava"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

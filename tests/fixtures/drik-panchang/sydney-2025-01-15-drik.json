@@ -1,0 +1,42 @@
+{
+  "label": "Sydney — 2025-01-15 (day after Makara Sankranti, Southern Hemisphere)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=15%2F01%2F2025&geoname-id=2147714&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Sydney (geoname 2147714, AEDT=UTC+11). civilDate 2025-01-15 because 6am AEDT Jan 15 = UTC 19:00 Jan 14, before all Sankranti-day limb ends. Sunrise 06:00 AEDT, sunset 20:09 AEDT. Pratipada still active at 6am (ends 08:51 AEDT = UTC 21:51 Jan 14, δ=79s ✓). Pushya end 15:58 AEDT Jan 15 (=UTC 04:58 Jan 15, δ=44s ✓). Vishkambha end 08:29 AEDT (=UTC 21:29 Jan 14, δ=26s ✓). Kaulava end 08:51 AEDT (=UTC 21:51 Jan 14, δ=79s ✓). No makara_sankranti on this civil date (Sankranti was Jan 14 AEDT)."
+  },
+  "location": {
+    "name": "Sydney, Australia",
+    "latitude": -33.86785,
+    "longitude": 151.20732,
+    "altitude": 58,
+    "timezone": "Australia/Sydney"
+  },
+  "civilDate": "2025-01-15",
+  "expect": {
+    "sunrise": "06:00",
+    "sunset": "20:09",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1,
+      "endTime": "08:51"
+    },
+    "nakshatra": {
+      "name": "Pushya",
+      "endTime": "15:58"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "08:29"
+    },
+    "karana": {
+      "name": "Kaulava",
+      "endTime": "08:51"
+    },
+    "masa": {
+      "name": "Pausha"
+    }
+  }
+}

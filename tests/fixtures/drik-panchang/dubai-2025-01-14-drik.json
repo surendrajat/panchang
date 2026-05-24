@@ -1,0 +1,42 @@
+{
+  "label": "Dubai — 2025-01-14 (Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=292223&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Dubai (geoname 292223, UTC+4). Sunrise 07:06 GST. Sunset 17:50 GST (Dinamana 10h44m25s) — model 42s after Drik, just over 30s tolerance, not pinned. Punarvasu end 08:47 GST (=UTC 04:47, δ=36s ✓). Vishkambha end 01:29 Jan 15 GST (=UTC 21:29, δ=26s ✓). Pratipada end 01:51 Jan 15 GST (=UTC 21:51, δ=79s ✓). Balava end 14:04 GST (=UTC 10:04, δ=96s ✓). All within 2-min tolerance."
+  },
+  "location": {
+    "name": "Dubai, UAE",
+    "latitude": 25.0657,
+    "longitude": 55.17128,
+    "altitude": 5,
+    "timezone": "Asia/Dubai"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "07:06",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1,
+      "endTime": "2025-01-15T01:51:00+04:00"
+    },
+    "nakshatra": {
+      "name": "Punarvasu",
+      "endTime": "08:47"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "2025-01-15T01:29:00+04:00"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "14:04"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

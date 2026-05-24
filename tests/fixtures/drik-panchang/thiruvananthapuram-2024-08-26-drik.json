@@ -1,0 +1,43 @@
+{
+  "label": "Thiruvananthapuram — 2024-08-26 (Krishna Janmashtami)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=26%2F08%2F2024&geoname-id=1254163&time-format=24hour"
+    ],
+    "notes": "Drik Panchang Thiruvananthapuram (geoname 1254163). Sunrise 06:14, sunset 18:33. Ashtami end 02:19 Aug 27 IST, Krittika end 15:55, Vyaghata end 22:17, Balava end 14:55. Model sunrise 06:14:24 (δ=24s ✓), sunset 18:33:26 (δ=26s ✓). Limb end times identical to other IST cities (universal UTC times); all within 2-min tolerance."
+  },
+  "location": {
+    "name": "Thiruvananthapuram, India",
+    "latitude": 8.5241,
+    "longitude": 76.9366,
+    "altitude": 6,
+    "timezone": "Asia/Kolkata"
+  },
+  "civilDate": "2024-08-26",
+  "expect": {
+    "sunrise": "06:14",
+    "sunset": "18:33",
+    "tithi": {
+      "name": "Ashtami",
+      "paksha": "krishna",
+      "number": 8,
+      "endTime": "2024-08-27T02:19:00+05:30"
+    },
+    "nakshatra": {
+      "name": "Krittika",
+      "endTime": "15:55"
+    },
+    "yoga": {
+      "name": "Vyaghata",
+      "endTime": "22:17"
+    },
+    "karana": {
+      "name": "Balava",
+      "endTime": "14:55"
+    },
+    "masa": {
+      "name": "Shravana"
+    },
+    "festivals": ["krishna_janmashtami"]
+  }
+}

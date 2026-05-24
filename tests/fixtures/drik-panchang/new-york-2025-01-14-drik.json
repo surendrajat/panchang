@@ -1,0 +1,43 @@
+{
+  "label": "New York — 2025-01-14 (Makara Sankranti)",
+  "source": {
+    "urls": [
+      "https://www.drikpanchang.com/panchang/day-panchang.html?date=14%2F01%2F2025&geoname-id=5128581&time-format=24hour"
+    ],
+    "notes": "Drik Panchang New York (geoname 5128581, EST=UTC-5). Sunrise 07:18 EST, sunset 16:53 EST. At 6am EST (UTC 11:00) Punarvasu already ended (UTC 04:47) so Pushya is active; Pushya end 23:58 EST Jan 14 (=UTC 04:58 Jan 15, δ=44s ✓). Vishkambha end 16:29 EST (=UTC 21:29, δ=26s ✓). Pratipada/Kaulava end 16:51 EST (=UTC 21:51, δ=79s ✓). Balava already ended before 6am EST."
+  },
+  "location": {
+    "name": "New York, USA",
+    "latitude": 40.71427,
+    "longitude": -74.00597,
+    "altitude": 10,
+    "timezone": "America/New_York"
+  },
+  "civilDate": "2025-01-14",
+  "expect": {
+    "sunrise": "07:18",
+    "sunset": "16:53",
+    "tithi": {
+      "name": "Pratipada",
+      "paksha": "krishna",
+      "number": 1,
+      "endTime": "16:51"
+    },
+    "nakshatra": {
+      "name": "Pushya",
+      "endTime": "23:58"
+    },
+    "yoga": {
+      "name": "Vishkambha",
+      "endTime": "16:29"
+    },
+    "karana": {
+      "name": "Kaulava",
+      "endTime": "16:51"
+    },
+    "masa": {
+      "name": "Pausha"
+    },
+    "festivals": ["makara_sankranti", "pongal"]
+  }
+}

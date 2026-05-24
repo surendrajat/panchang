@@ -84,4 +84,42 @@ describe('offline asset contract', () => {
 
     expect(violations).toEqual([]);
   });
+
+  it('PWA precache stays within bundle budget (run pnpm build first)', () => {
+    const swPath = join(ROOT, 'dist/sw.js');
+    if (!existsSync(swPath)) {
+      console.warn('dist/sw.js not found — skipping bundle budget check (run pnpm build first)');
+      return;
+    }
+
+    const sw = read('dist/sw.js');
+    const MAX_ENTRIES = 25;
+    const MAX_KIB = 1000;
+
+    // Extract unique precache URLs from the workbox precacheAndRoute call.
+    const urls = [...sw.matchAll(/url:"([^"]+)"/g)].map((m) => m[1]);
+    const unique = [...new Set(urls)];
+
+    expect(
+      unique.length,
+      `Precache entry count ${unique.length} exceeds ceiling of ${MAX_ENTRIES}`,
+    ).toBeLessThanOrEqual(MAX_ENTRIES);
+
+    // Sum actual sizes of the corresponding files in dist/.
+    let totalBytes = 0;
+    for (const url of unique) {
+      try {
+        totalBytes += statSync(join(ROOT, 'dist', url)).size;
+      } catch {
+        // file not found — workbox sometimes references assets by hash that
+        // aren't simple paths; ignore safely.
+      }
+    }
+
+    const totalKiB = totalBytes / 1024;
+    expect(
+      totalKiB,
+      `Precache total ${totalKiB.toFixed(1)} KiB exceeds ceiling of ${MAX_KIB} KiB`,
+    ).toBeLessThanOrEqual(MAX_KIB);
+  });
 });

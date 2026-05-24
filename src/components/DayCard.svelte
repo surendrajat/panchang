@@ -15,6 +15,7 @@
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
   import MoonPhase from './MoonPhase.svelte';
   import PanchangaTable from './PanchangaTable.svelte';
+  import TimingIcon from './TimingIcon.svelte';
 
   interface Props {
     panchanga: Panchanga;
@@ -284,97 +285,26 @@
     </div>
   </div>
 
-  <!-- TIMINGS strip — SVG icons render crisply at any size, unlike
-       Unicode glyphs whose weight depends on the font fallback. The
-       sunrise/sunset pair uses a horizon line + arrow to disambiguate;
-       moonrise/moonset use a crescent over/under the same horizon. -->
+  <!-- TIMINGS strip — a shared icon family keeps rise/set readable at a
+       glance without depending on font fallback glyphs. -->
   <div class="timings">
     <div class="t">
-      <div class="ic" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 4v3" />
-          <path d="M5.6 11.6L7 13" />
-          <path d="M18.4 11.6L17 13" />
-          <path d="M7 18h10" />
-          <path d="M3 21h18" />
-          <path d="M7 18a5 5 0 0 1 10 0" fill="currentColor" fill-opacity="0.18" />
-          <path d="M9 21l3-3 3 3" />
-        </svg>
-      </div>
+      <div class="ic ic--sun"><TimingIcon type="sunrise" /></div>
       <div class="lab">{tr('timing.sunrise')}</div>
       <div class="val num">{fmtTime(panchanga.sunrise)}</div>
     </div>
     <div class="t">
-      <div class="ic" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 11v-3" />
-          <path d="M5.6 9L7 7.5" />
-          <path d="M18.4 9L17 7.5" />
-          <path d="M7 13h10" />
-          <path d="M3 21h18" />
-          <path d="M7 13a5 5 0 0 1 10 0" fill="currentColor" fill-opacity="0.18" />
-          <path d="M9 17l3 3 3-3" />
-        </svg>
-      </div>
+      <div class="ic ic--sun"><TimingIcon type="sunset" /></div>
       <div class="lab">{tr('timing.sunset')}</div>
       <div class="val num">{fmtTime(panchanga.sunset)}</div>
     </div>
     <div class="t">
-      <div class="ic" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 21h18" />
-          <path d="M9 21l3-3 3 3" />
-          <!-- Crescent moon — clipping a small circle out of a larger one. -->
-          <path
-            d="M9 13a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 13z"
-            fill="currentColor"
-            fill-opacity="0.18"
-          />
-        </svg>
-      </div>
+      <div class="ic ic--moon"><TimingIcon type="moonrise" /></div>
       <div class="lab">{tr('timing.moonrise')}</div>
       <div class="val num">{fmtTime(panchanga.moonrise)}</div>
     </div>
     <div class="t">
-      <div class="ic" aria-hidden="true">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 21h18" />
-          <path d="M9 17l3 3 3-3" />
-          <path
-            d="M9 9a5 5 0 1 0 6.5-4.8A5.5 5.5 0 0 1 9 9z"
-            fill="currentColor"
-            fill-opacity="0.18"
-          />
-        </svg>
-      </div>
+      <div class="ic ic--moon"><TimingIcon type="moonset" /></div>
       <div class="lab">{tr('timing.moonset')}</div>
       <div class="val num">{fmtTime(panchanga.moonset)}</div>
     </div>
@@ -642,14 +572,16 @@
   }
   .ic {
     color: var(--gold);
-    margin: 0 auto 4px;
-    width: 22px;
-    height: 22px;
-    opacity: 0.9;
+    margin: 0 auto 5px;
+    width: 30px;
+    height: 30px;
+    opacity: 0.96;
   }
-  .ic svg {
-    width: 100%;
-    height: 100%;
+  .ic--sun {
+    color: var(--red);
+  }
+  .ic--moon {
+    color: var(--indigo);
   }
   .lab {
     font-size: 10px;

@@ -43,27 +43,22 @@ import {
   sunLongitudeAtJD,
   julianToDate,
   civilMidnightInZone,
+  MS_PER_DAY,
 } from '$lib/astro';
 import type { Panchanga, Location, AyanamsaSystem } from './types';
+import { tithiAtJD } from './tithi';
+import { KARANA_DEGREES } from './karana';
+import { NAKSHATRA_DEGREES } from './nakshatra';
 
 export type Window = 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'chandrodaya';
 
 const PRADOSHA_OFFSET_MIN = 48;
-const TITHI_DEGREES = 12;
-const KARANA_DEGREES = 6;
-const NAKSHATRA_DEGREES = 360 / 27;
-const MS_PER_DAY = 86_400_000;
 // Bhadra ephemeris-drift tolerance. astronomy-engine's Moon position
 // may differ from Drik's Swiss-Ephemeris result by up to ~3 arcsec,
 // which can shift the Vishti karana boundary by 1–3 minutes at the
 // extremes. This guard treats Bhadra as "still active at the cutoff"
 // if it ended within `BHADRA_GUARD_BAND_MS` of the cutoff instant.
 const BHADRA_GUARD_BAND_MS = 5 * 60_000;
-
-function tithiIndexAtJD(jd: number): number {
-  const e = sunMoonElongationAtJD(jd);
-  return Math.floor(e / TITHI_DEGREES) + 1;
-}
 
 // Sidereal nakshatra index (1..27, Ashwini = 1) at a given JD.
 // Used by Vijayadashami's Shravana-preferred tiebreaker.
@@ -104,8 +99,8 @@ export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: 
   const nightMs = nextRise.getTime() - events.set.getTime();
   const kaalStart = new Date(events.set.getTime() + (7 * nightMs) / 15);
   const kaalEnd = new Date(events.set.getTime() + (8 * nightMs) / 15);
-  const startTithi = tithiIndexAtJD(dateToJulian(kaalStart));
-  const endTithi = tithiIndexAtJD(dateToJulian(kaalEnd));
+  const startTithi = tithiAtJD(dateToJulian(kaalStart)).index;
+  const endTithi = tithiAtJD(dateToJulian(kaalEnd)).index;
   // Tithi is monotonic in elongation → check the [start, end] range.
   return tithiIndex >= startTithi && tithiIndex <= endTithi;
 }
@@ -202,7 +197,7 @@ function probeWindow(loc: Location, date: Date, win: Window): WindowProbe | null
   const moonrise = win === 'chandrodaya' ? moonRiseSet(loc, date).rise : null;
   const instant = windowInstant(win, events.rise, events.set, moonrise);
   if (!instant) return null;
-  return { instant, tithiIndex: tithiIndexAtJD(dateToJulian(instant)) };
+  return { instant, tithiIndex: tithiAtJD(dateToJulian(instant)).index };
 }
 
 // Date-based vyapini check. The festival fires on `date` when the
@@ -354,8 +349,6 @@ function bhadraCutoffInstant(
   // All remaining cutoffs need the next-day sunrise.
   const nextEvents = sunRiseSet(loc, new Date(date.getTime() + MS_PER_DAY));
   const nextSunrise = nextEvents.rise ?? new Date(events.rise.getTime() + MS_PER_DAY);
-  // `win` is reserved for future per-window cutoff rules.
-  void win;
   if (cutoff === 'brahmaMuhurta') {
     return new Date(nextSunrise.getTime() - BRAHMA_MUHURTA_BEFORE_SUNRISE_MS);
   }
@@ -494,21 +487,13 @@ export function vyapiniWithSunriseFallback(
 // (ayanamsa, sunLongitudeAtJD, julianToDate, civilMidnightInZone are
 //  imported at the top of this file alongside the other astro deps.)
 
-// Unused — `findSankrantiTransitJD` computes sidereal directly. Retained
-// in the codebase for potential future per-day sign tests.
-// function sunSiderealSign(jd: number, p: Panchanga): number {
-//   const trop = sunLongitudeAtJD(jd);
-//   const sid = (((trop - ayanamsa(jd, p.options.ayanamsa)) % 360) + 360) % 360;
-//   return Math.floor(sid / 30);
-// }
-
 // Bisect-find the JD at which the Sun's sidereal longitude crosses
 // `targetDeg`. Bracket spans 4 days centered ~2 days before the
 // expected crossing.
 function findSankrantiTransitJD(
   bracketStartJD: number,
   targetDeg: number,
-  ayanamsaSys: 'lahiri' | 'raman' | 'kp' | 'yukteshwar' | 'true_chitra',
+  ayanamsaSys: AyanamsaSystem,
 ): number {
   let lo = bracketStartJD;
   let hi = lo + 4;

@@ -13,7 +13,7 @@ import { FIXED_KARANA_NAMES, MOVABLE_KARANA_NAMES } from './names';
 import { bisectAngularCrossing } from './bisect';
 import type { KaranaInfo } from './types';
 
-const KARANA_DEGREES = 6;
+export const KARANA_DEGREES = 6;
 
 function karanaNameForPosition(pos: number): { name: string; namedIndex: number } {
   // Position is 0..59. Position 0 corresponds to Shukla Pratipada first

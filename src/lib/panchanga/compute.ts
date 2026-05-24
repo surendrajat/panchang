@@ -10,9 +10,13 @@
 import {
   civilMidnightInZone,
   civilTimeInZone,
+  civilYMDInZone,
   sunRiseSet,
   moonRiseSet,
   dateToJulian,
+  ayanamsa,
+  sunLongitudeAtJD,
+  MS_PER_DAY,
 } from '$lib/astro';
 import { evaluateFestivals } from './festivals/rules';
 import { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
@@ -27,8 +31,7 @@ import { rituFromSunSiderealSign } from './ritu';
 import { ayanaFromSunSiderealSign } from './ayana';
 import { computeMuhurta } from './muhurta';
 import { moonPhaseAtInstant } from './moon-phase';
-import { ayanamsa, sunLongitudeAtJD } from '$lib/astro';
-import { civilYMDInZone } from '$lib/astro';
+
 import {
   DEFAULT_OPTIONS,
   type FestivalOccurrence,
@@ -150,8 +153,6 @@ export function computePanchanga(
   partial.festivals = evaluateFestivals(PAN_INDIA_FESTIVALS, partial);
   return partial;
 }
-
-const MS_PER_DAY = 86_400_000;
 
 export function computeMonth(
   year: number,

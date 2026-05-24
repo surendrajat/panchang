@@ -16,6 +16,7 @@
 
 import type { Panchanga } from '../types';
 import type { FestivalRule } from './rules';
+import { civilYMDInZone } from '$lib/astro';
 import {
   vyapiniMatches,
   bhadraAwareVyapiniMatches,
@@ -144,14 +145,8 @@ const isSankrantiInto = sankrantiInto;
 // Gregorian/sidereal drift only changes Lohri's calendar date by ±1.
 function isLohri(p: Panchanga): boolean {
   if (p.solar.signAtDayEnd !== 8) return false; // must still be in Dhanu at end of day
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: p.location.timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  const [, m, d] = fmt.format(p.date).split('-').map(Number);
-  return m === 1 && d === 13;
+  const { month, day } = civilYMDInZone(p.date, p.location.timezone);
+  return month === 1 && day === 13;
 }
 
 export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [

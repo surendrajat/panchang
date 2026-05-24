@@ -13,7 +13,7 @@ import { TITHI_NAMES } from './names';
 import { bisectAngularCrossing } from './bisect';
 import type { TithiInfo } from './types';
 
-const TITHI_DEGREES = 12;
+export const TITHI_DEGREES = 12;
 
 export function tithiAtJD(jd: number): { index: number; elongation: number } {
   const elongation = sunMoonElongationAtJD(jd);

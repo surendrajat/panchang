@@ -61,3 +61,57 @@ describe('pan-India festival registry', () => {
     expect(failures).toEqual([]);
   });
 });
+
+describe('tithiInMasa additional combinations', () => {
+  const matches = tithiInMasa(4, 'shukla', 'Kartika');
+  const base = {
+    tithi: { number: 4, paksha: 'shukla' },
+    masa: { name: 'Kartika', isAdhika: false },
+  } as Panchanga;
+
+  it('returns false when tithi number differs', () => {
+    expect(matches({ ...base, tithi: { ...base.tithi, number: 5 } } as Panchanga)).toBe(false);
+  });
+
+  it('returns false when paksha differs (krishna instead of shukla)', () => {
+    expect(matches({ ...base, tithi: { ...base.tithi, paksha: 'krishna' } } as Panchanga)).toBe(
+      false,
+    );
+  });
+
+  it('returns false when masa name differs', () => {
+    expect(matches({ ...base, masa: { ...base.masa, name: 'Bhadrapada' } } as Panchanga)).toBe(
+      false,
+    );
+  });
+
+  it('returns false when all three fields differ', () => {
+    expect(
+      matches({
+        tithi: { number: 9, paksha: 'krishna' },
+        masa: { name: 'Phalguna', isAdhika: false },
+      } as Panchanga),
+    ).toBe(false);
+  });
+});
+
+describe('evaluateFestivals edge cases', () => {
+  it('returns empty array for empty rule list', () => {
+    expect(evaluateFestivals([], {} as Panchanga)).toEqual([]);
+  });
+
+  it('returns empty array when no rule matches', () => {
+    const rules: FestivalRule[] = [
+      { key: 'a', displayName: 'A', matches: () => false },
+      { key: 'b', displayName: 'B', matches: () => false },
+    ];
+    expect(evaluateFestivals(rules, {} as Panchanga)).toEqual([]);
+  });
+
+  it('includes observance metadata without affecting evaluation', () => {
+    const rules: FestivalRule[] = [
+      { key: 'x', displayName: 'X', observance: 'midnight_tithi', matches: () => true },
+    ];
+    expect(evaluateFestivals(rules, {} as Panchanga)).toEqual(['x']);
+  });
+});

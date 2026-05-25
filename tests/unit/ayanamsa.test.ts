@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ayanamsa, dateToJulian } from '$lib/astro';
+import { siderealFromTropical } from '$lib/astro/ayanamsa';
 
 describe('Lahiri ayanamsa', () => {
   it('is ~23.864° at J2000 (Swiss Ephemeris SE_SIDM_LAHIRI)', () => {
@@ -51,5 +52,40 @@ describe('Lahiri ayanamsa', () => {
     const jd = dateToJulian(new Date(iso));
     const ayan = ayanamsa(jd, 'lahiri');
     expect(Math.abs(ayan - expected) * 60).toBeLessThan(tol);
+  });
+});
+
+describe('siderealFromTropical', () => {
+  it('subtracts the ayanamsa from tropical longitude', () => {
+    const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
+    const tropical = 80.0; // some tropical longitude in degrees
+    const ayan = ayanamsa(jd, 'lahiri'); // ~24.21
+    const expected = (((tropical - ayan) % 360) + 360) % 360;
+    expect(siderealFromTropical(tropical, jd, 'lahiri')).toBeCloseTo(expected, 8);
+  });
+
+  it('wraps correctly when result would be negative (tropical near 0°)', () => {
+    const jd = dateToJulian(new Date('2025-06-01T00:00:00Z'));
+    const result = siderealFromTropical(10.0, jd, 'lahiri');
+    // ayanamsa ~24.21, so 10 - 24 = -14, wrapped → ~346°
+    expect(result).toBeGreaterThanOrEqual(0);
+    expect(result).toBeLessThan(360);
+    expect(result).toBeCloseTo(10 - ayanamsa(jd, 'lahiri') + 360, 5);
+  });
+
+  it('wraps correctly when result exceeds 360°', () => {
+    const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
+    const result = siderealFromTropical(370.0, jd, 'lahiri');
+    expect(result).toBeGreaterThanOrEqual(0);
+    expect(result).toBeLessThan(360);
+  });
+
+  it('KP system gives a slightly larger sidereal longitude than Lahiri', () => {
+    const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
+    const tropical = 120.0;
+    const lahiri = siderealFromTropical(tropical, jd, 'lahiri');
+    const kp = siderealFromTropical(tropical, jd, 'kp');
+    // KP ayanamsa is ~6 arcmin LESS than Lahiri, so KP sidereal is larger
+    expect(kp).toBeGreaterThan(lahiri);
   });
 });

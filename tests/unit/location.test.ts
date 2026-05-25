@@ -44,3 +44,40 @@ describe('browserTimezone', () => {
     expect(browserTimezone()).toMatch(/^(UTC|Etc\/UTC|[A-Za-z_]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?)$/);
   });
 });
+
+describe('searchCities edge cases', () => {
+  it('is case-insensitive', () => {
+    const lower = searchCities('mumbai');
+    const upper = searchCities('MUMBAI');
+    const mixed = searchCities('Mumbai');
+    expect(lower.length).toBeGreaterThan(0);
+    expect(upper.length).toBe(lower.length);
+    expect(mixed.length).toBe(lower.length);
+  });
+
+  it('returns empty array for a query with no matches', () => {
+    expect(searchCities('zzz_nonexistent_city_xyz')).toEqual([]);
+  });
+
+  it('returns a default list of cities for an empty query string', () => {
+    // searchCities('') returns the first N cities rather than empty
+    const results = searchCities('');
+    expect(results.length).toBeGreaterThan(0);
+  });
+
+  it('returns multiple results for a partial prefix match', () => {
+    // "New" matches "New Delhi", "New York", etc.
+    expect(searchCities('new').length).toBeGreaterThan(1);
+  });
+
+  it('each result has name, latitude, longitude, and timezone fields', () => {
+    const results = searchCities('delhi');
+    expect(results.length).toBeGreaterThan(0);
+    for (const city of results) {
+      expect(typeof city.name).toBe('string');
+      expect(typeof city.latitude).toBe('number');
+      expect(typeof city.longitude).toBe('number');
+      expect(typeof city.timezone).toBe('string');
+    }
+  });
+});

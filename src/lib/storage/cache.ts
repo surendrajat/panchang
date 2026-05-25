@@ -19,14 +19,13 @@
 // when the cache is wired into startup.
 
 import { db, type CachedPanchangaRow } from './db';
-import { civilYMDInZone } from '$lib/astro';
+import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
 import type { Location, Panchanga, PanchangaOptions } from '$lib/panchanga';
 
 export const CALCULATION_VERSION = 3;
 
 const MAX_ENTRIES = 1000;
 const MAX_AGE_DAYS = 30;
-const MS_PER_DAY = 86_400_000;
 
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
   const { year, month, day } = civilYMDInZone(date, location.timezone);

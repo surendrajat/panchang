@@ -1,10 +1,11 @@
 <script lang="ts">
   import DayCard from '$components/DayCard.svelte';
   import DayPager from '$components/DayPager.svelte';
-  import { computePanchanga } from '$lib/panchanga';
+  import { computePanchanga, type Panchanga } from '$lib/panchanga';
   import { preferences } from '$lib/state/preferences.svelte';
   import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey } from '$lib/i18n';
+  import { cacheKey, getCached, putCached } from '$lib/storage';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
@@ -12,12 +13,33 @@
   const now = new Date();
   const todayYMD = $derived(localYMD(now, preferences.location?.timezone ?? 'UTC'));
 
-  const panchanga = $derived.by(() => {
-    if (!preferences.location || !preferences.hydrated) return null;
-    return computePanchanga(now, preferences.location, {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
+  let panchanga = $state<Panchanga | null>(null);
+
+  $effect(() => {
+    const loc = preferences.location;
+    const hydrated = preferences.hydrated;
+    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    if (!loc || !hydrated) {
+      panchanga = null;
+      return;
+    }
+    const key = cacheKey(now, loc, opts);
+    let cancelled = false;
+    getCached(key).then((cached) => {
+      if (cancelled) return;
+      if (cached) {
+        panchanga = cached;
+        return;
+      }
+      const result = computePanchanga(now, loc, opts);
+      if (!cancelled) {
+        panchanga = result;
+        void putCached(key, result);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   });
 </script>
 

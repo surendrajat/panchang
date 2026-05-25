@@ -4,6 +4,7 @@
   import { preferences } from '$lib/state/preferences.svelte';
   import { applyNumerals } from '$lib/format/numerals';
   import { t, type TranslationKey, masaNameByIndex, localeMetaOf } from '$lib/i18n';
+  import { cacheKey, putCached } from '$lib/storage';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
@@ -29,6 +30,17 @@
       ayanamsa: preferences.ayanamsa,
       monthSystem: preferences.monthSystem,
     });
+  });
+
+  // Populate the per-day cache after each month computation so
+  // subsequent Day.svelte visits to those dates are instant.
+  $effect(() => {
+    const loc = preferences.location;
+    if (!days.length || !loc) return;
+    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    for (const p of days) {
+      void putCached(cacheKey(p.date, loc, opts), p);
+    }
   });
 
   function adjacentMonth(delta: number): string {

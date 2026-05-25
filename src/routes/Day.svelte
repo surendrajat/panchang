@@ -2,9 +2,10 @@
   import DayCard from '$components/DayCard.svelte';
   import DayPager from '$components/DayPager.svelte';
   import { civilTimeInZone, isValidCivilDate } from '$lib/astro';
-  import { computePanchanga } from '$lib/panchanga';
+  import { computePanchanga, type Panchanga } from '$lib/panchanga';
   import { preferences } from '$lib/state/preferences.svelte';
   import { t, type TranslationKey } from '$lib/i18n';
+  import { cacheKey, getCached, putCached } from '$lib/storage';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
@@ -31,13 +32,34 @@
     return !isValidCivilDate(Number(m[1]), Number(m[2]), Number(m[3]));
   });
 
-  const panchanga = $derived.by(() => {
-    if (!preferences.location || !preferences.hydrated) return null;
-    if (!date || Number.isNaN(date.getTime())) return null;
-    return computePanchanga(date, preferences.location, {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
+  let panchanga = $state<Panchanga | null>(null);
+
+  $effect(() => {
+    const loc = preferences.location;
+    const hydrated = preferences.hydrated;
+    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    if (!loc || !hydrated || !date || Number.isNaN(date.getTime())) {
+      panchanga = null;
+      return;
+    }
+    const d = date;
+    const key = cacheKey(d, loc, opts);
+    let cancelled = false;
+    getCached(key).then((cached) => {
+      if (cancelled) return;
+      if (cached) {
+        panchanga = cached;
+        return;
+      }
+      const result = computePanchanga(d, loc, opts);
+      if (!cancelled) {
+        panchanga = result;
+        void putCached(key, result);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   });
 
   // Day navigation lives in DayPager.svelte now — single source of

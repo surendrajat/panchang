@@ -38,7 +38,12 @@
   $effect(() => {
     const loc = preferences.location;
     if (!days.length || !loc) return;
-    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    const opts = {
+      ayanamsa: preferences.ayanamsa,
+      monthSystem: preferences.monthSystem,
+      topocentric: preferences.topocentric,
+      sunriseHorizon: 'standard' as const,
+    };
     for (const p of days) {
       void putCached(cacheKey(p.date, loc, opts), p);
     }

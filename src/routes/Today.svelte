@@ -18,7 +18,12 @@
   $effect(() => {
     const loc = preferences.location;
     const hydrated = preferences.hydrated;
-    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    const opts = {
+      ayanamsa: preferences.ayanamsa,
+      monthSystem: preferences.monthSystem,
+      topocentric: preferences.topocentric,
+      sunriseHorizon: 'standard' as const,
+    };
     if (!loc || !hydrated) {
       panchanga = null;
       return;

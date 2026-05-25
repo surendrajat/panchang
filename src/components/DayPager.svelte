@@ -82,6 +82,18 @@
     }).format(currentDate);
   }
 
+  // Compact label for narrow screens: "Wed, 25 May 2026" instead of
+  // "Wednesday, 25 May 2026". Saves ~4–6 chars on the longest weekdays.
+  function compactDateLabel(): string {
+    return new Intl.DateTimeFormat(localeTag, {
+      timeZone: tz,
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(currentDate);
+  }
+
   function shortDateLabel(ymd: string): string {
     const m = ymd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!m) return ymd;
@@ -119,7 +131,10 @@
 
   <div class="pager__center">
     <div class="pager__date-row">
-      <span class="pager__date">{num(dateLabel())}</span>
+      <span class="pager__date pager__date--full">{num(dateLabel())}</span>
+      <span class="pager__date pager__date--compact" aria-hidden="true"
+        >{num(compactDateLabel())}</span
+      >
       <button
         class="pager__pick"
         onclick={openDatePicker}
@@ -223,11 +238,14 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
+    min-width: 0;
   }
   .pager__date-row {
     display: flex;
     align-items: center;
     gap: 4px;
+    min-width: 0;
+    max-width: 100%;
   }
   .pager__date {
     font-family: var(--font-serif);
@@ -236,6 +254,10 @@
     color: var(--ink);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    min-width: 0;
+  }
+  .pager__date--compact {
+    display: none;
   }
   .pager__pick {
     display: inline-flex;
@@ -251,6 +273,7 @@
       background 0.15s,
       color 0.15s;
     line-height: 0;
+    flex-shrink: 0;
   }
   .pager__pick:hover {
     color: var(--red);
@@ -294,6 +317,12 @@
   @media (max-width: 460px) {
     .pager {
       grid-template-columns: auto 1fr auto;
+    }
+    .pager__date--full {
+      display: none;
+    }
+    .pager__date--compact {
+      display: inline;
     }
   }
 </style>

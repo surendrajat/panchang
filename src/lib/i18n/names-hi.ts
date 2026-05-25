@@ -117,6 +117,21 @@ export const FIXED_KARANA_NAMES_HI: readonly string[] = [
   'किंस्तुघ्न', // pos 0
 ];
 
+export const RASHI_NAMES_HI: readonly string[] = [
+  'मेष', // 0
+  'वृषभ', // 1
+  'मिथुन', // 2
+  'कर्क', // 3
+  'सिंह', // 4
+  'कन्या', // 5
+  'तुला', // 6
+  'वृश्चिक', // 7
+  'धनु', // 8
+  'मकर', // 9
+  'कुम्भ', // 10
+  'मीन', // 11
+];
+
 export const MASA_NAMES_HI: readonly string[] = [
   'चैत्र',
   'वैशाख',

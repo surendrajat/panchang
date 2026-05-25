@@ -10,6 +10,7 @@
     tithiNameByIndex,
     masaNameByIndex,
     samvatsaraNameByIndex,
+    rashiNameByIndex,
     localeMetaOf,
   } from '$lib/i18n';
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
@@ -135,6 +136,15 @@
   // tithi name and as input to the "ends X · then Y" line.
   const tithiName = $derived(tithiNameByIndex(panchanga.tithi.index, preferences.language));
   const masaName = $derived(masaNameByIndex(panchanga.masa.index, preferences.language));
+
+  // Moon's sidereal rashi: each rashi = 9 nakshatras-padas out of 108 total.
+  // Formula: floor(((nakIndex - 1) * 4 + (pada - 1)) / 9), gives 0..11.
+  const moonRashiIndex = $derived(
+    Math.floor(((panchanga.nakshatra.index - 1) * 4 + (panchanga.nakshatra.pada - 1)) / 9),
+  );
+
+  // True on days when the Sun crosses a sign boundary (a Sankranti).
+  const hasSankranti = $derived(panchanga.solar.signAtDayStart !== panchanga.solar.signAtDayEnd);
 
   function nextTithiName(): string {
     const next = (panchanga.tithi.index % 30) + 1;
@@ -263,6 +273,57 @@
         </div>
       {/if}
       <div class="greg num">{gregLine()}</div>
+      <div class="rashi-line">
+        <span class="ri-item">
+          <svg
+            class="ri-icon ri-icon--sun"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.6"
+            stroke-linecap="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="5" fill="currentColor" fill-opacity="0.12" />
+            <line x1="12" y1="2" x2="12" y2="4" />
+            <line x1="12" y1="20" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="4" y2="12" />
+            <line x1="20" y1="12" x2="22" y2="12" />
+            <line x1="4.9" y1="4.9" x2="6.3" y2="6.3" />
+            <line x1="17.7" y1="17.7" x2="19.1" y2="19.1" />
+            <line x1="19.1" y1="4.9" x2="17.7" y2="6.3" />
+            <line x1="6.3" y1="17.7" x2="4.9" y2="19.1" />
+          </svg>{rashiNameByIndex(
+            panchanga.solar.sign,
+            preferences.language,
+          )}{#if hasSankranti}&thinsp;<span class="badge">{tr('year.sankranti')}</span>{/if}
+        </span>
+        <span class="ri-sep" aria-hidden="true">·</span>
+        <span class="ri-item">
+          <svg
+            class="ri-icon ri-icon--moon"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+              fill="currentColor"
+              fill-opacity="0.12"
+            />
+          </svg>{rashiNameByIndex(moonRashiIndex, preferences.language)}
+        </span>
+      </div>
     </div>
     <div class="hero__moon">
       <MoonPhase
@@ -535,6 +596,33 @@
     margin-top: 12px;
     font-size: 13.5px;
     color: var(--ink-soft);
+  }
+  .rashi-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .ri-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .ri-icon {
+    display: block;
+    flex-shrink: 0;
+  }
+  .ri-icon--sun {
+    color: var(--red);
+  }
+  .ri-icon--moon {
+    color: var(--indigo);
+  }
+  .ri-sep {
+    color: var(--ink-faint);
   }
 
   .hero__moon {

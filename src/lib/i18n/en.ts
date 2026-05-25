@@ -117,6 +117,9 @@ export const en = {
   'year.ayana': 'Ayana',
   'year.uttarayana': 'Uttarayana',
   'year.dakshinayana': 'Dakshinayana',
+  'year.suryaRashi': 'Surya Rashi',
+  'year.chandraRashi': 'Chandra Rashi',
+  'year.sankranti': 'Sankranti',
 
   // ── ritus
   'ritu.vasanta': 'Vasanta',

@@ -11,6 +11,7 @@ import {
   MOVABLE_KARANA_NAMES,
   FIXED_KARANA_NAMES,
   SAMVATSARA_NAMES,
+  RASHI_NAMES,
 } from '$lib/panchanga/names';
 import {
   TITHI_NAMES_HI,
@@ -20,6 +21,7 @@ import {
   MOVABLE_KARANA_NAMES_HI,
   FIXED_KARANA_NAMES_HI,
   SAMVATSARA_NAMES_HI,
+  RASHI_NAMES_HI,
 } from './names-hi';
 import type { Language } from './index';
 
@@ -42,6 +44,11 @@ export function yogaNameByIndex(index1to27: number, lang: Language): string {
 
 export function masaNameByIndex(index1to12: number, lang: Language): string {
   return pick(MASA_NAMES, MASA_NAMES_HI, lang, index1to12 - 1) ?? '';
+}
+
+// Rashi (sidereal sign) by 0-based index (0=Mesha … 11=Meena).
+export function rashiNameByIndex(index0to11: number, lang: Language): string {
+  return pick(RASHI_NAMES, RASHI_NAMES_HI, lang, index0to11) ?? '';
 }
 
 export function samvatsaraNameByIndex(index0to59: number, lang: Language): string {

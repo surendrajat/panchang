@@ -98,6 +98,7 @@ export {
   nakshatraNameByIndex,
   yogaNameByIndex,
   masaNameByIndex,
+  rashiNameByIndex,
   samvatsaraNameByIndex,
   karanaNameByPosition,
   localizeTithi,

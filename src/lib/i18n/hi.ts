@@ -126,6 +126,9 @@ export const hi: Record<TranslationKey, string> = {
   'year.ayana': 'अयन',
   'year.uttarayana': 'उत्तरायण',
   'year.dakshinayana': 'दक्षिणायन',
+  'year.suryaRashi': 'सूर्य राशि',
+  'year.chandraRashi': 'चन्द्र राशि',
+  'year.sankranti': 'संक्रान्ति',
 
   // ── ritus
   'ritu.vasanta': 'वसन्त',

@@ -165,6 +165,23 @@ export const MASA_INDEX_BY_SUN_SIGN: readonly number[] = [
   1,
 ];
 
+// 12 sidereal signs (rashis). Index 0 = Mesha (Sun enters ~mid-April).
+// Used to display Surya Rashi and Chandra Rashi on the day card.
+export const RASHI_NAMES: readonly string[] = [
+  'Mesha', // 0 — Aries
+  'Vrishabha', // 1 — Taurus
+  'Mithuna', // 2 — Gemini
+  'Karka', // 3 — Cancer
+  'Simha', // 4 — Leo
+  'Kanya', // 5 — Virgo
+  'Tula', // 6 — Libra
+  'Vrishchika', // 7 — Scorpio
+  'Dhanu', // 8 — Sagittarius
+  'Makara', // 9 — Capricorn
+  'Kumbha', // 10 — Aquarius
+  'Meena', // 11 — Pisces
+];
+
 // 6 ritus, each spanning 2 solar months. Vasanta (spring) begins ~mid-March.
 export const RITU_NAMES: readonly string[] = [
   'vasanta',

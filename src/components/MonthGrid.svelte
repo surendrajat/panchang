@@ -245,6 +245,7 @@
   .tt .glyph {
     font-size: 13px;
     color: var(--indigo);
+    margin-right: 3px;
   }
   .tt .glyph--amavasya {
     color: var(--ink);

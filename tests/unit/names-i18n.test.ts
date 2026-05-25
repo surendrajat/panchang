@@ -11,6 +11,7 @@ import {
   MOVABLE_KARANA_NAMES,
   FIXED_KARANA_NAMES,
   SAMVATSARA_NAMES,
+  RASHI_NAMES,
 } from '$lib/panchanga/names';
 import {
   TITHI_NAMES_HI,
@@ -20,6 +21,7 @@ import {
   MOVABLE_KARANA_NAMES_HI,
   FIXED_KARANA_NAMES_HI,
   SAMVATSARA_NAMES_HI,
+  RASHI_NAMES_HI,
 } from '$lib/i18n/names-hi';
 
 describe('Hindi name arrays match English-array lengths', () => {
@@ -31,6 +33,7 @@ describe('Hindi name arrays match English-array lengths', () => {
     ['karana-movable', MOVABLE_KARANA_NAMES.length, MOVABLE_KARANA_NAMES_HI.length],
     ['karana-fixed', FIXED_KARANA_NAMES.length, FIXED_KARANA_NAMES_HI.length],
     ['samvatsara', SAMVATSARA_NAMES.length, SAMVATSARA_NAMES_HI.length],
+    ['rashi', RASHI_NAMES.length, RASHI_NAMES_HI.length],
   ])('%s arrays are the same length', (_label, en, hi) => {
     expect(hi).toBe(en);
   });

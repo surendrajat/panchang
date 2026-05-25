@@ -178,6 +178,7 @@ export const hi: Record<TranslationKey, string> = {
 
   // ── day-pager
   'pager.jumpToToday': 'आज पर जाएं',
+  'pager.pickDate': 'तारीख पर जाएं',
 
   // ── settings cards
   'settings.title': 'विन्यास',

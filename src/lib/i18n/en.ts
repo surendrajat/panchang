@@ -166,6 +166,7 @@ export const en = {
 
   // ── day-pager
   'pager.jumpToToday': 'Jump to today',
+  'pager.pickDate': 'Jump to date',
 
   // ── settings cards
   'settings.title': 'Settings',

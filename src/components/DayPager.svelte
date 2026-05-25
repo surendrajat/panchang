@@ -51,6 +51,27 @@
   // adding Tamil/Telugu/etc. doesn't require editing this component.
   const localeTag = $derived(localeMetaOf(preferences.language).intlLocale);
 
+  // Date-picker: a hidden <input type="date"> is triggered programmatically
+  // so we get the native picker UI on every platform while keeping full
+  // control over placement and styling of the trigger button.
+  let dateInput = $state<HTMLInputElement | null>(null);
+
+  function openDatePicker() {
+    if (!dateInput) return;
+    // showPicker() is the modern API; fall back to click() for older browsers.
+    if (typeof dateInput.showPicker === 'function') {
+      dateInput.showPicker();
+    } else {
+      dateInput.click();
+    }
+  }
+
+  function onDatePick(e: Event) {
+    const value = (e.target as HTMLInputElement).value; // YYYY-MM-DD
+    if (!value) return;
+    window.location.hash = dayHref(value);
+  }
+
   function dateLabel(): string {
     return new Intl.DateTimeFormat(localeTag, {
       timeZone: tz,
@@ -97,7 +118,43 @@
   </a>
 
   <div class="pager__center">
-    <div class="pager__date">{num(dateLabel())}</div>
+    <div class="pager__date-row">
+      <span class="pager__date">{num(dateLabel())}</span>
+      <button
+        class="pager__pick"
+        onclick={openDatePicker}
+        aria-label={tr('pager.pickDate')}
+        title={tr('pager.pickDate')}
+        type="button"
+      >
+        <!-- Calendar icon (Lucide-style) -->
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <circle cx="12" cy="15" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      </button>
+      <!-- Hidden native date input — triggered by the button above -->
+      <input
+        bind:this={dateInput}
+        type="date"
+        class="pager__pick-input"
+        value={currentYMD}
+        onchange={onDatePick}
+        aria-hidden="true"
+        tabindex="-1"
+      />
+    </div>
     {#if !isToday}
       <a class="pager__today" href="#/">{tr('pager.jumpToToday')}</a>
     {/if}
@@ -167,6 +224,11 @@
     align-items: center;
     gap: 2px;
   }
+  .pager__date-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
   .pager__date {
     font-family: var(--font-serif);
     font-size: 15px;
@@ -174,6 +236,43 @@
     color: var(--ink);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  .pager__pick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: var(--radius-sm);
+    transition:
+      background 0.15s,
+      color 0.15s;
+    line-height: 0;
+  }
+  .pager__pick:hover {
+    color: var(--red);
+    background: color-mix(in srgb, var(--red) 10%, var(--paper-2));
+  }
+  .pager__pick svg {
+    width: 14px;
+    height: 14px;
+  }
+  /* Hidden native date input — visually invisible, opened programmatically */
+  .pager__pick-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
   }
   .pager__today {
     font-size: 11px;

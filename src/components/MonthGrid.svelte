@@ -2,6 +2,7 @@
   import type { Panchanga } from '$lib/panchanga';
   import { PAN_INDIA_FESTIVALS } from '$lib/panchanga';
   import { renderNumber } from '$lib/format/numerals';
+  import { localYMD } from '$lib/format/time';
   import { preferences } from '$lib/state/preferences.svelte';
   import { t, type TranslationKey, tithiNameByIndex } from '$lib/i18n';
 
@@ -16,14 +17,7 @@
   }
   let { days, weekStart, year, month, onSelectDay }: Props = $props();
 
-  const todayYMD = $derived.by(() => {
-    return new Intl.DateTimeFormat('en-CA', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: preferences.location?.timezone ?? 'UTC',
-    }).format(new Date());
-  });
+  const todayYMD = $derived(localYMD(new Date(), preferences.location?.timezone ?? 'UTC'));
 
   const grid = $derived(buildGrid(days, weekStart, year, month));
   // Tied to preferences.language via tr() — Hindi swaps to रवि/सोम/etc.
@@ -85,15 +79,6 @@
     return named ?? null;
   }
 
-  function isoDay(d: Date, timezone: string): string {
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(d);
-  }
-
   function tithiGlyph(p: Panchanga): { char: string; type: 'purnima' | 'amavasya' | 'ekadashi' } | null {
     if (p.tithi.index === 15) return { char: '○', type: 'purnima' };  // Full moon — bright/hollow
     if (p.tithi.index === 30) return { char: '●', type: 'amavasya' }; // New moon — dark/filled
@@ -111,7 +96,7 @@
 <div class="grid" role="grid">
   {#each grid as cell, i (i)}
     {#if cell}
-      {@const gregYmd = isoDay(cell.date, cell.location.timezone)}
+      {@const gregYmd = localYMD(cell.date, cell.location.timezone)}
       {@const gregDay = Number(gregYmd.slice(-2))}
       {@const fest = namedFestival(cell.festivals)}
       {@const glyph = tithiGlyph(cell)}

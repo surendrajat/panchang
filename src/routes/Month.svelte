@@ -3,6 +3,7 @@
   import { computeMonth } from '$lib/panchanga';
   import { preferences } from '$lib/state/preferences.svelte';
   import { applyNumerals } from '$lib/format/numerals';
+  import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey, masaNameByIndex, localeMetaOf } from '$lib/i18n';
   import { cacheKey, putCached } from '$lib/storage';
 
@@ -59,17 +60,8 @@
   }
 
   function handleSelect(d: Date): void {
-    // `d` is local-midnight-as-UTC for the picked day, in the location
-    // tz. Localize to YYYY-MM-DD in that same tz so URL matches the
-    // displayed day (see lib/format/time.ts: localYMD).
     if (!preferences.location) return;
-    const fmt = new Intl.DateTimeFormat('en-CA', {
-      timeZone: preferences.location.timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-    location.hash = `/day/${fmt.format(d)}`;
+    location.hash = `/day/${localYMD(d, preferences.location.timezone)}`;
   }
 
   function monthLabel(): string {

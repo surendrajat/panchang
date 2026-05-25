@@ -79,8 +79,10 @@
     return named ?? null;
   }
 
-  function tithiGlyph(p: Panchanga): { char: string; type: 'purnima' | 'amavasya' | 'ekadashi' } | null {
-    if (p.tithi.index === 15) return { char: '○', type: 'purnima' };  // Full moon — bright/hollow
+  function tithiGlyph(
+    p: Panchanga,
+  ): { char: string; type: 'purnima' | 'amavasya' | 'ekadashi' } | null {
+    if (p.tithi.index === 15) return { char: '○', type: 'purnima' }; // Full moon — bright/hollow
     if (p.tithi.index === 30) return { char: '●', type: 'amavasya' }; // New moon — dark/filled
     if (p.tithi.number === 11) return { char: '◆', type: 'ekadashi' };
     return null;
@@ -88,38 +90,37 @@
 </script>
 
 <div class="calendar-scroll">
-<div class="dow" role="row">
-  {#each weekdayLabels as label (label)}
-    <div role="columnheader">{label}</div>
-  {/each}
-</div>
-<div class="grid" role="grid">
-  {#each grid as cell, i (i)}
-    {#if cell}
-      {@const gregYmd = localYMD(cell.date, cell.location.timezone)}
-      {@const gregDay = Number(gregYmd.slice(-2))}
-      {@const fest = namedFestival(cell.festivals)}
-      {@const glyph = tithiGlyph(cell)}
-      {@const isToday = gregYmd === todayYMD}
-      <button
-        class="cell {cell.paksha} {isToday ? 'today' : ''}"
-        type="button"
-        onclick={() => onSelectDay?.(cell.date)}
-        aria-label={`${gregYmd}, ${cell.masa.name} ${cell.paksha} ${cell.tithi.name}${fest ? `, ${PAN_INDIA_FESTIVALS.find((f) => f.key === fest)?.displayName ?? fest}` : ''}`}
-      >
-        {#if fest}<span class="fdot" aria-hidden="true"></span>{/if}
-        <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>
-        {#if fest}<div class="fname">{festivalShortName(fest)}</div>{/if}
-        <div class="tt">
-          {#if glyph}<span class="glyph glyph--{glyph.type}">{glyph.char}</span>
-          {/if}{tithiNameByIndex(cell.tithi.index, preferences.language)}
-        </div>
-      </button>
-    {:else}
-      <span class="cell cell--empty" aria-hidden="true"></span>
-    {/if}
-  {/each}
-</div>
+  <div class="cal" role="grid">
+    {#each weekdayLabels as label (label)}
+      <div class="dh" role="columnheader">{label}</div>
+    {/each}
+    {#each grid as cell, i (i)}
+      {#if cell}
+        {@const gregYmd = localYMD(cell.date, cell.location.timezone)}
+        {@const gregDay = Number(gregYmd.slice(-2))}
+        {@const fest = namedFestival(cell.festivals)}
+        {@const glyph = tithiGlyph(cell)}
+        {@const isToday = gregYmd === todayYMD}
+        <button
+          class="cell {cell.paksha} {isToday ? 'today' : ''}"
+          role="gridcell"
+          type="button"
+          onclick={() => onSelectDay?.(cell.date)}
+          aria-label={`${gregYmd}, ${cell.masa.name} ${cell.paksha} ${cell.tithi.name}${fest ? `, ${PAN_INDIA_FESTIVALS.find((f) => f.key === fest)?.displayName ?? fest}` : ''}`}
+        >
+          {#if fest}<span class="fdot" aria-hidden="true"></span>{/if}
+          <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>
+          {#if fest}<div class="fname">{festivalShortName(fest)}</div>{/if}
+          <div class="tt">
+            {#if glyph}<span class="glyph glyph--{glyph.type}">{glyph.char}</span>
+            {/if}{tithiNameByIndex(cell.tithi.index, preferences.language)}
+          </div>
+        </button>
+      {:else}
+        <span class="cell cell--empty" role="gridcell" aria-hidden="true"></span>
+      {/if}
+    {/each}
+  </div>
 </div>
 <div class="legend">
   <span><span class="sw sw--shukla"></span>{tr('legend.shuklaPaksha')}</span>
@@ -133,29 +134,30 @@
 </div>
 
 <style>
-  .dow {
+  /* Single unified grid — headers and cells share one column definition
+     so alignment is guaranteed and one min-width drives the scroll.
+     min-width = 7 cols × 80px + 6 gaps × 2px + 2px border = 574px.
+     Must be ≥ 574px or .cal { overflow: hidden } clips column 7. */
+  .cal {
     display: grid;
-    grid-template-columns: repeat(7, minmax(42px, 1fr));
-    margin: 14px 0 6px;
-    padding: 0 2px;
+    grid-template-columns: repeat(7, minmax(80px, 1fr));
+    min-width: 574px;
+    gap: 2px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-top: 14px;
   }
-  .dow div {
+  .dh {
+    background: var(--paper);
     text-align: center;
     font-size: 10.5px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--red);
     font-weight: 700;
-    padding-bottom: 4px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(42px, 1fr));
-    gap: 2px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    overflow: hidden;
+    padding: 6px 2px 8px;
   }
   .cell {
     background: var(--cell-bg, var(--paper));
@@ -236,6 +238,9 @@
     font-weight: 600;
     margin-top: auto;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .tt .glyph {
     font-size: 13px;
@@ -267,6 +272,9 @@
     margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .legend {
     display: flex;
@@ -308,11 +316,18 @@
   :global(:root[data-theme='dark']) .sw--krishna {
     background: color-mix(in srgb, #000 38%, var(--paper));
   }
+  /* Full-bleed scroll: pull container to .wrap's edges (margin-inline: -18px)
+     so padding-inline: 18px becomes trailing space after the grid at max scroll.
+     Value must match .wrap { padding: 0 18px } in app.css. */
   .calendar-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-inline: -18px;
+    padding-inline: 18px;
   }
-  /* min-width is now implicit: 7 cols × 42px = 294px + 12px gap */
+  /* min-width: 560px → forces scroll on phones (7 × 80px + gaps + border).
+     80px columns give ~64px content — enough for most tithi names.
+     minmax(80px, 1fr) expands to fill wider screens without scroll. */
   .dot {
     font-size: 13px;
   }

@@ -16,4 +16,6 @@ export {
   festivalCacheKey,
   getFestivalsCached,
   putFestivalsCached,
+  CALCULATION_VERSION,
+  CACHE_BUST,
 } from './cache';

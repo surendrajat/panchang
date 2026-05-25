@@ -1,31 +1,39 @@
 // Optional compute-result cache. Keyed by date + location + options +
-// CALCULATION_VERSION. The helpers are tested and the Settings screen can clear
-// the table, but route-level calculations currently compute directly.
+// CALCULATION_VERSION + CACHE_BUST. The helpers are tested and the Settings
+// screen can clear the table, but daily panchanga calculations currently
+// compute directly (only festival-year results are actively cached).
 //
-// CALCULATION_VERSION must be bumped whenever any of the following
-// change in a way that affects computed values:
-//   - ayanamsa polynomial (src/lib/astro/ayanamsa.ts)
-//   - sunrise/sunset model (src/lib/astro/sunrise.ts)
-//   - tithi/nakshatra/yoga/karana boundary math
-//   - masa / paksha / adhika detection
-//   - festival rule logic (src/lib/panchanga/festivals/*, tiebreakers.ts)
+// Two invalidation levers — bump either to force fresh computation:
+//   CALCULATION_VERSION — increment when algorithm math changes and cached
+//     values would be incorrect (ayanamsa, sunrise model, tithi boundaries,
+//     festival rules). Old entries become orphans cleaned up by evictStale().
+//   CACHE_BUST — increment to force-invalidate all client caches without any
+//     algorithm change (e.g. display/naming fix, data correction). This is
+//     the recommended way to push a global cache clear via a code deploy when
+//     no computation logic actually changed.
 //
-// On a version mismatch, cached entries are silently ignored (they'll
-// be overwritten on next compute) — no migration needed because every
-// value is a pure function of the cache-key inputs.
+// Both values are embedded in every cache key, so mismatched entries are
+// silently ignored and overwritten — no migration needed.
 //
-// LRU semantics: max 1000 entries; putCached() evicts oldest createdAt when
-// over the cap. evictStale() is available to remove entries older than 30 days
-// when the cache is wired into startup.
+// TTLs: festival-year cache expires after MAX_FESTIVAL_AGE_DAYS (1 day) so
+// stale entries don't accumulate across calendar years. Daily panchanga
+// entries live longer (MAX_PANCHANGA_AGE_DAYS = 30).
 
 import { db, type CachedPanchangaRow, type CachedFestivalsRow } from './db';
 import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
 import type { Location, Panchanga, PanchangaOptions, FestivalOccurrence } from '$lib/panchanga';
 
 export const CALCULATION_VERSION = 3;
+// Bump to force-invalidate all client caches on the next deploy without
+// changing CALCULATION_VERSION (e.g. display name fix, data correction).
+export const CACHE_BUST = 1;
 
 const MAX_ENTRIES = 1000;
-const MAX_AGE_DAYS = 30;
+const MAX_PANCHANGA_AGE_DAYS = 30;
+// Festival-year caches are heavier (365-day scan) but also larger and
+// potentially stale after a deploy. 1-day TTL keeps storage lean while
+// still eliminating recomputation on back-navigation within the same day.
+const MAX_FESTIVAL_AGE_DAYS = 1;
 
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
   const { year, month, day } = civilYMDInZone(date, location.timezone);
@@ -33,7 +41,7 @@ export function cacheKey(date: Date, location: Location, options: PanchangaOptio
   const altitude = location.altitude ?? 0;
   const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
   const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}/${options.sunriseHorizon}`;
-  return `v${CALCULATION_VERSION}|${ymd}|${loc}|${opts}`;
+  return `v${CALCULATION_VERSION}|b${CACHE_BUST}|${ymd}|${loc}|${opts}`;
 }
 
 export async function getCached(key: string): Promise<Panchanga | null> {
@@ -48,10 +56,11 @@ export async function putCached(key: string, data: Panchanga): Promise<void> {
 }
 
 export async function evictStale(): Promise<number> {
-  const cutoff = new Date(Date.now() - MAX_AGE_DAYS * MS_PER_DAY);
+  const panchangaCutoff = new Date(Date.now() - MAX_PANCHANGA_AGE_DAYS * MS_PER_DAY);
+  const festivalCutoff = new Date(Date.now() - MAX_FESTIVAL_AGE_DAYS * MS_PER_DAY);
   const [panchanga, festivals] = await Promise.all([
-    db().cachedPanchangas.where('createdAt').below(cutoff).delete(),
-    db().cachedFestivals.where('createdAt').below(cutoff).delete(),
+    db().cachedPanchangas.where('createdAt').below(panchangaCutoff).delete(),
+    db().cachedFestivals.where('createdAt').below(festivalCutoff).delete(),
   ]);
   return panchanga + festivals;
 }
@@ -81,7 +90,7 @@ export function festivalCacheKey(
 ): string {
   const altitude = location.altitude ?? 0;
   const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
-  return `v${CALCULATION_VERSION}|festivals|${year}|${loc}|${opts.ayanamsa}/${opts.monthSystem}`;
+  return `v${CALCULATION_VERSION}|b${CACHE_BUST}|festivals|${year}|${loc}|${opts.ayanamsa}/${opts.monthSystem}`;
 }
 
 export async function getFestivalsCached(key: string): Promise<FestivalOccurrence[] | null> {

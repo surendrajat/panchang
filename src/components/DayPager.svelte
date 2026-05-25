@@ -82,15 +82,17 @@
     }).format(currentDate);
   }
 
-  // Compact label for narrow screens: "Wed, 25 May 2026" instead of
-  // "Wednesday, 25 May 2026". Only the weekday is shortened; month name
-  // stays full so Hindi month names (मई, जून…) are never truncated.
+  // Compact label for narrow screens. The weekday always abbreviates.
+  // Month format is locale-aware: Hindi month names (मई, जून, अगस्त…)
+  // are already compact so they stay full; English uses the short form
+  // to prevent overflow on narrow phones (Sep vs September).
   function compactDateLabel(): string {
+    const month = preferences.language === 'hi' ? ('long' as const) : ('short' as const);
     return new Intl.DateTimeFormat(localeTag, {
       timeZone: tz,
       weekday: 'short',
       day: 'numeric',
-      month: 'long',
+      month,
       year: 'numeric',
     }).format(currentDate);
   }

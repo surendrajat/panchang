@@ -10,7 +10,6 @@ export const en = {
   'nav.back': 'Back',
   'nav.skipToContent': 'Skip to content',
   'nav.openSettings': 'Open settings',
-  'nav.toggleNumerals': 'Toggle Devanagari numerals',
   'nav.themeAuto': 'Switch to light theme',
   'nav.themeLight': 'Switch to dark theme',
   'nav.themeDark': 'Switch to auto theme',

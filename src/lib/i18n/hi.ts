@@ -15,7 +15,6 @@ export const hi: Record<TranslationKey, string> = {
   'nav.back': 'वापस',
   'nav.skipToContent': 'सामग्री पर जाएं',
   'nav.openSettings': 'विन्यास खोलें',
-  'nav.toggleNumerals': 'देवनागरी अंक टॉगल करें',
   'nav.themeAuto': 'दिन की पृष्ठभूमि',
   'nav.themeLight': 'रात की पृष्ठभूमि',
   'nav.themeDark': 'स्वतः पृष्ठभूमि',

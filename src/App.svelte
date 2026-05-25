@@ -14,6 +14,7 @@
   import { t, type TranslationKey, samvatsaraNameByIndex } from '$lib/i18n';
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
   import { applyNumerals } from '$lib/format/numerals';
+  import { evictStale } from '$lib/storage';
 
   // Component-local translator that picks up the user's active language
   // reactively (preferences is $state). Pass through to the pure t().
@@ -30,6 +31,7 @@
 
   onMount(() => {
     hydratePreferences();
+    void evictStale();
     const handler = () => (hash = location.hash);
     window.addEventListener('hashchange', handler);
     return () => window.removeEventListener('hashchange', handler);
@@ -83,12 +85,6 @@
     const idx = order.indexOf(preferences.theme);
     const next = order[(idx + 1) % order.length];
     void updatePreferences({ theme: next });
-  }
-
-  function toggleNumerals(): void {
-    void updatePreferences({
-      numerals: preferences.numerals === 'latin' ? 'devanagari' : 'latin',
-    });
   }
 
   // Determine the icon glyph for the theme button.
@@ -155,16 +151,6 @@
            controls clamped to the edges. -->
       <div class="sri-seal" aria-hidden="true">|| श्री ||</div>
       <div class="controls" role="group" aria-label="App controls">
-        <button
-          class="icon-btn"
-          type="button"
-          onclick={toggleNumerals}
-          aria-pressed={preferences.numerals === 'devanagari'}
-          title={tr('nav.toggleNumerals')}
-          aria-label={tr('nav.toggleNumerals')}
-        >
-          {preferences.numerals === 'devanagari' ? '12' : '१२'}
-        </button>
         <button
           class="icon-btn"
           type="button"
@@ -334,6 +320,10 @@
     cursor: pointer;
     text-decoration: none;
     transition: background 0.15s;
+    /* Prevent the pill from pushing the controls off-screen on narrow viewports */
+    min-width: 0;
+    max-width: 46vw;
+    overflow: hidden;
   }
   .loc-pill:hover {
     background: var(--paper-3);
@@ -342,6 +332,14 @@
   .loc-pill svg {
     width: 13px;
     height: 13px;
+    flex-shrink: 0;
+  }
+  .loc-pill span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .controls {
     display: flex;
@@ -458,6 +456,12 @@
     gap: 4px;
     justify-content: center;
     margin: 4px 0 26px;
+    overflow-x: auto;
+    /* Hide scrollbar while keeping scroll functionality */
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
   }
   :global(.tab) {
     font-family: var(--font-serif);
@@ -488,6 +492,12 @@
   :global(.tab:focus-visible) {
     color: var(--ink);
     text-decoration: none !important;
+  }
+  @media (max-width: 400px) {
+    :global(.tab) {
+      padding: 7px 13px 9px;
+      font-size: 16px;
+    }
   }
 
   /* Settings header — back link replaces the tab strip while inside

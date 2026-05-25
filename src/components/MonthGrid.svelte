@@ -95,9 +95,8 @@
   }
 
   function tithiGlyph(p: Panchanga): { char: string; type: 'purnima' | 'amavasya' | 'ekadashi' } | null {
-    if (p.tithi.index === 15) return { char: '●', type: 'purnima' };
-    // Amavasya: filled circle shown dark (new moon = no light)
-    if (p.tithi.index === 30) return { char: '●', type: 'amavasya' };
+    if (p.tithi.index === 15) return { char: '○', type: 'purnima' };  // Full moon — bright/hollow
+    if (p.tithi.index === 30) return { char: '●', type: 'amavasya' }; // New moon — dark/filled
     if (p.tithi.number === 11) return { char: '◆', type: 'ekadashi' };
     return null;
   }
@@ -142,7 +141,7 @@
   <span><span class="sw sw--krishna"></span>{tr('legend.krishnaPaksha')}</span>
   <span><span class="dot dot--fest">●</span>{tr('legend.festival')}</span>
   <span
-    ><span class="dot dot--moon">●</span>{tr('common.purnima')} ·
+    ><span class="dot dot--moon">○</span>{tr('common.purnima')} ·
     <span class="dot dot--amavasya">●</span>{tr('common.amavasya')} ·
     <span class="dot dot--ekadashi">◆</span>{tr('common.ekadashi')}</span
   >
@@ -151,7 +150,7 @@
 <style>
   .dow {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
     margin: 14px 0 6px;
     padding: 0 2px;
   }
@@ -166,7 +165,7 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
     gap: 2px;
     background: var(--line);
     border: 1px solid var(--line);
@@ -328,10 +327,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  .dow,
-  .grid {
-    min-width: 280px;
-  }
+  /* min-width is now implicit: 7 cols × 42px = 294px + 12px gap */
   .dot {
     font-size: 13px;
   }

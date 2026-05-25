@@ -471,11 +471,13 @@
   .tithi-name__num {
     font-family: var(--font-serif);
     font-size: 0.4em;
+    line-height: 1;
     font-weight: 500;
     color: var(--ink-soft);
     margin-left: 2px;
-    /* Align to the bottom of the hero word's descender line */
-    vertical-align: text-bottom;
+    /* Baseline alignment: bottom of (n) sits at the same level as
+       the bottom of the hero text — no deeper than that. */
+    vertical-align: baseline;
     letter-spacing: 0;
   }
   .badge {

@@ -166,15 +166,18 @@
     <div class="about-row">
       <span class="k">{tr('settings.aboutMethodology')}</span>
       <span class="v"
-        ><a href="https://github.com/" rel="noopener" target="_blank"
-          >{tr('settings.methodologyLink')}</a
+        ><a
+          href="https://github.com/surendrajat/panchang/blob/main/METHODOLOGY.md"
+          rel="noopener"
+          target="_blank">{tr('settings.methodologyLink')}</a
         ></span
       >
     </div>
     <div class="about-row">
       <span class="k">{tr('settings.aboutSource')}</span>
       <span class="v"
-        ><a href="https://github.com/" rel="noopener" target="_blank">{tr('settings.sourceLink')}</a
+        ><a href="https://github.com/surendrajat/panchang" rel="noopener" target="_blank"
+          >{tr('settings.sourceLink')}</a
         ></span
       >
     </div>

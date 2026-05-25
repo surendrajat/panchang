@@ -14,6 +14,7 @@ export const en = {
   'nav.themeLight': 'Switch to dark theme',
   'nav.themeDark': 'Switch to auto theme',
   'nav.location': 'Change location',
+  'nav.switchLanguage': 'Switch to Hindi',
   'nav.prevMonth': 'Previous month',
   'nav.nextMonth': 'Next month',
   'nav.prevYear': 'Previous year',

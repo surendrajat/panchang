@@ -87,6 +87,10 @@
     void updatePreferences({ theme: next });
   }
 
+  function toggleLanguage(): void {
+    void updatePreferences({ language: preferences.language === 'hi' ? 'en' : 'hi' });
+  }
+
   // Theme cycle order: auto → light → dark → auto
   const themeLabel = $derived(
     preferences.theme === 'dark'
@@ -204,6 +208,15 @@
               <circle cx="12" cy="12" r="9" />
             </svg>
           {/if}
+        </button>
+        <button
+          class="icon-btn lang-btn"
+          type="button"
+          onclick={toggleLanguage}
+          title={tr('nav.switchLanguage')}
+          aria-label={tr('nav.switchLanguage')}
+        >
+          {preferences.language === 'hi' ? 'EN' : 'हि'}
         </button>
         <a
           class="icon-btn icon-btn--link"
@@ -419,6 +432,12 @@
     width: 17px;
     height: 17px;
     stroke-width: 1.75;
+  }
+  .lang-btn {
+    font-family: var(--font-serif);
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
   }
 
   .title {

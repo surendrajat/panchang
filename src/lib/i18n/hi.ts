@@ -19,6 +19,7 @@ export const hi: Record<TranslationKey, string> = {
   'nav.themeLight': 'रात की पृष्ठभूमि',
   'nav.themeDark': 'स्वतः पृष्ठभूमि',
   'nav.location': 'स्थान बदलें',
+  'nav.switchLanguage': 'Switch to English',
   'nav.prevMonth': 'विगत मास',
   'nav.nextMonth': 'आगामी मास',
   'nav.prevYear': 'विगत वर्ष',

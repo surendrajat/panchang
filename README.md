@@ -2,7 +2,7 @@
 
 A free, offline-first Hindu calendar that runs entirely in your browser.
 
-**▶ [panchang.pages.dev](https://panchang.pages.dev)**
+**🌎 [panchang.surendrajat.xyz](https://panchang.surendrajat.xyz)**
 
 No accounts. No ads. No tracking. Install once, works on a plane.
 
@@ -44,7 +44,7 @@ pnpm test       # unit + regression suite
 pnpm build      # static output → ./dist
 ```
 
-Requires Node 24 and pnpm 11 (pinned in `.nvmrc` / `package.json`).
+Requires Node 24 and pnpm 11 (pinned in `.nvmrc`).
 
 ## Contributing
 
@@ -52,7 +52,9 @@ Bug reports, accuracy comparisons against local panchangas, and language transla
 
 ## License
 
-[AGPL-3.0-or-later](./LICENSE). Modified versions served publicly must publish their changes. Open an issue if you need a different arrangement.
+Copyright 2026 @surendrajat
+
+This project is licensed under the [AGPL-3.0-or-later](./LICENSE).
 
 ## Acknowledgements
 

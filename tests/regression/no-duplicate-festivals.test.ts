@@ -30,7 +30,7 @@ const ONCE_PER_YEAR_FESTIVALS = [
 
 describe('Krishna-paksha festivals fire exactly once per year', () => {
   for (const monthSystem of ['amanta', 'purnimanta'] as const) {
-    for (const year of [2025, 2026]) {
+    for (const year of [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028]) {
       it(`${year}, ${monthSystem}`, () => {
         const from = new Date(Date.UTC(year, 0, 1));
         const to = new Date(Date.UTC(year, 11, 31));

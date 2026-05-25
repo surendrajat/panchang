@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computePanchanga } from '$lib/panchanga';
+import { MS_PER_DAY } from '$lib/astro';
 import { DELHI } from '../helpers';
 
 const MASA_ORDER = [
@@ -56,7 +57,7 @@ describe('Purnimanta Adhika-Jyeshtha 2026 monotonic transition', () => {
     const start = new Date(Date.UTC(2026, 4, 15, 12, 0, 0));
     let prevOrd = -1;
     for (let i = 0; i < 90; i++) {
-      const date = new Date(start.getTime() + i * 86_400_000);
+      const date = new Date(start.getTime() + i * MS_PER_DAY);
       const p = computePanchanga(date, DELHI, { monthSystem: 'purnimanta' });
       const ord = masaOrdinal(p.masa.name);
       // Wrap from Phalguna(11) back to Chaitra(0) is allowed.

@@ -14,6 +14,7 @@
   import { localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
   import { t, type TranslationKey, localeMetaOf } from '$lib/i18n';
+  import { MS_PER_DAY } from '$lib/astro';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
@@ -39,7 +40,7 @@
     const m = currentYMD.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!m) return currentYMD;
     const base = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
-    const next = new Date(base.getTime() + delta * 86_400_000);
+    const next = new Date(base.getTime() + delta * MS_PER_DAY);
     return localYMD(next, tz);
   }
 

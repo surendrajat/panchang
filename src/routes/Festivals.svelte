@@ -1,6 +1,6 @@
 <script lang="ts">
   import { findFestivals, PAN_INDIA_FESTIVALS, type FestivalOccurrence } from '$lib/panchanga';
-  import { civilTimeInZone } from '$lib/astro';
+  import { civilTimeInZone, MS_PER_DAY } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import { formatDate, localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
@@ -59,7 +59,7 @@
 
   function daysFromToday(d: Date): number {
     const now = Date.now();
-    return Math.round((d.getTime() - now) / 86_400_000);
+    return Math.round((d.getTime() - now) / MS_PER_DAY);
   }
 
   function countdownLabel(occ: FestivalOccurrence): string {

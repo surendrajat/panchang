@@ -16,7 +16,7 @@
 
 import type { Panchanga } from '../types';
 import type { FestivalRule } from './rules';
-import { civilYMDInZone } from '$lib/astro';
+import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
 import {
   vyapiniMatches,
   bhadraAwareVyapiniMatches,
@@ -227,7 +227,7 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
       // still Phalguna (Krishna 1 of Phalguna), so we don't need to
       // load yesterday's masa — we can gate on today's masa.
       if (p.masa.amantaName !== 'Phalguna' || p.masa.isAdhika) return false;
-      const yesterday = new Date(p.date.getTime() - 86_400_000);
+      const yesterday = new Date(p.date.getTime() - MS_PER_DAY);
       // Replay the Bhadra-aware Holika Dahan check for `yesterday`
       // using the date-based primitive (no yesterday-Panchanga needed).
       return bhadraAwareVyapiniMatchesForDate(p.location, yesterday, 'pradosha', SHUKLA(15));

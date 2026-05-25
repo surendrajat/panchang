@@ -473,10 +473,9 @@
     font-size: 0.4em;
     font-weight: 500;
     color: var(--ink-soft);
-    margin-left: 4px;
-    /* Subscript-style: bottom-aligned, tucked close to the baseline
-       of the hero word rather than floating above it. */
-    vertical-align: -0.1em;
+    margin-left: 2px;
+    /* Align to the bottom of the hero word's descender line */
+    vertical-align: text-bottom;
     letter-spacing: 0;
   }
   .badge {

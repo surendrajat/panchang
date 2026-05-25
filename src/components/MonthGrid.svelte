@@ -94,14 +94,16 @@
     }).format(d);
   }
 
-  function tithiGlyph(p: Panchanga): string {
-    if (p.tithi.index === 15) return '●'; // Purnima
-    if (p.tithi.index === 30) return '○'; // Amavasya
-    if (p.tithi.number === 11) return '◆'; // Ekadashi
-    return '';
+  function tithiGlyph(p: Panchanga): { char: string; type: 'purnima' | 'amavasya' | 'ekadashi' } | null {
+    if (p.tithi.index === 15) return { char: '●', type: 'purnima' };
+    // Amavasya: filled circle shown dark (new moon = no light)
+    if (p.tithi.index === 30) return { char: '●', type: 'amavasya' };
+    if (p.tithi.number === 11) return { char: '◆', type: 'ekadashi' };
+    return null;
   }
 </script>
 
+<div class="calendar-scroll">
 <div class="dow" role="row">
   {#each weekdayLabels as label (label)}
     <div role="columnheader">{label}</div>
@@ -125,7 +127,7 @@
         <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>
         {#if fest}<div class="fname">{festivalShortName(fest)}</div>{/if}
         <div class="tt">
-          {#if glyph}<span class="glyph">{glyph}</span>
+          {#if glyph}<span class="glyph glyph--{glyph.type}">{glyph.char}</span>
           {/if}{tithiNameByIndex(cell.tithi.index, preferences.language)}
         </div>
       </button>
@@ -134,13 +136,14 @@
     {/if}
   {/each}
 </div>
+</div>
 <div class="legend">
   <span><span class="sw sw--shukla"></span>{tr('legend.shuklaPaksha')}</span>
   <span><span class="sw sw--krishna"></span>{tr('legend.krishnaPaksha')}</span>
   <span><span class="dot dot--fest">●</span>{tr('legend.festival')}</span>
   <span
     ><span class="dot dot--moon">●</span>{tr('common.purnima')} ·
-    <span class="dot dot--moon">○</span>{tr('common.amavasya')} ·
+    <span class="dot dot--amavasya">●</span>{tr('common.amavasya')} ·
     <span class="dot dot--ekadashi">◆</span>{tr('common.ekadashi')}</span
   >
 </div>
@@ -254,6 +257,14 @@
     font-size: 13px;
     color: var(--indigo);
   }
+  .tt .glyph--amavasya {
+    color: var(--ink);
+    opacity: 0.65;
+  }
+  .dot--amavasya {
+    color: var(--ink);
+    opacity: 0.65;
+  }
   .fdot {
     position: absolute;
     left: 8px;
@@ -312,6 +323,14 @@
   }
   :global(:root[data-theme='dark']) .sw--krishna {
     background: color-mix(in srgb, #000 38%, var(--paper));
+  }
+  .calendar-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dow,
+  .grid {
+    min-width: 280px;
   }
   .dot {
     font-size: 13px;

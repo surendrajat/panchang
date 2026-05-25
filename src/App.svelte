@@ -134,7 +134,7 @@
            rendered at the masthead center. Centered absolutely so the
            toprow's flex justify-content keeps the location pill and
            controls clamped to the edges. -->
-      <div class="sri-seal" aria-hidden="true">|| श्री ||</div>
+      <div class="sri-seal" aria-hidden="true">॥ श्री ॥</div>
       <div class="controls" role="group" aria-label="App controls">
         <button
           class="icon-btn lang-btn"
@@ -143,7 +143,15 @@
           title={tr('nav.switchLanguage')}
           aria-label={tr('nav.switchLanguage')}
         >
-          {preferences.language === 'hi' ? 'EN' : 'अ'}
+          {#if preferences.language === 'hi'}
+            <svg class="lang-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <text x="12" y="19" text-anchor="middle" font-family="Georgia, 'Palatino Linotype', serif" font-size="20" font-weight="700">A</text>
+            </svg>
+          {:else}
+            <svg class="lang-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <text x="12" y="19" text-anchor="middle" font-family="Georgia, 'Palatino Linotype', serif" font-size="20" font-weight="700">अ</text>
+            </svg>
+          {/if}
         </button>
         <a
           class="icon-btn icon-btn--link"
@@ -341,10 +349,10 @@
     top: 50%;
     transform: translate(-50%, -50%);
     font-family: var(--font-serif);
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
     color: var(--red);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     white-space: nowrap;
     pointer-events: none;
   }
@@ -357,10 +365,11 @@
     stroke-width: 1.75;
   }
   .lang-btn {
-    font-family: var(--font-serif);
-    font-size: 16px;
-    letter-spacing: 0.03em;
     color: var(--ink-soft);
+  }
+  .lang-btn .lang-svg {
+    width: 22px;
+    height: 22px;
   }
 
   .title {

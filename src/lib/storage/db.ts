@@ -7,7 +7,13 @@
 //     calculations yet)
 
 import Dexie, { type Table } from 'dexie';
-import type { AyanamsaSystem, Location, MonthSystem, Panchanga } from '$lib/panchanga';
+import type {
+  AyanamsaSystem,
+  Location,
+  MonthSystem,
+  Panchanga,
+  FestivalOccurrence,
+} from '$lib/panchanga';
 
 export interface Preferences {
   id: 'singleton';
@@ -38,10 +44,17 @@ export interface CachedPanchangaRow {
   createdAt: Date;
 }
 
+export interface CachedFestivalsRow {
+  cacheKey: string;
+  data: FestivalOccurrence[];
+  createdAt: Date;
+}
+
 export class PanchangaDB extends Dexie {
   preferences!: Table<Preferences, 'singleton'>;
   savedLocations!: Table<SavedLocation, number>;
   cachedPanchangas!: Table<CachedPanchangaRow, string>;
+  cachedFestivals!: Table<CachedFestivalsRow, string>;
 
   constructor() {
     super('panchanga-db');
@@ -49,6 +62,9 @@ export class PanchangaDB extends Dexie {
       preferences: 'id',
       savedLocations: '++id, name, isDefault',
       cachedPanchangas: 'cacheKey, createdAt',
+    });
+    this.version(2).stores({
+      cachedFestivals: 'cacheKey, createdAt',
     });
   }
 }

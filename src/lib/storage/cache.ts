@@ -18,9 +18,9 @@
 // over the cap. evictStale() is available to remove entries older than 30 days
 // when the cache is wired into startup.
 
-import { db, type CachedPanchangaRow } from './db';
+import { db, type CachedPanchangaRow, type CachedFestivalsRow } from './db';
 import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
-import type { Location, Panchanga, PanchangaOptions } from '$lib/panchanga';
+import type { Location, Panchanga, PanchangaOptions, FestivalOccurrence } from '$lib/panchanga';
 
 export const CALCULATION_VERSION = 3;
 
@@ -49,7 +49,11 @@ export async function putCached(key: string, data: Panchanga): Promise<void> {
 
 export async function evictStale(): Promise<number> {
   const cutoff = new Date(Date.now() - MAX_AGE_DAYS * MS_PER_DAY);
-  return db().cachedPanchangas.where('createdAt').below(cutoff).delete();
+  const [panchanga, festivals] = await Promise.all([
+    db().cachedPanchangas.where('createdAt').below(cutoff).delete(),
+    db().cachedFestivals.where('createdAt').below(cutoff).delete(),
+  ]);
+  return panchanga + festivals;
 }
 
 async function trimIfNeeded(): Promise<void> {
@@ -61,5 +65,31 @@ async function trimIfNeeded(): Promise<void> {
 }
 
 export async function clearAll(): Promise<void> {
-  await db().cachedPanchangas.clear();
+  await Promise.all([db().cachedPanchangas.clear(), db().cachedFestivals.clear()]);
+}
+
+// ── Festival-year cache ──────────────────────────────────────────────────────
+// Keyed by year + location + ayanamsa/monthSystem + CALCULATION_VERSION.
+// A full-year festival scan (~365 panchanga evaluations) is expensive;
+// results are deterministic for a given key so we cache them indefinitely
+// (evictStale() prunes entries older than MAX_AGE_DAYS).
+
+export function festivalCacheKey(
+  year: number,
+  location: Location,
+  opts: { ayanamsa: string; monthSystem: string },
+): string {
+  const altitude = location.altitude ?? 0;
+  const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
+  return `v${CALCULATION_VERSION}|festivals|${year}|${loc}|${opts.ayanamsa}/${opts.monthSystem}`;
+}
+
+export async function getFestivalsCached(key: string): Promise<FestivalOccurrence[] | null> {
+  const row = await db().cachedFestivals.get(key);
+  return row?.data ?? null;
+}
+
+export async function putFestivalsCached(key: string, data: FestivalOccurrence[]): Promise<void> {
+  const row: CachedFestivalsRow = { cacheKey: key, data, createdAt: new Date() };
+  await db().cachedFestivals.put(row);
 }

@@ -7,6 +7,10 @@ export async function loadPreferences(): Promise<Preferences> {
   return row ?? DEFAULT_PREFERENCES;
 }
 
+export async function isFirstLaunch(): Promise<boolean> {
+  return (await db().preferences.get('singleton')) === undefined;
+}
+
 export async function savePreferences(prefs: Preferences): Promise<void> {
   await db().preferences.put({ ...prefs, id: 'singleton' });
 }

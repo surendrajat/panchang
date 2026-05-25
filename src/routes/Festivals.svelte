@@ -1,10 +1,18 @@
 <script lang="ts">
-  import { findFestivals, PAN_INDIA_FESTIVALS, type FestivalOccurrence } from '$lib/panchanga';
+  import {
+    findFestivals,
+    PAN_INDIA_FESTIVALS,
+    type FestivalOccurrence,
+    type Location,
+    type AyanamsaSystem,
+    type MonthSystem,
+  } from '$lib/panchanga';
   import { civilTimeInZone, MS_PER_DAY } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import { formatDate, localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
   import { t, type TranslationKey, localeMetaOf } from '$lib/i18n';
+  import { festivalCacheKey, getFestivalsCached, putFestivalsCached } from '$lib/storage';
 
   // Pick the language-appropriate display name for a festival.
   function festivalDisplay(o: FestivalOccurrence): string {
@@ -38,15 +46,42 @@
     'masik_shivaratri',
   ]);
 
-  const occurrences = $derived.by(() => {
-    if (!parsedYear || !preferences.location || !preferences.hydrated) return [];
-    const from = civilTimeInZone(parsedYear, 1, 1, preferences.location.timezone, 12);
-    const to = civilTimeInZone(parsedYear, 12, 31, preferences.location.timezone, 12);
-    const all = findFestivals(from, to, preferences.location, {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
+  // Compute and cache all festival occurrences for the selected year.
+  // Uses IndexedDB so repeated visits are near-instant; falls back to
+  // synchronous compute on cache miss (first load or after eviction).
+  async function loadFestivals(
+    year: number,
+    loc: Location,
+    opts: { ayanamsa: AyanamsaSystem; monthSystem: MonthSystem },
+  ): Promise<FestivalOccurrence[]> {
+    const key = festivalCacheKey(year, loc, opts);
+    const cached = await getFestivalsCached(key);
+    if (cached) return cached;
+    const from = civilTimeInZone(year, 1, 1, loc.timezone, 12);
+    const to = civilTimeInZone(year, 12, 31, loc.timezone, 12);
+    const all = findFestivals(from, to, loc, opts);
+    const results = all.filter((o) => !MONTHLY_KEYS.has(o.key));
+    await putFestivalsCached(key, results);
+    return results;
+  }
+
+  let occurrences = $state<FestivalOccurrence[]>([]);
+
+  $effect(() => {
+    if (!parsedYear || !preferences.location || !preferences.hydrated) {
+      occurrences = [];
+      return;
+    }
+    const year = parsedYear;
+    const loc = preferences.location;
+    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    let cancelled = false;
+    loadFestivals(year, loc, opts).then((results) => {
+      if (!cancelled) occurrences = results;
     });
-    return all.filter((o) => !MONTHLY_KEYS.has(o.key));
+    return () => {
+      cancelled = true;
+    };
   });
 
   function adjustYear(delta: number): string {

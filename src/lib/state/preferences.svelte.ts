@@ -6,6 +6,7 @@
 import {
   DEFAULT_PREFERENCES,
   loadPreferences,
+  isFirstLaunch,
   patchPreferences,
   type Preferences,
 } from '$lib/storage';
@@ -42,9 +43,16 @@ export const preferences = $state<PreferencesState>({
 
 export async function hydratePreferences(): Promise<void> {
   try {
-    const loaded = await loadPreferences();
+    const [loaded, firstLaunch] = await Promise.all([loadPreferences(), isFirstLaunch()]);
     Object.assign(preferences, loaded);
     if (!preferences.location) preferences.location = defaultLocation();
+    // On first launch (no saved preferences) auto-detect language from the
+    // browser. If the system language is Hindi we default to Hindi; all
+    // other languages stay at the English default for now.
+    if (firstLaunch && typeof navigator !== 'undefined') {
+      const nav = (navigator.language ?? '').toLowerCase();
+      if (nav.startsWith('hi')) preferences.language = 'hi';
+    }
   } catch {
     // IndexedDB may be unavailable (private mode, locked file). Continue
     // with defaults; user can still use the app for the session.

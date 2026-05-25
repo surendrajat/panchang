@@ -83,13 +83,14 @@
   }
 
   // Compact label for narrow screens: "Wed, 25 May 2026" instead of
-  // "Wednesday, 25 May 2026". Saves ~4–6 chars on the longest weekdays.
+  // "Wednesday, 25 May 2026". Only the weekday is shortened; month name
+  // stays full so Hindi month names (मई, जून…) are never truncated.
   function compactDateLabel(): string {
     return new Intl.DateTimeFormat(localeTag, {
       timeZone: tz,
       weekday: 'short',
       day: 'numeric',
-      month: 'short',
+      month: 'long',
       year: 'numeric',
     }).format(currentDate);
   }

@@ -90,8 +90,9 @@ const COEFFS: Record<AyanamsaSystem, AyanamsaCoeffs> = {
     // True Chitra-paksha: ayanamsa such that the ecliptic longitude of Spica
     // (Chitra) is exactly 180° sidereal. Anchored to Swiss Ephemeris's
     // SE_SIDM_TRUE_CITRA at J2000 (23.84002°, ~1′ below Lahiri) and carried
-    // forward by the same IAU precession — accurate to ~1″ over 1900–2100,
-    // since Spica's proper motion is negligible at that scale.
+    // forward by the same IAU precession. Matches Swiss-Eph's dynamic
+    // TRUE_CITRA to ≤14″ over 1900–2100 (~1″ near J2000); the residual is
+    // nutation, which the true node tracks and this smooth polynomial omits.
     baseDegreesAtJ2000: 23.84002,
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,

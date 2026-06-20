@@ -15,6 +15,8 @@ export { computeBirthChart, birthInstant } from './chart';
 export { computeGrahas, computeGraha, grahaSiderealLongitude, nakshatraOf } from './grahas';
 export { computeLagna } from './lagna';
 export { vimshottariMahadashas, antardashasOf, activeDashaIndex } from './dasha';
+export { computeMatch } from './matching';
+export type { KootaKey, KootaScore, MatchPerson, MatchResult } from './matching';
 
 export {
   GRAHA_NAMES,

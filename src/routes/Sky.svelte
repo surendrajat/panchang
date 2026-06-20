@@ -405,8 +405,8 @@
         {@const [gx, gy] = pt(g.lon, R_GRAHA)}
         {@const sel = selected?.type === 'graha' && selected.key === g.key}
         <g class="body" role="button" tabindex="0" aria-label={grahaName(g.key, lang)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
-          {#if sel}<circle cx={gx} cy={gy} r="11" class="sel-glow" />{/if}
-          <circle cx={gx} cy={gy} r="8" class="graha" />
+          {#if sel}<circle cx={gx} cy={gy} r="12" class="sel-glow" />{/if}
+          <circle cx={gx} cy={gy} r="9.5" class="graha" />
           <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
           <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaName(g.key, lang)}</text>
         </g>
@@ -459,7 +459,7 @@
         <div class="val"><dt><span class="zsym g--sun">{SUN_GLYPH}</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
         <div class="val"><dt><span class="zsym g--moon">{MOON_GLYPH}</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
-          <dt>{hi('अंतर', 'Gap')} (☾−☉) ÷ 12°</dt>
+          <dt>{hi('अंतर', 'Gap')} (<span class="zsym g--moon">{MOON_GLYPH}</span> − <span class="zsym g--sun">{SUN_GLYPH}</span>) ÷ 12°</dt>
           <dd>
             <span class="hero-num">{num(elong.toFixed(1))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b></span>
             <span class="hero-tithi muted">{paksha} · {num((tithiFrac * 100).toFixed(0))}%</span>
@@ -689,7 +689,7 @@
     fill: var(--ink);
   }
   .graha-glyph {
-    font-size: 10px;
+    font-size: 12px;
     fill: var(--ink);
   }
   /* body hover label — name appears on hover/focus, not always */

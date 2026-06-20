@@ -129,14 +129,15 @@
   const sunRashi = $derived(displaySign(sunSid));
   const moonRashi = $derived(displaySign(moonSid));
 
-  const GRAHA_META: { key: GrahaKey; hi: string; en: string }[] = [
-    { key: 'mars', hi: 'मं', en: 'Ma' },
-    { key: 'mercury', hi: 'बु', en: 'Me' },
-    { key: 'jupiter', hi: 'गु', en: 'Ju' },
-    { key: 'venus', hi: 'शु', en: 'Ve' },
-    { key: 'saturn', hi: 'श', en: 'Sa' },
-    { key: 'rahu', hi: 'रा', en: 'Ra' },
-    { key: 'ketu', hi: 'के', en: 'Ke' },
+  // Traditional Vedic planet colours, tuned to read on both light and dark.
+  const GRAHA_META: { key: GrahaKey; color: string }[] = [
+    { key: 'mars', color: '#cc4433' },
+    { key: 'mercury', color: '#3a9d63' },
+    { key: 'jupiter', color: '#cf9a1e' },
+    { key: 'venus', color: '#7f86c4' },
+    { key: 'saturn', color: '#6878a0' },
+    { key: 'rahu', color: '#8a8a8a' },
+    { key: 'ketu', color: '#a07b45' },
   ];
   const grahaPositions = $derived.by(() =>
     showGrahas
@@ -202,10 +203,10 @@
     // lon = where on the zodiac the event lands (the Moon's place, or the sign
     // boundary for a sankranti) — used for the markers around the wheel.
     return [
-      { key: 'purnima', hi: 'पूर्णिमा', en: 'Full moon', jd: pJd, lon: moonSidAt(pJd) },
-      { key: 'amavasya', hi: 'अमावस्या', en: 'New moon', jd: aJd, lon: moonSidAt(aJd) },
+      { key: 'purnima', hi: 'पूर्णिमा', en: 'Purnima', jd: pJd, lon: moonSidAt(pJd) },
+      { key: 'amavasya', hi: 'अमावस्या', en: 'Amavasya', jd: aJd, lon: moonSidAt(aJd) },
       { key: 'ekadashi', hi: 'एकादशी', en: 'Ekadashi', jd: ekJd, lon: moonSidAt(ekJd) },
-      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${rashiLabel(nextSign)} sankranti`, jd: sankrJd, lon: (nextSign * 30) % 360 },
+      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${rashiLabel(nextSign)} Sankranti`, jd: sankrJd, lon: (nextSign * 30) % 360 },
     ]
       .sort((a, b) => a.jd - b.jd)
       .map((ev) => ({ ...ev, when: eventWhen(ev.jd, fromJd) }));
@@ -236,17 +237,21 @@
     if (s.type === 'graha') {
       const k = s.key!;
       const node = k === 'rahu' || k === 'ketu';
+      const gp = grahaPositions.find((g) => g.key === k);
+      const inSign = gp ? `${hi('अभी', 'In')} ${signName(displaySign(gp.lon))}${hi(' में', '')}. ` : '';
       return {
         title: grahaLabel(k),
-        body: node
-          ? hi(
-              'चन्द्रपथ का संधि-बिंदु (राहु/केतु) — यहीं ग्रहण होते हैं। यह सदा वक्री चलता है।',
-              'A lunar node (Rahu/Ketu) — where eclipses happen. It always moves retrograde.',
-            )
-          : hi(
-              'एक ग्रह — राशियों में इसकी स्थिति कुंडली बनाती है। तेज़ गति पर इसे वक्री होते देखें।',
-              'A graha (planet) — its position among the signs shapes the kundli. Speed it up to watch it go retrograde.',
-            ),
+        body:
+          inSign +
+          (node
+            ? hi(
+                'चन्द्रपथ का संधि-बिंदु — यहीं ग्रहण होते हैं; सदा वक्री।',
+                'A lunar node — where eclipses happen; always retrograde.',
+              )
+            : hi(
+                'एक ग्रह — राशि-स्थिति कुंडली बनाती है। तेज़ गति पर वक्री होते देखें।',
+                'A graha — its sign placement shapes the kundli; speed it up to watch it go retrograde.',
+              )),
       };
     }
     const i = s.i!;
@@ -407,8 +412,8 @@
         {@const sel = selected?.type === 'graha' && selected.key === g.key}
         <g class="body" role="button" tabindex="0" aria-label={grahaLabel(g.key)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
           {#if sel}<circle cx={gx} cy={gy} r="12" class="sel-glow" />{/if}
-          <circle cx={gx} cy={gy} r="9.5" class="graha" />
-          <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
+          <circle cx={gx} cy={gy} r="9.5" class="graha" style:stroke={g.color} />
+          <text x={gx} y={gy} class="graha-glyph zsym" fill={g.color} text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
           <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaLabel(g.key)}</text>
         </g>
       {/each}

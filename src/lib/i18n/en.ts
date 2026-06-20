@@ -152,9 +152,9 @@ export const en = {
   'fest.festivalsYear': 'Festivals · {year}',
   'fest.today': 'today',
   'fest.inDays': 'in {days} days',
-  'fest.inOneDay': 'in 1 day',
+  'fest.inOneDay': 'in {days} day',
   'fest.daysAgo': '{days} days ago',
-  'fest.oneDayAgo': '1 day ago',
+  'fest.oneDayAgo': '{days} day ago',
   'fest.computing': "Computing the year's festivals…",
   'fest.invalidYear': 'Invalid year: {year}',
 

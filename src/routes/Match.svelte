@@ -82,9 +82,9 @@
   const kootaLabel = (k: KootaKey) => (lang === 'hi' ? KOOTA[k][1] : KOOTA[k][0]);
 
   function moonOf(p: Person) {
-    // Default a blank birth time to noon (as the Kundli route does) — otherwise
-    // birthInstant would parse '' to NaN and the match would silently break.
-    const instant = birthInstant(p.date, p.time || '12:00', p.place!.timezone);
+    // birthInstant defaults a blank/unknown time to noon (the standard
+    // convention), so guna milan still resolves the Moon's nakshatra.
+    const instant = birthInstant(p.date, p.time, p.place!.timezone);
     const chart = computeBirthChart(instant, p.place!, true, {
       ayanamsa: preferences.ayanamsa,
       nodeType: preferences.nodeType,
@@ -181,7 +181,7 @@
     {@render personForm(bride, 'bride')}
   </div>
 
-  {#if error}<p class="form-error">{error}</p>{/if}
+  {#if error}<p class="form-error" role="alert">{error}</p>{/if}
 
   <div class="actions">
     <button class="btn btn--primary" type="button" onclick={match} disabled={!canMatch}>

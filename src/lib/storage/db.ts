@@ -1,10 +1,11 @@
 // IndexedDB schema via Dexie.
 //
-// Three tables:
+// Tables:
 //   - preferences (singleton row, the user's settings)
-//   - savedLocations (list of bookmarked cities)
-//   - cachedPanchangas (optional memoized compute results; not wired into route
-//     calculations yet)
+//   - savedLocations (bookmarked cities)
+//   - cachedPanchangas / cachedFestivals (best-effort memoized compute results;
+//     read/written by the Today/Day/Month/Festivals routes — see cache.ts)
+//   - birthProfiles (saved births for the kundli / matching features)
 
 import Dexie, { type Table } from 'dexie';
 import type {

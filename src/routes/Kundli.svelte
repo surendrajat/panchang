@@ -259,7 +259,7 @@
           <LocationPicker location={place} onChange={(loc) => (place = loc)} />
         </div>
 
-        {#if error}<p class="form-error">{error}</p>{/if}
+        {#if error}<p class="form-error" role="alert">{error}</p>{/if}
 
         <div class="actions">
           {#if chart}

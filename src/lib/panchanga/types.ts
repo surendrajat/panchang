@@ -15,7 +15,7 @@ export type Paksha = 'shukla' | 'krishna';
 
 export interface PanchangaOptions {
   ayanamsa: AyanamsaSystem; // default 'lahiri'
-  monthSystem: MonthSystem; // default 'amanta'
+  monthSystem: MonthSystem; // engine default 'amanta' (app default is purnimanta)
   topocentric: boolean; // default false (geocentric, matches drik)
   sunriseHorizon: 'standard' | 'civil'; // default 'standard'
 }
@@ -153,6 +153,10 @@ export interface FestivalOccurrence {
 
 export const DEFAULT_OPTIONS: PanchangaOptions = {
   ayanamsa: 'lahiri',
+  // The ENGINE default is amanta (the pan-Indian/southern lunar-month
+  // convention). The APP product default is purnimanta (DEFAULT_PREFERENCES,
+  // North-Indian) and the UI always passes it explicitly — so these two
+  // defaults differ intentionally; they are not meant to be kept in sync.
   monthSystem: 'amanta',
   topocentric: false,
   sunriseHorizon: 'standard',

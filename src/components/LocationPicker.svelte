@@ -116,7 +116,7 @@
       <span class="cur muted">{tr('settings.noLocation')}</span>
     {/if}
   </div>
-  {#if error}<p class="error">{error}</p>{/if}
+  {#if error}<p class="error" role="alert">{error}</p>{/if}
 </div>
 
 <style>

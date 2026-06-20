@@ -63,6 +63,11 @@ let _language: Language = 'en';
 
 export function setLanguage(lang: Language): void {
   _language = lang;
+  // Keep the document language in sync so assistive tech (and search/print)
+  // use the right pronunciation/segmentation for Devanagari vs Latin text.
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+  }
 }
 
 export function currentLanguage(): Language {

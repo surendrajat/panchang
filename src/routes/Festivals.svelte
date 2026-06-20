@@ -100,9 +100,9 @@
   function countdownLabel(occ: FestivalOccurrence): string {
     const dt = daysFromToday(occ.date);
     if (dt === 0) return tr('fest.today');
-    if (dt === -1) return tr('fest.oneDayAgo');
+    if (dt === -1) return tr('fest.oneDayAgo', { days: num('1') });
     if (dt < 0) return tr('fest.daysAgo', { days: num(String(-dt)) });
-    if (dt === 1) return tr('fest.inOneDay');
+    if (dt === 1) return tr('fest.inOneDay', { days: num('1') });
     return tr('fest.inDays', { days: num(String(dt)) });
   }
 </script>

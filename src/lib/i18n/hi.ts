@@ -161,12 +161,12 @@ export const hi: Record<TranslationKey, string> = {
   'fest.festivalsYear': 'त्योहार · {year}',
   'fest.today': 'आज',
   'fest.inDays': '{days} दिन में',
-  'fest.inOneDay': '1 दिन में',
+  'fest.inOneDay': '{days} दिन में',
   // पूर्व ("before/past") reads more naturally than the colloquial पहले
   // in a calendar context, and matches the literary register used
   // elsewhere (विगत/आगामी).
   'fest.daysAgo': '{days} दिन पूर्व',
-  'fest.oneDayAgo': '1 दिन पूर्व',
+  'fest.oneDayAgo': '{days} दिन पूर्व',
   'fest.computing': 'वर्ष के त्योहारों की गणना हो रही है…',
   'fest.invalidYear': 'अमान्य वर्ष: {year}',
 

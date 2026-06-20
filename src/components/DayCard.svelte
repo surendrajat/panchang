@@ -296,7 +296,9 @@
             <line x1="17.7" y1="17.7" x2="19.1" y2="19.1" />
             <line x1="19.1" y1="4.9" x2="17.7" y2="6.3" />
             <line x1="6.3" y1="17.7" x2="4.9" y2="19.1" />
-          </svg>{rashiLabel(panchanga.solar.sign)}{#if hasSankranti}&thinsp;<span class="badge">{tr('year.sankranti')}</span>{/if}
+          </svg>{rashiLabel(panchanga.solar.sign)}{#if hasSankranti}&thinsp;<span class="badge"
+              >{tr('year.sankranti')}</span
+            >{/if}
         </span>
         <span class="ri-sep" aria-hidden="true">·</span>
         <span class="ri-item">

@@ -97,18 +97,6 @@
     }).format(currentDate);
   }
 
-  function shortDateLabel(ymd: string): string {
-    const m = ymd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!m) return ymd;
-    const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0));
-    return new Intl.DateTimeFormat(localeTag, {
-      timeZone: tz,
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-    }).format(d);
-  }
-
   // For the "Day" tab semantic to stay clean we use #/ for today and
   // #/day/<ymd> for any other day.
   function dayHref(ymd: string): string {

@@ -21,6 +21,9 @@ if (typeof window !== 'undefined') {
 export const clock = {
   /** Current instant; reactive — re-reads when the app regains focus/visibility. */
   get now(): Date {
+    // A fresh, immutable Date derived from the reactive nowMs — never stored or
+    // mutated, so SvelteDate isn't needed here.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     return new Date(nowMs);
   },
 };

@@ -30,7 +30,6 @@ async function main() {
   try {
     sharp = (await import(/* @vite-ignore */ 'sharp' as string)).default;
   } catch {
-    // eslint-disable-next-line no-console
     console.error('sharp is not installed. Run: pnpm add -D sharp');
     process.exit(1);
   }
@@ -69,7 +68,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

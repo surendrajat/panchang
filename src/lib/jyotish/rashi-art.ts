@@ -6,7 +6,18 @@ export type Element = 'fire' | 'earth' | 'air' | 'water';
 
 // The classical four-element cycle, repeating Mesha→Meena.
 export const RASHI_ELEMENT: readonly Element[] = [
-  'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water',
+  'fire',
+  'earth',
+  'air',
+  'water',
+  'fire',
+  'earth',
+  'air',
+  'water',
+  'fire',
+  'earth',
+  'air',
+  'water',
 ];
 
 export const ELEMENT_LABEL: Record<Element, { en: string; hi: string }> = {
@@ -18,6 +29,16 @@ export const ELEMENT_LABEL: Record<Element, { en: string; hi: string }> = {
 
 // The Western sign each rashi corresponds to (for a learner's bridge).
 export const RASHI_SIGN_EN: readonly string[] = [
-  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
 ];

@@ -108,7 +108,8 @@
   function cast(): void {
     error = null;
     if (!date || !place) {
-      error = lang === 'hi' ? 'जन्म तिथि और स्थान आवश्यक हैं।' : 'Birth date and place are required.';
+      error =
+        lang === 'hi' ? 'जन्म तिथि और स्थान आवश्यक हैं।' : 'Birth date and place are required.';
       return;
     }
     try {
@@ -157,7 +158,9 @@
     const now = new Date();
     const activeIdx = activeDashaIndex(periods, now);
     const active = activeIdx >= 0 ? periods[activeIdx] : null;
-    const activeAntar = active ? antardashasOf(active).find((a) => now >= a.start && now < a.end) : null;
+    const activeAntar = active
+      ? antardashasOf(active).find((a) => now >= a.start && now < a.end)
+      : null;
     return { periods, activeIdx, active, activeAntar };
   });
 
@@ -183,7 +186,9 @@
           numberingSystem: 'latn',
         }).format(chart.instant)
       : null;
-    const where = chart.location.name ?? `${chart.location.latitude.toFixed(2)}, ${chart.location.longitude.toFixed(2)}`;
+    const where =
+      chart.location.name ??
+      `${chart.location.latitude.toFixed(2)}, ${chart.location.longitude.toFixed(2)}`;
     return num(timeStr ? `${dateStr} · ${timeStr} · ${where}` : `${dateStr} · ${where}`);
   }
 
@@ -223,210 +228,283 @@
 </div>
 
 {#if mode === 'chart'}
-<section class="view stack stack--lg">
-  {#if editing}
-    <!-- ───────── birth-detail form ───────── -->
-    <div class="card form-card">
-      <h2>
-        {lang === 'hi' ? 'कुण्डली' : 'Kundli'}
-        <span class="deva">जन्म कुण्डली</span>
-      </h2>
-      <p class="desc">
-        {lang === 'hi'
-          ? 'जन्म की तिथि, समय और स्थान से लग्न, ग्रह स्थिति और विंशोत्तरी दशा।'
-          : 'Lagna, planetary positions, and Vimshottari dasha from a birth date, time, and place.'}
-      </p>
+  <section class="view stack stack--lg">
+    {#if editing}
+      <!-- ───────── birth-detail form ───────── -->
+      <div class="card form-card">
+        <h2>
+          {lang === 'hi' ? 'कुण्डली' : 'Kundli'}
+          <span class="deva">जन्म कुण्डली</span>
+        </h2>
+        <p class="desc">
+          {lang === 'hi'
+            ? 'जन्म की तिथि, समय और स्थान से लग्न, ग्रह स्थिति और विंशोत्तरी दशा।'
+            : 'Lagna, planetary positions, and Vimshottari dasha from a birth date, time, and place.'}
+        </p>
 
-      {#if profiles.length > 0}
-        <div class="saved">
-          <div class="saved-lab">{lang === 'hi' ? 'सहेजी कुण्डलियाँ' : 'Saved charts'}</div>
-          <div class="saved-chips">
-            {#each profiles as p (p.id)}
-              <span class="chip">
-                <button class="chip-load" type="button" onclick={() => loadProfile(p)}>
-                  {p.name} <small class="num">· {num(p.date)}</small>
-                </button>
-                <button
-                  class="chip-del"
-                  type="button"
-                  aria-label={lang === 'hi' ? 'हटाएँ' : 'Delete'}
-                  onclick={() => removeProfile(p.id)}>×</button
-                >
-              </span>
-            {/each}
+        {#if profiles.length > 0}
+          <div class="saved">
+            <div class="saved-lab">{lang === 'hi' ? 'सहेजी कुण्डलियाँ' : 'Saved charts'}</div>
+            <div class="saved-chips">
+              {#each profiles as p (p.id)}
+                <span class="chip">
+                  <button class="chip-load" type="button" onclick={() => loadProfile(p)}>
+                    {p.name} <small class="num">· {num(p.date)}</small>
+                  </button>
+                  <button
+                    class="chip-del"
+                    type="button"
+                    aria-label={lang === 'hi' ? 'हटाएँ' : 'Delete'}
+                    onclick={() => removeProfile(p.id)}>×</button
+                  >
+                </span>
+              {/each}
+            </div>
           </div>
+        {/if}
+
+        <div class="fields stack">
+          <label class="label">
+            <span class="lab"
+              >{lang === 'hi' ? 'नाम' : 'Name'}
+              <span class="hint">{lang === 'hi' ? '(वैकल्पिक)' : '(optional)'}</span></span
+            >
+            <input
+              class="input"
+              type="text"
+              bind:value={name}
+              placeholder={lang === 'hi' ? 'स्वयं' : 'Self'}
+            />
+          </label>
+
+          <div class="two-up">
+            <label class="label">
+              <span class="lab">{lang === 'hi' ? 'जन्म तिथि' : 'Date of birth'}</span>
+              <input
+                class="input"
+                type="date"
+                bind:value={date}
+                max="2100-12-31"
+                min="1800-01-01"
+              />
+            </label>
+            <label class="label">
+              <span class="lab">{lang === 'hi' ? 'जन्म समय' : 'Time of birth'}</span>
+              <input class="input" type="time" bind:value={time} disabled={!timeKnown} />
+            </label>
+          </div>
+
+          <label class="checkrow">
+            <input
+              type="checkbox"
+              checked={!timeKnown}
+              onchange={(e) => (timeKnown = !e.currentTarget.checked)}
+            />
+            <span>
+              {lang === 'hi' ? 'जन्म समय ज्ञात नहीं है' : "I don't know the birth time"}
+              <small
+                >{lang === 'hi'
+                  ? 'लग्न और भाव छोड़ दिए जाएँगे; राशि और दशा फिर भी मान्य।'
+                  : 'Lagna & houses are omitted; rashis and dasha still hold.'}</small
+              >
+            </span>
+          </label>
+
+          <div class="label">
+            <span class="lab">{lang === 'hi' ? 'जन्म स्थान' : 'Place of birth'}</span>
+            <LocationPicker location={place} onChange={(loc) => (place = loc)} />
+          </div>
+
+          {#if error}<p class="form-error" role="alert">{error}</p>{/if}
+
+          <div class="actions">
+            {#if chart}
+              <button class="btn btn--ghost" type="button" onclick={() => (editing = false)}>
+                {lang === 'hi' ? 'वापस' : 'Back to chart'}
+              </button>
+            {/if}
+            <button class="btn btn--primary" type="button" onclick={cast} disabled={!canCast}>
+              {lang === 'hi' ? 'कुण्डली बनाएँ' : 'Cast Kundli'}
+            </button>
+          </div>
+        </div>
+      </div>
+    {:else if chart}
+      <!-- ───────── result ───────── -->
+      <div class="bar-row">
+        <button
+          class="birth-bar"
+          type="button"
+          onclick={reopen}
+          aria-label={lang === 'hi' ? 'विवरण संपादित करें' : 'Edit details'}
+        >
+          <div class="birth-bar__name">
+            {name || (lang === 'hi' ? 'जन्म कुण्डली' : 'Birth chart')}
+          </div>
+          <div class="birth-bar__meta">{birthLine()}</div>
+          <svg
+            class="birth-bar__edit"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+          </svg>
+        </button>
+        <button class="btn save-btn" type="button" onclick={saveCurrent} disabled={saved}>
+          {saved ? (lang === 'hi' ? '✓ सहेजा' : '✓ Saved') : lang === 'hi' ? 'सहेजें' : 'Save'}
+        </button>
+      </div>
+
+      <!-- hero: the three facts people ask for -->
+      <div class="identity stagger">
+        <div class="id-cell">
+          <div class="id-lab">{lang === 'hi' ? 'लग्न' : 'Lagna'}</div>
+          <div class="id-val">{chart.lagna ? rashiLabel(chart.lagna.rashi) : '—'}</div>
+          <div class="id-sub">
+            {chart.lagna
+              ? formatDeg(chart.lagna.degInRashi)
+              : lang === 'hi'
+                ? 'समय अज्ञात'
+                : 'time unknown'}
+          </div>
+        </div>
+        <div class="id-cell">
+          <div class="id-lab">{lang === 'hi' ? 'राशि' : 'Rashi'}</div>
+          <div class="id-val">{rashiLabel(chart.moonRashi)}</div>
+          <div class="id-sub">{lang === 'hi' ? 'चन्द्र राशि' : 'Moon sign'}</div>
+        </div>
+        <div class="id-cell">
+          <div class="id-lab">{lang === 'hi' ? 'नक्षत्र' : 'Nakshatra'}</div>
+          <div class="id-val">{nakshatraNameByIndex(chart.moonNakshatra.index, lang)}</div>
+          <div class="id-sub">
+            {lang === 'hi'
+              ? `पाद ${num(chart.moonNakshatra.pada)}`
+              : `Pada ${num(chart.moonNakshatra.pada)}`}
+          </div>
+        </div>
+      </div>
+
+      <!-- Naamakshar: the traditional name-starting syllable, from the Moon's
+         nakshatra + pada. -->
+      <div class="naamakshar" role="note">
+        <span class="naam-lab">{lang === 'hi' ? 'नामाक्षर' : 'Name syllable'}</span>
+        <span class="naam-val"
+          >{nameSyllable(chart.moonNakshatra.index, chart.moonNakshatra.pada, lang)}</span
+        >
+        <span class="naam-hint"
+          >{lang === 'hi'
+            ? 'परंपरा से नाम इसी ध्वनि से आरम्भ होता है'
+            : 'by tradition the name begins with this sound'}</span
+        >
+      </div>
+
+      <!-- the chart, with a Rashi (D1) / Navamsa (D9) toggle -->
+      <div
+        class="varga-toggle"
+        role="group"
+        aria-label={lang === 'hi' ? 'कुण्डली प्रकार' : 'Chart type'}
+      >
+        <button
+          class="vt"
+          class:vt--on={vargaView === 1}
+          type="button"
+          onclick={() => (vargaView = 1)}
+        >
+          {lang === 'hi' ? 'राशि (D1)' : 'Rashi (D1)'}
+        </button>
+        <button
+          class="vt"
+          class:vt--on={vargaView === 9}
+          type="button"
+          onclick={() => (vargaView = 9)}
+        >
+          {lang === 'hi' ? 'नवांश (D9)' : 'Navamsa (D9)'}
+        </button>
+      </div>
+      <KundliChart {chart} {lang} {numerals} varga={vargaView} />
+
+      <!-- graha table -->
+      <div>
+        <div class="sec-head">
+          <h2>{lang === 'hi' ? 'ग्रह' : 'Grahas'}</h2>
+          <span class="deva-sm">नव ग्रह</span>
+          <span class="fill"></span>
+        </div>
+        <div class="graha-table" role="table">
+          <div class="gt-head" role="row">
+            <span role="columnheader">{lang === 'hi' ? 'ग्रह' : 'Graha'}</span>
+            <span role="columnheader">{lang === 'hi' ? 'राशि' : 'Rashi'}</span>
+            <span role="columnheader" class="gt-deg">{lang === 'hi' ? 'अंश' : 'Degree'}</span>
+            <span role="columnheader">{lang === 'hi' ? 'नक्षत्र' : 'Nakshatra'}</span>
+            <span role="columnheader" class="gt-house">{lang === 'hi' ? 'भाव' : 'House'}</span>
+          </div>
+          {#each GRAHA_ROWS as key (key)}
+            {@const g = chart.grahas.find((x) => x.key === key)}
+            {#if g}
+              <div class="gt-row" role="row">
+                <span class="gt-name" role="cell">
+                  {grahaLabel(key)}
+                  {#if g.retrograde}<span
+                      class="retro"
+                      title={lang === 'hi' ? 'वक्री' : 'Retrograde'}>℞</span
+                    >{/if}
+                </span>
+                <span role="cell">{rashiLabel(g.rashi)}</span>
+                <span class="gt-deg num" role="cell">{formatDeg(g.degInRashi)}</span>
+                <span role="cell"
+                  >{nakshatraNameByIndex(g.nakshatra, lang)}
+                  <small class="muted">({num(g.pada)})</small></span
+                >
+                <span class="gt-house num" role="cell">{g.house ? num(g.house) : '—'}</span>
+              </div>
+            {/if}
+          {/each}
+        </div>
+      </div>
+
+      <!-- vimshottari dasha -->
+      {#if dasha}
+        <div>
+          <div class="sec-head">
+            <h2>{lang === 'hi' ? 'विंशोत्तरी दशा' : 'Vimshottari Dasha'}</h2>
+            <span class="deva-sm">{lang === 'hi' ? 'महादशा' : 'Mahadasha'}</span>
+            <span class="fill"></span>
+          </div>
+          {#if dasha.active}
+            <p class="dasha-now">
+              {lang === 'hi' ? 'वर्तमान' : 'Running now'}:
+              <b>{dashaLordName(dasha.active.lord)}</b>
+              {#if dasha.activeAntar}<span class="muted">
+                  · {lang === 'hi' ? 'अन्तर्दशा' : 'antardasha'}
+                  {dashaLordName(dasha.activeAntar.lord)}</span
+                >{/if}
+            </p>
+          {/if}
+          <ol class="dasha-list">
+            {#each dasha.periods as p, i (i)}
+              <li class="dasha-row" class:active={i === dasha.activeIdx}>
+                <span class="dr-lord">{dashaLordName(p.lord)}</span>
+                <span class="dr-span num">{yearOf(p.start)} – {yearOf(p.end)}</span>
+                <span class="dr-years num muted"
+                  >{num(p.years)} {lang === 'hi' ? 'वर्ष' : 'yrs'}</span
+                >
+              </li>
+            {/each}
+          </ol>
         </div>
       {/if}
 
-      <div class="fields stack">
-        <label class="label">
-          <span class="lab">{lang === 'hi' ? 'नाम' : 'Name'} <span class="hint">{lang === 'hi' ? '(वैकल्पिक)' : '(optional)'}</span></span>
-          <input class="input" type="text" bind:value={name} placeholder={lang === 'hi' ? 'स्वयं' : 'Self'} />
-        </label>
-
-        <div class="two-up">
-          <label class="label">
-            <span class="lab">{lang === 'hi' ? 'जन्म तिथि' : 'Date of birth'}</span>
-            <input class="input" type="date" bind:value={date} max="2100-12-31" min="1800-01-01" />
-          </label>
-          <label class="label">
-            <span class="lab">{lang === 'hi' ? 'जन्म समय' : 'Time of birth'}</span>
-            <input class="input" type="time" bind:value={time} disabled={!timeKnown} />
-          </label>
-        </div>
-
-        <label class="checkrow">
-          <input type="checkbox" checked={!timeKnown} onchange={(e) => (timeKnown = !e.currentTarget.checked)} />
-          <span>
-            {lang === 'hi' ? 'जन्म समय ज्ञात नहीं है' : "I don't know the birth time"}
-            <small>{lang === 'hi' ? 'लग्न और भाव छोड़ दिए जाएँगे; राशि और दशा फिर भी मान्य।' : 'Lagna & houses are omitted; rashis and dasha still hold.'}</small>
-          </span>
-        </label>
-
-        <div class="label">
-          <span class="lab">{lang === 'hi' ? 'जन्म स्थान' : 'Place of birth'}</span>
-          <LocationPicker location={place} onChange={(loc) => (place = loc)} />
-        </div>
-
-        {#if error}<p class="form-error" role="alert">{error}</p>{/if}
-
-        <div class="actions">
-          {#if chart}
-            <button class="btn btn--ghost" type="button" onclick={() => (editing = false)}>
-              {lang === 'hi' ? 'वापस' : 'Back to chart'}
-            </button>
-          {/if}
-          <button class="btn btn--primary" type="button" onclick={cast} disabled={!canCast}>
-            {lang === 'hi' ? 'कुण्डली बनाएँ' : 'Cast Kundli'}
-          </button>
-        </div>
-      </div>
-    </div>
-  {:else if chart}
-    <!-- ───────── result ───────── -->
-    <div class="bar-row">
-      <button class="birth-bar" type="button" onclick={reopen} aria-label={lang === 'hi' ? 'विवरण संपादित करें' : 'Edit details'}>
-        <div class="birth-bar__name">{name || (lang === 'hi' ? 'जन्म कुण्डली' : 'Birth chart')}</div>
-        <div class="birth-bar__meta">{birthLine()}</div>
-        <svg class="birth-bar__edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-        </svg>
-      </button>
-      <button class="btn save-btn" type="button" onclick={saveCurrent} disabled={saved}>
-        {saved ? (lang === 'hi' ? '✓ सहेजा' : '✓ Saved') : lang === 'hi' ? 'सहेजें' : 'Save'}
-      </button>
-    </div>
-
-    <!-- hero: the three facts people ask for -->
-    <div class="identity stagger">
-      <div class="id-cell">
-        <div class="id-lab">{lang === 'hi' ? 'लग्न' : 'Lagna'}</div>
-        <div class="id-val">{chart.lagna ? rashiLabel(chart.lagna.rashi) : '—'}</div>
-        <div class="id-sub">{chart.lagna ? formatDeg(chart.lagna.degInRashi) : (lang === 'hi' ? 'समय अज्ञात' : 'time unknown')}</div>
-      </div>
-      <div class="id-cell">
-        <div class="id-lab">{lang === 'hi' ? 'राशि' : 'Rashi'}</div>
-        <div class="id-val">{rashiLabel(chart.moonRashi)}</div>
-        <div class="id-sub">{lang === 'hi' ? 'चन्द्र राशि' : 'Moon sign'}</div>
-      </div>
-      <div class="id-cell">
-        <div class="id-lab">{lang === 'hi' ? 'नक्षत्र' : 'Nakshatra'}</div>
-        <div class="id-val">{nakshatraNameByIndex(chart.moonNakshatra.index, lang)}</div>
-        <div class="id-sub">{lang === 'hi' ? `पाद ${num(chart.moonNakshatra.pada)}` : `Pada ${num(chart.moonNakshatra.pada)}`}</div>
-      </div>
-    </div>
-
-    <!-- Naamakshar: the traditional name-starting syllable, from the Moon's
-         nakshatra + pada. -->
-    <div class="naamakshar" role="note">
-      <span class="naam-lab">{lang === 'hi' ? 'नामाक्षर' : 'Name syllable'}</span>
-      <span class="naam-val">{nameSyllable(chart.moonNakshatra.index, chart.moonNakshatra.pada, lang)}</span>
-      <span class="naam-hint"
-        >{lang === 'hi'
-          ? 'परंपरा से नाम इसी ध्वनि से आरम्भ होता है'
-          : 'by tradition the name begins with this sound'}</span
-      >
-    </div>
-
-    <!-- the chart, with a Rashi (D1) / Navamsa (D9) toggle -->
-    <div class="varga-toggle" role="group" aria-label={lang === 'hi' ? 'कुण्डली प्रकार' : 'Chart type'}>
-      <button class="vt" class:vt--on={vargaView === 1} type="button" onclick={() => (vargaView = 1)}>
-        {lang === 'hi' ? 'राशि (D1)' : 'Rashi (D1)'}
-      </button>
-      <button class="vt" class:vt--on={vargaView === 9} type="button" onclick={() => (vargaView = 9)}>
-        {lang === 'hi' ? 'नवांश (D9)' : 'Navamsa (D9)'}
-      </button>
-    </div>
-    <KundliChart {chart} {lang} {numerals} varga={vargaView} />
-
-    <!-- graha table -->
-    <div>
-      <div class="sec-head">
-        <h2>{lang === 'hi' ? 'ग्रह' : 'Grahas'}</h2>
-        <span class="deva-sm">नव ग्रह</span>
-        <span class="fill"></span>
-      </div>
-      <div class="graha-table" role="table">
-        <div class="gt-head" role="row">
-          <span role="columnheader">{lang === 'hi' ? 'ग्रह' : 'Graha'}</span>
-          <span role="columnheader">{lang === 'hi' ? 'राशि' : 'Rashi'}</span>
-          <span role="columnheader" class="gt-deg">{lang === 'hi' ? 'अंश' : 'Degree'}</span>
-          <span role="columnheader">{lang === 'hi' ? 'नक्षत्र' : 'Nakshatra'}</span>
-          <span role="columnheader" class="gt-house">{lang === 'hi' ? 'भाव' : 'House'}</span>
-        </div>
-        {#each GRAHA_ROWS as key (key)}
-          {@const g = chart.grahas.find((x) => x.key === key)}
-          {#if g}
-            <div class="gt-row" role="row">
-              <span class="gt-name" role="cell">
-                {grahaLabel(key)}
-                {#if g.retrograde}<span class="retro" title={lang === 'hi' ? 'वक्री' : 'Retrograde'}>℞</span>{/if}
-              </span>
-              <span role="cell">{rashiLabel(g.rashi)}</span>
-              <span class="gt-deg num" role="cell">{formatDeg(g.degInRashi)}</span>
-              <span role="cell">{nakshatraNameByIndex(g.nakshatra, lang)} <small class="muted">({num(g.pada)})</small></span>
-              <span class="gt-house num" role="cell">{g.house ? num(g.house) : '—'}</span>
-            </div>
-          {/if}
-        {/each}
-      </div>
-    </div>
-
-    <!-- vimshottari dasha -->
-    {#if dasha}
-      <div>
-        <div class="sec-head">
-          <h2>{lang === 'hi' ? 'विंशोत्तरी दशा' : 'Vimshottari Dasha'}</h2>
-          <span class="deva-sm">{lang === 'hi' ? 'महादशा' : 'Mahadasha'}</span>
-          <span class="fill"></span>
-        </div>
-        {#if dasha.active}
-          <p class="dasha-now">
-            {lang === 'hi' ? 'वर्तमान' : 'Running now'}:
-            <b>{dashaLordName(dasha.active.lord)}</b>
-            {#if dasha.activeAntar}<span class="muted"> · {lang === 'hi' ? 'अन्तर्दशा' : 'antardasha'} {dashaLordName(dasha.activeAntar.lord)}</span>{/if}
-          </p>
-        {/if}
-        <ol class="dasha-list">
-          {#each dasha.periods as p, i (i)}
-            <li class="dasha-row" class:active={i === dasha.activeIdx}>
-              <span class="dr-lord">{dashaLordName(p.lord)}</span>
-              <span class="dr-span num">{yearOf(p.start)} – {yearOf(p.end)}</span>
-              <span class="dr-years num muted">{num(p.years)} {lang === 'hi' ? 'वर्ष' : 'yrs'}</span>
-            </li>
-          {/each}
-        </ol>
-      </div>
+      <!-- methodology / honesty -->
+      <p class="method-note">
+        {lang === 'hi'
+          ? 'गणना: लाहिरी अयनांश · मध्य राहु · पूर्ण-राशि भाव · ज्योतिष इंजन (पूर्वावलोकन)। जन्म समय में कुछ मिनटों का अंतर लग्न बदल सकता है।'
+          : 'Computed with Lahiri ayanamsa · mean node · whole-sign houses · jyotish engine (preview). A few minutes of birth-time uncertainty can shift the lagna near a cusp.'}
+      </p>
     {/if}
-
-    <!-- methodology / honesty -->
-    <p class="method-note">
-      {lang === 'hi'
-        ? 'गणना: लाहिरी अयनांश · मध्य राहु · पूर्ण-राशि भाव · ज्योतिष इंजन (पूर्वावलोकन)। जन्म समय में कुछ मिनटों का अंतर लग्न बदल सकता है।'
-        : 'Computed with Lahiri ayanamsa · mean node · whole-sign houses · jyotish engine (preview). A few minutes of birth-time uncertainty can shift the lagna near a cusp.'}
-    </p>
-  {/if}
-</section>
+  </section>
 {:else}
   <Match />
 {/if}

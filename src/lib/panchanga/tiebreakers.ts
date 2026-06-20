@@ -525,8 +525,7 @@ function findSankrantiTransitJD(
 ): number {
   let lo = bracketStartJD;
   let hi = lo + 4;
-  const siderealAt = (jd: number) =>
-    siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys);
+  const siderealAt = (jd: number) => siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys);
   for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
     if (siderealAt(mid) < targetDeg) lo = mid;

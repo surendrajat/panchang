@@ -3,12 +3,7 @@
   import LocationPicker from '$components/LocationPicker.svelte';
   import { preferences } from '$lib/state/preferences.svelte';
   import type { Location } from '$lib/panchanga';
-  import {
-    computeBirthChart,
-    birthInstant,
-    computeMatch,
-    type KootaKey,
-  } from '$lib/jyotish';
+  import { computeBirthChart, birthInstant, computeMatch, type KootaKey } from '$lib/jyotish';
   import { nakshatraNameByIndex } from '$lib/i18n';
   import { rashiLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
@@ -86,7 +81,10 @@
   function match(): void {
     error = null;
     if (!groom.date || !groom.place || !bride.date || !bride.place) {
-      error = lang === 'hi' ? 'दोनों की जन्म तिथि और स्थान आवश्यक हैं।' : "Both partners' birth date and place are required.";
+      error =
+        lang === 'hi'
+          ? 'दोनों की जन्म तिथि और स्थान आवश्यक हैं।'
+          : "Both partners' birth date and place are required.";
       return;
     }
     try {
@@ -141,11 +139,23 @@
             {/each}
           </select>
         {/if}
-        <input class="input" type="text" bind:value={p.name} aria-label={lang === 'hi' ? 'नाम' : 'Name'} placeholder={lang === 'hi' ? 'नाम (वैकल्पिक)' : 'Name (optional)'} />
+        <input
+          class="input"
+          type="text"
+          bind:value={p.name}
+          aria-label={lang === 'hi' ? 'नाम' : 'Name'}
+          placeholder={lang === 'hi' ? 'नाम (वैकल्पिक)' : 'Name (optional)'}
+        />
         <div class="two-up">
           <label class="label">
             <span class="lab">{lang === 'hi' ? 'जन्म तिथि' : 'Date'}</span>
-            <input class="input" type="date" bind:value={p.date} min="1800-01-01" max="2100-12-31" />
+            <input
+              class="input"
+              type="date"
+              bind:value={p.date}
+              min="1800-01-01"
+              max="2100-12-31"
+            />
           </label>
           <label class="label">
             <span class="lab">{lang === 'hi' ? 'समय' : 'Time'}</span>
@@ -188,9 +198,17 @@
       </div>
       <div class="score-band score-band--{band.tone}">{lang === 'hi' ? band.hi : band.en}</div>
       <div class="pair-line">
-        <span>{groom.name || (lang === 'hi' ? 'वर' : 'Groom')}: {nakshatraNameByIndex(out.g.nak, lang)} · {rashiLabel(out.g.rashi)}</span>
+        <span
+          >{groom.name || (lang === 'hi' ? 'वर' : 'Groom')}: {nakshatraNameByIndex(out.g.nak, lang)} ·
+          {rashiLabel(out.g.rashi)}</span
+        >
         <span class="pair-amp">⚭</span>
-        <span>{bride.name || (lang === 'hi' ? 'वधू' : 'Bride')}: {nakshatraNameByIndex(out.b.nak, lang)} · {rashiLabel(out.b.rashi)}</span>
+        <span
+          >{bride.name || (lang === 'hi' ? 'वधू' : 'Bride')}: {nakshatraNameByIndex(
+            out.b.nak,
+            lang,
+          )} · {rashiLabel(out.b.rashi)}</span
+        >
       </div>
     </div>
 
@@ -199,8 +217,12 @@
       {#each out.result.kootas as k (k.key)}
         <div class="koota">
           <div class="koota-name">{kootaLabel(k.key)}</div>
-          <div class="koota-bar"><div class="koota-fill" style="width: {(k.got / k.max) * 100}%"></div></div>
-          <div class="koota-pts num"><b>{num(k.got)}</b><span class="koota-max">/{num(k.max)}</span></div>
+          <div class="koota-bar">
+            <div class="koota-fill" style="width: {(k.got / k.max) * 100}%"></div>
+          </div>
+          <div class="koota-pts num">
+            <b>{num(k.got)}</b><span class="koota-max">/{num(k.max)}</span>
+          </div>
         </div>
       {/each}
     </div>
@@ -211,7 +233,8 @@
         <b>{lang === 'hi' ? 'दोष' : 'Dosha'}:</b>
         {#if out.result.nadiDosha}<span>{lang === 'hi' ? 'नाड़ी दोष' : 'Nadi dosha'}</span>{/if}
         {#if out.result.nadiDosha && out.result.bhakootDosha}·{/if}
-        {#if out.result.bhakootDosha}<span>{lang === 'hi' ? 'भकूट दोष' : 'Bhakoot dosha'}</span>{/if}
+        {#if out.result.bhakootDosha}<span>{lang === 'hi' ? 'भकूट दोष' : 'Bhakoot dosha'}</span
+          >{/if}
       </div>
     {/if}
 
@@ -293,10 +316,18 @@
     border: 3px solid var(--line);
     background: var(--paper-2);
   }
-  .score-ring--great { border-color: var(--ok); }
-  .score-ring--good { border-color: var(--gold); }
-  .score-ring--ok { border-color: var(--ink-soft); }
-  .score-ring--low { border-color: var(--red); }
+  .score-ring--great {
+    border-color: var(--ok);
+  }
+  .score-ring--good {
+    border-color: var(--gold);
+  }
+  .score-ring--ok {
+    border-color: var(--ink-soft);
+  }
+  .score-ring--low {
+    border-color: var(--red);
+  }
   .score-num {
     font-family: var(--font-serif);
     font-size: 48px;
@@ -314,10 +345,18 @@
     font-size: 22px;
     font-weight: 600;
   }
-  .score-band--great { color: var(--ok); }
-  .score-band--good { color: var(--gold); }
-  .score-band--ok { color: var(--ink); }
-  .score-band--low { color: var(--red); }
+  .score-band--great {
+    color: var(--ok);
+  }
+  .score-band--good {
+    color: var(--gold);
+  }
+  .score-band--ok {
+    color: var(--ink);
+  }
+  .score-band--low {
+    color: var(--red);
+  }
   .pair-line {
     display: flex;
     flex-wrap: wrap;
@@ -368,7 +407,11 @@
   }
   .koota-fill {
     height: 100%;
-    background: linear-gradient(to right, color-mix(in srgb, var(--gold) 70%, var(--red)), var(--gold));
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--gold) 70%, var(--red)),
+      var(--gold)
+    );
     border-radius: 999px;
   }
   .koota-pts {

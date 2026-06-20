@@ -10,9 +10,15 @@
   // cap, Mercury's craters, Venus' cloud, a node's shadow. Renders an SVG <g>
   // to sit inside a parent <svg>; used for the grahas on the sky wheel.
   import type { GrahaKey } from '$lib/jyotish';
-  let { kind, cx = 0, cy = 0, r = 9 }: { kind: GrahaKey; cx?: number; cy?: number; r?: number } = $props();
+  let {
+    kind,
+    cx = 0,
+    cy = 0,
+    r = 9,
+  }: { kind: GrahaKey; cx?: number; cy?: number; r?: number } = $props();
 
-  const id = `bi${(_uid += 1)}`;
+  _uid += 1;
+  const id = `bi${_uid}`;
   // [highlight, mid, shadow] — sphere shaded light (top-left) to dark (rim)
   const GRAD: Record<GrahaKey, [string, string, string]> = {
     sun: ['#fff3c4', '#ffc83a', '#ee8a00'],
@@ -39,20 +45,41 @@
       <stop offset="58%" stop-color="#000" stop-opacity="0" />
       <stop offset="100%" stop-color="#000" stop-opacity="0.34" />
     </radialGradient>
-    <clipPath id="{id}c"><circle {cx} {cy} r={r} /></clipPath>
+    <clipPath id="{id}c"><circle {cx} {cy} {r} /></clipPath>
   </defs>
 
   <!-- Saturn ring: back half drawn behind the globe -->
   {#if kind === 'saturn'}
-    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 1 {cx + r * 2} {cy}" fill="none" stroke="#caa85e" stroke-width={Math.max(1, r * 0.22)} transform="rotate(-18 {cx} {cy})" opacity="0.9" />
+    <path
+      d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 1 {cx + r * 2} {cy}"
+      fill="none"
+      stroke="#caa85e"
+      stroke-width={Math.max(1, r * 0.22)}
+      transform="rotate(-18 {cx} {cy})"
+      opacity="0.9"
+    />
   {/if}
 
-  <circle {cx} {cy} r={r} fill="url(#{id}g)" />
+  <circle {cx} {cy} {r} fill="url(#{id}g)" />
 
   <g clip-path="url(#{id}c)">
     {#if kind === 'mars'}
-      <ellipse cx={cx - r * 0.12} cy={cy + r * 0.3} rx={r * 0.52} ry={r * 0.26} fill="#6e2410" opacity="0.4" />
-      <ellipse cx={cx + r * 0.42} cy={cy - r * 0.05} rx={r * 0.2} ry={r * 0.13} fill="#6e2410" opacity="0.3" />
+      <ellipse
+        cx={cx - r * 0.12}
+        cy={cy + r * 0.3}
+        rx={r * 0.52}
+        ry={r * 0.26}
+        fill="#6e2410"
+        opacity="0.4"
+      />
+      <ellipse
+        cx={cx + r * 0.42}
+        cy={cy - r * 0.05}
+        rx={r * 0.2}
+        ry={r * 0.13}
+        fill="#6e2410"
+        opacity="0.3"
+      />
       <ellipse {cx} cy={cy - r * 0.78} rx={r * 0.5} ry={r * 0.26} fill="#fbf4ea" opacity="0.85" />
     {:else if kind === 'mercury'}
       <circle cx={cx - r * 0.3} cy={cy - r * 0.14} r={r * 0.22} fill="#4f463c" opacity="0.5" />
@@ -67,26 +94,76 @@
       <ellipse {cx} cy={cy - r * 0.16} rx={r} ry={r * 0.16} fill="#a06a38" opacity="0.5" />
       <ellipse {cx} cy={cy + r * 0.22} rx={r} ry={r * 0.14} fill="#7e5228" opacity="0.55" />
       <ellipse {cx} cy={cy + r * 0.56} rx={r} ry={r * 0.12} fill="#9a6634" opacity="0.5" />
-      <ellipse cx={cx + r * 0.36} cy={cy + r * 0.2} rx={r * 0.22} ry={r * 0.15} fill="#bf4a32" opacity="0.9" />
+      <ellipse
+        cx={cx + r * 0.36}
+        cy={cy + r * 0.2}
+        rx={r * 0.22}
+        ry={r * 0.15}
+        fill="#bf4a32"
+        opacity="0.9"
+      />
     {:else if kind === 'rahu' || kind === 'ketu'}
-      <ellipse cx={cx - r * 0.3} cy={cy - r * 0.3} rx={r * 0.45} ry={r * 0.55} fill="#fff" opacity="0.06" />
+      <ellipse
+        cx={cx - r * 0.3}
+        cy={cy - r * 0.3}
+        rx={r * 0.45}
+        ry={r * 0.55}
+        fill="#fff"
+        opacity="0.06"
+      />
     {/if}
-    <circle {cx} {cy} r={r} fill="url(#{id}s)" />
+    <circle {cx} {cy} {r} fill="url(#{id}s)" />
   </g>
 
-  <circle {cx} {cy} r={r} fill="none" stroke="rgba(30,16,4,0.28)" stroke-width="0.6" />
+  <circle {cx} {cy} {r} fill="none" stroke="rgba(30,16,4,0.28)" stroke-width="0.6" />
 
   <!-- Saturn ring: front half over the globe + a thin gap line -->
   {#if kind === 'saturn'}
-    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}" fill="none" stroke="#e4cd8e" stroke-width={Math.max(1, r * 0.22)} transform="rotate(-18 {cx} {cy})" />
-    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}" fill="none" stroke="#9c7f47" stroke-width="0.5" transform="rotate(-18 {cx} {cy})" opacity="0.7" />
+    <path
+      d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}"
+      fill="none"
+      stroke="#e4cd8e"
+      stroke-width={Math.max(1, r * 0.22)}
+      transform="rotate(-18 {cx} {cy})"
+    />
+    <path
+      d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}"
+      fill="none"
+      stroke="#9c7f47"
+      stroke-width="0.5"
+      transform="rotate(-18 {cx} {cy})"
+      opacity="0.7"
+    />
   {/if}
   {#if kind === 'rahu'}
-    <circle {cx} {cy} r={r * 1.16} fill="none" stroke="#a99ce0" stroke-width="0.9" stroke-dasharray="1.6 2" opacity="0.7" />
+    <circle
+      {cx}
+      {cy}
+      r={r * 1.16}
+      fill="none"
+      stroke="#a99ce0"
+      stroke-width="0.9"
+      stroke-dasharray="1.6 2"
+      opacity="0.7"
+    />
   {/if}
   {#if kind === 'ketu'}
-    <path d="M{cx + r * 0.6} {cy - r * 0.6} q{r * 1.5} -{r * 0.2} {r * 2.4} {r * 0.8}" fill="none" stroke="#cda35d" stroke-width={Math.max(0.8, r * 0.16)} stroke-linecap="round" opacity="0.6" />
-    <path d="M{cx + r * 0.5} {cy - r * 0.1} q{r * 1.4} {r * 0.1} {r * 2.2} {r * 1.1}" fill="none" stroke="#cda35d" stroke-width={Math.max(0.6, r * 0.1)} stroke-linecap="round" opacity="0.4" />
+    <path
+      d="M{cx + r * 0.6} {cy - r * 0.6} q{r * 1.5} -{r * 0.2} {r * 2.4} {r * 0.8}"
+      fill="none"
+      stroke="#cda35d"
+      stroke-width={Math.max(0.8, r * 0.16)}
+      stroke-linecap="round"
+      opacity="0.6"
+    />
+    <path
+      d="M{cx + r * 0.5} {cy - r * 0.1} q{r * 1.4} {r * 0.1} {r * 2.2} {r * 1.1}"
+      fill="none"
+      stroke="#cda35d"
+      stroke-width={Math.max(0.6, r * 0.1)}
+      stroke-linecap="round"
+      opacity="0.4"
+    />
   {/if}
 </g>
 

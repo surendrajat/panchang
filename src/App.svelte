@@ -174,11 +174,25 @@
         >
           {#if preferences.language === 'hi'}
             <svg class="lang-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <text x="12" y="19" text-anchor="middle" font-family="Georgia, 'Palatino Linotype', serif" font-size="20" font-weight="700">A</text>
+              <text
+                x="12"
+                y="19"
+                text-anchor="middle"
+                font-family="Georgia, 'Palatino Linotype', serif"
+                font-size="20"
+                font-weight="700">A</text
+              >
             </svg>
           {:else}
             <svg class="lang-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <text x="12" y="19" text-anchor="middle" font-family="Georgia, 'Palatino Linotype', serif" font-size="20" font-weight="700">अ</text>
+              <text
+                x="12"
+                y="19"
+                text-anchor="middle"
+                font-family="Georgia, 'Palatino Linotype', serif"
+                font-size="20"
+                font-weight="700">अ</text
+              >
             </svg>
           {/if}
         </button>

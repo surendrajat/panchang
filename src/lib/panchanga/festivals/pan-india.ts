@@ -33,8 +33,18 @@ import {
 
 // Amanta month order, for the kshaya-Pratipada boundary rule in `inShukla`.
 const AMANTA_ORDER = [
-  'Chaitra', 'Vaishakha', 'Jyeshtha', 'Ashadha', 'Shravana', 'Bhadrapada',
-  'Ashvina', 'Kartika', 'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
+  'Chaitra',
+  'Vaishakha',
+  'Jyeshtha',
+  'Ashadha',
+  'Shravana',
+  'Bhadrapada',
+  'Ashvina',
+  'Kartika',
+  'Margashirsha',
+  'Pausha',
+  'Magha',
+  'Phalguna',
 ];
 const prevAmanta = (m: string): string => {
   const i = AMANTA_ORDER.indexOf(m);
@@ -137,7 +147,8 @@ function inShukla(tithiNumber: number, amantaMasa: string) {
     const prev = tithiNumber === 1 ? 30 : tithiNumber - 1;
     const next = tithiNumber === 30 ? 1 : tithiNumber + 1;
     if (today !== prev) return false;
-    if (sunriseTithiIndex(p.location, new Date(p.date.getTime() + MS_PER_DAY)) !== next) return false;
+    if (sunriseTithiIndex(p.location, new Date(p.date.getTime() + MS_PER_DAY)) !== next)
+      return false;
     if (tithiNumber !== 1) {
       // A non-Pratipada kshaya tithi falls mid-month (labelled M).
       return p.masa.amantaName === amantaMasa;
@@ -148,7 +159,10 @@ function inShukla(tithiNumber: number, amantaMasa: string) {
     // ...and the new month beginning here must be NIJA, not the leap (Adhika)
     // month: festivals skip Adhika maas. (Edge: Adhika + kshaya Pratipada, e.g.
     // Chaitra 1964.) Adhika ⇔ the Sun crosses no sign during the lunar month.
-    const ctx = masaContext(dateToJulian(new Date(p.date.getTime() + MS_PER_DAY)), p.options.ayanamsa);
+    const ctx = masaContext(
+      dateToJulian(new Date(p.date.getTime() + MS_PER_DAY)),
+      p.options.ayanamsa,
+    );
     return (ctx.signAtEnd - ctx.signAtStart + 12) % 12 !== 0;
   };
 }

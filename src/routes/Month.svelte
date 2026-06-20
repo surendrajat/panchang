@@ -27,7 +27,12 @@
 
   const days = $derived.by(() => {
     if (!parsed || !preferences.location || !preferences.hydrated) return [];
-    return computeMonth(parsed.year, parsed.month, preferences.location, panchangaOptionsFrom(preferences));
+    return computeMonth(
+      parsed.year,
+      parsed.month,
+      preferences.location,
+      panchangaOptionsFrom(preferences),
+    );
   });
 
   // Populate the per-day cache after each month computation so

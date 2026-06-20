@@ -15,7 +15,15 @@
 import { RASHI_LORDS } from './names';
 import type { GrahaKey } from './types';
 
-export type KootaKey = 'varna' | 'vashya' | 'tara' | 'yoni' | 'grahaMaitri' | 'gana' | 'bhakoot' | 'nadi';
+export type KootaKey =
+  | 'varna'
+  | 'vashya'
+  | 'tara'
+  | 'yoni'
+  | 'grahaMaitri'
+  | 'gana'
+  | 'bhakoot'
+  | 'nadi';
 
 export interface KootaScore {
   key: KootaKey;
@@ -157,9 +165,11 @@ function nadi(nak: number): number {
 export function computeMatch(groom: MatchPerson, bride: MatchPerson): MatchResult {
   const varna = VARNA_RANK[groom.rashi] >= VARNA_RANK[bride.rashi] ? 1 : 0;
 
-  const vashya = VASHYA[vashyaGroup(bride.rashi, bride.rashiDeg)][vashyaGroup(groom.rashi, groom.rashiDeg)];
+  const vashya =
+    VASHYA[vashyaGroup(bride.rashi, bride.rashiDeg)][vashyaGroup(groom.rashi, groom.rashiDeg)];
 
-  const tara = taraDir(groom.nakshatra, bride.nakshatra) + taraDir(bride.nakshatra, groom.nakshatra);
+  const tara =
+    taraDir(groom.nakshatra, bride.nakshatra) + taraDir(bride.nakshatra, groom.nakshatra);
 
   const yoni = YONI[YONI_ANIMAL[groom.nakshatra - 1]][YONI_ANIMAL[bride.nakshatra - 1]];
 

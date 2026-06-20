@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type-check
-        run: pnpm exec tsc --noEmit
+      - name: Lint (type-check + svelte-check + eslint)
+        run: pnpm lint
 
-      - name: Svelte check
-        run: pnpm exec svelte-check --tsconfig ./tsconfig.json
+      - name: Format check
+        run: pnpm format:check
 
       # Build before tests so the offline-assets PWA budget test sees dist/
       # (it self-skips when dist/ is absent — see tests/unit/offline-assets.test.ts).

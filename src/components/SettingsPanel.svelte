@@ -65,7 +65,9 @@
       class="select"
       value={preferences.nodeType}
       onchange={(e) =>
-        updatePreferences({ nodeType: (e.currentTarget as HTMLSelectElement).value as 'mean' | 'true' })}
+        updatePreferences({
+          nodeType: (e.currentTarget as HTMLSelectElement).value as 'mean' | 'true',
+        })}
     >
       {#each nodeOptions as o (o.value)}
         <option value={o.value}>{tr(o.key)}</option>

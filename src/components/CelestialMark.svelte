@@ -6,7 +6,18 @@
 </script>
 
 {#if body === 'sun'}
-  <svg class="cmark" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" focusable="false">
+  <svg
+    class="cmark"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    aria-hidden="true"
+    focusable="false"
+  >
     <circle cx="12" cy="12" r="5" fill="currentColor" fill-opacity="0.12" />
     <line x1="12" y1="2" x2="12" y2="4" />
     <line x1="12" y1="20" x2="12" y2="22" />
@@ -18,8 +29,24 @@
     <line x1="6.3" y1="17.7" x2="4.9" y2="19.1" />
   </svg>
 {:else}
-  <svg class="cmark" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor" fill-opacity="0.12" />
+  <svg
+    class="cmark"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+      fill="currentColor"
+      fill-opacity="0.12"
+    />
   </svg>
 {/if}
 

@@ -92,8 +92,12 @@
               timeFormat: (e.currentTarget as HTMLSelectElement).value as '12h' | '24h',
             })}
         >
-          <option value="24h">{tr('settings.timeFormat24', { h: num('24'), eg: num('18:30') })}</option>
-          <option value="12h">{tr('settings.timeFormat12', { h: num('12'), eg: num('6:30') })}</option>
+          <option value="24h"
+            >{tr('settings.timeFormat24', { h: num('24'), eg: num('18:30') })}</option
+          >
+          <option value="12h"
+            >{tr('settings.timeFormat12', { h: num('12'), eg: num('6:30') })}</option
+          >
         </select>
       </label>
       <label class="label">

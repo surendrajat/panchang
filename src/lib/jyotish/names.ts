@@ -166,11 +166,18 @@ function table(lang: 'en' | 'hi'): readonly Quad[] {
 
 // The naming syllable for a given nakshatra (1–27) and pada (1–4), in the
 // active language's script (Devanagari akshar for Hindi, Latin for English).
-export function nameSyllable(nakshatra1to27: number, pada1to4: 1 | 2 | 3 | 4, lang: 'en' | 'hi' = 'en'): string {
+export function nameSyllable(
+  nakshatra1to27: number,
+  pada1to4: 1 | 2 | 3 | 4,
+  lang: 'en' | 'hi' = 'en',
+): string {
   return table(lang)[nakshatra1to27 - 1][pada1to4 - 1];
 }
 
 // All four pada syllables of a nakshatra (e.g. to show the alternatives).
-export function nakshatraSyllables(nakshatra1to27: number, lang: 'en' | 'hi' = 'en'): readonly string[] {
+export function nakshatraSyllables(
+  nakshatra1to27: number,
+  lang: 'en' | 'hi' = 'en',
+): readonly string[] {
   return table(lang)[nakshatra1to27 - 1];
 }

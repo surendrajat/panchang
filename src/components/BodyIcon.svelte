@@ -4,78 +4,89 @@
 </script>
 
 <script lang="ts">
-  // A small, realistic rendering of a planet — gradient globe plus the feature
-  // that makes it recognisable (Jupiter's bands + red spot, Saturn's ring,
-  // Mars' rust + cap, Mercury's craters, a node's shadow). Renders an SVG <g>
+  // A small but realistic rendering of a planet: a lit gradient sphere (with
+  // limb darkening for 3D), plus the feature that makes it recognisable —
+  // Saturn's tilted ring, Jupiter's bands + Great Red Spot, Mars' rust + polar
+  // cap, Mercury's craters, Venus' cloud, a node's shadow. Renders an SVG <g>
   // to sit inside a parent <svg>; used for the grahas on the sky wheel.
   import type { GrahaKey } from '$lib/jyotish';
   let { kind, cx = 0, cy = 0, r = 9 }: { kind: GrahaKey; cx?: number; cy?: number; r?: number } = $props();
 
   const id = `bi${(_uid += 1)}`;
+  // [highlight, mid, shadow] — sphere shaded light (top-left) to dark (rim)
   const GRAD: Record<GrahaKey, [string, string, string]> = {
-    sun: ['#fff0c0', '#ffce3a', '#f08a00'],
-    moon: ['#f4f1e8', '#d9d2c2', '#bdb49e'],
-    mars: ['#f0a070', '#cf5a30', '#7c2a12'],
-    mercury: ['#cfc6b6', '#9a9080', '#615850'],
-    venus: ['#fbf0c8', '#ecd690', '#c2a052'],
-    jupiter: ['#f0ddbb', '#cd9c63', '#9a6836'],
-    saturn: ['#f4e8bc', '#dcc184', '#ab8a52'],
-    rahu: ['#544e72', '#2b2640', '#14101f'],
-    ketu: ['#6c584d', '#3a2c26', '#1a1210'],
+    sun: ['#fff3c4', '#ffc83a', '#ee8a00'],
+    moon: ['#f8f5ee', '#d7d0c0', '#a59c8a'],
+    mars: ['#f0a574', '#c8542c', '#6e2410'],
+    mercury: ['#cabfac', '#928777', '#534b42'],
+    venus: ['#fcf3cf', '#e7cb84', '#b08e42'],
+    jupiter: ['#efe0c4', '#cb9c64', '#86592f'],
+    saturn: ['#f5ead0', '#dcc488', '#9c7f47'],
+    rahu: ['#5e5780', '#2d2745', '#0e0a17'],
+    ketu: ['#715d50', '#3c2d25', '#150e0b'],
   };
   const g = $derived(GRAD[kind]);
 </script>
 
 <g class="bi">
   <defs>
-    <radialGradient id="{id}g" cx="36%" cy="32%" r="74%">
+    <radialGradient id="{id}g" cx="35%" cy="30%" r="80%">
       <stop offset="0%" stop-color={g[0]} />
-      <stop offset="55%" stop-color={g[1]} />
+      <stop offset="52%" stop-color={g[1]} />
       <stop offset="100%" stop-color={g[2]} />
+    </radialGradient>
+    <radialGradient id="{id}s" cx="38%" cy="32%" r="72%">
+      <stop offset="58%" stop-color="#000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#000" stop-opacity="0.34" />
     </radialGradient>
     <clipPath id="{id}c"><circle {cx} {cy} r={r} /></clipPath>
   </defs>
 
-  <!-- Saturn's ring sits behind the globe, then the globe, then a front arc -->
+  <!-- Saturn ring: back half drawn behind the globe -->
   {#if kind === 'saturn'}
-    <ellipse {cx} {cy} rx={r * 1.9} ry={r * 0.6} fill="none" stroke="#c9a85e" stroke-width={Math.max(1, r * 0.2)} transform="rotate(-20 {cx} {cy})" />
+    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 1 {cx + r * 2} {cy}" fill="none" stroke="#caa85e" stroke-width={Math.max(1, r * 0.22)} transform="rotate(-18 {cx} {cy})" opacity="0.9" />
   {/if}
 
-  <circle {cx} {cy} r={r} fill="url(#{id}g)" stroke="rgba(40,20,0,0.22)" stroke-width="0.6" />
+  <circle {cx} {cy} r={r} fill="url(#{id}g)" />
 
   <g clip-path="url(#{id}c)">
     {#if kind === 'mars'}
-      <ellipse cx={cx - r * 0.15} cy={cy + r * 0.28} rx={r * 0.5} ry={r * 0.24} fill="#7a2a12" opacity="0.42" />
-      <ellipse cx={cx + r * 0.4} cy={cy - r * 0.1} rx={r * 0.22} ry={r * 0.14} fill="#7a2a12" opacity="0.32" />
-      <ellipse cx={cx + r * 0.2} cy={cy - r * 0.62} rx={r * 0.4} ry={r * 0.22} fill="#f3e7d8" opacity="0.75" />
+      <ellipse cx={cx - r * 0.12} cy={cy + r * 0.3} rx={r * 0.52} ry={r * 0.26} fill="#6e2410" opacity="0.4" />
+      <ellipse cx={cx + r * 0.42} cy={cy - r * 0.05} rx={r * 0.2} ry={r * 0.13} fill="#6e2410" opacity="0.3" />
+      <ellipse {cx} cy={cy - r * 0.78} rx={r * 0.5} ry={r * 0.26} fill="#fbf4ea" opacity="0.85" />
     {:else if kind === 'mercury'}
-      <circle cx={cx - r * 0.28} cy={cy - r * 0.16} r={r * 0.2} fill="#5e564c" opacity="0.55" />
-      <circle cx={cx + r * 0.3} cy={cy + r * 0.24} r={r * 0.15} fill="#5e564c" opacity="0.5" />
-      <circle cx={cx + r * 0.08} cy={cy - r * 0.4} r={r * 0.1} fill="#5e564c" opacity="0.45" />
-      <circle cx={cx - r * 0.4} cy={cy + r * 0.32} r={r * 0.08} fill="#5e564c" opacity="0.45" />
+      <circle cx={cx - r * 0.3} cy={cy - r * 0.14} r={r * 0.22} fill="#4f463c" opacity="0.5" />
+      <circle cx={cx + r * 0.32} cy={cy + r * 0.26} r={r * 0.16} fill="#4f463c" opacity="0.45" />
+      <circle cx={cx + r * 0.06} cy={cy - r * 0.42} r={r * 0.11} fill="#4f463c" opacity="0.4" />
+      <circle cx={cx - r * 0.42} cy={cy + r * 0.34} r={r * 0.09} fill="#4f463c" opacity="0.4" />
     {:else if kind === 'venus'}
-      <ellipse {cx} cy={cy - r * 0.25} rx={r} ry={r * 0.18} fill="#fff6d8" opacity="0.4" />
-      <ellipse {cx} cy={cy + r * 0.35} rx={r} ry={r * 0.2} fill="#b88c44" opacity="0.28" />
+      <ellipse {cx} cy={cy - r * 0.3} rx={r} ry={r * 0.2} fill="#fff7da" opacity="0.42" />
+      <ellipse {cx} cy={cy + r * 0.4} rx={r} ry={r * 0.22} fill="#b3873a" opacity="0.26" />
     {:else if kind === 'jupiter'}
-      <ellipse {cx} cy={cy - r * 0.45} rx={r} ry={r * 0.14} fill="#9a6836" opacity="0.5" />
-      <ellipse {cx} cy={cy - r * 0.08} rx={r} ry={r * 0.17} fill="#a8743e" opacity="0.45" />
-      <ellipse {cx} cy={cy + r * 0.32} rx={r} ry={r * 0.15} fill="#8c5e30" opacity="0.5" />
-      <ellipse {cx} cy={cy + r * 0.66} rx={r} ry={r * 0.12} fill="#9a6836" opacity="0.45" />
-      <ellipse cx={cx + r * 0.32} cy={cy + r * 0.12} rx={r * 0.24} ry={r * 0.14} fill="#c8503a" opacity="0.85" />
+      <ellipse {cx} cy={cy - r * 0.5} rx={r} ry={r * 0.13} fill="#8a5e30" opacity="0.5" />
+      <ellipse {cx} cy={cy - r * 0.16} rx={r} ry={r * 0.16} fill="#a06a38" opacity="0.5" />
+      <ellipse {cx} cy={cy + r * 0.22} rx={r} ry={r * 0.14} fill="#7e5228" opacity="0.55" />
+      <ellipse {cx} cy={cy + r * 0.56} rx={r} ry={r * 0.12} fill="#9a6634" opacity="0.5" />
+      <ellipse cx={cx + r * 0.36} cy={cy + r * 0.2} rx={r * 0.22} ry={r * 0.15} fill="#bf4a32" opacity="0.9" />
     {:else if kind === 'rahu' || kind === 'ketu'}
-      <path d="M{cx - r * 0.55} {cy - r} a{r} {r} 0 0 0 0 {r * 2}Z" fill="#ffffff" opacity="0.05" />
+      <ellipse cx={cx - r * 0.3} cy={cy - r * 0.3} rx={r * 0.45} ry={r * 0.55} fill="#fff" opacity="0.06" />
     {/if}
+    <circle {cx} {cy} r={r} fill="url(#{id}s)" />
   </g>
 
+  <circle {cx} {cy} r={r} fill="none" stroke="rgba(30,16,4,0.28)" stroke-width="0.6" />
+
+  <!-- Saturn ring: front half over the globe + a thin gap line -->
   {#if kind === 'saturn'}
-    <!-- front half of the ring, over the globe -->
-    <path d="M{cx - r * 1.79} {cy + r * 0.5} A {r * 1.9} {r * 0.6} -20 0 0 {cx + r * 1.79} {cy - r * 0.5}" fill="none" stroke="#d8b870" stroke-width={Math.max(0.8, r * 0.14)} transform="rotate(-20 {cx} {cy})" opacity="0" />
+    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}" fill="none" stroke="#e4cd8e" stroke-width={Math.max(1, r * 0.22)} transform="rotate(-18 {cx} {cy})" />
+    <path d="M{cx - r * 2} {cy} A {r * 2} {r * 0.66} 0 0 0 {cx + r * 2} {cy}" fill="none" stroke="#9c7f47" stroke-width="0.5" transform="rotate(-18 {cx} {cy})" opacity="0.7" />
   {/if}
   {#if kind === 'rahu'}
-    <circle {cx} {cy} r={r * 1.2} fill="none" stroke="#9a8fce" stroke-width="0.8" stroke-dasharray="1.5 2" opacity="0.7" />
+    <circle {cx} {cy} r={r * 1.16} fill="none" stroke="#a99ce0" stroke-width="0.9" stroke-dasharray="1.6 2" opacity="0.7" />
   {/if}
   {#if kind === 'ketu'}
-    <path d="M{cx + r * 0.7} {cy - r * 0.7} q{r * 1.5} -{r * 0.3} {r * 2.3} {r * 0.6}" fill="none" stroke="#c9a05a" stroke-width={Math.max(0.8, r * 0.14)} stroke-linecap="round" opacity="0.6" />
+    <path d="M{cx + r * 0.6} {cy - r * 0.6} q{r * 1.5} -{r * 0.2} {r * 2.4} {r * 0.8}" fill="none" stroke="#cda35d" stroke-width={Math.max(0.8, r * 0.16)} stroke-linecap="round" opacity="0.6" />
+    <path d="M{cx + r * 0.5} {cy - r * 0.1} q{r * 1.4} {r * 0.1} {r * 2.2} {r * 1.1}" fill="none" stroke="#cda35d" stroke-width={Math.max(0.6, r * 0.1)} stroke-linecap="round" opacity="0.4" />
   {/if}
 </g>
 

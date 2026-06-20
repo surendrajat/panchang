@@ -39,6 +39,19 @@
     { mon: { en: 'Chaitra', hi: 'चैत्र' }, greg: { en: 'Mar–Apr', hi: 'मार्च–अप्रैल' } },
   ];
 
+  // What each graha signifies (for the tap-to-learn card).
+  const PLANET_INFO: Record<GrahaKey, { en: string; hi: string }> = {
+    sun: { en: 'The soul, vitality and the self.', hi: 'आत्मा, ओज और स्वत्व।' },
+    moon: { en: 'The mind, emotion and nourishment.', hi: 'मन, भावना और पोषण।' },
+    mars: { en: 'Energy, courage and drive — lord of Mesha & Vrishchika.', hi: 'ऊर्जा, साहस, कर्म — मेष व वृश्चिक का स्वामी।' },
+    mercury: { en: 'Intellect, speech and commerce — lord of Mithuna & Kanya.', hi: 'बुद्धि, वाणी, व्यापार — मिथुन व कन्या का स्वामी।' },
+    jupiter: { en: 'Wisdom, growth and fortune — lord of Dhanu & Meena.', hi: 'ज्ञान, विस्तार, भाग्य — धनु व मीन का स्वामी।' },
+    venus: { en: 'Love, beauty and the arts — lord of Vrishabha & Tula.', hi: 'प्रेम, सौन्दर्य, कला — वृषभ व तुला का स्वामी।' },
+    saturn: { en: 'Discipline, time and karma — lord of Makara & Kumbha.', hi: 'अनुशासन, समय, कर्मफल — मकर व कुम्भ का स्वामी।' },
+    rahu: { en: 'The north lunar node — ambition and the unconventional; where eclipses fall.', hi: 'उत्तर पात — महत्वाकांक्षा व अपरंपरा; ग्रहण यहीं होते हैं।' },
+    ketu: { en: 'The south lunar node — detachment and insight; always opposite Rahu.', hi: 'दक्षिण पात — वैराग्य व अंतर्दृष्टि; सदा राहु के सम्मुख।' },
+  };
+
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
   import { rashiLabel, grahaLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
@@ -229,22 +242,12 @@
       };
     if (s.type === 'graha') {
       const k = s.key!;
-      const node = k === 'rahu' || k === 'ketu';
       const gp = grahaPositions.find((g) => g.key === k);
-      const inSign = gp ? `${hi('अभी', 'In')} ${signName(displaySign(gp.lon))}${hi(' में', '')}. ` : '';
+      const sign = gp ? signName(displaySign(gp.lon)) : '';
+      const loc = gp ? hi(`${sign} में · `, `In ${sign} · `) : '';
       return {
         title: grahaLabel(k),
-        body:
-          inSign +
-          (node
-            ? hi(
-                'चन्द्रपथ का संधि-बिंदु — यहीं ग्रहण होते हैं; सदा वक्री।',
-                'A lunar node — where eclipses happen; always retrograde.',
-              )
-            : hi(
-                'एक ग्रह — राशि-स्थिति कुंडली बनाती है। तेज़ गति पर वक्री होते देखें।',
-                'A graha — its sign placement shapes the kundli; speed it up to watch it go retrograde.',
-              )),
+        body: loc + PLANET_INFO[k][lang === 'hi' ? 'hi' : 'en'],
       };
     }
     const i = s.i!;
@@ -454,10 +457,10 @@
 
     <div class="readout">
       <dl class="vals">
-        <div class="val"><dt class="dt-body"><span class="ic ic--sun"><CelestialMark body="sun" size={15} /></span>{hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
-        <div class="val"><dt class="dt-body"><span class="ic ic--moon"><CelestialMark body="moon" size={15} /></span>{hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt class="dt-body"><span class="ic--sun"><CelestialMark body="sun" size={15} /></span>{hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt class="dt-body"><span class="ic--moon"><CelestialMark body="moon" size={15} /></span>{hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
-          <dt>{hi('अंतर', 'Gap')} (<span class="ic ic--moon"><CelestialMark body="moon" size={13} /></span> − <span class="ic ic--sun"><CelestialMark body="sun" size={13} /></span>) ÷ 12°</dt>
+          <dt class="dt-gap"><span>{hi('अंतर', 'Gap')} (</span><span class="ic--moon"><CelestialMark body="moon" size={14} /></span><span>−</span><span class="ic--sun"><CelestialMark body="sun" size={14} /></span><span>) ÷ 12°</span></dt>
           <dd>
             <span class="hero-num">{num(elong.toFixed(1))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b></span>
             <span class="hero-tithi muted">{paksha} · {num((tithiFrac * 100).toFixed(0))}%</span>
@@ -853,21 +856,27 @@
     font-size: 0.8rem;
     color: var(--ink-soft);
   }
-  /* icon-bearing labels: flex with a controlled gap */
+  /* icon-bearing label + the gap formula: flex so the SVG marks centre
+     exactly against the text and operators (no baseline guesswork) */
   .dt-body {
     display: flex;
     align-items: center;
     gap: 0.4em;
   }
-  /* the Sun/Moon SVG marks (shared with the day card) */
-  .ic {
-    display: inline-flex;
+  .dt-gap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2em;
   }
+  /* the Sun/Moon SVG marks (shared with the day card) */
   .ic--sun {
     color: #d98008;
+    display: inline-flex;
   }
   .ic--moon {
     color: #4a79a8;
+    display: inline-flex;
   }
   .val dd {
     margin: 0.12rem 0 0;

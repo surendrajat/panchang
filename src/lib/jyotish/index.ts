@@ -5,6 +5,7 @@ export type {
   GrahaPosition,
   Lagna,
   NodeType,
+  LagnaMethod,
   BirthChart,
   BirthChartOptions,
   DashaPeriod,

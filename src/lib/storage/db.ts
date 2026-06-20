@@ -20,6 +20,9 @@ export interface Preferences {
   location: Location | null;
   ayanamsa: AyanamsaSystem;
   monthSystem: MonthSystem;
+  // Ascendant convention for kundli: 'swiss' (accurate / Swiss Ephemeris)
+  // or 'drik' (matches Drik Panchang). See jyotish/lagna.ts.
+  lagnaMethod: 'swiss' | 'drik';
   topocentric: boolean;
   theme: 'auto' | 'light' | 'dark';
   weekStart: 'sunday' | 'monday';
@@ -83,6 +86,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // most published Hindi/Sanskrit panchangas (and Drik Panchang's
   // default for non-southern locations).
   monthSystem: 'purnimanta',
+  // Default to the geometrically accurate ascendant (Swiss Ephemeris).
+  // Users who specifically cross-check against Drik can switch to 'drik'.
+  lagnaMethod: 'swiss',
   topocentric: false,
   theme: 'auto',
   // Sunday-first matches the canonical Vedic week — Ravi/Sunday is

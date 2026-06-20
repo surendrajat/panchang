@@ -52,7 +52,11 @@
 
   function moonOf(p: Person) {
     const instant = birthInstant(p.date, p.time, p.place!.timezone);
-    const chart = computeBirthChart(instant, p.place!, true, { ayanamsa: preferences.ayanamsa, nodeType: 'mean' });
+    const chart = computeBirthChart(instant, p.place!, true, {
+      ayanamsa: preferences.ayanamsa,
+      nodeType: 'mean',
+      lagnaMethod: preferences.lagnaMethod,
+    });
     const moon = chart.grahas.find((g) => g.key === 'moon')!;
     return { nakshatra: moon.nakshatra, rashi: moon.rashi, rashiDeg: moon.degInRashi };
   }

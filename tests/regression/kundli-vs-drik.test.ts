@@ -77,9 +77,20 @@ describe('lagna vs Drik — both hemispheres, full day', () => {
     ['New York 06:30', loc('New York', [40, 42, 51], [-74, 0, 21], 'America/New_York'), '1990-08-15T06:30:00-04:00', abs(4, 2, 13, 4)],
   ];
   for (const [label, location, iso, drik] of CASES) {
-    it(`${label} within ${LAGNA_TOL_ARCMIN}′`, () => {
-      const mine = computeLagna(new Date(iso), location, 'lahiri').longitude;
+    it(`${label} 'drik' method within ${LAGNA_TOL_ARCMIN}′`, () => {
+      const mine = computeLagna(new Date(iso), location, 'lahiri', 'drik').longitude;
       expect(sep(mine, drik) * 60).toBeLessThan(LAGNA_TOL_ARCMIN);
     });
   }
+
+  it("'swiss' (accurate) method differs from Drik by a longitude-proportional term", () => {
+    // The geometric ascendant (Swiss Ephemeris convention) is the default;
+    // it should sit a few arcminutes off Drik at Indian longitudes — and the
+    // gap must never exceed ~15′ (the documented ≤13′ bound + margin).
+    const [, location, iso, drik] = CASES[1]; // Delhi 06:30
+    const swiss = computeLagna(new Date(iso), location, 'lahiri', 'swiss').longitude;
+    const gap = sep(swiss, drik) * 60;
+    expect(gap).toBeGreaterThan(2); // genuinely different from Drik
+    expect(gap).toBeLessThan(15); // but small — same sign except near a cusp
+  });
 });

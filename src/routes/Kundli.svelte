@@ -46,6 +46,7 @@
       chart = computeBirthChart(instant, place, timeKnown, {
         ayanamsa: preferences.ayanamsa,
         nodeType: 'mean',
+        lagnaMethod: preferences.lagnaMethod,
       });
       editing = false;
     } catch (e) {

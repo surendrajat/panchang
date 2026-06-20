@@ -49,14 +49,25 @@ export interface Lagna {
 
 export type NodeType = 'mean' | 'true';
 
+// Ascendant convention:
+//   'swiss' — geometrically rigorous local sidereal time (LST = GST + λ).
+//     Matches Swiss Ephemeris swe_houses, astro.com, Jagannatha Hora, and
+//     astronomy-engine's validated horizon transform. The accurate value.
+//   'drik'  — reproduces Drik Panchang, which forms LST as GST + λ·(sidereal/
+//     solar ratio). Differs from 'swiss' by ≤13′ (≈0.9 min of birth time).
+// Only the lagna and houses are affected; the nine grahas are identical.
+export type LagnaMethod = 'swiss' | 'drik';
+
 export interface BirthChartOptions {
   ayanamsa: AyanamsaSystem; // default 'lahiri'
   nodeType: NodeType; // default 'mean'
+  lagnaMethod: LagnaMethod; // default 'swiss' (accurate)
 }
 
 export const DEFAULT_CHART_OPTIONS: BirthChartOptions = {
   ayanamsa: 'lahiri',
   nodeType: 'mean',
+  lagnaMethod: 'swiss',
 };
 
 export interface BirthChart {

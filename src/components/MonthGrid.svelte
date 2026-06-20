@@ -134,14 +134,16 @@
 </div>
 
 <style>
-  /* Single unified grid — headers and cells share one column definition
-     so alignment is guaranteed and one min-width drives the scroll.
-     min-width = 7 cols × 80px + 6 gaps × 2px + 2px border = 574px.
-     Must be ≥ 574px or .cal { overflow: hidden } clips column 7. */
+  /* Transposed (vertical) month: weekday labels run down the LEFT column and
+     each week is a column. Column-flow fills the 7 labels down column 1, then
+     each subsequent 7 cells down its own week column. Fewer columns than the
+     old 7-wide layout, so it fits a phone better and reads top-to-bottom. */
   .cal {
     display: grid;
-    grid-template-columns: repeat(7, minmax(80px, 1fr));
-    min-width: 574px;
+    grid-template-rows: repeat(7, minmax(54px, auto));
+    grid-template-columns: max-content; /* the weekday-label column */
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(58px, 1fr); /* one column per week */
     gap: 2px;
     background: var(--line);
     border: 1px solid var(--line);
@@ -151,18 +153,20 @@
   }
   .dh {
     background: var(--paper);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     font-size: 10.5px;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--red);
     font-weight: 700;
-    padding: 6px 2px 8px;
+    padding: 0 9px;
   }
   .cell {
     background: var(--cell-bg, var(--paper));
-    min-height: 84px;
-    padding: 7px 8px 8px;
+    min-height: 54px;
+    padding: 5px 7px 6px;
     position: relative;
     cursor: pointer;
     transition:
@@ -326,9 +330,8 @@
     margin-inline: -18px;
     padding-inline: 18px;
   }
-  /* min-width: 560px → forces scroll on phones (7 × 80px + gaps + border).
-     80px columns give ~64px content — enough for most tithi names.
-     minmax(80px, 1fr) expands to fill wider screens without scroll. */
+  /* The transposed grid is ~label + (5–6 week × 58px) ≈ 350–400px, so it fits
+     most phones without scrolling; .calendar-scroll is the fallback below that. */
   .dot {
     font-size: 13px;
   }
@@ -342,11 +345,15 @@
     color: var(--indigo);
   }
   @media (max-width: 460px) {
-    .cell {
-      min-height: 64px;
+    .gd {
+      font-size: 15px;
     }
     .fname {
       display: none;
+    }
+    .dh {
+      padding: 0 7px;
+      font-size: 10px;
     }
   }
 </style>

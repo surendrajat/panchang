@@ -1,14 +1,13 @@
 <script lang="ts">
-  // EXPERIMENTAL — "The Sky Right Now". A live geocentric ecliptic wheel plus a
-  // physical Sun–Earth–Moon inset, showing where the panchanga comes from: the
-  // Sun and Moon as two angles on the sidereal zodiac, the gap between them
-  // (the tithi), and why that gap is the Moon's phase. Optionally the other
-  // grahas. Every value is computed from the same engine the rest of the app
-  // uses; the tithi matches the Today page exactly.
+  // EXPERIMENTAL — "The Sky Right Now". A live geocentric ecliptic wheel with
+  // Hindu-style rashi icons, a physical Sun–Earth–Moon inset, upcoming events,
+  // and tap-to-learn cards — built for someone learning where the panchanga
+  // comes from. Every value is the real engine; the tithi matches Today exactly.
 
   import { preferences } from '$lib/state/preferences.svelte';
   import {
     dateToJulian,
+    julianToDate,
     sunLongitudeAtJD,
     moonLongitudeAtJD,
     sunMoonElongationAtJD,
@@ -17,6 +16,8 @@
   } from '$lib/astro';
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
+  import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
+  import { RASHI_ICON_PATHS, RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
   import {
     rashiNameByIndex,
     nakshatraNameByIndex,
@@ -30,45 +31,49 @@
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
 
   // ── Time model ────────────────────────────────────────────────────────────
-  // `live` tracks the real now; otherwise advance simMs at `speed` (sim-ms per
-  // real-ms). The loop only runs when needed — idle when paused, throttled to
-  // ~4 Hz when live (the real sky barely moves), smooth 60 fps only for
-  // accelerated playback, and torn down on unmount: zero cost off-page.
+  // The loop runs only when needed and is capped to ~30 fps: smooth, but light
+  // on phones and it bounds how fast the readout churns. Idle when paused,
+  // throttled to ~4 Hz when live, torn down on unmount (zero cost off-page).
   let simMs = $state(Date.now());
   let speed = $state(0);
   let live = $state(true);
   let showGrahas = $state(false);
 
   $effect(() => {
-    if (!live && speed === 0) return; // paused on a fixed instant — no work
+    if (!live && speed === 0) return;
     let raf = 0;
     let last = performance.now();
-    let acc = 0;
+    let liveAcc = 0;
+    let evAcc = 0;
     const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
       const dt = t - last;
+      if (dt < 30) return; // cap ~30 fps
       last = t;
       if (live) {
-        acc += dt;
-        if (acc >= 250) {
+        liveAcc += dt;
+        if (liveAcc >= 250) {
           simMs = Date.now();
-          acc = 0;
+          liveAcc = 0;
         }
       } else {
         simMs += speed * dt;
       }
-      raf = requestAnimationFrame(tick);
+      evAcc += dt;
+      if (evAcc >= 400) {
+        eventsBaseMs = simMs;
+        evAcc = 0;
+      }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   });
 
-  // Labels resolved in the template (and digits via num()) so they react to a
-  // language / numeral-preference switch.
   const SPEEDS = [
     { key: 'pause', live: false, speed: 0, n: '', hi: 'रोकें', en: 'Pause' },
-    { key: 'hour', live: false, speed: 3600, n: '1', hi: 'घं/से', en: 'hr/s' },
+    { key: 'hour', live: false, speed: 3600, n: '1', hi: 'घंटा/से', en: 'hour/s' },
     { key: 'day', live: false, speed: 86400, n: '1', hi: 'दिन/से', en: 'day/s' },
-    { key: 'week', live: false, speed: 604800, n: '1', hi: 'सप्ताह/से', en: 'wk/s' },
+    { key: 'week', live: false, speed: 604800, n: '1', hi: 'सप्ताह/से', en: 'week/s' },
   ];
   const activeSpeedKey = $derived(
     live ? 'now' : (SPEEDS.find((s) => s.speed === speed)?.key ?? 'pause'),
@@ -76,11 +81,13 @@
   function setSpeed(s: { live: boolean; speed: number }) {
     live = s.live;
     speed = s.speed;
+    eventsBaseMs = simMs;
   }
   function goNow() {
     live = true;
     speed = 0;
     simMs = Date.now();
+    eventsBaseMs = simMs;
   }
 
   // ── Derived astronomy (the real engine) ────────────────────────────────────
@@ -89,11 +96,10 @@
   const ayan = $derived(ayanamsa(jd, preferences.ayanamsa));
   const sunSid = $derived(norm360(sunLongitudeAtJD(jd) - ayan));
   const moonSid = $derived(norm360(moonLongitudeAtJD(jd) - ayan));
-  // Elongation from the engine's own source, so the tithi matches Today exactly.
-  const elong = $derived(sunMoonElongationAtJD(jd));
+  const elong = $derived(sunMoonElongationAtJD(jd)); // engine source → exact tithi
 
-  const NAK_ARC = 360 / 27; // 13°20′
-  const tithiNum = $derived(Math.floor(elong / 12) + 1); // 1..30
+  const NAK_ARC = 360 / 27;
+  const tithiNum = $derived(Math.floor(elong / 12) + 1);
   const tithiFrac = $derived((elong % 12) / 12);
   const paksha = $derived(elong < 180 ? hi('शुक्ल', 'Shukla') : hi('कृष्ण', 'Krishna'));
   const nakNum = $derived(Math.floor(moonSid / NAK_ARC) + 1);
@@ -102,7 +108,6 @@
   const moonRashi = $derived(Math.floor(moonSid / 30));
   const illum = $derived((1 - Math.cos((elong * Math.PI) / 180)) / 2);
 
-  // The other grahas (only computed when shown).
   const GRAHA_META: { key: GrahaKey; hi: string; en: string }[] = [
     { key: 'mars', hi: 'मं', en: 'Ma' },
     { key: 'mercury', hi: 'बु', en: 'Me' },
@@ -121,14 +126,15 @@
       : [],
   );
 
-  // Date + time, numeral-preference-aware (Latin digits from Intl, then num())
-  // and honouring the 12/24-hour setting.
   const simLabel = $derived.by(() => {
+    // 2-digit day/hour + tabular-nums → the fast-changing fields keep a constant
+    // width, so the clock doesn't expand/contract (jitter) frame-to-frame at
+    // speed. Only the month name varies, and that changes rarely.
     const fmt = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
-      day: 'numeric',
+      day: '2-digit',
       month: 'short',
       year: 'numeric',
-      hour: preferences.timeFormat === '12h' ? 'numeric' : '2-digit',
+      hour: '2-digit',
       minute: '2-digit',
       hour12: preferences.timeFormat === '12h',
       numberingSystem: 'latn',
@@ -137,57 +143,128 @@
     return num(fmt.format(simDate));
   });
 
+  // ── Upcoming events ─────────────────────────────────────────────────────────
+  // Recomputed only when the sim DAY changes (not per frame), from that day's
+  // start — cheap even at week/s.
+  function refineCrossing(estJd: number, fn: (j: number) => number, target: number): number {
+    let lo = estJd - 1.6;
+    let hi = estJd + 1.6;
+    for (let i = 0; i < 32; i++) {
+      const m = (lo + hi) / 2;
+      const d = ((fn(m) - target + 540) % 360) - 180; // signed, (−180,180]
+      if (d < 0) lo = m;
+      else hi = m;
+    }
+    return (lo + hi) / 2;
+  }
+  function nextElongJd(fromJd: number, target: number): number {
+    const e = sunMoonElongationAtJD(fromJd);
+    let days = (((target - e) % 360) + 360) % 360 / 12.19;
+    if (days < 0.08) days += 360 / 12.19;
+    return refineCrossing(fromJd + days, sunMoonElongationAtJD, target);
+  }
+  function eventWhen(j: number, fromJd: number): string {
+    const ds = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
+      day: 'numeric',
+      month: 'short',
+      numberingSystem: 'latn',
+      timeZone: preferences.location?.timezone,
+    }).format(julianToDate(j));
+    const days = Math.max(0, Math.round(j - fromJd));
+    const inDays = days === 0 ? hi('आज', 'today') : days === 1 ? hi('कल', '1 day') : `${num(days)} ${hi('दिन', 'days')}`;
+    return `${num(ds)} · ${inDays}`;
+  }
+  // Events are throttled (eventsBaseMs, updated ~2.5 Hz in the tick) so fast
+  // playback doesn't re-bisect them every frame — important on phones.
+  let eventsBaseMs = $state(Date.now());
+  const events = $derived.by(() => {
+    const fromJd = dateToJulian(new Date(eventsBaseMs));
+    const dayJd = dateToJulian(new Date(Math.floor(eventsBaseMs / 86_400_000) * 86_400_000));
+    const sunSidAt = (j: number) => norm360(sunLongitudeAtJD(j) - ayanamsa(j, preferences.ayanamsa));
+    const sunNow = sunSidAt(dayJd);
+    const nextSign = (Math.floor(sunNow / 30) + 1) % 12;
+    const sankrJd = refineCrossing(dayJd + ((((nextSign * 30) % 360) - sunNow + 360) % 360 || 30) / 0.9856, sunSidAt, (nextSign * 30) % 360);
+    const ek = Math.min(nextElongJd(dayJd, 120), nextElongJd(dayJd, 300));
+    return [
+      { key: 'purnima', hi: 'पूर्णिमा', en: 'Full moon', jd: nextElongJd(dayJd, 180) },
+      { key: 'amavasya', hi: 'अमावस्या', en: 'New moon', jd: nextElongJd(dayJd, 360) },
+      { key: 'ekadashi', hi: 'एकादशी', en: 'Ekadashi', jd: ek },
+      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, lang)} संक्रांति`, en: `${RASHI_SIGN_EN[nextSign]} sankranti`, jd: sankrJd },
+    ]
+      .sort((a, b) => a.jd - b.jd)
+      .map((ev) => ({ ...ev, when: eventWhen(ev.jd, fromJd) }));
+  });
+
+  // ── Tap-to-learn ────────────────────────────────────────────────────────────
+  type Selected = { type: 'rashi' | 'sun' | 'moon'; i?: number } | null;
+  let selected = $state<Selected>(null);
+  const learn = $derived.by(() => {
+    const s = selected;
+    if (!s) return null;
+    if (s.type === 'sun')
+      return {
+        title: hi('सूर्य', 'The Sun'),
+        body: hi(
+          'सूर्य की राशि-स्थिति से मास और ऋतु तय होते हैं। यह हर ~30 दिन में एक राशि बदलता है (संक्रांति)।',
+          'The Sun’s position sets the month and season. It moves one rashi (~30°) every ~30 days — each crossing is a sankranti.',
+        ),
+      };
+    if (s.type === 'moon')
+      return {
+        title: hi('चन्द्र', 'The Moon'),
+        body: hi(
+          'चन्द्र सूर्य से जितना आगे है (अंतर) ÷ 12° = तिथि। यह हर ~2.3 दिन में नक्षत्र बदलता है।',
+          'How far the Moon is ahead of the Sun (the gap) ÷ 12° = the tithi. It changes nakshatra every ~2.3 days.',
+        ),
+      };
+    const i = s.i!;
+    const lord = grahaName(RASHI_LORDS[i], lang);
+    const el = ELEMENT_LABEL[RASHI_ELEMENT[i]][lang === 'hi' ? 'hi' : 'en'];
+    return {
+      title: `${rashiNameByIndex(i, lang)} · ${RASHI_SIGN_EN[i]}`,
+      body: hi(
+        `तत्व: ${el} · स्वामी: ${lord}. सूर्य जब इस राशि में होता है तब का सौर मास इसी से नामित होता है।`,
+        `Element: ${el} · ruled by ${lord}. The solar month is named after the rashi the Sun enters.`,
+      ),
+    };
+  });
+
   // ── Wheel geometry ─────────────────────────────────────────────────────────
   const SIZE = 380;
   const C = SIZE / 2;
-  const R_OUT = 180;
-  const R_IN = 142;
-  const R_LABEL = 161;
-  const R_BODY = 112; // Sun/Moon
-  const R_GRAHA = 90; // other grahas
-  const R_ARC = 70; // elongation arc
+  const R_OUT = 182;
+  const R_IN = 138;
+  const R_ICON = 162;
+  const R_NAME = 150;
+  const R_BODY = 110;
+  const R_GRAHA = 88;
+  const R_ARC = 66;
 
-  // 0° at 3 o'clock, increasing counterclockwise — the way the Sun and Moon
-  // actually move (eastward) seen from the north of the ecliptic.
   function pt(deg: number, r: number): [number, number] {
     const a = (deg * Math.PI) / 180;
     return [C + r * Math.cos(a), C - r * Math.sin(a)];
   }
   const ptStr = (deg: number, r: number) => pt(deg, r).map((n) => n.toFixed(2)).join(' ');
-
-  function sector(startDeg: number, endDeg: number): string {
-    return [
-      `M ${ptStr(startDeg, R_IN)}`,
-      `L ${ptStr(startDeg, R_OUT)}`,
-      `A ${R_OUT} ${R_OUT} 0 0 0 ${ptStr(endDeg, R_OUT)}`,
-      `L ${ptStr(endDeg, R_IN)}`,
-      `A ${R_IN} ${R_IN} 0 0 1 ${ptStr(startDeg, R_IN)}`,
-      'Z',
-    ].join(' ');
+  function sector(s: number, e: number): string {
+    return `M ${ptStr(s, R_IN)} L ${ptStr(s, R_OUT)} A ${R_OUT} ${R_OUT} 0 0 0 ${ptStr(e, R_OUT)} L ${ptStr(e, R_IN)} A ${R_IN} ${R_IN} 0 0 1 ${ptStr(s, R_IN)} Z`;
   }
-
   const elongPath = $derived(
     `M ${ptStr(sunSid, R_ARC)} A ${R_ARC} ${R_ARC} 0 ${elong > 180 ? 1 : 0} 0 ${ptStr(moonSid, R_ARC)}`,
   );
-
-  const RASHI_GLYPH = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
   const rashis = Array.from({ length: 12 }, (_, i) => i);
   const nakTicks = Array.from({ length: 27 }, (_, i) => i * NAK_ARC);
   const rayAngles = Array.from({ length: 8 }, (_, i) => (i * 360) / 8);
-
   const sunPt = $derived(pt(sunSid, R_BODY));
   const moonPt = $derived(pt(moonSid, R_BODY));
-
-  // Live phase of the Moon marker (terminator geometry, as in MoonPhase.svelte).
   const moonLitPath = $derived.by(() => {
     const r = 12;
     const [cx, cy] = moonPt;
     const waxing = elong < 180;
     const rx = Math.abs(r * Math.cos(illum * Math.PI));
-    const gibbous = illum > 0.5;
-    const limbSweep = waxing ? 1 : 0;
-    const termSweep = waxing ? (gibbous ? 1 : 0) : gibbous ? 0 : 1;
-    return `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${limbSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r} Z`;
+    const gib = illum > 0.5;
+    const limb = waxing ? 1 : 0;
+    const term = waxing ? (gib ? 1 : 0) : gib ? 0 : 1;
+    return `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${limb} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${term} ${cx} ${cy - r} Z`;
   });
 
   // ── Physical Sun–Earth–Moon inset ──────────────────────────────────────────
@@ -197,11 +274,11 @@
   const SUNX = 44;
   const ORB = 62;
   const moonOrb = $derived.by(() => {
-    const a = ((180 + elong) * Math.PI) / 180; // 180° = toward the Sun (new)
+    const a = ((180 + elong) * Math.PI) / 180;
     return { x: EARTH.x + ORB * Math.cos(a), y: EARTH.y - ORB * Math.sin(a) };
   });
   const litHalf = (cx: number, cy: number, r: number) =>
-    `M ${cx} ${cy - r} A ${r} ${r} 0 0 0 ${cx} ${cy + r} Z`; // sunward (left) semicircle
+    `M ${cx} ${cy - r} A ${r} ${r} 0 0 0 ${cx} ${cy + r} Z`;
 </script>
 
 <section class="sky">
@@ -215,126 +292,134 @@
     </p>
   </header>
 
-  <!-- prominent date/time readout -->
-  <div class="clock">{simLabel}</div>
+  <!-- date + speed controls (fixed-width so the layout never shifts) -->
+  <div class="timebar">
+    <div class="clock">{simLabel}</div>
+    <div class="speeds" role="group" aria-label={hi('समय गति', 'Time speed')}>
+      <button type="button" class:on={activeSpeedKey === 'now'} onclick={goNow}>● {hi('अभी', 'Now')}</button>
+      {#each SPEEDS as s (s.key)}
+        <button type="button" class:on={activeSpeedKey === s.key} onclick={() => setSpeed(s)}>
+          {s.n ? num(s.n) + ' ' : ''}{lang === 'hi' ? s.hi : s.en}
+        </button>
+      {/each}
+    </div>
+  </div>
 
   <div class="sky__grid">
     <svg class="wheel" viewBox="0 0 {SIZE} {SIZE}" role="img" aria-label={hi('आकाश चक्र', 'Ecliptic wheel')}>
       <defs>
         <radialGradient id="sun-grad" cx="38%" cy="36%" r="68%">
-          <stop offset="0%" stop-color="#fff8d8" />
-          <stop offset="50%" stop-color="#ffd23f" />
-          <stop offset="100%" stop-color="#f08a00" />
+          <stop offset="0%" stop-color="#fff8d8" /><stop offset="50%" stop-color="#ffd23f" /><stop offset="100%" stop-color="#f08a00" />
         </radialGradient>
         <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ffcf4d" stop-opacity="0.5" />
-          <stop offset="100%" stop-color="#ffcf4d" stop-opacity="0" />
+          <stop offset="0%" stop-color="#ffcf4d" stop-opacity="0.45" /><stop offset="100%" stop-color="#ffcf4d" stop-opacity="0" />
         </radialGradient>
         <radialGradient id="earth-grad" cx="38%" cy="34%" r="72%">
-          <stop offset="0%" stop-color="#7db4e6" />
-          <stop offset="100%" stop-color="#2f6196" />
+          <stop offset="0%" stop-color="#7db4e6" /><stop offset="100%" stop-color="#2f6196" />
         </radialGradient>
       </defs>
 
-      <!-- rashi ring -->
       {#each rashis as i (i)}
         {@const isSun = i === sunRashi}
         {@const isMoon = i === moonRashi}
-        <path d={sector(i * 30, (i + 1) * 30)} class="rashi" class:rashi--alt={i % 2 === 1} class:rashi--sun={isSun} class:rashi--moon={isMoon && !isSun} />
-        {@const [lx, ly] = pt(i * 30 + 15, R_LABEL)}
-        <circle cx={lx} cy={ly - 3} r="10" class="badge" class:badge--sun={isSun} class:badge--moon={isMoon && !isSun} />
-        <text x={lx} y={ly - 3} class="rashi-glyph" class:on={isSun || isMoon} dominant-baseline="central" text-anchor="middle">{RASHI_GLYPH[i]}</text>
-        <text x={lx} y={ly + 11} class="rashi-name" dominant-baseline="middle" text-anchor="middle">{rashiNameByIndex(i, lang)}</text>
+        {@const [ix, iy] = pt(i * 30 + 15, R_ICON)}
+        {@const [nx, ny] = pt(i * 30 + 15, R_NAME)}
+        <path
+          d={sector(i * 30, (i + 1) * 30)}
+          class="rashi"
+          class:rashi--alt={i % 2 === 1}
+          class:rashi--sun={isSun}
+          class:rashi--moon={isMoon && !isSun}
+          role="button"
+          tabindex="0"
+          aria-label={rashiNameByIndex(i, lang)}
+          onclick={() => (selected = { type: 'rashi', i })}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'rashi', i })}
+        />
+        <g class="rashi-icon" class:on={isSun || isMoon} transform="translate({ix - 9}, {iy - 9}) scale(0.5625)" pointer-events="none">
+          {#each RASHI_ICON_PATHS[i] as d (d)}
+            <path {d} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          {/each}
+        </g>
+        <text x={nx} y={ny} class="rashi-name" dominant-baseline="middle" text-anchor="middle" pointer-events="none">{rashiNameByIndex(i, lang)}</text>
       {/each}
 
-      <!-- nakshatra ticks -->
       {#each nakTicks as deg (deg)}
         <line x1={pt(deg, R_IN)[0]} y1={pt(deg, R_IN)[1]} x2={pt(deg, R_IN - 6)[0]} y2={pt(deg, R_IN - 6)[1]} class="nak-tick" />
       {/each}
 
-      <!-- elongation arc (the tithi gap) -->
       <path d={elongPath} class="elong-arc" fill="none" />
-
-      <!-- radii from Earth to Sun and Moon -->
       <line x1={C} y1={C} x2={sunPt[0]} y2={sunPt[1]} class="ray ray--sun" />
       <line x1={C} y1={C} x2={moonPt[0]} y2={moonPt[1]} class="ray ray--moon" />
 
-      <!-- other grahas -->
       {#each grahaPositions as g (g.key)}
         {@const [gx, gy] = pt(g.lon, R_GRAHA)}
         <circle cx={gx} cy={gy} r="8" class="graha" />
         <text x={gx} y={gy} class="graha-label" text-anchor="middle" dominant-baseline="central">{lang === 'hi' ? g.hi : g.en}</text>
       {/each}
 
-      <!-- Earth at center -->
       <circle cx={C} cy={C} r="9" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1.5" />
       <path d="M{C - 6} {C - 1} q3 -3 6 0 q2 2 -1 3 q-4 1 -5 -3 Z" class="earth-land" />
       <path d="M{C + 1} {C + 3} q3 -1 4 2 q-2 2 -4 0 Z" class="earth-land" />
       <text x={C} y={C + 22} class="center-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
 
-      <!-- Moon: live phase disc -->
-      <circle cx={moonPt[0]} cy={moonPt[1]} r="12" class="moon-dark" />
-      <path d={moonLitPath} class="moon-lit" />
-      <circle cx={moonPt[0]} cy={moonPt[1]} r="12" class="moon-ring" />
+      <g role="button" tabindex="0" aria-label={hi('चन्द्र', 'Moon')} onclick={() => (selected = { type: 'moon' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })} style="cursor:pointer">
+        <circle cx={moonPt[0]} cy={moonPt[1]} r="12" class="moon-dark" />
+        <path d={moonLitPath} class="moon-lit" />
+        <circle cx={moonPt[0]} cy={moonPt[1]} r="12" class="moon-ring" />
+      </g>
 
-      <!-- Sun: subtle glow + gradient disc (same r as the Moon) + short rays -->
-      <circle cx={sunPt[0]} cy={sunPt[1]} r="15" fill="url(#sun-glow)" />
-      {#each rayAngles as a (a)}
-        {@const cos = Math.cos((a * Math.PI) / 180)}
-        {@const sin = Math.sin((a * Math.PI) / 180)}
-        <line x1={sunPt[0] + cos * 13.5} y1={sunPt[1] - sin * 13.5} x2={sunPt[0] + cos * 17.5} y2={sunPt[1] - sin * 17.5} class="sun-ray" />
-      {/each}
-      <circle cx={sunPt[0]} cy={sunPt[1]} r="12" fill="url(#sun-grad)" stroke="#e07b00" stroke-width="0.75" />
+      <g role="button" tabindex="0" aria-label={hi('सूर्य', 'Sun')} onclick={() => (selected = { type: 'sun' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })} style="cursor:pointer">
+        <circle cx={sunPt[0]} cy={sunPt[1]} r="15" fill="url(#sun-glow)" />
+        {#each rayAngles as a (a)}
+          {@const cos = Math.cos((a * Math.PI) / 180)}
+          {@const sin = Math.sin((a * Math.PI) / 180)}
+          <line x1={sunPt[0] + cos * 13.5} y1={sunPt[1] - sin * 13.5} x2={sunPt[0] + cos * 17.5} y2={sunPt[1] - sin * 17.5} class="sun-ray" />
+        {/each}
+        <circle cx={sunPt[0]} cy={sunPt[1]} r="12" fill="url(#sun-grad)" stroke="#e07b00" stroke-width="0.75" />
+      </g>
     </svg>
 
-    <!-- live readout -->
     <div class="readout">
       <dl class="vals">
-        <div class="val">
-          <dt><span class="g g--sun">☉</span> {hi('सूर्य', 'Sun')} λ</dt>
-          <dd>{num(sunSid.toFixed(2))}° · {rashiNameByIndex(sunRashi, lang)}</dd>
-        </div>
-        <div class="val">
-          <dt><span class="g g--moon">☾</span> {hi('चन्द्र', 'Moon')} λ</dt>
-          <dd>{num(moonSid.toFixed(2))}° · {rashiNameByIndex(moonRashi, lang)}</dd>
-        </div>
-        <div class="val val--hero">
-          <dt>{hi('अंतर', 'Gap')} (λ☾ − λ☉) ÷ 12°</dt>
-          <dd>
-            {num(elong.toFixed(2))}° →
-            <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b>
-            <span class="muted">({paksha}, {num((tithiFrac * 100).toFixed(0))}%)</span>
-          </dd>
-        </div>
-        <div class="val">
-          <dt>{hi('नक्षत्र', 'Nakshatra')} (λ☾)</dt>
-          <dd>{nakshatraNameByIndex(nakNum, lang)}</dd>
-        </div>
-        <div class="val">
-          <dt>{hi('योग', 'Yoga')} (λ☉ + λ☾)</dt>
-          <dd>{yogaNameByIndex(yogaNum, lang)}</dd>
-        </div>
-        <div class="val">
-          <dt>{hi('चन्द्र कला', 'Moon phase')}</dt>
-          <dd>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</dd>
-        </div>
+        <div class="val"><dt><span class="g g--sun">☉</span> {hi('सूर्य', 'Sun')} λ</dt><dd>{num(sunSid.toFixed(2))}° · {rashiNameByIndex(sunRashi, lang)}</dd></div>
+        <div class="val"><dt><span class="g g--moon">☾</span> {hi('चन्द्र', 'Moon')} λ</dt><dd>{num(moonSid.toFixed(2))}° · {rashiNameByIndex(moonRashi, lang)}</dd></div>
+        <div class="val val--hero"><dt>{hi('अंतर', 'Gap')} (λ☾ − λ☉) ÷ 12°</dt><dd>{num(elong.toFixed(2))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b> <span class="muted">({paksha}, {num((tithiFrac * 100).toFixed(0))}%)</span></dd></div>
+        <div class="val"><dt>{hi('नक्षत्र', 'Nakshatra')}</dt><dd>{nakshatraNameByIndex(nakNum, lang)}</dd></div>
+        <div class="val"><dt>{hi('योग', 'Yoga')}</dt><dd>{yogaNameByIndex(yogaNum, lang)}</dd></div>
+        <div class="val"><dt>{hi('चन्द्र कला', 'Moon phase')}</dt><dd>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</dd></div>
       </dl>
+      <label class="graha-toggle"><input type="checkbox" bind:checked={showGrahas} /> {hi('सभी ग्रह दिखाएँ', 'Show all grahas')}</label>
     </div>
+  </div>
+
+  {#if learn}
+    <aside class="learn">
+      <button class="learn__close" type="button" onclick={() => (selected = null)} aria-label={hi('बंद करें', 'Close')}>×</button>
+      <h3>{learn.title}</h3>
+      <p>{learn.body}</p>
+    </aside>
+  {:else}
+    <p class="tap-hint">{hi('💡 चक्र में किसी राशि, सूर्य या चन्द्र पर टैप करें', '💡 Tap any rashi, the Sun or the Moon on the wheel to learn about it')}</p>
+  {/if}
+
+  <!-- upcoming events -->
+  <div class="events">
+    <span class="events__label">{hi('आगामी', 'Upcoming')}</span>
+    {#each events as ev (ev.key)}
+      <div class="event">
+        <span class="event__name">{lang === 'hi' ? ev.hi : ev.en}</span>
+        <span class="event__when">{ev.when}</span>
+      </div>
+    {/each}
   </div>
 
   <!-- Physical Sun–Earth–Moon inset -->
   <figure class="orbital">
     <svg viewBox="0 0 {OW} {OH}" role="img" aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}>
       <defs>
-        <radialGradient id="orb-sun" cx="40%" cy="38%" r="62%">
-          <stop offset="0%" stop-color="#fff8d8" />
-          <stop offset="55%" stop-color="#ffd23f" />
-          <stop offset="100%" stop-color="#f08a00" />
-        </radialGradient>
-        <radialGradient id="orb-earth" cx="38%" cy="34%" r="72%">
-          <stop offset="0%" stop-color="#7db4e6" />
-          <stop offset="100%" stop-color="#2f6196" />
-        </radialGradient>
+        <radialGradient id="orb-sun" cx="40%" cy="38%" r="62%"><stop offset="0%" stop-color="#fff8d8" /><stop offset="55%" stop-color="#ffd23f" /><stop offset="100%" stop-color="#f08a00" /></radialGradient>
+        <radialGradient id="orb-earth" cx="38%" cy="34%" r="72%"><stop offset="0%" stop-color="#7db4e6" /><stop offset="100%" stop-color="#2f6196" /></radialGradient>
       </defs>
       {#each [-30, -10, 10, 30] as dy (dy)}
         <line x1={SUNX + 26} y1={EARTH.y + dy} x2={EARTH.x - 16} y2={EARTH.y + dy * 0.5} class="sunlight" />
@@ -351,42 +436,24 @@
     </svg>
     <figcaption>
       {hi(
-        'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित रहता है; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर कला बनाता है। अमावस्या पर चन्द्र सूर्य की ओर, पूर्णिमा पर विपरीत।',
+        'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर कला बनाता है। अमावस्या पर चन्द्र सूर्य की ओर, पूर्णिमा पर विपरीत।',
         "The Moon's sunward half is always lit; from Earth we see it at an angle — that gap is the phase. New moon when the Moon is toward the Sun, full when opposite.",
       )}
     </figcaption>
   </figure>
 
-  <!-- controls -->
-  <div class="controls" role="group" aria-label={hi('समय नियंत्रण', 'Time controls')}>
-    <div class="speeds">
-      <button type="button" class:on={activeSpeedKey === 'now'} onclick={goNow}>● {hi('अभी', 'Now')}</button>
-      {#each SPEEDS as s (s.key)}
-        <button type="button" class:on={activeSpeedKey === s.key} onclick={() => setSpeed(s)}>
-          {s.n ? num(s.n) + ' ' : ''}{lang === 'hi' ? s.hi : s.en}
-        </button>
-      {/each}
-    </div>
-    <label class="graha-toggle">
-      <input type="checkbox" bind:checked={showGrahas} />
-      {hi('सभी ग्रह', 'All grahas')}
-    </label>
-  </div>
-
   <p class="hint">
     {hi(
-      'गति बढ़ाएँ और देखें — चन्द्र सूर्य से आगे बढ़ता है, अंतर 0° से 360° तक भरता है, हर 12° पर नई तिथि। ग्रह चालू करें तो तेज़ गति पर मंगल/बुध आदि का वक्री (उल्टा) चलना भी दिखता है।',
-      'Speed it up and watch the Moon pull ahead of the Sun — every 12° is a new tithi. Turn on the grahas and, at speed, you can even watch a planet go retrograde (briefly reverse).',
+      'गति बढ़ाएँ और देखें — हर 12° पर नई तिथि, 180° पर पूर्णिमा। ग्रह चालू करें तो तेज़ गति पर वक्री गति भी दिखती है।',
+      'Speed it up — every 12° is a new tithi, 180° is the full moon. Turn on the grahas and watch a planet go retrograde at speed.',
     )}
-    <a href="https://github.com/surendrajat/panchang/tree/main/docs/guide" target="_blank" rel="noopener">
-      {hi('यह कैसे काम करता है →', 'How this works →')}
-    </a>
+    <a href="https://github.com/surendrajat/panchang/tree/main/docs/guide" target="_blank" rel="noopener">{hi('यह कैसे काम करता है →', 'How this works →')}</a>
   </p>
 </section>
 
 <style>
   .sky {
-    max-width: 780px;
+    max-width: 800px;
     margin: 0 auto;
   }
   .sky__head h2 {
@@ -406,77 +473,101 @@
   }
   .desc {
     color: var(--ink-soft);
-    margin: 0.4rem 0 0.75rem;
+    margin: 0.4rem 0 0.9rem;
+  }
+
+  /* fixed-height/nowrap so the date+speed bar never reflows the layout */
+  .timebar {
+    text-align: center;
+    margin-bottom: 1rem;
   }
   .clock {
-    text-align: center;
-    font-size: 1.15rem;
+    display: inline-block;
+    min-width: 13rem;
+    font-size: 1.2rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
     color: var(--ink);
     font-variant-numeric: tabular-nums;
-    margin: 0 0 0.5rem;
+    white-space: nowrap;
+    line-height: 1.6;
   }
+  .speeds {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+  }
+  .speeds button {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill, 999px);
+    background: var(--paper-2);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .speeds button.on {
+    background: var(--red);
+    color: var(--paper);
+    border-color: var(--red);
+  }
+
   .sky__grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem 1.5rem;
+    gap: 0.75rem 1.5rem;
     align-items: center;
     justify-content: center;
   }
   .wheel {
-    width: 380px;
+    flex: 1 1 320px;
+    max-width: 400px;
+  }
+  /* fixed-width readout: changing values never resize it, so the wheel stays put */
+  .readout {
+    flex: 0 0 264px;
     max-width: 100%;
-    flex: 1 1 340px;
   }
 
   .rashi {
     fill: var(--paper-2);
     stroke: var(--line);
     stroke-width: 1;
+    cursor: pointer;
+    transition: fill 0.15s;
   }
   .rashi--alt {
     fill: var(--paper-3);
   }
-  /* strong, unambiguous highlight for the Sun's and Moon's current rashi
-     (declared after --alt so they win) */
+  .rashi:hover {
+    fill: color-mix(in srgb, var(--gold, #b8860b) 12%, var(--paper-2));
+  }
   .rashi--sun {
-    fill: color-mix(in srgb, #f0a000 32%, var(--paper));
+    fill: color-mix(in srgb, #f0a000 34%, var(--paper));
     stroke: #e07b00;
   }
   .rashi--moon {
-    fill: color-mix(in srgb, #6f9fd0 30%, var(--paper));
+    fill: color-mix(in srgb, #6f9fd0 32%, var(--paper));
     stroke: #4a79a8;
   }
-  .badge {
-    fill: var(--paper);
-    stroke: var(--line);
-    stroke-width: 1;
+  .rashi-icon {
+    color: var(--red-deep, #7a1818);
   }
-  .badge--sun {
-    fill: #f0a000;
-    stroke: #e07b00;
-  }
-  .badge--moon {
-    fill: #6f9fd0;
-    stroke: #4a79a8;
-  }
-  .rashi-glyph {
-    font-size: 13px;
-    fill: var(--ink);
-  }
-  .rashi-glyph.on {
-    fill: var(--paper);
+  .rashi-icon.on {
+    color: var(--ink);
   }
   .rashi-name {
-    font-size: 7.5px;
+    font-size: 10.5px;
     fill: var(--ink-soft);
     font-weight: 600;
   }
   .nak-tick {
     stroke: var(--line);
     stroke-width: 1;
-    opacity: 0.5;
+    opacity: 0.45;
   }
   .elong-arc {
     stroke: var(--red);
@@ -486,7 +577,7 @@
   }
   .ray {
     stroke-width: 1.25;
-    opacity: 0.45;
+    opacity: 0.4;
   }
   .ray--sun {
     stroke: #f0a000;
@@ -501,7 +592,6 @@
   }
   .moon-dark {
     fill: var(--paper-3);
-    stroke: none;
   }
   .moon-lit {
     fill: #f3e7c4;
@@ -531,29 +621,27 @@
     fill: var(--ink-faint, #999);
   }
 
-  .readout {
-    flex: 1 1 260px;
-    min-width: 240px;
-  }
   .vals {
     margin: 0;
     display: grid;
-    gap: 0.45rem;
+    gap: 0.4rem;
   }
   .val {
     border-bottom: 1px solid var(--line);
-    padding-bottom: 0.35rem;
+    padding-bottom: 0.32rem;
   }
   .val dt {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--ink-soft);
   }
   .val dd {
     margin: 0.1rem 0 0;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
   .val--hero dd {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
+    white-space: normal;
   }
   .val--hero b {
     color: var(--red);
@@ -565,6 +653,86 @@
     color: var(--ink-faint, #888);
     font-size: 0.85em;
   }
+  .graha-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .learn,
+  .tap-hint {
+    margin: 1rem 0 0;
+  }
+  .tap-hint {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+  .learn {
+    position: relative;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius, 8px);
+    padding: 0.75rem 2rem 0.75rem 0.9rem;
+  }
+  .learn h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1rem;
+  }
+  .learn p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .learn__close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.5rem;
+    border: none;
+    background: none;
+    color: var(--ink-soft);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .events {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 1.1rem 0;
+    padding: 0.6rem 0.8rem;
+    background: var(--paper-2);
+    border-radius: var(--radius, 8px);
+  }
+  .events__label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint, #999);
+  }
+  .event {
+    display: flex;
+    flex-direction: column;
+    min-width: 92px;
+  }
+  .event__name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .event__when {
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
 
   .orbital {
     margin: 1.25rem 0 0;
@@ -574,9 +742,8 @@
     gap: 0.5rem 1.25rem;
   }
   .orbital svg {
-    width: 380px;
-    max-width: 100%;
     flex: 1 1 320px;
+    max-width: 400px;
   }
   .orbital figcaption {
     flex: 1 1 240px;
@@ -612,46 +779,11 @@
     stroke-width: 1;
   }
 
-  .controls {
-    margin: 1.25rem 0 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem 1rem;
-    justify-content: space-between;
-  }
-  .speeds {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-  .speeds button {
-    padding: 0.3rem 0.7rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-pill, 999px);
-    background: var(--paper-2);
-    color: var(--ink);
-    font: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-  .speeds button.on {
-    background: var(--red);
-    color: var(--paper);
-    border-color: var(--red);
-  }
-  .graha-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-    cursor: pointer;
-  }
   .hint {
     color: var(--ink-soft);
     font-size: 0.85rem;
     line-height: 1.5;
+    margin-top: 1rem;
   }
   .hint a {
     color: var(--red);

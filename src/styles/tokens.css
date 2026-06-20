@@ -25,6 +25,24 @@
     U+11B00-11B09;
 }
 
+/* Panchang Symbols — one family split by unicode-range over two tiny local
+   subsets, so the sky-wheel marks render identically on every device:
+   • zodiac signs + sun/moon icons  → JetBrains Mono Nerd Font (Apache-2.0)
+   • planet symbols ☿♀♂♃♄☊☋          → STIX Two Math (SIL OFL-1.1)
+   See public/fonts for the bundled subsets. */
+@font-face {
+  font-family: 'Panchang Symbols';
+  font-display: block;
+  src: url('/fonts/panchang-sym-signs.woff2') format('woff2');
+  unicode-range: U+F0A7D-F0A88, U+F185, U+F4EE;
+}
+@font-face {
+  font-family: 'Panchang Symbols';
+  font-display: block;
+  src: url('/fonts/panchang-sym-planets.woff2') format('woff2');
+  unicode-range: U+263F-2644, U+260A-260B;
+}
+
 :root {
   /* Color — light (saffron paper) */
   --paper: #f5e6c3;

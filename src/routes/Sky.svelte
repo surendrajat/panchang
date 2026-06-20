@@ -19,15 +19,8 @@
   import type { GrahaKey } from '$lib/jyotish';
   import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
   import { RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
-
-  // Real Unicode astrological glyphs, rendered as text via a symbol-font stack
-  // (.zsym) with the VS-15 selector forcing the line (non-emoji) form.
-  const VS = String.fromCharCode(0xfe0e);
-  const ZODIAC_CHAR = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'].map((c) => c + VS);
-  const PLANET_CHAR: Record<string, string> = {
-    sun: '☉' + VS, moon: '☽' + VS, mars: '♂' + VS, mercury: '☿' + VS,
-    jupiter: '♃' + VS, venus: '♀' + VS, saturn: '♄' + VS, rahu: '☊' + VS, ketu: '☋' + VS,
-  };
+  // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
+  import { SIGN_GLYPH, SUN_GLYPH, MOON_GLYPH, PLANET_GLYPH } from '$lib/jyotish/glyphs';
   // The lunar month + Gregorian span while the Sun sits in each sign (for the
   // tap-to-learn card). Index 0 = Mesha.
   const SIGN_MONTH: readonly { mon: string; greg: string }[] = [
@@ -382,7 +375,7 @@
           />
           <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
           <text class="rashi-name" class:on={isSun || isMoon}><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle">{signName(i)}</textPath></text>
-          <text class="rashi-glyph zsym" class:on={isSun || isMoon} x={ix} y={iy} text-anchor="middle" dominant-baseline="central" pointer-events="none">{ZODIAC_CHAR[i]}</text>
+          <text class="rashi-glyph zsym" class:on={isSun || isMoon} x={ix} y={iy} text-anchor="middle" dominant-baseline="central" pointer-events="none">{SIGN_GLYPH[i]}</text>
         {/each}
         {#each nakTicks as deg (deg)}
           <line x1={pt(deg, R_IN)[0]} y1={pt(deg, R_IN)[1]} x2={pt(deg, R_IN - 5)[0]} y2={pt(deg, R_IN - 5)[1]} class="nak-tick" />
@@ -408,7 +401,7 @@
         <g class="body" role="button" tabindex="0" aria-label={grahaName(g.key, lang)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
           {#if sel}<circle cx={gx} cy={gy} r="11" class="sel-glow" />{/if}
           <circle cx={gx} cy={gy} r="8" class="graha" />
-          <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_CHAR[g.key]}</text>
+          <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
           <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaName(g.key, lang)}</text>
         </g>
       {/each}
@@ -457,8 +450,8 @@
 
     <div class="readout">
       <dl class="vals">
-        <div class="val"><dt><span class="zsym g--sun">{PLANET_CHAR.sun}</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
-        <div class="val"><dt><span class="zsym g--moon">{PLANET_CHAR.moon}</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt><span class="zsym g--sun">{SUN_GLYPH}</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt><span class="zsym g--moon">{MOON_GLYPH}</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
           <dt>{hi('अंतर', 'Gap')} (☾−☉) ÷ 12°</dt>
           <dd>
@@ -675,10 +668,8 @@
   /* Real Unicode astrological / planet glyphs, forced to the line (text) form —
      a Nerd Font if the device has one, else the system symbol fonts. */
   .zsym {
-    font-family:
-      'Symbols Nerd Font', 'Symbols Nerd Font Mono', 'Apple Symbols', 'Segoe UI Symbol',
-      'Noto Sans Symbols', 'Noto Sans Symbols2', 'STIXGeneral', serif;
-    font-variant-emoji: text;
+    /* bundled local subsets (see tokens.css) — identical on every device */
+    font-family: 'Panchang Symbols', 'Apple Symbols', 'Segoe UI Symbol', serif;
   }
   .rashi-glyph {
     font-size: 15px;

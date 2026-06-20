@@ -1,0 +1,19 @@
+Panchang Symbols — bundled subset fonts for the sky-wheel marks
+================================================================
+
+panchang-sym-signs.woff2
+  Subset of JetBrains Mono Nerd Font (Regular): the Material Design "zodiac-*"
+  icons (U+F0A7D–U+F0A88) plus the sun (U+F185) and moon (U+F4EE) icons.
+  - JetBrains Mono: SIL Open Font License 1.1 / Apache License 2.0
+  - Material Design Icons (Pictogrammers): Apache License 2.0
+  - Nerd Fonts patcher: MIT License
+
+panchang-sym-planets.woff2
+  Subset of STIX Two Math: the astrological planet & node symbols
+  ☿ ♀ ♂ ♃ ♄ ☊ ☋ (U+263F–U+2644, U+260A–U+260B).
+  - STIX Two: SIL Open Font License 1.1
+
+These are minimal subsets created with fonttools/pyftsubset and redistributed
+under the above licenses. Full license texts are available from the upstream
+projects (jetbrains.com/lp/mono, pictogrammers.com, github.com/ryanoasis/
+nerd-fonts, stixfonts.org).

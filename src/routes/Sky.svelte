@@ -484,6 +484,9 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
+  // Bodies dim toward the horizon (atmospheric extinction) — fully bright above
+  // ~12°, fading to a dim ember at the rim, so they "go out" as they set/rise.
+  const domeFade = (alt: number): number => Math.min(1, Math.max(0.15, alt / 12));
   // The lit-portion path of the Moon at its current phase (mirrors
   // MoonPhase.svelte) so the dome shows the Moon's real crescent/gibbous shape.
   function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
@@ -607,6 +610,120 @@
       const { azimuth, altitude } = starAltAz(st.ra, st.dec, simDate, loc.latitude, loc.longitude);
       return { ra: st.ra, mag: st.mag, altitude, pt: domePt(azimuth, altitude) };
     }).filter((s) => s.altitude >= 0);
+  });
+
+  // A few well-known constellations, spread around the sky so some are always up.
+  // Each: stars as [RA hours, Dec degrees] (J2000) + line segments by star index.
+  const CONSTELLATIONS = [
+    {
+      name: { en: 'Saptarishi', hi: 'सप्तर्षि' }, // Ursa Major / the Big Dipper
+      stars: [
+        [11.06, 61.75],
+        [11.03, 56.38],
+        [11.9, 53.69],
+        [12.26, 57.03],
+        [12.9, 55.96],
+        [13.4, 54.93],
+        [13.79, 49.31],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+      ],
+    },
+    {
+      name: { en: 'Orion', hi: 'मृग' }, // Mriga
+      stars: [
+        [5.92, 7.41],
+        [5.42, 6.35],
+        [5.68, -1.94],
+        [5.6, -1.2],
+        [5.53, -0.3],
+        [5.8, -9.67],
+        [5.24, -8.2],
+      ],
+      lines: [
+        [0, 1],
+        [0, 2],
+        [1, 4],
+        [2, 3],
+        [3, 4],
+        [2, 5],
+        [4, 6],
+        [5, 6],
+      ],
+    },
+    {
+      name: { en: 'Scorpius', hi: 'वृश्चिक' }, // Vrishchika
+      stars: [
+        [16.09, -19.8],
+        [16.0, -22.62],
+        [15.98, -26.11],
+        [16.49, -26.43],
+        [16.6, -28.22],
+        [16.84, -34.29],
+        [17.56, -37.1],
+        [17.51, -37.3],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [1, 3],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+      ],
+    },
+    {
+      name: { en: 'Cassiopeia', hi: 'कैसिओपिया' },
+      stars: [
+        [0.15, 59.15],
+        [0.68, 56.54],
+        [0.95, 60.72],
+        [1.43, 60.24],
+        [1.91, 63.67],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+      ],
+    },
+  ];
+  // Constellations with enough stars above the horizon to draw — when it's dark.
+  const domeConstellations = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return [];
+    return CONSTELLATIONS.map((con) => {
+      const pts = con.stars.map(([ra, dec]) => {
+        const { azimuth, altitude } = starAltAz(ra, dec, simDate, loc.latitude, loc.longitude);
+        return { altitude, pt: domePt(azimuth, altitude) };
+      });
+      const up = pts.filter((p) => p.altitude >= 0);
+      if (up.length < 3) return null; // mostly below the horizon — skip
+      const segs = con.lines
+        .filter(([a, b]) => pts[a].altitude >= 0 && pts[b].altitude >= 0)
+        .map(([a, b]) => `${pts[a].pt.join(',')} ${pts[b].pt.join(',')}`);
+      const cx = up.reduce((s, p) => s + p.pt[0], 0) / up.length;
+      const cy = up.reduce((s, p) => s + p.pt[1], 0) / up.length;
+      const meanAlt = up.reduce((s, p) => s + p.altitude, 0) / up.length;
+      return {
+        key: con.name.en,
+        name: con.name,
+        stars: up.map((p) => p.pt),
+        segs,
+        cx,
+        cy,
+        opacity: domeFade(meanAlt) * 0.85,
+      };
+    }).filter((c): c is NonNullable<typeof c> => c !== null);
   });
 </script>
 
@@ -1115,7 +1232,7 @@
     <figure class="moonphase">
       <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={120} />
       <figcaption>
-        {hi('हम जो देखते हैं', 'What we see')} —
+        {hi('चन्द्र हमें कैसा दिखता है', 'How the Moon looks to us')} —
         <strong>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</strong>, {paksha}
         {tithiNameByIndex(tithiNum, lang)}
       </figcaption>
@@ -1147,12 +1264,27 @@
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
         <!-- soft highlight overhead → darker rim, so the flat disc reads as a curved sky -->
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-depth)" />
+        <!-- constellation stick-figures (faint), behind the bright stars -->
+        {#each domeConstellations as con (con.key)}
+          <g class="dome-con" opacity={con.opacity}>
+            {#each con.segs as seg (seg)}
+              <polyline points={seg} class="dome-con-line" />
+            {/each}
+            {#each con.stars as st (`${st[0]},${st[1]}`)}
+              <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
+            {/each}
+            <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
+              >{lang === 'hi' ? con.name.hi : con.name.en}</text
+            >
+          </g>
+        {/each}
         {#each domeStars as s (s.ra)}
           <circle
             cx={s.pt[0]}
             cy={s.pt[1]}
             r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
             class="dome-star"
+            opacity={domeFade(s.altitude)}
           />
         {/each}
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
@@ -1173,7 +1305,7 @@
         {#if showGrahas}
           {#each domePlanets as b (b.body)}
             {#if b.altitude >= 0}
-              <g class="dome-body">
+              <g class="dome-body" opacity={domeFade(b.altitude)}>
                 <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
                 {#if showLabels}
                   <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
@@ -1187,7 +1319,7 @@
         <!-- Sun & Moon last → drawn on top of the planets, and larger -->
         {#each domeSunMoon as b (b.body)}
           {#if b.altitude >= 0}
-            <g class="dome-body">
+            <g class="dome-body" opacity={domeFade(b.altitude)}>
               {#if b.body === 'sun'}
                 <circle cx={b.pt[0]} cy={b.pt[1]} r="12" fill="url(#sun-glow)" />
                 {#each rayAngles as a (a)}
@@ -1769,7 +1901,7 @@
   /* sky dome — a dark twilight all-sky view of the local sky */
   .skydome {
     margin: 1.5rem auto 0;
-    max-width: 380px;
+    max-width: 460px;
     text-align: center;
   }
   .skydome svg {
@@ -1785,6 +1917,21 @@
   }
   .dome-star {
     fill: rgba(255, 255, 255, 0.9);
+  }
+  .dome-con-line {
+    fill: none;
+    stroke: rgba(150, 180, 235, 0.5);
+    stroke-width: 0.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .dome-con-star {
+    fill: rgba(214, 228, 255, 0.95);
+  }
+  .dome-con-name {
+    font-size: 6px;
+    fill: rgba(180, 200, 240, 0.62);
+    letter-spacing: 0.3px;
   }
   .dome-card {
     font-size: 10px;

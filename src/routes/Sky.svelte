@@ -18,7 +18,7 @@
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
   import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
-  import { RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+  import { RASHI_GLYPH_PATHS, RASHI_REALISTIC_PATHS, RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
 
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
@@ -36,7 +36,7 @@
   let live = $state(true);
   let showGrahas = $state(false);
   let tropical = $state(false);
-  let iconStyle = $state<'line' | 'bold'>('line');
+  let iconStyle = $state<'realistic' | 'glyph'>('realistic');
 
   $effect(() => {
     if (!live && speed === 0) return;
@@ -225,7 +225,8 @@
   const C = SIZE / 2;
   const R_OUT = 184;
   const R_IN = 138;
-  const R_NAME = 161; // curved sign names, centered in the ring
+  const R_NAME = 170; // curved sign names (outer)
+  const R_ICON = 149; // sign icon, tucked inside the name
   const R_BODY = 116; // Sun / Moon (clear of the ring and the grahas)
   const R_GRAHA = 84; // other planets
   const R_ARC = 54; // elongation arc (small, central)
@@ -299,6 +300,11 @@
     <div class="toggles">
       <label><input type="checkbox" bind:checked={showGrahas} /> {hi('सभी ग्रह', 'All planets')}</label>
       <label><input type="checkbox" bind:checked={tropical} /> {hi('सायन (पाश्चात्य)', 'Tropical zodiac')}</label>
+      <span class="icon-switch">
+        {hi('चिह्न', 'Icons')}:
+        <button type="button" class:on={iconStyle === 'realistic'} onclick={() => (iconStyle = 'realistic')}>{hi('चित्र', 'Realistic')}</button>
+        <button type="button" class:on={iconStyle === 'glyph'} onclick={() => (iconStyle = 'glyph')}>{hi('संकेत', 'Glyph')}</button>
+      </span>
     </div>
   </div>
 
@@ -316,6 +322,7 @@
         {#each rashis as i (i)}
           {@const isSun = i === sunRashi}
           {@const isMoon = i === moonRashi}
+          {@const [ix, iy] = pt(i * 30 + 15, R_ICON)}
           <path
             d={sector(i * 30, (i + 1) * 30)}
             class="rashi"
@@ -331,6 +338,13 @@
           />
           <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
           <text class="rashi-name" class:on={isSun || isMoon}><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle">{signName(i)}</textPath></text>
+          <g class="rashi-art" class:on={isSun || isMoon} transform="translate({ix - 11} {iy - 11}) scale(0.6875)" pointer-events="none">
+            {#if iconStyle === 'glyph'}
+              <path d={RASHI_GLYPH_PATHS[i]} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+            {:else}
+              <path d={RASHI_REALISTIC_PATHS[i]} fill="currentColor" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+            {/if}
+          </g>
         {/each}
         {#each nakTicks as deg (deg)}
           <line x1={pt(deg, R_IN)[0]} y1={pt(deg, R_IN)[1]} x2={pt(deg, R_IN - 5)[0]} y2={pt(deg, R_IN - 5)[1]} class="nak-tick" />
@@ -535,6 +549,26 @@
     gap: 0.35rem;
     cursor: pointer;
   }
+  .icon-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .icon-switch button {
+    padding: 0.12rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill, 999px);
+    background: var(--paper-2);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .icon-switch button.on {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
 
   .sky__grid {
     display: flex;
@@ -596,6 +630,12 @@
   .rashi-name.on {
     fill: var(--ink);
     font-weight: 700;
+  }
+  .rashi-art {
+    color: var(--ink-soft); /* theme-adaptive */
+  }
+  .rashi-art.on {
+    color: var(--ink);
   }
   .nak-tick {
     stroke: var(--line);

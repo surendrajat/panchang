@@ -1,51 +1,42 @@
-// Hindu-style pictorial icons for the twelve rashis, drawn on a 0 0 32 32 grid
-// as stroke paths (ram, bull, twins, crab, lion, maiden, scales, scorpion, bow,
-// makara, water-pot, fishes). Rendered with currentColor + round caps. Paired
-// with the element each rashi belongs to, for the tap-to-learn card.
+// Two switchable icon sets for the twelve rashis, on a 0 0 32 32 grid.
+//
+//  • RASHI_GLYPH_PATHS     — the standard astrological symbols, as clean stroke
+//    paths (render: fill none, stroke currentColor).
+//  • RASHI_REALISTIC_PATHS — pictorial silhouettes (ram, bull, twins, crab,
+//    lion, maiden, scales, scorpion, archer, sea-goat, water-bearer, fishes).
+//    Render fill currentColor + a thin matching stroke so legs/antennae read.
+//
+// Both are single path strings per sign (multiple sub-paths inside). The sky
+// page lets the look be toggled by eye.
 
-export const RASHI_ICON_PATHS: readonly (readonly string[])[] = [
-  // Mesha — ram
-  ['M16 21V13', 'M16 13C16 7 10 6 8 10 8.5 13 11.5 13 12 10', 'M16 13C16 7 22 6 24 10 23.5 13 20.5 13 20 10'],
-  // Vrishabha — bull
-  ['M16 16m-6 0a6 6 0 1 0 12 0 6 6 0 1 0-12 0', 'M9 8C11 12 13 13 16 13 19 13 21 12 23 8'],
-  // Mithuna — twins
-  ['M12 9a2 2 0 1 0 .1 0', 'M12 11v9M9 14h6', 'M20 9a2 2 0 1 0 .1 0', 'M20 11v9M17 14h6'],
-  // Karka — crab
-  ['M16 19m-6 0a6 5 0 1 0 12 0 6 5 0 1 0-12 0', 'M11 16 7 12M7 12 5 13M7 12 8 10', 'M21 16 25 12M25 12 27 13M25 12 24 10', 'M12 23 10 26M20 23 22 26'],
-  // Simha — lion
-  ['M16 18m-4 0a4 4 0 1 0 8 0 4 4 0 1 0-8 0', 'M12.5 14.5 11 10.5 15 13M19.5 14.5 21 10.5 17 13', 'M9 18C6.5 16 6.5 13 8 12M23 18C25.5 16 25.5 13 24 12', 'M16 18 15 19.5h2zM14.5 19.5C15.3 20.6 16.7 20.6 17.5 19.5'],
-  // Kanya — maiden
-  ['M16 8a2.5 2.5 0 1 0 .1 0', 'M16 11 11 25h10z', 'M11 17h10'],
-  // Tula — scales
-  ['M16 6v4', 'M7 10h18', 'M16 10V8', 'M7 10 5 15h4z', 'M25 10 23 15h4z'],
-  // Vrishchika — scorpion
-  ['M6 16h11', 'M17 16c4 0 6-2 6-5 0-2-2-3-3-1', 'M6 16 4 13M6 16 4 19'],
-  // Dhanu — bow & arrow
-  ['M9 24C5 20 5 13 9 9', 'M7 23 25 7M25 7 19 8M25 7 24 13'],
-  // Makara — makara (crocodile)
-  ['M5 17C9 14 16 13 21 15', 'M5 17C7 19 14 19 20 17.5', 'M21 15 26 13M20 17.5 25 17M26 13C24.5 14 24.5 16 25 17', 'M9 15 8 13M12 15 11 13M15 15 14 13', 'M5 17 3 15M5 17 3 18.5'],
-  // Kumbha — water pot
-  ['M12 9h8', 'M13 9C11.5 11 11 13 11 15 11 18 13 20 16 20 19 20 21 18 21 15 21 13 20.5 11 19 9', 'M11 23q2.5-2 5 0 2.5 2 5 0', 'M12 26q2-1.5 4 0 2 1.5 4 0'],
-  // Meena — fishes
-  ['M7 11Q12 7 17 11 12 15 7 11M17 11 20 8M17 11 20 14', 'M7 21Q12 17 17 21 12 25 7 21M17 21 20 18M17 21 20 24'],
+export const RASHI_GLYPH_PATHS: readonly string[] = [
+  'M16 23 V14 M16 14 C16 9 12 7.5 10.5 10.5 C9.5 12.5 11 14 12.5 13 M16 14 C16 9 20 7.5 21.5 10.5 C22.5 12.5 21 14 19.5 13', // Mesha ♈
+  'M16 21 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 M8 8 C8 12 11 13 16 13 C21 13 24 12 24 8', // Vrishabha ♉
+  'M12 9 V23 M20 9 V23 M9 9 Q16 6 23 9 M9 23 Q16 26 23 23', // Mithuna ♊
+  'M9 12 Q9 9 13 9 Q16 9 16 12 M16 12 A2 2 0 1 1 13.5 11 M23 20 Q23 23 19 23 Q16 23 16 20 M16 20 A2 2 0 1 1 18.5 21', // Karka ♋
+  'M11 21 a3 3 0 1 1 5 1.5 C18 17 16 12 20 11 C23 10.3 24 13 22.5 14.5', // Simha ♌
+  'M10 21 V12 Q11.5 9.5 13 12 V21 M16 21 V12 Q17.5 9.5 19 12 V21 Q19 23.5 22 22 Q24.5 20.5 23 17.5 Q21.7 15.5 18.5 16.8', // Kanya ♍
+  'M7 22 H25 M8 17 H24 M11 17 A5 5 0 0 1 21 17', // Tula ♎
+  'M8 21 V12 Q9.5 9.5 11 12 V21 M14 21 V12 Q15.5 9.5 17 12 V21 Q17 23.5 20 23 L24 23 M24 23 L21 21 M24 23 L21.5 25.5', // Vrishchika ♏
+  'M9 23 L21 11 M21 11 L15 11 M21 11 L21 17 M13 15 L18 20', // Dhanu ♐
+  'M8 12 V19 M8 13 Q9.5 11 11 13 V19 Q11 21 14 20.5 Q17 20 17 17 Q17 14 14 14.5 Q12 15 13 17', // Makara ♑
+  'M8 14 L11 12 L14 14 L17 12 L20 14 L23 12 M8 20 L11 18 L14 20 L17 18 L20 20 L23 18', // Kumbha ♒
+  'M11 8 C7.5 11 7.5 21 11 24 M21 8 C24.5 11 24.5 21 21 24 M9 16 H23', // Meena ♓
 ];
 
-// Bold alternative: the same twelve signs as solid filled silhouettes (one
-// path each, fill=currentColor). Switchable in the sky page so the look can be
-// chosen by eye against the line set above.
-export const RASHI_ICON_FILLED: readonly string[] = [
-  'M9 8C6 9 6 13 9 13 8 11 10 11 11 13L11 11C11 8 14 8 16 12 18 8 21 8 21 11L21 13C22 11 24 11 23 13 26 13 26 9 23 8 20 7 17 9 16 11 15 9 12 7 9 8ZM14.5 11.5H17.5L16.5 22H15.5Z', // Mesha
-  'M16 13a5.5 5.5 0 1 0 0.01 0ZM8 6C10 10 13 11 16 11 19 11 22 10 24 6 23 9.5 21 11 16 11 11 11 9 9.5 8 6Z', // Vrishabha
-  'M10.5 7a2 2 0 1 0 .01 0ZM9.5 11h2v10h-2zM21.5 7a2 2 0 1 0 .01 0ZM20.5 11h2v10h-2zM9.5 14.5h13v2h-13z', // Mithuna
-  'M16 14a6.5 4.5 0 1 0 .01 0ZM8 9C6 11 6 13 8.5 14.5L9.5 12.5C8.5 11.5 9.5 10.5 10.5 11.5ZM24 9C26 11 26 13 23.5 14.5L22.5 12.5C23.5 11.5 22.5 10.5 21.5 11.5Z', // Karka
-  'M16 14.5a4 4 0 1 0 .01 0ZM12 10.5 13 13.5 15.5 12.5ZM20 10.5 19 13.5 16.5 12.5ZM20.5 20C23.5 20 24.5 16.5 22 15 23.5 17 21 18.5 20 17Z', // Simha
-  'M16 8a2.2 2.2 0 1 0 .01 0ZM16 11.5 11.5 24.5H20.5Z', // Kanya
-  'M15.2 6H16.8V11.5H15.2ZM6 11H26V12.6H6ZM6 12.4 4 16.5H8ZM26 12.4 24 16.5H28Z', // Tula
-  'M6 17a4 2.5 0 1 0 0.01 0ZM9 14.6C16 14.6 20 13 20 10L22 10.5 20.5 8 19 11 20 11.6C20 12.8 16 13.2 10 13.2Z', // Vrishchika
-  'M23 9 15.5 9 17.5 11 9 19.5 11.5 22 20 13.5 22 15.5Z', // Dhanu
-  'M5 17C9 14 15 14 19 15.5L19 13.5 22.5 12.5 20 16C21 17 20 18.2 19 17.6 15 19 9 19 5 17Z', // Makara
-  'M12 9h8v1.5h-8zM13.5 10.5C12.5 13 12 17 16 18.5 20 17 19.5 13 18.5 10.5ZM11 22.5Q16 20.5 21 22.5L21 24.5Q16 22.5 11 24.5Z', // Kumbha
-  'M8 11Q12 7.5 16 11 12 14.5 8 11ZM16 11 19 8.5 19 13.5ZM8 20Q12 16.5 16 20 12 23.5 8 20ZM16 20 19 17.5 19 22.5Z', // Meena
+export const RASHI_REALISTIC_PATHS: readonly string[] = [
+  'M16 14 C13.5 14 11.5 15.5 11.5 18 C11.5 21 13.5 23 16 23 C18.5 23 20.5 21 20.5 18 C20.5 15.5 18.5 14 16 14 Z M12 16 C8 15 6 17 7 19.5 C7.6 21 9.5 20.7 9.4 19 M20 16 C24 15 26 17 25 19.5 C24.4 21 22.5 20.7 22.6 19 M14.3 14.4 L13.3 12 M17.7 14.4 L18.7 12', // Mesha ram
+  'M16 16.5 C12.5 16.5 10 18.5 10 21 C10 23.5 12.5 25 16 25 C19.5 25 22 23.5 22 21 C22 18.5 19.5 16.5 16 16.5 Z M10.5 18.5 C6 14.5 4 17 6.5 19 M21.5 18.5 C26 14.5 28 17 25.5 19 M13.6 20 a0.9 0.9 0 1 0 0.01 0 M18.4 20 a0.9 0.9 0 1 0 0.01 0', // Vrishabha bull
+  'M11 9 a2 2 0 1 0 0.01 0 Z M9 12 H13 L12.2 17 L13 23 H11.4 L11 18.5 L10.6 23 H9 L9.8 17 Z M21 9 a2 2 0 1 0 0.01 0 Z M19 12 H23 L22.2 17 L23 23 H21.4 L21 18.5 L20.6 23 H19 L19.8 17 Z M13 13.5 L19 13.5', // Mithuna twins
+  'M16 18 a4.5 2.8 0 1 0 0.01 0 Z M11.5 16.5 C8.5 14.5 6.5 16 8 17.5 C8.8 18.2 9.7 17.7 9.3 16.9 M20.5 16.5 C23.5 14.5 25.5 16 24 17.5 C23.2 18.2 22.3 17.7 22.7 16.9 M11 19 L8 20.3 M11.4 20.4 L9 22.2 M21 19 L24 20.3 M20.6 20.4 L23 22.2 M14.5 20.8 L14 23 M17.5 20.8 L18 23', // Karka crab
+  'M16 14.5 C12.5 14.5 10 17 10 20 C10 23 12.5 25 16 25 C19.5 25 22 23 22 20 C22 17 19.5 14.5 16 14.5 Z M14.5 11.5 L13.2 14.5 M17.5 11.5 L18.8 14.5 M10.2 17.5 L7.5 16 M21.8 17.5 L24.5 16 M22 22 C24.8 22.3 24.8 25.5 22.3 26.3 M12 13 L13.5 15 M20 13 L18.5 15', // Simha lion
+  'M16 9 a2 2 0 1 0 0.01 0 Z M12.8 13.5 C12.8 12 19.2 12 19.2 13.5 L21 24.5 H11 Z M13 16 L10.5 14.2 M19 16 L21.5 14.2 M16 13.7 V24.5', // Kanya maiden
+  'M15 7 H17 V11 H15 Z M6 11 H26 V12.4 H6 Z M6 12.6 L4.2 16.2 H7.8 Z M26 12.6 L24.2 16.2 H27.8 Z M5 16.4 H7 M25 16.4 H27 M16 7 V11', // Tula scales
+  'M7 17 a1.6 1.6 0 1 0 0.01 0 Z M8.6 17 H11.4 M12.8 17 a1.5 1.5 0 1 0 0.01 0 Z M14.2 16.6 H16.6 M18 16.2 a1.5 1.5 0 1 0 0.01 0 Z M19.4 15.8 C21.5 15.4 22.5 13.8 23.3 12.4 C23.7 11.6 24.5 11.4 24.8 12.4 L25.6 11.5 M24.8 12.4 L24.9 13.9 M5.6 16 L7 16.8 M5.6 18.4 L7 17.6', // Vrishchika scorpion
+  'M7 23 L10 18 C11 16 13 15 15 15 L19 13.5 L21.5 11 M21.5 11 L18.7 11.4 M21.5 11 L21.6 13.8 M11 18 L9.5 23 M15 15.2 L14.5 23 M16 14.8 L18.5 23 M12.5 16.5 C13.5 15 15.5 15 16.5 16.5', // Dhanu archer
+  'M9 14.5 C9 12.8 11.2 12.3 12.8 13.4 L14.5 12.3 C15.5 11.7 16 12.8 15.4 13.8 L14 15.2 M11.2 13.6 a0.7 0.7 0 1 0 0.01 0 M14 15.5 C17 15 19.5 16.5 20 19.5 C20.4 22 22.5 23 24.3 21.8 C26 20.7 25.7 17.7 23.7 17.6 C22 17.5 21.3 19.5 22.6 20.6', // Makara sea-goat
+  'M16 9.5 a1.7 1.7 0 1 0 0.01 0 Z M13 12.5 H19 L18 18 H14 Z M12.5 14.5 L9.5 16.5 M19.5 14.5 L22.5 16.5 M8 21 Q10 19 12 21 Q14 23 16 21 Q18 19 20 21 Q22 23 24 21 M8 24 Q10 22 12 24 Q14 26 16 24 Q18 22 20 24 Q22 26 24 24', // Kumbha water-bearer
+  'M9 11 Q13 8 16 11 Q13 14 9 11 Z M9 11 L5.5 8 L6 14 Z M23 11 Q19 8 16 11 Q19 14 23 11 Z M23 11 L26.5 8 L26 14 Z M14 21 Q18 18 21 21 Q18 24 14 21 Z M14 21 L10.5 18 L11 24 Z M16 11 V21', // Meena fishes
 ];
 
 export type Element = 'fire' | 'earth' | 'air' | 'water';

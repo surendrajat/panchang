@@ -32,6 +32,7 @@
   });
 
   const gradientId = `moon-lit-${Math.random().toString(36).slice(2, 8)}`;
+  const darkSheenId = `moon-dark-${Math.random().toString(36).slice(2, 8)}`;
 </script>
 
 <figure class="moon">
@@ -49,8 +50,15 @@
         <stop offset="70%" stop-color="var(--moon-mid)" />
         <stop offset="100%" stop-color="var(--moon-low)" />
       </radialGradient>
+      <radialGradient id={darkSheenId} cx="38%" cy="34%" r="78%">
+        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.1)" />
+        <stop offset="60%" stop-color="rgba(255, 255, 255, 0.02)" />
+        <stop offset="100%" stop-color="rgba(0, 0, 0, 0.14)" />
+      </radialGradient>
     </defs>
     <circle {cx} {cy} r={R} fill="var(--moon-dark)" stroke="var(--line)" stroke-width="1" />
+    <!-- faint earthshine sheen on the dark limb so it reads as a sphere, not a hole -->
+    <circle {cx} {cy} r={R} fill="url(#{darkSheenId})" />
     <path d={litPath} fill="url(#{gradientId})" />
     <circle {cx} {cy} r={R} fill="none" stroke="var(--line)" stroke-width="1" />
   </svg>
@@ -61,7 +69,7 @@
     --moon-hi: #fbf4df;
     --moon-mid: #efe2bf;
     --moon-low: #d8c79b;
-    --moon-dark: var(--paper-3);
+    --moon-dark: #363842;
     display: inline-flex;
     margin: 0;
   }

@@ -49,6 +49,8 @@ describe('offline asset contract', () => {
     expect(urls).toEqual([
       '/fonts/noto-sans-devanagari-devanagari.woff2',
       '/fonts/noto-serif-devanagari-devanagari.woff2',
+      '/fonts/panchang-sym-signs.woff2',
+      '/fonts/panchang-sym-planets.woff2',
     ]);
 
     for (const url of urls) {
@@ -57,6 +59,10 @@ describe('offline asset contract', () => {
     expect(existsSync(join(ROOT, 'public/fonts/OFL.txt')), 'font license should be bundled').toBe(
       true,
     );
+    expect(
+      existsSync(join(ROOT, 'public/fonts/panchang-symbols-LICENSE.txt')),
+      'bundled symbol-font license should be present',
+    ).toBe(true);
   });
 
   it('does not use runtime network request APIs', () => {

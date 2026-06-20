@@ -219,11 +219,23 @@
   });
 
   // ── Tap-to-learn ────────────────────────────────────────────────────────────
-  type Selected = { type: 'rashi' | 'sun' | 'moon' | 'graha'; i?: number; key?: GrahaKey } | null;
+  type Selected = {
+    type: 'rashi' | 'sun' | 'moon' | 'earth' | 'graha';
+    i?: number;
+    key?: GrahaKey;
+  } | null;
   let selected = $state<Selected>(null);
   const learn = $derived.by(() => {
     const s = selected;
     if (!s) return null;
+    if (s.type === 'earth')
+      return {
+        title: hi('पृथ्वी', 'Earth'),
+        body: hi(
+          'आप यहाँ हैं — यह भूकेन्द्रित दृष्टि है। चक्र दिखाता है कि पृथ्वी से देखने पर सूर्य, चन्द्र और ग्रह किस राशि में हैं।',
+          'You are here — this is the geocentric view. The wheel shows which sign the Sun, Moon and planets sit in as seen from Earth.',
+        ),
+      };
     if (s.type === 'sun')
       return {
         title: hi('सूर्य', 'The Sun'),
@@ -273,6 +285,20 @@
   const R_BODY = 116; // Sun / Moon (clear of the ring and the grahas)
   const R_GRAHA = 84; // other planets
   const R_ARC = 54; // elongation arc (small, central)
+
+  // Stagger grahas that bunch up in longitude (inner planets crowd the Sun) onto
+  // slightly different radii so their globes + names don't collide into a mash.
+  const grahaLayout = $derived.by(() => {
+    const sorted = [...grahaPositions].sort((a, b) => a.lon - b.lon);
+    let tier = 0;
+    return sorted.map((g, i) => {
+      const prev = sorted[i - 1];
+      const d = prev ? Math.abs(g.lon - prev.lon) : 999;
+      const sep = Math.min(d, 360 - d);
+      tier = sep < 12 ? tier + 1 : 0;
+      return { ...g, r: Math.max(46, R_GRAHA - tier * 17) };
+    });
+  });
 
   function pt(deg: number, r: number): [number, number] {
     const a = (deg * Math.PI) / 180;
@@ -403,22 +429,23 @@
         <path d={moonAnglePath} class="angle-arc angle-arc--moon" fill="none" />
       {/if}
 
-      {#each grahaPositions as g (g.key)}
-        {@const [gx, gy] = pt(g.lon, R_GRAHA)}
+      {#each grahaLayout as g (g.key)}
+        {@const [gx, gy] = pt(g.lon, g.r)}
         {@const sel = selected?.type === 'graha' && selected.key === g.key}
         <g class="body" role="button" tabindex="0" aria-label={grahaLabel(g.key)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
           {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
           <BodyIcon kind={g.key} cx={gx} cy={gy} r={9} />
-          <text x={gx} y={gy - 14} class="body-label" text-anchor="middle">{grahaLabel(g.key)}</text>
+          <text x={gx} y={gy - 14} class="body-name" text-anchor="middle">{grahaLabel(g.key)}</text>
         </g>
       {/each}
 
-      <!-- Earth (center reference) -->
-      <g class="body">
+      <!-- Earth (center reference) — tap to learn the geocentric view -->
+      <g class="body" role="button" tabindex="0" aria-label={hi('पृथ्वी', 'Earth')} onclick={() => (selected = { type: 'earth' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'earth' })}>
+        {#if selected?.type === 'earth'}<circle cx={C} cy={C} r="17" class="sel-glow" />{/if}
         <circle cx={C} cy={C} r="13" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1.5" />
         <path d="M{C - 9} {C - 4} q3 -3 7 -1 q2 2 0 4 q-3 2 -7 1 q-2 -2 0 -4Z M{C + 2} {C + 1} q4 -1 5 3 q0 3 -3 4 q-3 0 -3 -3 q-1 -3 1 -4Z M{C - 6} {C + 5} q3 -1 4 2 q0 2 -3 2 q-2 0 -1 -4Z" class="earth-land" />
         <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
-        <text x={C} y={C - 19} class="body-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
+        <text x={C} y={C - 19} class="body-name" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
       </g>
 
       <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
@@ -428,7 +455,7 @@
         {#each craters as [dx, dy, r] (dx + '-' + dy)}
           <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} r={r} class="crater" />
         {/each}
-        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-label" text-anchor="middle">{hi('चन्द्र', 'Moon')}</text>
+        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle">{hi('चन्द्र', 'Moon')}</text>
       </g>
 
       <!-- Sun: glow + straight rays + gradient disc -->
@@ -441,7 +468,7 @@
           <line x1={sunPt[0] + cos * 13} y1={sunPt[1] - sin * 13} x2={sunPt[0] + cos * 19} y2={sunPt[1] - sin * 19} class="sun-ray" />
         {/each}
         <circle cx={sunPt[0]} cy={sunPt[1]} r="11.5" fill="url(#sun-grad)" stroke="#e07b00" stroke-width="0.75" />
-        <text x={sunPt[0]} y={sunPt[1] - 19} class="body-label" text-anchor="middle">{hi('सूर्य', 'Sun')}</text>
+        <text x={sunPt[0]} y={sunPt[1] - 19} class="body-name" text-anchor="middle">{hi('सूर्य', 'Sun')}</text>
       </g>
 
       <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
@@ -755,6 +782,24 @@
   .body:hover .body-label,
   .body:focus-visible .body-label {
     opacity: 1;
+  }
+  /* always-visible names for the planets/sun/moon/earth — small, with a paper
+     halo so they read over the wheel; tapping still opens the info card */
+  .body-name {
+    font-size: 9px;
+    font-weight: 700;
+    fill: var(--ink);
+    paint-order: stroke;
+    stroke: var(--paper);
+    stroke-width: 2.5px;
+    stroke-linejoin: round;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+  .body:hover .body-name,
+  .body:focus-visible .body-name {
+    opacity: 1;
+    fill: var(--red);
   }
   /* subtle glow behind a tapped body */
   .sel-glow {

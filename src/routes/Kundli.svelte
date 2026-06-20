@@ -172,13 +172,15 @@
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      numberingSystem: 'latn', // Latin digits → num() then applies the numeral preference
     }).format(chart.instant);
     const timeStr = timeKnownOf(chart)
-      ? new Intl.DateTimeFormat('en-GB', {
+      ? new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
           timeZone: chart.location.timezone,
-          hour: '2-digit',
+          hour: preferences.timeFormat === '12h' ? 'numeric' : '2-digit',
           minute: '2-digit',
-          hour12: false,
+          hour12: preferences.timeFormat === '12h',
+          numberingSystem: 'latn',
         }).format(chart.instant)
       : null;
     const where = chart.location.name ?? `${chart.location.latitude.toFixed(2)}, ${chart.location.longitude.toFixed(2)}`;
@@ -430,26 +432,32 @@
 {/if}
 
 <style>
+  /* Understated segmented control: a soft track with a raised active pill —
+     no saturated fill. */
   .jyotish-tabs {
-    display: flex;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
+    display: inline-flex;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    margin-bottom: 1.25rem;
+    background: var(--paper-3);
+    border-radius: var(--radius-pill, 999px);
   }
   .jyotish-tabs button {
-    flex: 1;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius, 8px);
-    background: var(--paper-2);
+    padding: 0.4rem 1.1rem;
+    border: none;
+    border-radius: var(--radius-pill, 999px);
+    background: transparent;
     color: var(--ink-soft);
     font: inherit;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
+    transition: color 0.15s;
   }
   .jyotish-tabs button.on {
-    background: var(--red);
-    color: var(--paper);
-    border-color: var(--red);
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 1px 3px var(--shadow, rgba(0, 0, 0, 0.14));
   }
   .form-card {
     max-width: 560px;

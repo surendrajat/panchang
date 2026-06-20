@@ -194,6 +194,9 @@ export const en = {
   // international Hindu-Arabic form from the Devanagari form.
   'settings.numeralsLatin': 'Hindu, Latin script (1, 2, 3)',
   'settings.numeralsDevanagari': 'Hindu, Devanagari script (१, २, ३)',
+  'settings.timeFormat': 'Time format',
+  'settings.timeFormat24': '24-hour (18:30)',
+  'settings.timeFormat12': '12-hour (6:30 PM)',
   'settings.theme': 'Theme',
   'settings.themeAuto': 'Auto (match system)',
   'settings.themeLight': 'Light — saffron paper',

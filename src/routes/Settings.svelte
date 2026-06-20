@@ -81,6 +81,20 @@
         </select>
       </label>
       <label class="label">
+        <span class="lab">{tr('settings.timeFormat')}</span>
+        <select
+          class="select"
+          value={preferences.timeFormat}
+          onchange={(e) =>
+            updatePreferences({
+              timeFormat: (e.currentTarget as HTMLSelectElement).value as '12h' | '24h',
+            })}
+        >
+          <option value="24h">{tr('settings.timeFormat24')}</option>
+          <option value="12h">{tr('settings.timeFormat12')}</option>
+        </select>
+      </label>
+      <label class="label">
         <span class="lab">{tr('settings.theme')}</span>
         <select
           class="select"

@@ -98,7 +98,7 @@
           {#if localeMetaOf(preferences.language).uptoOrder === 'postfix'}
             <b class="num"
               ><time datetime={row.endsAt.toISOString()}
-                >{num(formatTime(row.endsAt, tz, '24h', sunrise))}</time
+                >{num(formatTime(row.endsAt, tz, preferences.timeFormat, sunrise))}</time
               ></b
             >
             {tr('tithi.upto')}
@@ -106,7 +106,7 @@
             {tr('tithi.upto')}
             <b class="num"
               ><time datetime={row.endsAt.toISOString()}
-                >{num(formatTime(row.endsAt, tz, '24h', sunrise))}</time
+                >{num(formatTime(row.endsAt, tz, preferences.timeFormat, sunrise))}</time
               ></b
             >
           {/if}

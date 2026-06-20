@@ -27,6 +27,8 @@ export interface Preferences {
   theme: 'auto' | 'light' | 'dark';
   weekStart: 'sunday' | 'monday';
   numerals: 'latin' | 'devanagari';
+  // Clock format for every time-of-day display, app-wide.
+  timeFormat: '12h' | '24h';
   language: 'en' | 'hi';
 }
 
@@ -110,5 +112,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // the first vara. Users can flip to Monday-first via Settings.
   weekStart: 'sunday',
   numerals: 'latin',
+  timeFormat: '24h',
   language: 'en',
 };

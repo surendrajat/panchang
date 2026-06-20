@@ -129,7 +129,7 @@
 
   function tithiEndsAtLabel(): string {
     if (!sunrise) return '';
-    return num(formatTime(panchanga.tithi.endTime, tz, '24h', sunrise));
+    return num(formatTime(panchanga.tithi.endTime, tz, preferences.timeFormat, sunrise));
   }
 
   // Localized tithi name for the current day — used as both the hero
@@ -233,14 +233,14 @@
   });
 
   function fmtRange(start: Date, end: Date): string {
-    const a = formatTime(start, tz, '24h', sunrise);
-    const b = formatTime(end, tz, '24h', sunrise);
+    const a = formatTime(start, tz, preferences.timeFormat, sunrise);
+    const b = formatTime(end, tz, preferences.timeFormat, sunrise);
     return num(`${a}–${b}`);
   }
 
   function fmtTime(d: Date | null): string {
     if (!d) return '—';
-    return num(formatTime(d, tz, '24h'));
+    return num(formatTime(d, tz, preferences.timeFormat));
   }
 </script>
 

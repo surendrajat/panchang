@@ -16,6 +16,7 @@
     civilMidnightInZone,
     bodyAltAz,
     starAltAz,
+    bodyArc,
     type SkyBody,
     ayanamsa,
     norm360,
@@ -110,6 +111,19 @@
   let showLabels = $state(true);
   let tropical = $state(false);
   let showAngles = $state(false);
+  // The sidereal/tropical + angle toggles only matter for the wheel, so they're
+  // shown only while the wheel is on screen (hidden once you scroll past it).
+  let wheelEl = $state<SVGSVGElement | null>(null);
+  let wheelInView = $state(true);
+  $effect(() => {
+    const el = wheelEl;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => (wheelInView = e.isIntersecting), {
+      rootMargin: '-90px 0px 0px 0px',
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  });
 
   $effect(() => {
     if (!live && speed === 0) return;
@@ -210,8 +224,10 @@
       : [],
   );
 
-  const simLabel = $derived.by(() => {
-    const fmt = new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
+  // Build the formatter only when locale/timezone/format change — not every
+  // animation frame (constructing Intl.DateTimeFormat is comparatively costly).
+  const simLabelFmt = $derived(
+    new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -220,9 +236,9 @@
       hour12: preferences.timeFormat === '12h',
       numberingSystem: 'latn',
       timeZone: preferences.location?.timezone,
-    });
-    return num(fmt.format(simDate));
-  });
+    }),
+  );
+  const simLabel = $derived(num(simLabelFmt.format(simDate)));
 
   // ── Upcoming events (throttled to ~2.5 Hz) ──────────────────────────────────
   function refineCrossing(estJd: number, fn: (j: number) => number, target: number): number {
@@ -468,37 +484,51 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
-  // A body's path across the local sky as one continuous above-horizon arc. We
-  // sample a 26 h window centred on `centerMs` and keep the LONGEST above-horizon
-  // run — so the Moon's arc isn't split into two pieces by the midnight boundary
-  // (which is what made it look broken).
+  // The lit-portion path of the Moon at its current phase (mirrors
+  // MoonPhase.svelte) so the dome shows the Moon's real crescent/gibbous shape.
+  function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
+    const waxing = phaseAngle < 180;
+    const rx = Math.abs(r * Math.cos(lit * Math.PI));
+    const gibbous = lit > 0.5;
+    const limbSweep = waxing ? 1 : 0;
+    const termSweep = waxing ? (gibbous ? 1 : 0) : gibbous ? 0 : 1;
+    return `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${limbSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r} Z`;
+  }
+  // A body's path across the local sky as ONE clean horizon-to-horizon arc.
+  // Sample strictly between the rise and set that bracket the transit nearest
+  // `centerMs` (bodyArc) — a fixed wall-clock window would straddle two days and
+  // draw a chord across the middle of the dome. Circumpolar bodies (no rise/set)
+  // fall back to a full 24 h loop.
   function domeTrack(body: SkyBody, centerMs: number, lat: number, lon: number): string {
-    const SPAN = 26 * 3_600_000;
-    const start = centerMs - SPAN / 2;
-    const N = 79;
-    const segs: string[][] = [];
-    let cur: string[] = [];
-    for (let i = 0; i < N; i++) {
-      const { azimuth, altitude } = bodyAltAz(
-        body,
-        new Date(start + (i * SPAN) / (N - 1)),
-        lat,
-        lon,
-      );
-      if (altitude >= 0)
-        cur.push(
-          domePt(azimuth, altitude)
+    const pts: string[] = [];
+    const arc = bodyArc(body, centerMs, lat, lon);
+    if (arc) {
+      const N = 64;
+      for (let i = 0; i <= N; i++) {
+        const t = new Date(arc.riseMs + ((arc.setMs - arc.riseMs) * i) / N);
+        const { azimuth, altitude } = bodyAltAz(body, t, lat, lon);
+        // clamp the rise/set ends (slightly below the geometric horizon from
+        // refraction) onto the rim so the arc starts and ends cleanly
+        pts.push(
+          domePt(azimuth, Math.max(0, altitude))
             .map((n) => n.toFixed(1))
             .join(','),
         );
-      else if (cur.length) {
-        segs.push(cur);
-        cur = [];
+      }
+    } else {
+      const N = 72;
+      for (let i = 0; i <= N; i++) {
+        const t = new Date(centerMs - 12 * 3_600_000 + (i * 24 * 3_600_000) / N);
+        const { azimuth, altitude } = bodyAltAz(body, t, lat, lon);
+        if (altitude >= 0)
+          pts.push(
+            domePt(azimuth, altitude)
+              .map((n) => n.toFixed(1))
+              .join(','),
+          );
       }
     }
-    if (cur.length) segs.push(cur);
-    if (!segs.length) return '';
-    return segs.reduce((a, b) => (b.length > a.length ? b : a)).join(' ');
+    return pts.join(' ');
   }
   // Centre the path on the current time, quantised to the hour so it doesn't
   // recompute every frame (the arc barely changes within an hour).
@@ -511,17 +541,29 @@
       moon: domeTrack('moon', domeCenter, loc.latitude, loc.longitude),
     };
   });
-  // Every visible body's current position in the local sky (the Sun & Moon plus
-  // the five naked-eye planets), drawn where each one actually is right now.
-  const DOME_BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'] as const;
-  const domeNow = $derived.by(() => {
+  // Current positions in the local sky. The Sun & Moon move visibly frame to
+  // frame so they track the live time; the five planets barely move within an
+  // hour, so they're quantised to domeCenter (saves ~10 engine calls/frame).
+  const domeSunMoon = $derived.by(() => {
     const loc = preferences.location;
-    if (!loc) return null;
-    return DOME_BODIES.map((body) => {
+    if (!loc) return [];
+    return (['sun', 'moon'] as const).map((body) => {
       const { azimuth, altitude } = bodyAltAz(body, simDate, loc.latitude, loc.longitude);
       return { body, azimuth, altitude, pt: domePt(azimuth, altitude) };
     });
   });
+  const domePlanets = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc) return [];
+    // Per-frame: a body's alt/az sweeps ~15°/hour with the sky's rotation, so
+    // quantising to the hour would make the planets jump each step while scrubbing.
+    return (['mercury', 'venus', 'mars', 'jupiter', 'saturn'] as const).map((body) => {
+      const { azimuth, altitude } = bodyAltAz(body, simDate, loc.latitude, loc.longitude);
+      return { body, azimuth, altitude, pt: domePt(azimuth, altitude) };
+    });
+  });
+  // Sun & Moon first (drawn on top, and domeNow[0] is the Sun for the sky colour).
+  const domeNow = $derived(preferences.location ? [...domeSunMoon, ...domePlanets] : null);
   const domeLoc = $derived(preferences.location?.name?.split(',')[0] ?? '');
 
   function lerpRGB(a: number[], b: number[], t: number): string {
@@ -531,7 +573,7 @@
   // Sky colour from the Sun's altitude: dark indigo at night → blue by day, with
   // a warm twilight rim between (a little atmospheric glow), updated live.
   const domeSky = $derived.by(() => {
-    const sunAlt = domeNow?.[0]?.altitude ?? -90;
+    const sunAlt = domeSunMoon[0]?.altitude ?? -90;
     const day = (sunAlt + 6) / 12; // 0 below −6°, 1 above +6°
     return {
       zen: lerpRGB([22, 31, 68], [39, 82, 132], day),
@@ -556,10 +598,11 @@
     { ra: 10.139, dec: 11.97, mag: 1.35 },
     { ra: 20.69, dec: 45.28, mag: 1.25 },
   ];
-  // Bright stars above the horizon — only once the sky is dark enough to see them.
+  // Bright stars above the horizon — only once the sky is dark. Per-frame for the
+  // same reason as the planets (their alt/az rotates with the sky as time runs).
   const domeStars = $derived.by(() => {
     const loc = preferences.location;
-    if (!loc || (domeNow?.[0]?.altitude ?? -90) > 0) return [];
+    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return [];
     return BRIGHT_STARS.map((st) => {
       const { azimuth, altitude } = starAltAz(st.ra, st.dec, simDate, loc.latitude, loc.longitude);
       return { ra: st.ra, mag: st.mag, altitude, pt: domePt(azimuth, altitude) };
@@ -610,27 +653,30 @@
         onclick={() => (showLabels = !showLabels)}
         ><span class="chip__dot"></span>{hi('नाम', 'Labels')}</button
       >
-      <button
-        type="button"
-        class="chip"
-        class:on={tropical}
-        aria-pressed={tropical}
-        onclick={() => (tropical = !tropical)}
-        ><span class="chip__dot"></span>{hi('सायन', 'Tropical')}</button
-      >
-      <button
-        type="button"
-        class="chip"
-        class:on={showAngles}
-        aria-pressed={showAngles}
-        onclick={() => (showAngles = !showAngles)}
-        ><span class="chip__dot"></span>{hi('कोण', 'Angles')}</button
-      >
+      {#if wheelInView}
+        <button
+          type="button"
+          class="chip"
+          class:on={tropical}
+          aria-pressed={tropical}
+          onclick={() => (tropical = !tropical)}
+          ><span class="chip__dot"></span>{hi('सायन', 'Tropical')}</button
+        >
+        <button
+          type="button"
+          class="chip"
+          class:on={showAngles}
+          aria-pressed={showAngles}
+          onclick={() => (showAngles = !showAngles)}
+          ><span class="chip__dot"></span>{hi('कोण', 'Angles')}</button
+        >
+      {/if}
     </div>
   </div>
 
   <div class="sky__grid">
     <svg
+      bind:this={wheelEl}
       class="wheel"
       viewBox="0 0 {SIZE} {SIZE}"
       role="img"
@@ -969,7 +1015,7 @@
   </p>
 
   <div class="events">
-    <span class="events__label">{hi('आगामी', 'Upcoming')}</span>
+    <span class="events__label">{hi('आगामी घटनाएँ', 'Upcoming events')}</span>
     {#each events as ev (ev.key)}
       <div class="event">
         <span class="event__name"
@@ -981,87 +1027,100 @@
     {/each}
   </div>
 
-  <!-- Side view: the geometry, and the phase we actually see -->
-  <figure class="orbital">
-    <svg
-      viewBox="0 0 {OW} {OH}"
-      role="img"
-      aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}
-    >
-      <!-- Parallel sunlight: the Sun is effectively at infinity, so its rays
+  <!-- Side view: the model on the left, the phase we actually see on the right -->
+  <div class="what-we-see">
+    <figure class="orbital">
+      <svg
+        viewBox="0 0 {OW} {OH}"
+        role="img"
+        aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}
+      >
+        <!-- Parallel sunlight: the Sun is effectively at infinity, so its rays
            reach the Earth–Moon system parallel (that's why the Moon's sunward
            half is always the lit half). -->
-      {#each [-20, 0, 20] as dy (dy)}
-        <line
-          x1={SUNX + 26}
-          y1={EARTH.y + dy}
-          x2={EARTH.x - 16}
-          y2={EARTH.y + dy}
-          class="sunlight"
+        {#each [-20, 0, 20] as dy (dy)}
+          <line
+            x1={SUNX + 26}
+            y1={EARTH.y + dy}
+            x2={EARTH.x - 16}
+            y2={EARTH.y + dy}
+            class="sunlight"
+          />
+        {/each}
+        <!-- Sun: same look as the wheel — glow + straight rays + gradient disc -->
+        <circle cx={SUNX} cy={EARTH.y} r="26" fill="url(#sun-glow)" />
+        {#each rayAngles as a (a)}
+          {@const cos = Math.cos((a * Math.PI) / 180)}
+          {@const sin = Math.sin((a * Math.PI) / 180)}
+          <line
+            x1={SUNX + cos * 21}
+            y1={EARTH.y - sin * 21}
+            x2={SUNX + cos * 28}
+            y2={EARTH.y - sin * 28}
+            class="sun-ray"
+          />
+        {/each}
+        <circle
+          cx={SUNX}
+          cy={EARTH.y}
+          r="18"
+          fill="url(#sun-grad)"
+          stroke="#e07b00"
+          stroke-width="0.75"
         />
-      {/each}
-      <!-- Sun: same look as the wheel — glow + straight rays + gradient disc -->
-      <circle cx={SUNX} cy={EARTH.y} r="26" fill="url(#sun-glow)" />
-      {#each rayAngles as a (a)}
-        {@const cos = Math.cos((a * Math.PI) / 180)}
-        {@const sin = Math.sin((a * Math.PI) / 180)}
-        <line
-          x1={SUNX + cos * 21}
-          y1={EARTH.y - sin * 21}
-          x2={SUNX + cos * 28}
-          y2={EARTH.y - sin * 28}
-          class="sun-ray"
+        {#if showLabels}
+          <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle"
+            >{grahaLabel('sun')}</text
+          >
+        {/if}
+        <circle cx={EARTH.x} cy={EARTH.y} r={ORB} class="orbit" />
+        <line x1={EARTH.x} y1={EARTH.y} x2={moonOrb.x} y2={moonOrb.y} class="sight" />
+        <!-- Earth: same icon as the wheel -->
+        <circle
+          cx={EARTH.x}
+          cy={EARTH.y}
+          r="12"
+          fill="url(#earth-grad)"
+          stroke="var(--paper)"
+          stroke-width="1.5"
         />
-      {/each}
-      <circle
-        cx={SUNX}
-        cy={EARTH.y}
-        r="18"
-        fill="url(#sun-grad)"
-        stroke="#e07b00"
-        stroke-width="0.75"
-      />
-      <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle"
-        >{grahaLabel('sun')}</text
-      >
-      <circle cx={EARTH.x} cy={EARTH.y} r={ORB} class="orbit" />
-      <line x1={EARTH.x} y1={EARTH.y} x2={moonOrb.x} y2={moonOrb.y} class="sight" />
-      <!-- Earth: same icon as the wheel -->
-      <circle
-        cx={EARTH.x}
-        cy={EARTH.y}
-        r="12"
-        fill="url(#earth-grad)"
-        stroke="var(--paper)"
-        stroke-width="1.5"
-      />
-      <path
-        d="M{EARTH.x - 8} {EARTH.y - 4} q3 -3 6 -1 q2 2 0 4 q-3 2 -6 1 q-2 -2 0 -4Z M{EARTH.x +
-          2} {EARTH.y + 1} q3 -1 4 3 q0 3 -3 3 q-2 0 -2 -3 q-1 -2 1 -3Z"
-        class="earth-land"
-      />
-      <ellipse cx={EARTH.x - 3} cy={EARTH.y - 4} rx="3.5" ry="2.3" class="earth-shine" />
-      <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle">{earthLabel}</text>
-      <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-dark" />
-      <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
-      <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
-    </svg>
-    <figcaption>
-      {hi(
-        'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर चन्द्र की कला है।',
-        "The Moon's sunward half is always lit; from Earth we see it at an angle — and that gap is the Moon's phase.",
-      )}
-    </figcaption>
-  </figure>
+        <path
+          d="M{EARTH.x - 8} {EARTH.y - 4} q3 -3 6 -1 q2 2 0 4 q-3 2 -6 1 q-2 -2 0 -4Z M{EARTH.x +
+            2} {EARTH.y + 1} q3 -1 4 3 q0 3 -3 3 q-2 0 -2 -3 q-1 -2 1 -3Z"
+          class="earth-land"
+        />
+        <ellipse cx={EARTH.x - 3} cy={EARTH.y - 4} rx="3.5" ry="2.3" class="earth-shine" />
+        {#if showLabels}
+          <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle"
+            >{earthLabel}</text
+          >
+        {/if}
+        <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-dark" />
+        <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
+        <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
+        {#if showLabels}
+          <text x={moonOrb.x} y={moonOrb.y + 21} class="orb-label" text-anchor="middle"
+            >{grahaLabel('moon')}</text
+          >
+        {/if}
+      </svg>
+      <figcaption>
+        {hi(
+          'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर चन्द्र की कला है।',
+          "The Moon's sunward half is always lit; from Earth we see it at an angle — and that gap is the Moon's phase.",
+        )}
+      </figcaption>
+    </figure>
 
-  <figure class="moonphase">
-    <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={128} />
-    <figcaption>
-      {hi('हम जो देखते हैं', 'What we see')} —
-      <strong>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</strong>, {paksha}
-      {tithiNameByIndex(tithiNum, lang)}
-    </figcaption>
-  </figure>
+    <figure class="moonphase">
+      <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={120} />
+      <figcaption>
+        {hi('हम जो देखते हैं', 'What we see')} —
+        <strong>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</strong>, {paksha}
+        {tithiNameByIndex(tithiNum, lang)}
+      </figcaption>
+    </figure>
+  </div>
 
   {#if domeTracks && domeNow}
     <figure class="skydome">
@@ -1074,13 +1133,20 @@
         )}
       >
         <defs>
-          <radialGradient id="dome-grad" cx="50%" cy="40%" r="62%">
+          <radialGradient id="dome-grad" cx="50%" cy="38%" r="64%">
             <stop offset="0%" stop-color={domeSky.zen} />
             <stop offset="66%" stop-color={domeSky.mid} />
             <stop offset="100%" stop-color={domeSky.rim} />
           </radialGradient>
+          <radialGradient id="dome-depth" cx="50%" cy="44%" r="60%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.06)" />
+            <stop offset="62%" stop-color="rgba(0,0,0,0)" />
+            <stop offset="100%" stop-color="rgba(0,0,0,0.22)" />
+          </radialGradient>
         </defs>
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
+        <!-- soft highlight overhead → darker rim, so the flat disc reads as a curved sky -->
+        <circle cx={DC} cy={DC} r={DR} fill="url(#dome-depth)" />
         {#each domeStars as s (s.ra)}
           <circle
             cx={s.pt[0]}
@@ -1089,10 +1155,7 @@
             class="dome-star"
           />
         {/each}
-        <circle cx={DC} cy={DC} r={(DR * 60) / 90} class="dome-ring" />
-        <circle cx={DC} cy={DC} r={(DR * 30) / 90} class="dome-ring" />
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
-        <circle cx={DC} cy={DC} r="1.3" class="dome-zenith" />
         <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
         <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
         <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
@@ -1106,55 +1169,63 @@
         {#if domeTracks.moon}
           <polyline points={domeTracks.moon} class="dome-path dome-path--moon" />
         {/if}
-        {#each domeNow as b (b.body)}
+        <!-- planets first → small and behind, hidden with the Grahas toggle -->
+        {#if showGrahas}
+          {#each domePlanets as b (b.body)}
+            {#if b.altitude >= 0}
+              <g class="dome-body">
+                <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
+                {#if showLabels}
+                  <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
+                    >{grahaLabel(b.body)}</text
+                  >
+                {/if}
+              </g>
+            {/if}
+          {/each}
+        {/if}
+        <!-- Sun & Moon last → drawn on top of the planets, and larger -->
+        {#each domeSunMoon as b (b.body)}
           {#if b.altitude >= 0}
             <g class="dome-body">
               {#if b.body === 'sun'}
-                <!-- same Sun as the wheel: glow + rays + gradient disc -->
-                <circle cx={b.pt[0]} cy={b.pt[1]} r="8.5" fill="url(#sun-glow)" />
+                <circle cx={b.pt[0]} cy={b.pt[1]} r="12" fill="url(#sun-glow)" />
                 {#each rayAngles as a (a)}
                   {@const c = Math.cos((a * Math.PI) / 180)}
                   {@const s = Math.sin((a * Math.PI) / 180)}
                   <line
-                    x1={b.pt[0] + c * 6}
-                    y1={b.pt[1] - s * 6}
-                    x2={b.pt[0] + c * 8.5}
-                    y2={b.pt[1] - s * 8.5}
+                    x1={b.pt[0] + c * 7.5}
+                    y1={b.pt[1] - s * 7.5}
+                    x2={b.pt[0] + c * 11}
+                    y2={b.pt[1] - s * 11}
                     class="sun-ray"
                   />
                 {/each}
                 <circle
                   cx={b.pt[0]}
                   cy={b.pt[1]}
-                  r="5.5"
+                  r="7"
                   fill="url(#sun-grad)"
                   stroke="#e07b00"
-                  stroke-width="0.6"
+                  stroke-width="0.7"
                 />
-              {:else if b.body === 'moon'}
-                <!-- same Moon as the wheel: cratered disc -->
+              {:else}
+                <!-- Moon drawn at its real phase shape -->
                 <circle
                   cx={b.pt[0]}
                   cy={b.pt[1]}
-                  r="6"
-                  fill="url(#moon-grad)"
-                  stroke="rgba(255,255,255,0.35)"
+                  r="7"
+                  fill="#363842"
+                  stroke="rgba(255,255,255,0.4)"
                   stroke-width="0.6"
                 />
-                {#each craters as [dx, dy, cr] (dx + '-' + dy)}
-                  <circle
-                    cx={b.pt[0] + dx * 0.5}
-                    cy={b.pt[1] + dy * 0.5}
-                    r={cr * 0.5}
-                    class="crater"
-                  />
-                {/each}
-              {:else}
-                <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={6} />
+                <path d={moonLitPath(b.pt[0], b.pt[1], 7, illum, elong)} fill="#f1e7cb" />
               {/if}
-              <text x={b.pt[0]} y={b.pt[1] - 9.5} class="dome-label" text-anchor="middle"
-                >{grahaLabel(b.body)}</text
-              >
+              {#if showLabels}
+                <text x={b.pt[0]} y={b.pt[1] - 12.5} class="dome-label" text-anchor="middle"
+                  >{grahaLabel(b.body)}</text
+                >
+              {/if}
             </g>
           {/if}
         {/each}
@@ -1673,21 +1744,32 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .orbital {
-    margin: 1.25rem 0 0;
+  /* "what we see": the Sun–Earth–Moon model on the left, the phase on the right */
+  .what-we-see {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem 1.25rem;
+    justify-content: center;
+    gap: 1rem 1.75rem;
+    margin-top: 1.5rem;
+  }
+  .orbital {
+    flex: 1 1 300px;
+    max-width: 400px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
   }
   .orbital svg {
-    flex: 1 1 300px;
-    max-width: 380px;
+    width: 100%;
+    max-width: 360px;
   }
   /* sky dome — a dark twilight all-sky view of the local sky */
   .skydome {
     margin: 1.5rem auto 0;
-    max-width: 340px;
+    max-width: 380px;
     text-align: center;
   }
   .skydome svg {
@@ -1700,15 +1782,6 @@
     fill: none;
     stroke: rgba(255, 255, 255, 0.45);
     stroke-width: 1.25;
-  }
-  .dome-ring {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.16);
-    stroke-width: 0.75;
-    stroke-dasharray: 2 3;
-  }
-  .dome-zenith {
-    fill: rgba(255, 255, 255, 0.5);
   }
   .dome-star {
     fill: rgba(255, 255, 255, 0.9);
@@ -1748,10 +1821,10 @@
     margin-top: 8px;
     line-height: 1.5;
   }
-  /* moon phase — its own centred section */
+  /* moon phase — its own centred section, to the right of the model */
   .moonphase {
-    margin: 1.75rem auto 0;
-    max-width: 300px;
+    flex: 0 1 200px;
+    margin: 0;
     text-align: center;
   }
   .moonphase figcaption {

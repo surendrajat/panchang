@@ -35,5 +35,5 @@ export { sunRiseSet, moonRiseSet, sunriseOnDay, sunsetOnDay } from './sunrise';
 
 export type { RiseSetEvents } from './sunrise';
 
-export { bodyAltAz, starAltAz } from './altaz';
+export { bodyAltAz, starAltAz, bodyArc } from './altaz';
 export type { AltAz, SkyBody } from './altaz';

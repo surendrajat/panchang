@@ -2,7 +2,7 @@
 // from a place on Earth at an instant — for the "what you'd see if you stood and
 // watched the sky" dome on the Sky page. Same astronomy-engine source as the
 // rest of the engine; includes standard atmospheric refraction.
-import { Body, Observer, Equator, Horizon } from 'astronomy-engine';
+import { Body, Observer, Equator, Horizon, SearchHourAngle, SearchRiseSet } from 'astronomy-engine';
 
 /** The bodies you can actually see with the naked eye (no Rahu/Ketu — those are
  *  the invisible lunar nodes, not objects in the sky). */
@@ -36,6 +36,27 @@ export function bodyAltAz(
   const eq = Equator(BODY[body], date, observer, true, true);
   const hor = Horizon(date, observer, eq.ra, eq.dec, 'normal');
   return { azimuth: hor.azimuth, altitude: hor.altitude };
+}
+
+/**
+ * The rise and set instants of the single above-horizon arc that brackets the
+ * body's transit (upper culmination) nearest `centerMs`. Returns null when the
+ * body is circumpolar / never rises in that window. Lets the sky-dome draw one
+ * clean horizon-to-horizon path instead of two pieces split at midnight.
+ */
+export function bodyArc(
+  body: SkyBody,
+  centerMs: number,
+  latitude: number,
+  longitude: number,
+  altitudeMeters = 0,
+): { riseMs: number; setMs: number } | null {
+  const observer = new Observer(latitude, longitude, altitudeMeters);
+  const transit = SearchHourAngle(BODY[body], observer, 0, new Date(centerMs - 12 * 3_600_000));
+  const rise = SearchRiseSet(BODY[body], observer, +1, transit.time.date, -1.5);
+  const set = SearchRiseSet(BODY[body], observer, -1, transit.time.date, +1.5);
+  if (!rise || !set) return null;
+  return { riseMs: rise.date.getTime(), setMs: set.date.getTime() };
 }
 
 /**

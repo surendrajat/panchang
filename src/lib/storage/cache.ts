@@ -43,13 +43,21 @@ const MAX_PANCHANGA_AGE_DAYS = 30;
 // still eliminating recomputation on back-navigation within the same day.
 const MAX_FESTIVAL_AGE_DAYS = 1;
 
+// Cache-busting prefix on every key (see CALCULATION_VERSION / CACHE_BUST).
+const KEY_PREFIX = `v${CALCULATION_VERSION}|b${CACHE_BUST}`;
+
+// The location component of every cache key — shared by the panchanga and
+// festival caches so a format change can't drift between the two.
+function locationKeyPart(location: Location): string {
+  const altitude = location.altitude ?? 0;
+  return `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
+}
+
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
   const { year, month, day } = civilYMDInZone(date, location.timezone);
   const ymd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  const altitude = location.altitude ?? 0;
-  const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
   const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}/${options.sunriseHorizon}`;
-  return `v${CALCULATION_VERSION}|b${CACHE_BUST}|${ymd}|${loc}|${opts}`;
+  return `${KEY_PREFIX}|${ymd}|${locationKeyPart(location)}|${opts}`;
 }
 
 export async function getCached(key: string): Promise<Panchanga | null> {
@@ -108,9 +116,7 @@ export function festivalCacheKey(
   location: Location,
   opts: { ayanamsa: string; monthSystem: string },
 ): string {
-  const altitude = location.altitude ?? 0;
-  const loc = `${location.latitude.toFixed(4)},${location.longitude.toFixed(4)},${altitude.toFixed(1)},${location.timezone}`;
-  return `v${CALCULATION_VERSION}|b${CACHE_BUST}|festivals|${year}|${loc}|${opts.ayanamsa}/${opts.monthSystem}`;
+  return `${KEY_PREFIX}|festivals|${year}|${locationKeyPart(location)}|${opts.ayanamsa}/${opts.monthSystem}`;
 }
 
 export async function getFestivalsCached(key: string): Promise<FestivalOccurrence[] | null> {

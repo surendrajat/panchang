@@ -40,6 +40,14 @@ import {
   type PanchangaOptions,
 } from './types';
 
+// One civil-day step for date walks: advance 28h then snap back to local
+// midnight. 28h exceeds the longest DST day (25h), so a spring-forward never
+// makes us skip a date and a fall-back never makes us repeat one.
+const DAY_STEP_MS = 28 * 3600_000;
+// Half a day — the noon anchor (when a polar day has no sunrise) and the
+// sunset fallback (anchor + 12h when there is no sunset).
+const HALF_DAY_MS = 12 * 3600_000;
+
 function resolveOptions(o?: Partial<PanchangaOptions>): PanchangaOptions {
   return { ...DEFAULT_OPTIONS, ...(o ?? {}) };
 }
@@ -66,7 +74,7 @@ export function computePanchanga(
   // Anchor for tithi/nakshatra/yoga/karana is sunrise, per ARCHITECTURE
   // §6.6. If sunrise doesn't exist (polar latitudes), fall back to local
   // noon of the civil date for the panchanga anchor.
-  const anchor = sunrise ?? new Date(dayStart.getTime() + 12 * 3600_000);
+  const anchor = sunrise ?? new Date(dayStart.getTime() + HALF_DAY_MS);
 
   const tithi = tithiAtInstant(anchor);
   const nakshatra = nakshatraAtInstant(anchor, opts.ayanamsa);
@@ -115,7 +123,7 @@ export function computePanchanga(
   const muhurta = computeMuhurta(
     vara,
     sunrise ?? anchor,
-    sunset ?? new Date(anchor.getTime() + 12 * 3600_000),
+    sunset ?? new Date(anchor.getTime() + HALF_DAY_MS),
   );
 
   // Build a temporary panchanga and run festival rules over it.
@@ -208,7 +216,7 @@ export function findFestivals(
     }
     // Step ahead by 28 hours, then snap to the next local midnight.
     // This works whether the previous day was 23h, 24h, or 25h.
-    cursor = civilMidnightInZone(new Date(cursor + 28 * 3600_000), location.timezone).getTime();
+    cursor = civilMidnightInZone(new Date(cursor + DAY_STEP_MS), location.timezone).getTime();
   }
   return out;
 }
@@ -235,7 +243,7 @@ export function findNextTithi(
       (criteria.masaIndex === undefined || p.masa.index === criteria.masaIndex) &&
       (criteria.nakshatraIndex === undefined || p.nakshatra.index === criteria.nakshatraIndex);
     if (matches) return p.date;
-    cursor = civilMidnightInZone(new Date(cursor + 28 * 3600_000), location.timezone).getTime();
+    cursor = civilMidnightInZone(new Date(cursor + DAY_STEP_MS), location.timezone).getTime();
   }
   return null;
 }

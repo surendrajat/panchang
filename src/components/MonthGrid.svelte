@@ -91,7 +91,7 @@
 
 <div class="calendar-scroll">
   <div class="cal" role="grid">
-    {#each weekdayLabels as label (label)}
+    {#each weekdayLabels as label, i (i)}
       <div class="dh" role="columnheader">{label}</div>
     {/each}
     {#each grid as cell, i (i)}

@@ -706,6 +706,13 @@
   .wheel :focus {
     outline: none;
   }
+  /* keyboard users get a clear focus ring on the focused sign/body (mouse
+     clicks stay ring-free via :focus above) */
+  .wheel :focus-visible {
+    outline: 2.5px solid var(--gold, #b8860b);
+    outline-offset: 1px;
+    border-radius: 3px;
+  }
   .rashi-name {
     font-size: 11.5px;
     fill: var(--ink-soft);

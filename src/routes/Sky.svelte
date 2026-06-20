@@ -12,12 +12,14 @@
     sunLongitudeAtJD,
     moonLongitudeAtJD,
     sunMoonElongationAtJD,
+    moonIlluminationAtJD,
+    civilMidnightInZone,
     ayanamsa,
     norm360,
   } from '$lib/astro';
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
-  import { tithiIndexFromElongation, clusterTiers } from '$lib/jyotish/sky-math';
+  import { tithiIndexFromElongation } from '$lib/jyotish/sky-math';
   import { RASHI_LORDS } from '$lib/jyotish/names';
   import { RASHI_ELEMENT, ELEMENT_LABEL } from '$lib/jyotish/rashi-art';
   // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
@@ -97,6 +99,7 @@
   let speed = $state(0);
   let live = $state(true);
   let showGrahas = $state(false);
+  let showLabels = $state(true);
   let tropical = $state(false);
   let showAngles = $state(false);
 
@@ -169,7 +172,9 @@
   const paksha = $derived(elong < 180 ? hi('शुक्ल', 'Shukla') : hi('कृष्ण', 'Krishna'));
   const nakNum = $derived(Math.floor(moonSid / NAK_ARC) + 1);
   const yogaNum = $derived(Math.floor(norm360(sunSid + moonSid) / NAK_ARC) + 1);
-  const illum = $derived((1 - Math.cos((elong * Math.PI) / 180)) / 2);
+  // Engine's true phase fraction (same source as the Day card), not the
+  // elongation approximation — so Sky and the Day card show the same "% lit".
+  const illum = $derived(moonIlluminationAtJD(jd));
 
   // Sidereal vs tropical is only a zodiac reference shift: the bodies stay put,
   // the sign boundaries rotate by the ayanamsa. So the displayed SIGN of a body
@@ -248,7 +253,11 @@
   let eventsBaseMs = $state(Date.now());
   const events = $derived.by(() => {
     const fromJd = dateToJulian(new Date(eventsBaseMs));
-    const dayJd = dateToJulian(new Date(Math.floor(eventsBaseMs / 86_400_000) * 86_400_000));
+    // Seed the "next event" search from the location's civil midnight (not UTC
+    // midnight), so the search window matches the panchanga's day boundary.
+    const dayJd = dateToJulian(
+      civilMidnightInZone(new Date(eventsBaseMs), preferences.location?.timezone ?? 'UTC'),
+    );
     const sunSidAt = (j: number) =>
       norm360(sunLongitudeAtJD(j) - ayanamsa(j, preferences.ayanamsa));
     const moonSidAt = (j: number) =>
@@ -283,7 +292,7 @@
 
   // ── Tap-to-learn ────────────────────────────────────────────────────────────
   type Selected = {
-    type: 'rashi' | 'sun' | 'moon' | 'earth' | 'graha';
+    type: 'rashi' | 'sun' | 'moon' | 'earth' | 'graha' | 'nakshatra';
     i?: number;
     key?: GrahaKey;
   } | null;
@@ -307,12 +316,20 @@
           'The Sun’s sign sets the month and the season. It moves one sign (~30°) every ~30 days — each crossing is a sankranti.',
         ),
       };
+    if (s.type === 'nakshatra')
+      return {
+        title: hi('नक्षत्र', 'Nakshatra'),
+        body: hi(
+          `भीतरी वलय की 27 लकीरें = 27 नक्षत्र (चन्द्रपथ के 27 भाग)। चन्द्र लगभग हर दिन एक नक्षत्र पार करता है। अभी: ${nakshatraNameByIndex(nakNum, 'hi')}।`,
+          `The 27 ticks on the inner ring are the 27 nakshatras — equal segments of the Moon's path. The Moon crosses one about every day. Now: ${nakshatraNameByIndex(nakNum, 'en')}.`,
+        ),
+      };
     if (s.type === 'moon')
       return {
         title: hi('चन्द्र', 'The Moon'),
         body: hi(
-          'चन्द्र सूर्य से जितना आगे है (अंतर) ÷ 12° = तिथि। यह हर ~सवा दो दिन में नक्षत्र बदलता है।',
-          'How far the Moon is ahead of the Sun (the gap) ÷ 12° = the tithi. It changes nakshatra every ~2.3 days.',
+          'चन्द्र सूर्य से जितना आगे है (अंतर) ÷ 12° = तिथि। यह लगभग हर दिन एक नक्षत्र (भीतरी वलय की 27 लकीरें) पार करता है।',
+          'How far the Moon is ahead of the Sun (the gap) ÷ 12° = the tithi. It crosses one nakshatra (the 27 inner-ring ticks) about every day.',
         ),
       };
     if (s.type === 'graha') {
@@ -346,19 +363,26 @@
   const R_NAME = 170; // curved sign names (outer)
   const R_ICON = 149; // sign icon, tucked inside the name
   const R_BODY = 116; // Sun / Moon (clear of the ring and the grahas)
-  const R_GRAHA = 84; // other planets
   const R_ARC = 54; // elongation arc (small, central)
 
   // Stagger grahas that bunch up in longitude (inner planets crowd the Sun) onto
   // slightly different radii so their globes + names don't collide into a mash.
-  const grahaLayout = $derived.by(() => {
-    const sorted = [...grahaPositions].sort((a, b) => a.lon - b.lon);
-    const tiers = clusterTiers(
-      sorted.map((g) => g.lon),
-      12,
-    );
-    return sorted.map((g, i) => ({ ...g, r: Math.max(46, R_GRAHA - tiers[i] * 17) }));
-  });
+  // Fixed per-graha radius. The radius is purely visual (it carries no
+  // astronomical meaning — only the angle = sidereal longitude does), so giving
+  // each graha its own ring keeps them from piling up AND makes motion smooth:
+  // only the angle animates, so there are no cluster-tier jumps.
+  const GRAHA_RADIUS: Record<GrahaKey, number> = {
+    sun: R_BODY,
+    moon: R_BODY,
+    ketu: 58,
+    mercury: 65,
+    venus: 72,
+    rahu: 79,
+    mars: 86,
+    saturn: 93,
+    jupiter: 100,
+  };
+  const grahaLayout = $derived(grahaPositions.map((g) => ({ ...g, r: GRAHA_RADIUS[g.key] })));
 
   function pt(deg: number, r: number): [number, number] {
     const a = (deg * Math.PI) / 180;
@@ -395,6 +419,13 @@
   const moonAnglePath = $derived(angleArc(moonSid, R_MOON_ARC));
   const rashis = Array.from({ length: 12 }, (_, i) => i);
   const nakTicks = Array.from({ length: 27 }, (_, i) => i * NAK_ARC);
+  // Subtle band over the nakshatra the Moon currently sits in (an annulus
+  // segment between R_IN and R_IN-7 spanning the Moon's 13.3° nakshatra).
+  const nakBandPath = $derived.by(() => {
+    const a = (nakNum - 1) * NAK_ARC;
+    const b = nakNum * NAK_ARC;
+    return `M ${ptStr(a, R_IN)} A ${R_IN} ${R_IN} 0 0 0 ${ptStr(b, R_IN)} L ${ptStr(b, R_IN - 7)} A ${R_IN - 7} ${R_IN - 7} 0 0 1 ${ptStr(a, R_IN - 7)} Z`;
+  });
   const rayAngles = Array.from({ length: 12 }, (_, i) => (i * 360) / 12);
   const sunPt = $derived(pt(sunSid, R_BODY));
   const moonPt = $derived(pt(moonSid, R_BODY));
@@ -454,6 +485,14 @@
         aria-pressed={showGrahas}
         onclick={() => (showGrahas = !showGrahas)}
         ><span class="chip__dot"></span>{hi('ग्रह', 'Planets')}</button
+      >
+      <button
+        type="button"
+        class="chip"
+        class:on={showLabels}
+        aria-pressed={showLabels}
+        onclick={() => (showLabels = !showLabels)}
+        ><span class="chip__dot"></span>{hi('नाम', 'Labels')}</button
       >
       <button
         type="button"
@@ -556,6 +595,20 @@
         {/each}
       </g>
 
+      <!-- Highlight the nakshatra the Moon sits in, so the 27 inner ticks read
+           as the Moon's nakshatras; tap to learn. (Sidereal-framed like the
+           bodies; in tropical mode the ticks themselves rotate with the ring.) -->
+      <path
+        d={nakBandPath}
+        class="nak-current"
+        role="button"
+        tabindex="0"
+        aria-label={hi('चन्द्र नक्षत्र', 'Moon nakshatra')}
+        onclick={() => (selected = { type: 'nakshatra' })}
+        onkeydown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'nakshatra' })}
+      />
+
       <!-- elongation arc + radii (bodies are fixed; only the ring rotates) -->
       <path d={elongPath} class="elong-arc" fill="none" />
       <line x1={C} y1={C} x2={sunPt[0]} y2={sunPt[1]} class="ray ray--sun" />
@@ -582,8 +635,11 @@
             (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}
         >
           {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
+          <circle cx={gx} cy={gy} r="12" class="hit" />
           <BodyIcon kind={g.key} cx={gx} cy={gy} r={9} />
-          <text x={gx} y={gy - 14} class="body-name" text-anchor="middle">{grahaLabel(g.key)}</text>
+          {#if showLabels}<text x={gx} y={gy - 14} class="body-name" text-anchor="middle"
+              >{grahaLabel(g.key)}</text
+            >{/if}
         </g>
       {/each}
 
@@ -612,7 +668,9 @@
           class="earth-land"
         />
         <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
-        <text x={C} y={C - 19} class="body-name" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
+        {#if showLabels}<text x={C} y={C - 19} class="body-name" text-anchor="middle"
+            >{hi('पृथ्वी', 'Earth')}</text
+          >{/if}
       </g>
 
       <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
@@ -641,9 +699,12 @@
         {#each craters as [dx, dy, r] (dx + '-' + dy)}
           <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} {r} class="crater" />
         {/each}
-        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle"
-          >{hi('चन्द्र', 'Moon')}</text
-        >
+        {#if showLabels}<text
+            x={moonPt[0]}
+            y={moonPt[1] - 16}
+            class="body-name"
+            text-anchor="middle">{hi('चन्द्र', 'Moon')}</text
+          >{/if}
       </g>
 
       <!-- Sun: glow + straight rays + gradient disc -->
@@ -658,32 +719,32 @@
         {#if selected?.type === 'sun'}<circle
             cx={sunPt[0]}
             cy={sunPt[1]}
-            r="20"
+            r="17"
             class="sel-glow"
           />{/if}
-        <circle cx={sunPt[0]} cy={sunPt[1]} r="16" fill="url(#sun-glow)" />
+        <circle cx={sunPt[0]} cy={sunPt[1]} r="13" fill="url(#sun-glow)" />
         {#each rayAngles as a (a)}
           {@const cos = Math.cos((a * Math.PI) / 180)}
           {@const sin = Math.sin((a * Math.PI) / 180)}
           <line
-            x1={sunPt[0] + cos * 13}
-            y1={sunPt[1] - sin * 13}
-            x2={sunPt[0] + cos * 19}
-            y2={sunPt[1] - sin * 19}
+            x1={sunPt[0] + cos * 11}
+            y1={sunPt[1] - sin * 11}
+            x2={sunPt[0] + cos * 15}
+            y2={sunPt[1] - sin * 15}
             class="sun-ray"
           />
         {/each}
         <circle
           cx={sunPt[0]}
           cy={sunPt[1]}
-          r="11.5"
+          r="10.5"
           fill="url(#sun-grad)"
           stroke="#e07b00"
           stroke-width="0.75"
         />
-        <text x={sunPt[0]} y={sunPt[1] - 19} class="body-name" text-anchor="middle"
-          >{hi('सूर्य', 'Sun')}</text
-        >
+        {#if showLabels}<text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
+            >{hi('सूर्य', 'Sun')}</text
+          >{/if}
       </g>
 
       <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
@@ -1153,6 +1214,25 @@
     stroke: var(--line);
     stroke-width: 1;
     opacity: 0.5;
+  }
+  /* invisible tap target for a graha (the BodyIcon itself is pointer-events:none) */
+  .hit {
+    fill: transparent;
+    pointer-events: all;
+    cursor: pointer;
+  }
+  /* the Moon's current nakshatra division — subtle band, tap to learn */
+  .nak-current {
+    fill: color-mix(in srgb, var(--indigo) 22%, transparent);
+    stroke: var(--indigo);
+    stroke-width: 0.75;
+    opacity: 0.8;
+    cursor: pointer;
+  }
+  .nak-current:hover,
+  .nak-current:focus-visible {
+    fill: color-mix(in srgb, var(--indigo) 34%, transparent);
+    outline: none;
   }
   .elong-arc {
     stroke: var(--red);

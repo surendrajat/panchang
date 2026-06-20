@@ -15,6 +15,13 @@
 // Both values are embedded in every cache key, so mismatched entries are
 // silently ignored and overwritten — no migration needed.
 //
+// Every operation here is BEST-EFFORT: the cache is purely an optimization, so
+// a flaky/unavailable IndexedDB must never break a render or surface an
+// unhandled rejection (several call sites are fire-and-forget). Reads fall back
+// to a miss (null), writes and eviction no-op on any DB error. The one
+// exception is clearAll(), which is a deliberate user action (Settings) whose
+// failure the caller should see.
+//
 // TTLs: festival-year cache expires after MAX_FESTIVAL_AGE_DAYS (1 day) so
 // stale entries don't accumulate across calendar years. Daily panchanga
 // entries live longer (MAX_PANCHANGA_AGE_DAYS = 30).
@@ -45,24 +52,36 @@ export function cacheKey(date: Date, location: Location, options: PanchangaOptio
 }
 
 export async function getCached(key: string): Promise<Panchanga | null> {
-  const row = await db().cachedPanchangas.get(key);
-  return row?.data ?? null;
+  try {
+    const row = await db().cachedPanchangas.get(key);
+    return row?.data ?? null;
+  } catch {
+    return null; // best-effort: any DB error is just a cache miss
+  }
 }
 
 export async function putCached(key: string, data: Panchanga): Promise<void> {
-  const row: CachedPanchangaRow = { cacheKey: key, data, createdAt: new Date() };
-  await db().cachedPanchangas.put(row);
-  await trimIfNeeded();
+  try {
+    const row: CachedPanchangaRow = { cacheKey: key, data, createdAt: new Date() };
+    await db().cachedPanchangas.put(row);
+    await trimIfNeeded();
+  } catch {
+    // best-effort: caching is an optimization, never surface a failure
+  }
 }
 
 export async function evictStale(): Promise<number> {
-  const panchangaCutoff = new Date(Date.now() - MAX_PANCHANGA_AGE_DAYS * MS_PER_DAY);
-  const festivalCutoff = new Date(Date.now() - MAX_FESTIVAL_AGE_DAYS * MS_PER_DAY);
-  const [panchanga, festivals] = await Promise.all([
-    db().cachedPanchangas.where('createdAt').below(panchangaCutoff).delete(),
-    db().cachedFestivals.where('createdAt').below(festivalCutoff).delete(),
-  ]);
-  return panchanga + festivals;
+  try {
+    const panchangaCutoff = new Date(Date.now() - MAX_PANCHANGA_AGE_DAYS * MS_PER_DAY);
+    const festivalCutoff = new Date(Date.now() - MAX_FESTIVAL_AGE_DAYS * MS_PER_DAY);
+    const [panchanga, festivals] = await Promise.all([
+      db().cachedPanchangas.where('createdAt').below(panchangaCutoff).delete(),
+      db().cachedFestivals.where('createdAt').below(festivalCutoff).delete(),
+    ]);
+    return panchanga + festivals;
+  } catch {
+    return 0; // best-effort cleanup
+  }
 }
 
 async function trimIfNeeded(): Promise<void> {
@@ -94,11 +113,19 @@ export function festivalCacheKey(
 }
 
 export async function getFestivalsCached(key: string): Promise<FestivalOccurrence[] | null> {
-  const row = await db().cachedFestivals.get(key);
-  return row?.data ?? null;
+  try {
+    const row = await db().cachedFestivals.get(key);
+    return row?.data ?? null;
+  } catch {
+    return null; // best-effort: any DB error is just a cache miss
+  }
 }
 
 export async function putFestivalsCached(key: string, data: FestivalOccurrence[]): Promise<void> {
-  const row: CachedFestivalsRow = { cacheKey: key, data, createdAt: new Date() };
-  await db().cachedFestivals.put(row);
+  try {
+    const row: CachedFestivalsRow = { cacheKey: key, data, createdAt: new Date() };
+    await db().cachedFestivals.put(row);
+  } catch {
+    // best-effort: caching is an optimization, never surface a failure
+  }
 }

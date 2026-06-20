@@ -17,11 +17,6 @@
     { value: 'amanta', key: 'monthSystem.amanta' },
     { value: 'purnimanta', key: 'monthSystem.purnimanta' },
   ];
-
-  const lagnaOptions: { value: 'swiss' | 'drik'; key: TranslationKey }[] = [
-    { value: 'swiss', key: 'lagnaMethod.swiss' },
-    { value: 'drik', key: 'lagnaMethod.drik' },
-  ];
 </script>
 
 <div class="stack">
@@ -52,25 +47,6 @@
         })}
     >
       {#each monthOptions as o (o.value)}
-        <option value={o.value}>{tr(o.key)}</option>
-      {/each}
-    </select>
-  </label>
-
-  <label class="label">
-    <span class="lab"
-      >{tr('settings.lagnaMethod')}
-      <span class="hint">{tr('settings.lagnaMethodHint')}</span></span
-    >
-    <select
-      class="select"
-      value={preferences.lagnaMethod}
-      onchange={(e) =>
-        updatePreferences({
-          lagnaMethod: (e.currentTarget as HTMLSelectElement).value as 'swiss' | 'drik',
-        })}
-    >
-      {#each lagnaOptions as o (o.value)}
         <option value={o.value}>{tr(o.key)}</option>
       {/each}
     </select>

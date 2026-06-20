@@ -22,26 +22,31 @@
     deleteBirthProfile,
     type BirthProfile,
   } from '$lib/storage';
+  import { kundliDraft } from '$lib/state/jyotish-draft.svelte';
 
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
   const num = (s: string | number) => applyNumerals(String(s), numerals);
 
-  // ── form state ──
-  let name = $state('');
-  let date = $state(''); // YYYY-MM-DD
-  let time = $state('12:00'); // HH:MM
-  let timeKnown = $state(true);
-  let place = $state<Location | null>(preferences.location);
+  // Form + result state, initialised from the module draft so it survives
+  // navigating away from this lazy-loaded route and back (see jyotish-draft).
+  let name = $state(kundliDraft.name);
+  let date = $state(kundliDraft.date); // YYYY-MM-DD
+  let time = $state(kundliDraft.time); // HH:MM
+  let timeKnown = $state(kundliDraft.timeKnown);
+  let place = $state<Location | null>(kundliDraft.place ?? preferences.location);
+  let chart = $state<BirthChart | null>(kundliDraft.chart);
+  let editing = $state(kundliDraft.editing); // form open vs. result shown
   let error = $state<string | null>(null);
-
-  // ── result state ──
-  let chart = $state<BirthChart | null>(null);
-  let editing = $state(true); // form open vs. result shown
 
   // ── saved profiles ──
   let profiles = $state<BirthProfile[]>([]);
-  let saved = $state(false); // current chart already saved this session
+  let saved = $state(kundliDraft.saved); // current chart already persisted
+
+  // Persist every change back to the module draft.
+  $effect(() => {
+    Object.assign(kundliDraft, { name, date, time, timeKnown, place, chart, editing, saved });
+  });
   async function refreshProfiles(): Promise<void> {
     try {
       profiles = await listBirthProfiles();
@@ -105,7 +110,6 @@
       chart = computeBirthChart(instant, place, timeKnown, {
         ayanamsa: preferences.ayanamsa,
         nodeType: 'mean',
-        lagnaMethod: preferences.lagnaMethod,
       });
       saved = false;
       editing = false;

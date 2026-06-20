@@ -32,7 +32,7 @@ export function computeBirthChart(
   dateToJulian(instant);
 
   const grahas = computeGrahas(instant, opts.ayanamsa, opts.nodeType);
-  const lagna = timeKnown ? computeLagna(instant, location, opts.ayanamsa, opts.lagnaMethod) : null;
+  const lagna = timeKnown ? computeLagna(instant, location, opts.ayanamsa) : null;
 
   if (lagna) {
     for (const g of grahas) {

@@ -13,6 +13,7 @@
   import { rashiNameByIndex, nakshatraNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
   import { listBirthProfiles, type BirthProfile } from '$lib/storage';
+  import { matchDraft } from '$lib/state/jyotish-draft.svelte';
 
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
@@ -24,15 +25,19 @@
     time: string;
     place: Location | null;
   }
-  const blank = (): Person => ({ name: '', date: '', time: '12:00', place: preferences.location });
 
-  let groom = $state<Person>(blank());
-  let bride = $state<Person>(blank());
+  // Init from the module draft so the form survives navigating away from this
+  // lazy-loaded route and back (see jyotish-draft).
+  let groom = $state<Person>(matchDraft.groom);
+  let bride = $state<Person>(matchDraft.bride);
   let error = $state<string | null>(null);
 
   // Saved profiles for quick-pick.
   let profiles = $state<BirthProfile[]>([]);
   onMount(async () => {
+    // Default each partner's place to the current location when unset.
+    if (!groom.place) groom.place = preferences.location;
+    if (!bride.place) bride.place = preferences.location;
     try {
       profiles = await listBirthProfiles();
     } catch {
@@ -52,7 +57,14 @@
     g: { nak: number; rashi: number };
     b: { nak: number; rashi: number };
   }
-  let out = $state<Computed | null>(null);
+  let out = $state<Computed | null>(matchDraft.out);
+
+  // Persist form + result back to the module draft on every change.
+  $effect(() => {
+    matchDraft.groom = groom;
+    matchDraft.bride = bride;
+    matchDraft.out = out;
+  });
 
   const canMatch = $derived(!!groom.date && !!groom.place && !!bride.date && !!bride.place);
 
@@ -74,7 +86,6 @@
     const chart = computeBirthChart(instant, p.place!, true, {
       ayanamsa: preferences.ayanamsa,
       nodeType: 'mean',
-      lagnaMethod: preferences.lagnaMethod,
     });
     const moon = chart.grahas.find((g) => g.key === 'moon')!;
     return { nakshatra: moon.nakshatra, rashi: moon.rashi, rashiDeg: moon.degInRashi };

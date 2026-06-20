@@ -2,42 +2,37 @@
 // birth instant and place. This is the one piece of astronomy the
 // panchanga layer didn't already need.
 //
-//   RAMC = local sidereal time (deg) = GAST·15 + longitudeEast·k
+//   RAMC = local sidereal time (deg) = GAST·15 + longitudeEast
 //   ε    = obliquity of the ecliptic
 //   λ_asc(tropical) = atan2( cos RAMC, −(sin RAMC·cos ε + tan φ·sin ε) )
 //   λ_asc(sidereal) = λ_asc(tropical) − ayanamsa
 //
 // The atan2 form already selects the rising (eastern) intersection.
 //
-// ── Two ascendant conventions (the `method` argument) ──
-// Verified against Drik Panchang's sidereal positions page across both
-// hemispheres (Delhi +77°, Kolkata +88°, New York −74°) and the full day.
-// All nine grahas match Drik to ≤0.04′. The ascendant has two conventions:
+// ── Why longitude is added directly (and a note on Drik Panchang) ──
+// LST = GST + longitude is the standard, geometrically rigorous formula —
+// the rising point actually on the eastern horizon. It is what:
+//   • the Government of India standard uses (Indian Astronomical Ephemeris:
+//     LST = GMST + longitude/15), with the Lahiri/Chitrapaksha ayanamsa,
+//   • Swiss Ephemeris (swe_houses), astro.com, and Jagannatha Hora compute,
+//   • astronomy-engine's own validated horizon transform produces, and
+//   • ProKerala returns (verified live: Leo 5°59′ for Delhi 1990-08-15 06:30).
 //
-//   'swiss' — local sidereal time = GST·15 + λ (longitude added directly).
-//     This is the geometrically rigorous rising point — what Swiss
-//     Ephemeris's swe_houses, astro.com, Jagannatha Hora, and
-//     astronomy-engine's own (validated) horizon transform all compute.
-//     The accurate value, and our default.
-//
-//   'drik'  — local sidereal time = GST·15 + λ·SIDEREAL_RATIO. Drik forms
-//     LST by treating the longitude like elapsed mean time and applying
-//     the sidereal acceleration. This reproduces Drik Panchang's lagna to
-//     ≤0.2′ at every test point. It differs from 'swiss' by a longitude-
-//     proportional term — up to ~13′ at Indian longitudes (≈0.9 min of
-//     birth time, inside birth-time uncertainty), flipping sign in the
-//     western hemisphere.
-//
-// Both are proven in tests/regression/kundli-vs-drik.test.ts.
+// drikpanchang.com is the OUTLIER: it forms LST as GST + longitude·(sidereal/
+// solar ratio) — applying the sidereal acceleration to the longitude (the old
+// "Local Mean Time" table method). That shifts its lagna by a longitude-
+// proportional term, up to ~13′ at Indian longitudes (it flips sign in the
+// western hemisphere). We deliberately do NOT replicate that deviation; we
+// match the Government of India / Swiss Ephemeris standard. The grahas are
+// unaffected — they match every source (incl. Drik) to ≤0.04′.
+// Proven in tests/regression/kundli-vs-drik.test.ts (run via pyswisseph).
 
 import { dateToJulian, gastHoursAtJD, ayanamsa, JD_J2000 } from '$lib/astro';
 import type { AyanamsaSystem, Location } from '$lib/panchanga/types';
-import type { Lagna, LagnaMethod } from './types';
+import type { Lagna } from './types';
 
 const DEG = Math.PI / 180;
 const JULIAN_CENTURY_DAYS = 36525;
-// Ratio of the mean sidereal day to the mean solar day (IAU).
-const SIDEREAL_RATIO = 1.002737909;
 
 function norm360(d: number): number {
   return ((d % 360) + 360) % 360;
@@ -50,15 +45,9 @@ function meanObliquityDeg(jd: number): number {
   return 23.439291111 - 0.0130041667 * T - 1.638889e-7 * T * T + 5.036111e-7 * T * T * T;
 }
 
-export function computeLagna(
-  instant: Date,
-  location: Location,
-  system: AyanamsaSystem,
-  method: LagnaMethod = 'swiss',
-): Lagna {
+export function computeLagna(instant: Date, location: Location, system: AyanamsaSystem): Lagna {
   const jd = dateToJulian(instant);
-  const lonFactor = method === 'drik' ? SIDEREAL_RATIO : 1;
-  const ramc = norm360(gastHoursAtJD(jd) * 15 + location.longitude * lonFactor) * DEG;
+  const ramc = norm360(gastHoursAtJD(jd) * 15 + location.longitude) * DEG;
   const eps = meanObliquityDeg(jd) * DEG;
   const phi = location.latitude * DEG;
 

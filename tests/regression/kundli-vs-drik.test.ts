@@ -19,6 +19,13 @@ function sep(a: number, b: number): number {
   const d = Math.abs(((a - b) % 360) + 360) % 360;
   return Math.min(d, 360 - d);
 }
+// Signed shortest difference a − b in degrees, range (−180, 180].
+function signedSep(a: number, b: number): number {
+  let d = (a - b) % 360;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return d;
+}
 function loc(name: string, lat: [number, number, number], lon: [number, number, number], tz = 'Asia/Kolkata'): Location {
   return {
     name,
@@ -30,7 +37,6 @@ function loc(name: string, lat: [number, number, number], lon: [number, number, 
 }
 
 const PLANET_TOL_ARCMIN = 0.2; // grahas matched to ≤0.04′; 5× margin
-const LAGNA_TOL_ARCMIN = 1.5; // lagna matched to ≤0.22′; generous margin
 
 describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
   const DELHI = loc('New Delhi', [28, 38, 8], [77, 13, 28]);
@@ -63,36 +69,28 @@ describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
   });
 });
 
-describe('lagna vs Drik — both hemispheres, full day', () => {
-  // [label, location, iso instant, drik lagna absolute deg]
-  const CASES: [string, Location, string, number][] = [
-    ['Delhi 00:30', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T00:30:00+05:30', abs(1, 15, 58, 49.79)],
-    ['Delhi 06:30', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T06:30:00+05:30', abs(4, 6, 10, 18)],
-    ['Delhi 12:00', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T12:00:00+05:30', abs(6, 18, 21, 42.46)],
-    ['Delhi 17:00', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T17:00:00+05:30', abs(8, 25, 26, 32)],
-    ['Delhi 21:06', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T21:06:58+05:30', abs(11, 14, 2, 35)],
-    ['Delhi 1975', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1975-08-15T21:11:34+05:30', abs(11, 15, 22, 34)],
-    ['Delhi 2026', loc('Delhi', [28, 38, 8], [77, 13, 28]), '2026-08-15T21:11:39+05:30', abs(11, 15, 36, 13)],
-    ['Kolkata 06:30', loc('Kolkata', [22, 33, 45], [88, 21, 46]), '1990-08-15T06:30:00+05:30', abs(4, 14, 55, 8)],
-    ['New York 06:30', loc('New York', [40, 42, 51], [-74, 0, 21], 'America/New_York'), '1990-08-15T06:30:00-04:00', abs(4, 2, 13, 4)],
+// We deliberately do NOT replicate drikpanchang.com's lagna: it applies the
+// sidereal/solar factor to longitude (the "Local Mean Time" method), which
+// deviates from the Government of India / Swiss-Ephemeris standard that our
+// engine (and ProKerala, astro.com, Jagannatha Hora) use. These cases keep
+// Drik's published lagna to prove the deviation is exactly that: small and
+// PROPORTIONAL to longitude — it grows with |longitude| and flips sign in the
+// western hemisphere. Drik is the outlier; our value is the standard one.
+describe('lagna deviates from drikpanchang.com by the bounded longitude term', () => {
+  // [label, location, iso, drikAbsDeg, expected signed gap (accurate − drik) ′]
+  const CASES: [string, Location, string, number, number][] = [
+    ['Delhi +77°E', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T06:30:00+05:30', abs(4, 6, 10, 18), -11],
+    ['Kolkata +88°E', loc('Kolkata', [22, 33, 45], [88, 21, 46]), '1990-08-15T06:30:00+05:30', abs(4, 14, 55, 8), -13],
+    ['New York −74°W', loc('New York', [40, 42, 51], [-74, 0, 21], 'America/New_York'), '1990-08-15T06:30:00-04:00', abs(4, 2, 13, 4), +10],
   ];
-  for (const [label, location, iso, drik] of CASES) {
-    it(`${label} 'drik' method within ${LAGNA_TOL_ARCMIN}′`, () => {
-      const mine = computeLagna(new Date(iso), location, 'lahiri', 'drik').longitude;
-      expect(sep(mine, drik) * 60).toBeLessThan(LAGNA_TOL_ARCMIN);
+  for (const [label, location, iso, drik, expectGap] of CASES) {
+    it(`${label}: accurate − Drik ≈ ${expectGap}′ (∝ longitude, sign-flips W)`, () => {
+      const mine = computeLagna(new Date(iso), location, 'lahiri').longitude;
+      const gap = signedSep(mine, drik) * 60;
+      expect(Math.sign(gap)).toBe(Math.sign(expectGap)); // hemisphere sign
+      expect(Math.abs(gap - expectGap)).toBeLessThan(3); // matches the documented deviation
     });
   }
-
-  it("'swiss' (accurate) method differs from Drik by a longitude-proportional term", () => {
-    // The geometric ascendant (Swiss Ephemeris convention) is the default;
-    // it should sit a few arcminutes off Drik at Indian longitudes — and the
-    // gap must never exceed ~15′ (the documented ≤13′ bound + margin).
-    const [, location, iso, drik] = CASES[1]; // Delhi 06:30
-    const swiss = computeLagna(new Date(iso), location, 'lahiri', 'swiss').longitude;
-    const gap = sep(swiss, drik) * 60;
-    expect(gap).toBeGreaterThan(2); // genuinely different from Drik
-    expect(gap).toBeLessThan(15); // but small — same sign except near a cusp
-  });
 });
 
 // The 'swiss' (default, accurate) lagna is the true rising point. These
@@ -118,7 +116,7 @@ describe("lagna 'swiss' method vs Swiss Ephemeris (pyswisseph, run directly)", (
   ];
   for (const [label, location, iso, swissEph] of SWISS) {
     it(`${label} matches Swiss Ephemeris within 1′`, () => {
-      const mine = computeLagna(new Date(iso), location, 'lahiri', 'swiss').longitude;
+      const mine = computeLagna(new Date(iso), location, 'lahiri').longitude;
       expect(sep(mine, swissEph) * 60).toBeLessThan(1);
     });
   }

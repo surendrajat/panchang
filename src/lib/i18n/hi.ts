@@ -198,8 +198,6 @@ export const hi: Record<TranslationKey, string> = {
     'खगोलीय गणना के विकल्प। मूल विन्यास प्रकाशित भारतीय पंचांगों से मेल खाते हैं।',
   'settings.ayanamsa': 'अयनांश',
   'settings.monthSystem': 'मास पद्धति',
-  'settings.lagnaMethod': 'लग्न गणना',
-  'settings.lagnaMethodHint': 'केवल कुण्डली',
   'settings.display': 'प्रदर्शन',
   'settings.numerals': 'अंक',
   'settings.numeralsLatin': 'हिन्दू, लैटिन लिपि (1, 2, 3)',
@@ -239,8 +237,6 @@ export const hi: Record<TranslationKey, string> = {
   'ayanamsa.yukteshwar': 'युक्तेश्वर',
 
   // ── month system options
-  'lagnaMethod.swiss': 'सटीक (स्विस इफ़ेमेरिस)',
-  'lagnaMethod.drik': 'दृक् पंचांग शैली',
   'monthSystem.amanta': 'अमान्त (अमावस्या से अमावस्या — दक्षिण भारत)',
   'monthSystem.purnimanta': 'पूर्णिमान्त (पूर्णिमा से पूर्णिमा — उत्तर भारत)',
 

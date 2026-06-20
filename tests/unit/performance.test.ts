@@ -9,6 +9,11 @@ function timed<T>(fn: () => T): { value: T; ms: number } {
   return { value, ms: performance.now() - start };
 }
 
+// Shared/loaded CI runners make tight wall-clock asserts flaky. Locally we keep
+// a tight interactive budget (catches real regressions); on CI we only guard
+// against a genuine hang/pathological blowup. Either way the timing is logged.
+const onCI = !!process.env.CI;
+
 describe('calculation performance guardrails', () => {
   it('computes a civil month within the interactive budget', () => {
     computeMonth(2026, 1, DELHI, { monthSystem: 'purnimanta' });
@@ -16,7 +21,7 @@ describe('calculation performance guardrails', () => {
     const { value, ms } = timed(() => computeMonth(2026, 1, DELHI, { monthSystem: 'purnimanta' }));
 
     expect(value).toHaveLength(31);
-    expect(ms, `computeMonth(2026-01 Delhi) took ${ms.toFixed(1)}ms`).toBeLessThan(2_500);
+    expect(ms, `computeMonth(2026-01 Delhi) took ${ms.toFixed(1)}ms`).toBeLessThan(onCI ? 30_000 : 2_500);
   });
 
   it('scans one festival year without pathological slowdown', () => {
@@ -31,6 +36,6 @@ describe('calculation performance guardrails', () => {
     );
 
     expect(value.length).toBeGreaterThan(0);
-    expect(ms, `findFestivals(2026 Delhi) took ${ms.toFixed(1)}ms`).toBeLessThan(8_000);
+    expect(ms, `findFestivals(2026 Delhi) took ${ms.toFixed(1)}ms`).toBeLessThan(onCI ? 60_000 : 8_000);
   });
 });

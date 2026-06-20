@@ -22,14 +22,21 @@
   // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
   import { SIGN_GLYPH, SUN_GLYPH, MOON_GLYPH, PLANET_GLYPH } from '$lib/jyotish/glyphs';
   // The lunar month + Gregorian span while the Sun sits in each sign (for the
-  // tap-to-learn card). Index 0 = Mesha.
-  const SIGN_MONTH: readonly { mon: string; greg: string }[] = [
-    { mon: 'Vaiśākha', greg: 'Apr–May' }, { mon: 'Jyeṣṭha', greg: 'May–Jun' },
-    { mon: 'Āṣāḍha', greg: 'Jun–Jul' }, { mon: 'Śrāvaṇa', greg: 'Jul–Aug' },
-    { mon: 'Bhādrapada', greg: 'Aug–Sep' }, { mon: 'Āśvina', greg: 'Sep–Oct' },
-    { mon: 'Kārtika', greg: 'Oct–Nov' }, { mon: 'Mārgaśīrṣa', greg: 'Nov–Dec' },
-    { mon: 'Pauṣa', greg: 'Dec–Jan' }, { mon: 'Māgha', greg: 'Jan–Feb' },
-    { mon: 'Phālguna', greg: 'Feb–Mar' }, { mon: 'Chaitra', greg: 'Mar–Apr' },
+  // tap-to-learn card), bilingual. Index 0 = Mesha.
+  type MonInfo = { mon: { en: string; hi: string }; greg: { en: string; hi: string } };
+  const SIGN_MONTH: readonly MonInfo[] = [
+    { mon: { en: 'Vaiśākha', hi: 'वैशाख' }, greg: { en: 'Apr–May', hi: 'अप्रैल–मई' } },
+    { mon: { en: 'Jyeṣṭha', hi: 'ज्येष्ठ' }, greg: { en: 'May–Jun', hi: 'मई–जून' } },
+    { mon: { en: 'Āṣāḍha', hi: 'आषाढ़' }, greg: { en: 'Jun–Jul', hi: 'जून–जुलाई' } },
+    { mon: { en: 'Śrāvaṇa', hi: 'श्रावण' }, greg: { en: 'Jul–Aug', hi: 'जुलाई–अगस्त' } },
+    { mon: { en: 'Bhādrapada', hi: 'भाद्रपद' }, greg: { en: 'Aug–Sep', hi: 'अगस्त–सितंबर' } },
+    { mon: { en: 'Āśvina', hi: 'आश्विन' }, greg: { en: 'Sep–Oct', hi: 'सितंबर–अक्तूबर' } },
+    { mon: { en: 'Kārtika', hi: 'कार्तिक' }, greg: { en: 'Oct–Nov', hi: 'अक्तूबर–नवंबर' } },
+    { mon: { en: 'Mārgaśīrṣa', hi: 'मार्गशीर्ष' }, greg: { en: 'Nov–Dec', hi: 'नवंबर–दिसंबर' } },
+    { mon: { en: 'Pauṣa', hi: 'पौष' }, greg: { en: 'Dec–Jan', hi: 'दिसंबर–जनवरी' } },
+    { mon: { en: 'Māgha', hi: 'माघ' }, greg: { en: 'Jan–Feb', hi: 'जनवरी–फरवरी' } },
+    { mon: { en: 'Phālguna', hi: 'फाल्गुन' }, greg: { en: 'Feb–Mar', hi: 'फरवरी–मार्च' } },
+    { mon: { en: 'Chaitra', hi: 'चैत्र' }, greg: { en: 'Mar–Apr', hi: 'मार्च–अप्रैल' } },
   ];
 
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
@@ -246,10 +253,10 @@
     const el = ELEMENT_LABEL[RASHI_ELEMENT[i]][lang === 'hi' ? 'hi' : 'en'];
     const m = SIGN_MONTH[i];
     return {
-      title: `${rashiNameByIndex(i, lang)} · ${RASHI_SIGN_EN[i]}`,
+      title: hi(rashiNameByIndex(i, 'hi'), `${rashiNameByIndex(i, 'en')} · ${RASHI_SIGN_EN[i]}`),
       body: hi(
-        `तत्व: ${el} · स्वामी ग्रह: ${lord}। सूर्य जब इस राशि में हो (~${m.greg}) तब ${m.mon} मास होता है।`,
-        `Element: ${el} · ruled by ${lord}. When the Sun is in this sign (~${m.greg}), it's the ${m.mon} month.`,
+        `तत्व: ${el} · स्वामी ग्रह: ${lord}। सूर्य जब इस राशि में हो (~${m.greg.hi}) तब ${m.mon.hi} मास होता है।`,
+        `Element: ${el} · ruled by ${lord}. When the Sun is in this sign (~${m.greg.en}), it's the ${m.mon.en} month.`,
       ),
     };
   });
@@ -316,7 +323,6 @@
     return { x: EARTH.x + ORB * Math.cos(a), y: EARTH.y - ORB * Math.sin(a) };
   });
   const litHalf = (cx: number, cy: number, r: number) => `M ${cx} ${cy - r} A ${r} ${r} 0 0 0 ${cx} ${cy + r} Z`;
-  const orbRays = Array.from({ length: 12 }, (_, i) => (i * 360) / 12);
 </script>
 
 <section class="sky">
@@ -442,7 +448,7 @@
         {@const [mx, my] = pt(ev.lon, R_IN - 5)}
         {@const [lx, ly] = pt(ev.lon, R_IN - 14)}
         <g class="body">
-          <circle cx={mx} cy={my} r="2.7" class="event-mark event-mark--{ev.key}" />
+          <circle cx={mx} cy={my} r="3.3" class="event-mark event-mark--{ev.key}" />
           <text x={lx} y={ly} class="body-label" text-anchor="middle">{lang === 'hi' ? ev.hi : ev.en}</text>
         </g>
       {/each}
@@ -482,30 +488,32 @@
   <div class="events">
     <span class="events__label">{hi('आगामी', 'Upcoming')}</span>
     {#each events as ev (ev.key)}
-      <div class="event"><span class="event__name">{lang === 'hi' ? ev.hi : ev.en}</span><span class="event__when">{ev.when}</span></div>
+      <div class="event"><span class="event__name"><span class="event-swatch event-mark--{ev.key}"></span>{lang === 'hi' ? ev.hi : ev.en}</span><span class="event__when">{ev.when}</span></div>
     {/each}
   </div>
 
   <!-- Side view: the geometry, and the phase we actually see -->
   <figure class="orbital">
     <svg viewBox="0 0 {OW} {OH}" role="img" aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}>
-      <defs>
-        <radialGradient id="orb-sun" cx="40%" cy="38%" r="62%"><stop offset="0%" stop-color="#fff8d8" /><stop offset="52%" stop-color="#ffce3a" /><stop offset="100%" stop-color="#f08a00" /></radialGradient>
-      </defs>
-      {#each [-22, 0, 22] as dy (dy)}
-        <line x1={SUNX + 30} y1={EARTH.y + dy} x2={EARTH.x - 16} y2={EARTH.y + dy * 0.4} class="sunlight" />
+      {#each [-20, 0, 20] as dy (dy)}
+        <line x1={SUNX + 26} y1={EARTH.y + dy} x2={EARTH.x - 16} y2={EARTH.y + dy * 0.4} class="sunlight" />
       {/each}
-      <circle cx={SUNX} cy={EARTH.y} r="22" fill="url(#orb-sun)" />
-      {#each orbRays as a (a)}
+      <!-- Sun: same look as the wheel — glow + straight rays + gradient disc -->
+      <circle cx={SUNX} cy={EARTH.y} r="26" fill="url(#sun-glow)" />
+      {#each rayAngles as a (a)}
         {@const cos = Math.cos((a * Math.PI) / 180)}
         {@const sin = Math.sin((a * Math.PI) / 180)}
-        <line x1={SUNX + cos * 24} y1={EARTH.y - sin * 24} x2={SUNX + cos * 30} y2={EARTH.y - sin * 30} class="orb-sun-ray" />
+        <line x1={SUNX + cos * 21} y1={EARTH.y - sin * 21} x2={SUNX + cos * 28} y2={EARTH.y - sin * 28} class="sun-ray" />
       {/each}
-      <text x={SUNX} y={EARTH.y + 44} class="orb-label" text-anchor="middle">{hi('सूर्य', 'Sun')}</text>
+      <circle cx={SUNX} cy={EARTH.y} r="18" fill="url(#sun-grad)" stroke="#e07b00" stroke-width="0.75" />
+      <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle">{hi('सूर्य', 'Sun')}</text>
       <circle cx={EARTH.x} cy={EARTH.y} r={ORB} class="orbit" />
       <line x1={EARTH.x} y1={EARTH.y} x2={moonOrb.x} y2={moonOrb.y} class="sight" />
-      <circle cx={EARTH.x} cy={EARTH.y} r="11" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1" />
-      <text x={EARTH.x} y={EARTH.y + 26} class="orb-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
+      <!-- Earth: same icon as the wheel -->
+      <circle cx={EARTH.x} cy={EARTH.y} r="12" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1.5" />
+      <path d="M{EARTH.x - 8} {EARTH.y - 4} q3 -3 6 -1 q2 2 0 4 q-3 2 -6 1 q-2 -2 0 -4Z M{EARTH.x + 2} {EARTH.y + 1} q3 -1 4 3 q0 3 -3 3 q-2 0 -2 -3 q-1 -2 1 -3Z" class="earth-land" />
+      <ellipse cx={EARTH.x - 3} cy={EARTH.y - 4} rx="3.5" ry="2.3" class="earth-shine" />
+      <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
       <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-dark" />
       <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
       <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
@@ -618,8 +626,8 @@
     justify-content: center;
   }
   .wheel {
-    flex: 1 1 330px;
-    max-width: 410px;
+    flex: 1 1 360px;
+    max-width: 460px;
   }
   /* fixed-width readout so changing values never reflow the wheel */
   .readout {
@@ -648,9 +656,11 @@
     fill: color-mix(in srgb, #6f9fd0 34%, var(--paper));
     stroke: #4a79a8;
   }
-  /* subtle selection tint on a tapped wedge — no hard border */
+  /* selection: a soft tint + a thin gold edge (visible, but not a hard border) */
   .rashi--selected {
-    fill: color-mix(in srgb, var(--gold, #b8860b) 22%, var(--paper-2));
+    fill: color-mix(in srgb, var(--gold, #b8860b) 30%, var(--paper-2));
+    stroke: var(--gold, #b8860b);
+    stroke-width: 1.5;
   }
   .wheel :focus {
     outline: none;
@@ -711,17 +721,30 @@
     stroke: var(--paper);
     stroke-width: 0.8;
   }
+  /* fill = wheel dot (SVG), background = strip swatch (HTML) — one source */
   .event-mark--purnima {
     fill: #e0a82e;
+    background: #e0a82e;
   }
   .event-mark--amavasya {
     fill: var(--ink-soft);
+    background: var(--ink-soft);
   }
   .event-mark--ekadashi {
     fill: #5a7fa8;
+    background: #5a7fa8;
   }
   .event-mark--sankranti {
     fill: var(--red);
+    background: var(--red);
+  }
+  .event-swatch {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    margin-right: 0.35em;
+    vertical-align: 0.02em;
   }
   .nak-tick {
     stroke: var(--line);
@@ -942,11 +965,6 @@
     stroke-width: 1.5;
     stroke-dasharray: 2 4;
     opacity: 0.6;
-  }
-  .orb-sun-ray {
-    stroke: #f5a623;
-    stroke-width: 2.2;
-    stroke-linecap: round;
   }
   .orbit {
     fill: none;

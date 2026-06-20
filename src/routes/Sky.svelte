@@ -18,7 +18,26 @@
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
   import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
-  import { RASHI_GLYPH_PATHS, RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+  import { RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+
+  // Real Unicode astrological glyphs, rendered as text via a symbol-font stack
+  // (.zsym) with the VS-15 selector forcing the line (non-emoji) form.
+  const VS = String.fromCharCode(0xfe0e);
+  const ZODIAC_CHAR = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'].map((c) => c + VS);
+  const PLANET_CHAR: Record<string, string> = {
+    sun: '☉' + VS, moon: '☽' + VS, mars: '♂' + VS, mercury: '☿' + VS,
+    jupiter: '♃' + VS, venus: '♀' + VS, saturn: '♄' + VS, rahu: '☊' + VS, ketu: '☋' + VS,
+  };
+  // The lunar month + Gregorian span while the Sun sits in each sign (for the
+  // tap-to-learn card). Index 0 = Mesha.
+  const SIGN_MONTH: readonly { mon: string; greg: string }[] = [
+    { mon: 'Vaiśākha', greg: 'Apr–May' }, { mon: 'Jyeṣṭha', greg: 'May–Jun' },
+    { mon: 'Āṣāḍha', greg: 'Jun–Jul' }, { mon: 'Śrāvaṇa', greg: 'Jul–Aug' },
+    { mon: 'Bhādrapada', greg: 'Aug–Sep' }, { mon: 'Āśvina', greg: 'Sep–Oct' },
+    { mon: 'Kārtika', greg: 'Oct–Nov' }, { mon: 'Mārgaśīrṣa', greg: 'Nov–Dec' },
+    { mon: 'Pauṣa', greg: 'Dec–Jan' }, { mon: 'Māgha', greg: 'Jan–Feb' },
+    { mon: 'Phālguna', greg: 'Feb–Mar' }, { mon: 'Chaitra', greg: 'Mar–Apr' },
+  ];
 
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
@@ -36,6 +55,7 @@
   let live = $state(true);
   let showGrahas = $state(false);
   let tropical = $state(false);
+  let showAngles = $state(false);
 
   $effect(() => {
     if (!live && speed === 0) return;
@@ -171,22 +191,27 @@
     const fromJd = dateToJulian(new Date(eventsBaseMs));
     const dayJd = dateToJulian(new Date(Math.floor(eventsBaseMs / 86_400_000) * 86_400_000));
     const sunSidAt = (j: number) => norm360(sunLongitudeAtJD(j) - ayanamsa(j, preferences.ayanamsa));
+    const moonSidAt = (j: number) => norm360(moonLongitudeAtJD(j) - ayanamsa(j, preferences.ayanamsa));
     const sunNow = sunSidAt(dayJd);
     const nextSign = (Math.floor(sunNow / 30) + 1) % 12;
     const sankrJd = refineCrossing(dayJd + ((((nextSign * 30) % 360) - sunNow + 360) % 360 || 30) / 0.9856, sunSidAt, (nextSign * 30) % 360);
-    const ek = Math.min(nextElongJd(dayJd, 120), nextElongJd(dayJd, 300));
+    const pJd = nextElongJd(dayJd, 180);
+    const aJd = nextElongJd(dayJd, 360);
+    const ekJd = Math.min(nextElongJd(dayJd, 120), nextElongJd(dayJd, 300));
+    // lon = where on the zodiac the event lands (the Moon's place, or the sign
+    // boundary for a sankranti) — used for the markers around the wheel.
     return [
-      { key: 'purnima', hi: 'पूर्णिमा', en: 'Full moon', jd: nextElongJd(dayJd, 180) },
-      { key: 'amavasya', hi: 'अमावस्या', en: 'New moon', jd: nextElongJd(dayJd, 360) },
-      { key: 'ekadashi', hi: 'एकादशी', en: 'Ekadashi', jd: ek },
-      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${RASHI_SIGN_EN[nextSign]} sankranti`, jd: sankrJd },
+      { key: 'purnima', hi: 'पूर्णिमा', en: 'Full moon', jd: pJd, lon: moonSidAt(pJd) },
+      { key: 'amavasya', hi: 'अमावस्या', en: 'New moon', jd: aJd, lon: moonSidAt(aJd) },
+      { key: 'ekadashi', hi: 'एकादशी', en: 'Ekadashi', jd: ekJd, lon: moonSidAt(ekJd) },
+      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${RASHI_SIGN_EN[nextSign]} sankranti`, jd: sankrJd, lon: (nextSign * 30) % 360 },
     ]
       .sort((a, b) => a.jd - b.jd)
       .map((ev) => ({ ...ev, when: eventWhen(ev.jd, fromJd) }));
   });
 
   // ── Tap-to-learn ────────────────────────────────────────────────────────────
-  type Selected = { type: 'rashi' | 'sun' | 'moon'; i?: number } | null;
+  type Selected = { type: 'rashi' | 'sun' | 'moon' | 'graha'; i?: number; key?: GrahaKey } | null;
   let selected = $state<Selected>(null);
   const learn = $derived.by(() => {
     const s = selected;
@@ -207,14 +232,31 @@
           'How far the Moon is ahead of the Sun (the gap) ÷ 12° = the tithi. It changes nakshatra every ~2.3 days.',
         ),
       };
+    if (s.type === 'graha') {
+      const k = s.key!;
+      const node = k === 'rahu' || k === 'ketu';
+      return {
+        title: grahaName(k, lang),
+        body: node
+          ? hi(
+              'चन्द्रपथ का संधि-बिंदु (राहु/केतु) — यहीं ग्रहण होते हैं। यह सदा वक्री चलता है।',
+              'A lunar node (Rahu/Ketu) — where eclipses happen. It always moves retrograde.',
+            )
+          : hi(
+              'एक ग्रह — राशियों में इसकी स्थिति कुंडली बनाती है। तेज़ गति पर इसे वक्री होते देखें।',
+              'A graha (planet) — its position among the signs shapes the kundli. Speed it up to watch it go retrograde.',
+            ),
+      };
+    }
     const i = s.i!;
     const lord = grahaName(RASHI_LORDS[i], lang);
     const el = ELEMENT_LABEL[RASHI_ELEMENT[i]][lang === 'hi' ? 'hi' : 'en'];
+    const m = SIGN_MONTH[i];
     return {
       title: `${rashiNameByIndex(i, lang)} · ${RASHI_SIGN_EN[i]}`,
       body: hi(
-        `तत्व: ${el} · स्वामी ग्रह: ${lord}. सूर्य जिस राशि में होता है, उसी से सौर मास का नाम पड़ता है।`,
-        `Element: ${el} · ruled by ${lord}. The solar month is named after the sign the Sun is in.`,
+        `तत्व: ${el} · स्वामी ग्रह: ${lord}। सूर्य जब इस राशि में हो (~${m.greg}) तब ${m.mon} मास होता है।`,
+        `Element: ${el} · ruled by ${lord}. When the Sun is in this sign (~${m.greg}), it's the ${m.mon} month.`,
       ),
     };
   });
@@ -250,6 +292,13 @@
   }
 
   const elongPath = $derived(`M ${ptStr(sunSid, R_ARC)} A ${R_ARC} ${R_ARC} 0 ${elong > 180 ? 1 : 0} 0 ${ptStr(moonSid, R_ARC)}`);
+  // Angle-measurement overlay: longitudes are measured CCW from sidereal 0°
+  // (Mesha start, due east). Each arc sweeps from there to the body's angle.
+  const R_SUN_ARC = 30; // angle arcs sit close to Earth (centre)
+  const R_MOON_ARC = 40;
+  const angleArc = (deg: number, r: number) => `M ${ptStr(0, r)} A ${r} ${r} 0 ${deg > 180 ? 1 : 0} 0 ${ptStr(deg, r)}`;
+  const sunAnglePath = $derived(angleArc(sunSid, R_SUN_ARC));
+  const moonAnglePath = $derived(angleArc(moonSid, R_MOON_ARC));
   const rashis = Array.from({ length: 12 }, (_, i) => i);
   const nakTicks = Array.from({ length: 27 }, (_, i) => i * NAK_ARC);
   const rayAngles = Array.from({ length: 12 }, (_, i) => (i * 360) / 12);
@@ -299,6 +348,7 @@
     <div class="toggles">
       <label><input type="checkbox" bind:checked={showGrahas} /> {hi('सभी ग्रह', 'All planets')}</label>
       <label><input type="checkbox" bind:checked={tropical} /> {hi('सायन (पाश्चात्य)', 'Tropical zodiac')}</label>
+      <label><input type="checkbox" bind:checked={showAngles} /> {hi('कोण दिखाएँ', 'Show angles')}</label>
     </div>
   </div>
 
@@ -332,9 +382,7 @@
           />
           <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
           <text class="rashi-name" class:on={isSun || isMoon}><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle">{signName(i)}</textPath></text>
-          <g class="rashi-art" class:on={isSun || isMoon} transform="translate({ix - 11} {iy - 11}) scale(0.6875)" pointer-events="none">
-            <path d={RASHI_GLYPH_PATHS[i]} fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-          </g>
+          <text class="rashi-glyph zsym" class:on={isSun || isMoon} x={ix} y={iy} text-anchor="middle" dominant-baseline="central" pointer-events="none">{ZODIAC_CHAR[i]}</text>
         {/each}
         {#each nakTicks as deg (deg)}
           <line x1={pt(deg, R_IN)[0]} y1={pt(deg, R_IN)[1]} x2={pt(deg, R_IN - 5)[0]} y2={pt(deg, R_IN - 5)[1]} class="nak-tick" />
@@ -346,47 +394,76 @@
       <line x1={C} y1={C} x2={sunPt[0]} y2={sunPt[1]} class="ray ray--sun" />
       <line x1={C} y1={C} x2={moonPt[0]} y2={moonPt[1]} class="ray ray--moon" />
 
+      <!-- angle-measurement overlay (toggle): base line at 0° + arc to each body -->
+      {#if showAngles}
+        {@const b = pt(0, 48)}
+        <line x1={C} y1={C} x2={b[0]} y2={b[1]} class="angle-base" />
+        <path d={sunAnglePath} class="angle-arc angle-arc--sun" fill="none" />
+        <path d={moonAnglePath} class="angle-arc angle-arc--moon" fill="none" />
+      {/if}
+
       {#each grahaPositions as g (g.key)}
         {@const [gx, gy] = pt(g.lon, R_GRAHA)}
-        <circle cx={gx} cy={gy} r="8" class="graha" />
-        <text x={gx} y={gy} class="graha-label" text-anchor="middle" dominant-baseline="central">{lang === 'hi' ? g.hi : g.en}</text>
+        {@const sel = selected?.type === 'graha' && selected.key === g.key}
+        <g class="body" role="button" tabindex="0" aria-label={grahaName(g.key, lang)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
+          {#if sel}<circle cx={gx} cy={gy} r="11" class="sel-glow" />{/if}
+          <circle cx={gx} cy={gy} r="8" class="graha" />
+          <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_CHAR[g.key]}</text>
+          <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaName(g.key, lang)}</text>
+        </g>
       {/each}
 
-      <!-- Earth -->
-      <circle cx={C} cy={C} r="10" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1.5" />
-      <path d="M{C - 6} {C - 3} q2 -2 5 -1 q2 1 1 3 q-1 2 -4 1 q-3 -1 -2 -3Z M{C + 1} {C + 2} q3 0 4 3 q-1 2 -4 1 q-2 -2 0 -4Z" class="earth-land" />
-      <ellipse cx={C - 3} cy={C - 3} rx="3" ry="2" class="earth-shine" />
-      <text x={C} y={C + 23} class="center-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
+      <!-- Earth (center reference) -->
+      <g class="body">
+        <circle cx={C} cy={C} r="13" fill="url(#earth-grad)" stroke="var(--paper)" stroke-width="1.5" />
+        <path d="M{C - 9} {C - 4} q3 -3 7 -1 q2 2 0 4 q-3 2 -7 1 q-2 -2 0 -4Z M{C + 2} {C + 1} q4 -1 5 3 q0 3 -3 4 q-3 0 -3 -3 q-1 -3 1 -4Z M{C - 6} {C + 5} q3 -1 4 2 q0 2 -3 2 q-2 0 -1 -4Z" class="earth-land" />
+        <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
+        <text x={C} y={C - 19} class="body-label" text-anchor="middle">{hi('पृथ्वी', 'Earth')}</text>
+      </g>
 
-      <!-- Moon: realistic disc with craters (the PHASE is shown in the side view) -->
-      <g role="button" tabindex="0" aria-label={hi('चन्द्र', 'Moon')} onclick={() => (selected = { type: 'moon' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })} style="cursor:pointer">
-        <circle cx={moonPt[0]} cy={moonPt[1]} r="12" fill="url(#moon-grad)" stroke="var(--ink-soft)" stroke-width="1.25" />
+      <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
+      <g class="body" role="button" tabindex="0" aria-label={hi('चन्द्र', 'Moon')} onclick={() => (selected = { type: 'moon' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })}>
+        {#if selected?.type === 'moon'}<circle cx={moonPt[0]} cy={moonPt[1]} r="15" class="sel-glow" />{/if}
+        <circle cx={moonPt[0]} cy={moonPt[1]} r="12" fill="url(#moon-grad)" stroke="var(--ink-soft)" stroke-width="1" />
         {#each craters as [dx, dy, r] (dx + '-' + dy)}
           <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} r={r} class="crater" />
         {/each}
+        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-label" text-anchor="middle">{hi('चन्द्र', 'Moon')}</text>
       </g>
 
-      <!-- Sun: glow + rays + gradient disc -->
-      <g role="button" tabindex="0" aria-label={hi('सूर्य', 'Sun')} onclick={() => (selected = { type: 'sun' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })} style="cursor:pointer">
+      <!-- Sun: glow + straight rays + gradient disc -->
+      <g class="body" role="button" tabindex="0" aria-label={hi('सूर्य', 'Sun')} onclick={() => (selected = { type: 'sun' })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })}>
+        {#if selected?.type === 'sun'}<circle cx={sunPt[0]} cy={sunPt[1]} r="20" class="sel-glow" />{/if}
         <circle cx={sunPt[0]} cy={sunPt[1]} r="16" fill="url(#sun-glow)" />
         {#each rayAngles as a (a)}
           {@const cos = Math.cos((a * Math.PI) / 180)}
           {@const sin = Math.sin((a * Math.PI) / 180)}
-          <line x1={sunPt[0] + cos * 13.5} y1={sunPt[1] - sin * 13.5} x2={sunPt[0] + cos * 17} y2={sunPt[1] - sin * 17} class="sun-ray" />
+          <line x1={sunPt[0] + cos * 13} y1={sunPt[1] - sin * 13} x2={sunPt[0] + cos * 19} y2={sunPt[1] - sin * 19} class="sun-ray" />
         {/each}
         <circle cx={sunPt[0]} cy={sunPt[1]} r="11.5" fill="url(#sun-grad)" stroke="#e07b00" stroke-width="0.75" />
+        <text x={sunPt[0]} y={sunPt[1] - 19} class="body-label" text-anchor="middle">{hi('सूर्य', 'Sun')}</text>
       </g>
+
+      <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
+      {#each events as ev (ev.key)}
+        {@const [mx, my] = pt(ev.lon, R_IN - 5)}
+        {@const [lx, ly] = pt(ev.lon, R_IN - 14)}
+        <g class="body">
+          <circle cx={mx} cy={my} r="2.7" class="event-mark event-mark--{ev.key}" />
+          <text x={lx} y={ly} class="body-label" text-anchor="middle">{lang === 'hi' ? ev.hi : ev.en}</text>
+        </g>
+      {/each}
     </svg>
 
     <div class="readout">
       <dl class="vals">
-        <div class="val"><dt><span class="g g--sun">☉</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
-        <div class="val"><dt><span class="g g--moon">☾</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt><span class="zsym g--sun">{PLANET_CHAR.sun}</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt><span class="zsym g--moon">{PLANET_CHAR.moon}</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
           <dt>{hi('अंतर', 'Gap')} (☾−☉) ÷ 12°</dt>
           <dd>
             <span class="hero-num">{num(elong.toFixed(1))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b></span>
-            <span class="hero-tithi muted">({paksha} {num((tithiFrac * 100).toFixed(0))}%)</span>
+            <span class="hero-tithi muted">{paksha} · {num((tithiFrac * 100).toFixed(0))}%</span>
           </dd>
         </div>
         <div class="val"><dt>{hi('नक्षत्र', 'Nakshatra')}</dt><dd>{nakshatraNameByIndex(nakNum, lang)}</dd></div>
@@ -578,18 +655,12 @@
     fill: color-mix(in srgb, #6f9fd0 34%, var(--paper));
     stroke: #4a79a8;
   }
-  /* selection highlight on the tapped wedge — replaces the browser's ugly
-     bounding-box focus rectangle (which we suppress below) */
+  /* subtle selection tint on a tapped wedge — no hard border */
   .rashi--selected {
-    stroke: var(--ink);
-    stroke-width: 2.5;
+    fill: color-mix(in srgb, var(--gold, #b8860b) 22%, var(--paper-2));
   }
   .wheel :focus {
     outline: none;
-  }
-  .wheel :focus-visible {
-    stroke: var(--ink);
-    stroke-width: 2.5;
   }
   .rashi-name {
     font-size: 11.5px;
@@ -601,11 +672,65 @@
     fill: var(--ink);
     font-weight: 700;
   }
-  .rashi-art {
-    color: var(--ink-soft); /* theme-adaptive */
+  /* Real Unicode astrological / planet glyphs, forced to the line (text) form —
+     a Nerd Font if the device has one, else the system symbol fonts. */
+  .zsym {
+    font-family:
+      'Symbols Nerd Font', 'Symbols Nerd Font Mono', 'Apple Symbols', 'Segoe UI Symbol',
+      'Noto Sans Symbols', 'Noto Sans Symbols2', 'STIXGeneral', serif;
+    font-variant-emoji: text;
   }
-  .rashi-art.on {
-    color: var(--ink);
+  .rashi-glyph {
+    font-size: 15px;
+    fill: var(--ink-soft);
+  }
+  .rashi-glyph.on {
+    fill: var(--ink);
+  }
+  .graha-glyph {
+    font-size: 10px;
+    fill: var(--ink);
+  }
+  /* body hover label — name appears on hover/focus, not always */
+  .body[role='button'] {
+    cursor: pointer;
+  }
+  .body-label {
+    font-size: 10px;
+    font-weight: 600;
+    fill: var(--ink);
+    paint-order: stroke;
+    stroke: var(--paper);
+    stroke-width: 2.5px;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.12s;
+    pointer-events: none;
+  }
+  .body:hover .body-label,
+  .body:focus-visible .body-label {
+    opacity: 1;
+  }
+  /* subtle glow behind a tapped body */
+  .sel-glow {
+    fill: var(--gold, #e0a000);
+    opacity: 0.3;
+  }
+  .event-mark {
+    stroke: var(--paper);
+    stroke-width: 0.8;
+  }
+  .event-mark--purnima {
+    fill: #e0a82e;
+  }
+  .event-mark--amavasya {
+    fill: var(--ink-soft);
+  }
+  .event-mark--ekadashi {
+    fill: #5a7fa8;
+  }
+  .event-mark--sankranti {
+    fill: var(--red);
   }
   .nak-tick {
     stroke: var(--line);
@@ -619,8 +744,8 @@
     opacity: 0.9;
   }
   .ray {
-    stroke-width: 1.25;
-    opacity: 0.4;
+    stroke-width: 1;
+    opacity: 0.22;
   }
   .ray--sun {
     stroke: #f0a000;
@@ -628,9 +753,26 @@
   .ray--moon {
     stroke: var(--ink-soft);
   }
+  /* angle-measurement overlay — very subtle dotted lines */
+  .angle-base {
+    stroke: var(--ink-faint, #aaa);
+    stroke-width: 1;
+    stroke-dasharray: 1.5 3;
+  }
+  .angle-arc {
+    stroke-width: 1.5;
+    stroke-dasharray: 1.5 3;
+    stroke-linecap: round;
+  }
+  .angle-arc--sun {
+    stroke: #e0951a;
+  }
+  .angle-arc--moon {
+    stroke: #5a7fa8;
+  }
   .sun-ray {
     stroke: #f5a623;
-    stroke-width: 2;
+    stroke-width: 1.6;
     stroke-linecap: round;
   }
   .crater {
@@ -639,13 +781,8 @@
   }
   .graha {
     fill: var(--paper);
-    stroke: var(--red);
-    stroke-width: 1.25;
-  }
-  .graha-label {
-    font-size: 8px;
-    font-weight: 700;
-    fill: var(--red);
+    stroke: var(--ink-faint, #999);
+    stroke-width: 1;
   }
   .earth-land {
     fill: #4e9a5b;
@@ -655,7 +792,6 @@
     fill: #ffffff;
     opacity: 0.22;
   }
-  .center-label,
   .orb-label {
     font-size: 9.5px;
     fill: var(--ink-faint, #999);
@@ -697,6 +833,9 @@
   }
   .g--sun {
     color: #d98008;
+  }
+  .g--moon {
+    color: var(--ink-soft);
   }
   .muted {
     color: var(--ink-faint, #888);

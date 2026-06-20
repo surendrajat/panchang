@@ -37,3 +37,21 @@ export function bodyAltAz(
   const hor = Horizon(date, observer, eq.ra, eq.dec, 'normal');
   return { azimuth: hor.azimuth, altitude: hor.altitude };
 }
+
+/**
+ * Alt/az of a fixed star from its catalogue right ascension (hours) and
+ * declination (degrees). J2000 coordinates are fine here — precession over a few
+ * decades is a fraction of a degree, invisible at the dome's scale.
+ */
+export function starAltAz(
+  raHours: number,
+  decDeg: number,
+  date: Date,
+  latitude: number,
+  longitude: number,
+  altitudeMeters = 0,
+): AltAz {
+  const observer = new Observer(latitude, longitude, altitudeMeters);
+  const hor = Horizon(date, observer, raHours, decDeg, 'normal');
+  return { azimuth: hor.azimuth, altitude: hor.altitude };
+}

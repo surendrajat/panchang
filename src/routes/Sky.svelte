@@ -15,6 +15,8 @@
     moonIlluminationAtJD,
     civilMidnightInZone,
     bodyAltAz,
+    starAltAz,
+    type SkyBody,
     ayanamsa,
     norm360,
   } from '$lib/astro';
@@ -68,12 +70,12 @@
       hi: 'अनुशासन, समय, कर्मफल — मकर व कुम्भ का स्वामी।',
     },
     rahu: {
-      en: 'The north lunar node — ambition and the unconventional; where eclipses fall.',
-      hi: 'उत्तर पात — महत्वाकांक्षा व अपरंपरा; ग्रहण यहीं होते हैं।',
+      en: 'A shadow-graha, not a real body — the north point where the Moon’s path crosses the Sun’s. Eclipses happen here; it stands for ambition and the unconventional.',
+      hi: 'छाया-ग्रह (कोई वास्तविक पिंड नहीं) — चन्द्रपथ का सूर्यपथ से उत्तर संधि-बिंदु। यहीं ग्रहण होते हैं; महत्वाकांक्षा व अपरंपरा।',
     },
     ketu: {
-      en: 'The south lunar node — detachment and insight; always opposite Rahu.',
-      hi: 'दक्षिण पात — वैराग्य व अंतर्दृष्टि; सदा राहु के सम्मुख।',
+      en: 'A shadow-graha, not a real body — the south crossing point, always opposite Rahu. Detachment, insight and liberation.',
+      hi: 'छाया-ग्रह (कोई वास्तविक पिंड नहीं) — दक्षिण संधि-बिंदु, सदा राहु के सम्मुख। वैराग्य, अंतर्दृष्टि व मोक्ष।',
     },
   };
 
@@ -94,6 +96,11 @@
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
   // Respects the transliteration preference (Mesha vs Aries) — see lib/labels.
   const signName = (i: number) => rashiLabel(i);
+  // Earth isn't a graha, so it has no grahaLabel — mirror the transliteration
+  // setting by hand so its label matches the Sun/Moon/planets.
+  const earthLabel = $derived(
+    lang === 'hi' ? 'पृथ्वी' : preferences.transliteration ? 'Prithvi' : 'Earth',
+  );
 
   // ── Time model (capped ~30 fps; idle when paused; torn down on unmount) ─────
   let simMs = $state(Date.now());
@@ -303,7 +310,7 @@
     if (!s) return null;
     if (s.type === 'earth')
       return {
-        title: hi('पृथ्वी', 'Earth'),
+        title: earthLabel,
         body: hi(
           'आप यहाँ हैं — यह भूकेन्द्रित दृष्टि है। चक्र दिखाता है कि पृथ्वी से देखने पर सूर्य, चन्द्र और ग्रह किस राशि में हैं।',
           'You are here — this is the geocentric view. The wheel shows which sign the Sun, Moon and planets sit in as seen from Earth.',
@@ -461,16 +468,20 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
-  // Today's path of a body across the local sky — the above-horizon arc, sampled
-  // every 20 min over the civil day, as one or more polyline point-strings.
-  function domeTrack(body: 'sun' | 'moon', dayStartMs: number, lat: number, lon: number): string[] {
-    const N = 73;
-    const segs: string[] = [];
+  // A body's path across the local sky as one continuous above-horizon arc. We
+  // sample a 26 h window centred on `centerMs` and keep the LONGEST above-horizon
+  // run — so the Moon's arc isn't split into two pieces by the midnight boundary
+  // (which is what made it look broken).
+  function domeTrack(body: SkyBody, centerMs: number, lat: number, lon: number): string {
+    const SPAN = 26 * 3_600_000;
+    const start = centerMs - SPAN / 2;
+    const N = 79;
+    const segs: string[][] = [];
     let cur: string[] = [];
     for (let i = 0; i < N; i++) {
       const { azimuth, altitude } = bodyAltAz(
         body,
-        new Date(dayStartMs + (i * 86_400_000) / (N - 1)),
+        new Date(start + (i * SPAN) / (N - 1)),
         lat,
         lon,
       );
@@ -481,20 +492,23 @@
             .join(','),
         );
       else if (cur.length) {
-        segs.push(cur.join(' '));
+        segs.push(cur);
         cur = [];
       }
     }
-    if (cur.length) segs.push(cur.join(' '));
-    return segs;
+    if (cur.length) segs.push(cur);
+    if (!segs.length) return '';
+    return segs.reduce((a, b) => (b.length > a.length ? b : a)).join(' ');
   }
+  // Centre the path on the current time, quantised to the hour so it doesn't
+  // recompute every frame (the arc barely changes within an hour).
+  const domeCenter = $derived(Math.floor(simMs / 3_600_000) * 3_600_000);
   const domeTracks = $derived.by(() => {
     const loc = preferences.location;
     if (!loc) return null;
-    const dayStart = civilMidnightInZone(new Date(eventsBaseMs), loc.timezone).getTime();
     return {
-      sun: domeTrack('sun', dayStart, loc.latitude, loc.longitude),
-      moon: domeTrack('moon', dayStart, loc.latitude, loc.longitude),
+      sun: domeTrack('sun', domeCenter, loc.latitude, loc.longitude),
+      moon: domeTrack('moon', domeCenter, loc.latitude, loc.longitude),
     };
   });
   // Every visible body's current position in the local sky (the Sun & Moon plus
@@ -509,6 +523,48 @@
     });
   });
   const domeLoc = $derived(preferences.location?.name?.split(',')[0] ?? '');
+
+  function lerpRGB(a: number[], b: number[], t: number): string {
+    const k = Math.max(0, Math.min(1, t));
+    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`;
+  }
+  // Sky colour from the Sun's altitude: dark indigo at night → blue by day, with
+  // a warm twilight rim between (a little atmospheric glow), updated live.
+  const domeSky = $derived.by(() => {
+    const sunAlt = domeNow?.[0]?.altitude ?? -90;
+    const day = (sunAlt + 6) / 12; // 0 below −6°, 1 above +6°
+    return {
+      zen: lerpRGB([22, 31, 68], [39, 82, 132], day),
+      mid: lerpRGB([39, 49, 92], [72, 122, 168], day),
+      rim: lerpRGB([106, 81, 96], [150, 182, 208], day),
+    };
+  });
+  // A handful of the brightest stars (J2000 RA hours, Dec degrees, magnitude).
+  const BRIGHT_STARS = [
+    { ra: 6.752, dec: -16.72, mag: -1.46 },
+    { ra: 5.278, dec: 45.998, mag: 0.08 },
+    { ra: 5.242, dec: -8.2, mag: 0.13 },
+    { ra: 14.261, dec: 19.18, mag: -0.05 },
+    { ra: 18.616, dec: 38.78, mag: 0.03 },
+    { ra: 7.655, dec: 5.225, mag: 0.34 },
+    { ra: 5.919, dec: 7.407, mag: 0.5 },
+    { ra: 4.599, dec: 16.51, mag: 0.85 },
+    { ra: 19.846, dec: 8.868, mag: 0.76 },
+    { ra: 13.42, dec: -11.16, mag: 0.97 },
+    { ra: 16.49, dec: -26.43, mag: 0.96 },
+    { ra: 7.755, dec: 28.03, mag: 1.14 },
+    { ra: 10.139, dec: 11.97, mag: 1.35 },
+    { ra: 20.69, dec: 45.28, mag: 1.25 },
+  ];
+  // Bright stars above the horizon — only once the sky is dark enough to see them.
+  const domeStars = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc || (domeNow?.[0]?.altitude ?? -90) > 0) return [];
+    return BRIGHT_STARS.map((st) => {
+      const { azimuth, altitude } = starAltAz(st.ra, st.dec, simDate, loc.latitude, loc.longitude);
+      return { ra: st.ra, mag: st.mag, altitude, pt: domePt(azimuth, altitude) };
+    }).filter((s) => s.altitude >= 0);
+  });
 </script>
 
 <section class="sky">
@@ -696,7 +752,7 @@
         >
           {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
           <circle cx={gx} cy={gy} r="12" class="hit" />
-          <BodyIcon kind={g.key} cx={gx} cy={gy} r={9} />
+          <BodyIcon kind={g.key} cx={gx} cy={gy} r={g.key === 'rahu' || g.key === 'ketu' ? 6 : 9} />
           {#if showLabels}<text x={gx} y={gy - 14} class="body-name" text-anchor="middle"
               >{grahaLabel(g.key)}</text
             >{/if}
@@ -708,7 +764,7 @@
         class="body"
         role="button"
         tabindex="0"
-        aria-label={hi('पृथ्वी', 'Earth')}
+        aria-label={earthLabel}
         onclick={() => (selected = { type: 'earth' })}
         onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'earth' })}
       >
@@ -729,7 +785,7 @@
         />
         <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
         {#if showLabels}<text x={C} y={C - 19} class="body-name" text-anchor="middle"
-            >{hi('पृथ्वी', 'Earth')}</text
+            >{earthLabel}</text
           >{/if}
       </g>
 
@@ -738,7 +794,7 @@
         class="body"
         role="button"
         tabindex="0"
-        aria-label={hi('चन्द्र', 'Moon')}
+        aria-label={grahaLabel('moon')}
         onclick={() => (selected = { type: 'moon' })}
         onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })}
       >
@@ -763,7 +819,7 @@
             x={moonPt[0]}
             y={moonPt[1] - 16}
             class="body-name"
-            text-anchor="middle">{hi('चन्द्र', 'Moon')}</text
+            text-anchor="middle">{grahaLabel('moon')}</text
           >{/if}
       </g>
 
@@ -772,7 +828,7 @@
         class="body"
         role="button"
         tabindex="0"
-        aria-label={hi('सूर्य', 'Sun')}
+        aria-label={grahaLabel('sun')}
         onclick={() => (selected = { type: 'sun' })}
         onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })}
       >
@@ -803,7 +859,7 @@
           stroke-width="0.75"
         />
         {#if showLabels}<text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
-            >{hi('सूर्य', 'Sun')}</text
+            >{grahaLabel('sun')}</text
           >{/if}
       </g>
 
@@ -824,7 +880,7 @@
       <dl class="vals">
         <div class="val">
           <dt class="dt-body">
-            <span class="ic--sun"><CelestialMark body="sun" size={15} /></span>{hi('सूर्य', 'Sun')}
+            <span class="ic--sun"><CelestialMark body="sun" size={15} /></span>{grahaLabel('sun')}
           </dt>
           <dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd>
         </div>
@@ -894,11 +950,23 @@
   {:else}
     <p class="tap-hint">
       {hi(
-        '💡 चक्र में किसी राशि, सूर्य या चन्द्र पर टैप करके जानें',
-        '💡 Tap any sign, the Sun or the Moon on the wheel to learn about it',
+        '💡 चक्र में किसी राशि, ग्रह, सूर्य/चन्द्र/पृथ्वी या नक्षत्र-वलय पर टैप करके जानें',
+        '💡 Tap any sign, planet, the Sun, Moon, Earth or the nakshatra ring on the wheel to learn about it',
       )}
     </p>
   {/if}
+
+  <p class="hint">
+    {hi(
+      'गति बढ़ाएँ और देखें — हर 12° पर नई तिथि, 180° पर पूर्णिमा। ग्रह चालू करें तो तेज़ गति पर वक्री गति भी दिखती है।',
+      'Speed it up — every 12° is a new tithi, 180° is the full moon. Turn on the planets and watch one go retrograde at speed.',
+    )}
+    <a
+      href="https://github.com/surendrajat/panchang/tree/main/docs/guide"
+      target="_blank"
+      rel="noopener">{hi('यह कैसे काम करता है →', 'How this works →')}</a
+    >
+  </p>
 
   <div class="events">
     <span class="events__label">{hi('आगामी', 'Upcoming')}</span>
@@ -954,7 +1022,7 @@
         stroke-width="0.75"
       />
       <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle"
-        >{hi('सूर्य', 'Sun')}</text
+        >{grahaLabel('sun')}</text
       >
       <circle cx={EARTH.x} cy={EARTH.y} r={ORB} class="orbit" />
       <line x1={EARTH.x} y1={EARTH.y} x2={moonOrb.x} y2={moonOrb.y} class="sight" />
@@ -973,22 +1041,25 @@
         class="earth-land"
       />
       <ellipse cx={EARTH.x - 3} cy={EARTH.y - 4} rx="3.5" ry="2.3" class="earth-shine" />
-      <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle"
-        >{hi('पृथ्वी', 'Earth')}</text
-      >
+      <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle">{earthLabel}</text>
       <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-dark" />
       <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
       <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
     </svg>
-    <div class="phase-side">
-      <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={76} />
-      <span class="phase-side__cap">{hi('हम जो देखते हैं', 'What we see')}</span>
-    </div>
     <figcaption>
       {hi(
         'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर चन्द्र की कला है।',
         "The Moon's sunward half is always lit; from Earth we see it at an angle — and that gap is the Moon's phase.",
       )}
+    </figcaption>
+  </figure>
+
+  <figure class="moonphase">
+    <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={128} />
+    <figcaption>
+      {hi('हम जो देखते हैं', 'What we see')} —
+      <strong>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')}</strong>, {paksha}
+      {tithiNameByIndex(tithiNum, lang)}
     </figcaption>
   </figure>
 
@@ -1004,12 +1075,20 @@
       >
         <defs>
           <radialGradient id="dome-grad" cx="50%" cy="40%" r="62%">
-            <stop offset="0%" stop-color="#161f44" />
-            <stop offset="66%" stop-color="#27315c" />
-            <stop offset="100%" stop-color="#6a5160" />
+            <stop offset="0%" stop-color={domeSky.zen} />
+            <stop offset="66%" stop-color={domeSky.mid} />
+            <stop offset="100%" stop-color={domeSky.rim} />
           </radialGradient>
         </defs>
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
+        {#each domeStars as s (s.ra)}
+          <circle
+            cx={s.pt[0]}
+            cy={s.pt[1]}
+            r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
+            class="dome-star"
+          />
+        {/each}
         <circle cx={DC} cy={DC} r={(DR * 60) / 90} class="dome-ring" />
         <circle cx={DC} cy={DC} r={(DR * 30) / 90} class="dome-ring" />
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
@@ -1021,16 +1100,58 @@
         >
         <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
         >
-        {#each domeTracks.sun as pts (pts)}
-          <polyline points={pts} class="dome-path dome-path--sun" />
-        {/each}
-        {#each domeTracks.moon as pts (pts)}
-          <polyline points={pts} class="dome-path dome-path--moon" />
-        {/each}
+        {#if domeTracks.sun}
+          <polyline points={domeTracks.sun} class="dome-path dome-path--sun" />
+        {/if}
+        {#if domeTracks.moon}
+          <polyline points={domeTracks.moon} class="dome-path dome-path--moon" />
+        {/if}
         {#each domeNow as b (b.body)}
           {#if b.altitude >= 0}
             <g class="dome-body">
-              <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={6} />
+              {#if b.body === 'sun'}
+                <!-- same Sun as the wheel: glow + rays + gradient disc -->
+                <circle cx={b.pt[0]} cy={b.pt[1]} r="8.5" fill="url(#sun-glow)" />
+                {#each rayAngles as a (a)}
+                  {@const c = Math.cos((a * Math.PI) / 180)}
+                  {@const s = Math.sin((a * Math.PI) / 180)}
+                  <line
+                    x1={b.pt[0] + c * 6}
+                    y1={b.pt[1] - s * 6}
+                    x2={b.pt[0] + c * 8.5}
+                    y2={b.pt[1] - s * 8.5}
+                    class="sun-ray"
+                  />
+                {/each}
+                <circle
+                  cx={b.pt[0]}
+                  cy={b.pt[1]}
+                  r="5.5"
+                  fill="url(#sun-grad)"
+                  stroke="#e07b00"
+                  stroke-width="0.6"
+                />
+              {:else if b.body === 'moon'}
+                <!-- same Moon as the wheel: cratered disc -->
+                <circle
+                  cx={b.pt[0]}
+                  cy={b.pt[1]}
+                  r="6"
+                  fill="url(#moon-grad)"
+                  stroke="rgba(255,255,255,0.35)"
+                  stroke-width="0.6"
+                />
+                {#each craters as [dx, dy, cr] (dx + '-' + dy)}
+                  <circle
+                    cx={b.pt[0] + dx * 0.5}
+                    cy={b.pt[1] + dy * 0.5}
+                    r={cr * 0.5}
+                    class="crater"
+                  />
+                {/each}
+              {:else}
+                <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={6} />
+              {/if}
               <text x={b.pt[0]} y={b.pt[1] - 9.5} class="dome-label" text-anchor="middle"
                 >{grahaLabel(b.body)}</text
               >
@@ -1046,18 +1167,6 @@
       </figcaption>
     </figure>
   {/if}
-
-  <p class="hint">
-    {hi(
-      'गति बढ़ाएँ और देखें — हर 12° पर नई तिथि, 180° पर पूर्णिमा। ग्रह चालू करें तो तेज़ गति पर वक्री गति भी दिखती है।',
-      'Speed it up — every 12° is a new tithi, 180° is the full moon. Turn on the planets and watch one go retrograde at speed.',
-    )}
-    <a
-      href="https://github.com/surendrajat/panchang/tree/main/docs/guide"
-      target="_blank"
-      rel="noopener">{hi('यह कैसे काम करता है →', 'How this works →')}</a
-    >
-  </p>
 </section>
 
 <style>
@@ -1086,9 +1195,17 @@
     font-size: 0.95rem;
   }
 
+  /* keep the date + speed controls in view while scrolling the long Sky page */
   .timebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     text-align: center;
     margin-bottom: 1rem;
+    padding: 0.5rem 0 0.6rem;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
   }
   .clock {
     display: inline-block;
@@ -1593,6 +1710,9 @@
   .dome-zenith {
     fill: rgba(255, 255, 255, 0.5);
   }
+  .dome-star {
+    fill: rgba(255, 255, 255, 0.9);
+  }
   .dome-card {
     font-size: 10px;
     font-weight: 700;
@@ -1628,15 +1748,20 @@
     margin-top: 8px;
     line-height: 1.5;
   }
-  .phase-side {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
+  /* moon phase — its own centred section */
+  .moonphase {
+    margin: 1.75rem auto 0;
+    max-width: 300px;
+    text-align: center;
   }
-  .phase-side__cap {
-    font-size: 0.76rem;
+  .moonphase figcaption {
+    margin-top: 12px;
+    font-size: 13.5px;
     color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .moonphase figcaption strong {
+    color: var(--ink);
   }
   .orbital figcaption {
     flex: 1 1 100%;

@@ -7,6 +7,12 @@ This document is the long-range architecture target for the project.
 Implementation should follow it where it matches the current product contract.
 For details on the current implementation, see `METHODOLOGY.md`.
 
+> **Status (2026):** the jyotish vertical — birth charts (kundli), Vimshottari
+> dasha, guna-milan matching, and the live "Sky" ecliptic wheel — has since
+> shipped and is integrated into the app, superseding several v1 "Non-goals"
+> below. See `EVALUATION.md` and `KUNDLI_PLAN.md` for that work. Treat the
+> repository-layout and Preferences snippets here as indicative, not current.
+
 ## 1. Goals & Non-Goals
 
 ### Goals (in priority order)
@@ -24,9 +30,9 @@ For details on the current implementation, see `METHODOLOGY.md`.
 
 ### Non-goals (explicitly out of scope for v1)
 
-- Horoscope / kundali / birth charts
-- Dasha / antardasha / vimshottari
-- Muhurta selection for events
+- ~~Horoscope / kundali / birth charts~~ — **shipped** (see Status above)
+- ~~Dasha / antardasha / vimshottari~~ — **shipped**
+- Muhurta selection for events (the panchanga shows muhurta windows; no electional picker)
 - User accounts, sync, cloud storage
 - Push notifications (defer to Phase 3)
 - Native mobile apps (Phase 3 via Bubblewrap if warranted)
@@ -590,8 +596,9 @@ interface Preferences {
   topocentric: boolean;
   theme: 'auto' | 'light' | 'dark';
   weekStart: 'sunday' | 'monday';
-  numerals: 'roman' | 'devanagari';
-  language: 'en';                    // for future use
+  numerals: 'latin' | 'devanagari';
+  language: 'en' | 'hi';             // English + Hindi shipped
+  transliteration: boolean;          // keep Sanskrit names (Mesha, Mangala) in English mode
 }
 
 interface SavedLocation {

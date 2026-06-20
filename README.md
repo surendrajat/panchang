@@ -38,7 +38,7 @@ Bundled city list covers India's metros, Hindu-diaspora centres in Southeast Asi
 
 ## Privacy
 
-Everything lives in your browser's IndexedDB. There is no server, no telemetry. Source files are precached by the service worker so the app loads instantly and works offline.
+Everything lives in your browser's IndexedDB. There is no server, no telemetry. The app shell and assets are precached by the service worker so the app loads instantly and works offline.
 
 ## Run locally
 

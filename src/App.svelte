@@ -4,6 +4,7 @@
     hydratePreferences,
     preferences,
     updatePreferences,
+    panchangaOptionsFrom,
   } from '$lib/state/preferences.svelte';
   import Today from './routes/Today.svelte';
   import Day from './routes/Day.svelte';
@@ -63,14 +64,12 @@
     return { name: 'today' };
   }
 
-  // Compute today's panchanga for the masthead samvat strip.
+  // Compute today's panchanga for the masthead samvat strip. Uses the same
+  // options builder as the routes so the strip can't disagree with the Today card.
   const todayPanchanga = $derived.by<Panchanga | null>(() => {
     if (!preferences.location || !preferences.hydrated) return null;
     try {
-      return computePanchanga(new Date(), preferences.location, {
-        ayanamsa: preferences.ayanamsa,
-        monthSystem: preferences.monthSystem,
-      });
+      return computePanchanga(new Date(), preferences.location, panchangaOptionsFrom(preferences));
     } catch {
       return null;
     }

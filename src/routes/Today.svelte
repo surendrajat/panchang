@@ -2,7 +2,7 @@
   import DayCard from '$components/DayCard.svelte';
   import DayPager from '$components/DayPager.svelte';
   import { computePanchanga, type Panchanga } from '$lib/panchanga';
-  import { preferences } from '$lib/state/preferences.svelte';
+  import { preferences, panchangaOptionsFrom } from '$lib/state/preferences.svelte';
   import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey } from '$lib/i18n';
   import { cacheKey, getCached, putCached } from '$lib/storage';
@@ -18,12 +18,7 @@
   $effect(() => {
     const loc = preferences.location;
     const hydrated = preferences.hydrated;
-    const opts = {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
-      topocentric: preferences.topocentric,
-      sunriseHorizon: 'standard' as const,
-    };
+    const opts = panchangaOptionsFrom(preferences);
     if (!loc || !hydrated) {
       panchanga = null;
       return;

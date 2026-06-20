@@ -1,7 +1,7 @@
 <script lang="ts">
   import MonthGrid from '$components/MonthGrid.svelte';
   import { computeMonth } from '$lib/panchanga';
-  import { preferences } from '$lib/state/preferences.svelte';
+  import { preferences, panchangaOptionsFrom } from '$lib/state/preferences.svelte';
   import { applyNumerals } from '$lib/format/numerals';
   import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey, masaNameByIndex, localeMetaOf } from '$lib/i18n';
@@ -27,10 +27,7 @@
 
   const days = $derived.by(() => {
     if (!parsed || !preferences.location || !preferences.hydrated) return [];
-    return computeMonth(parsed.year, parsed.month, preferences.location, {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
-    });
+    return computeMonth(parsed.year, parsed.month, preferences.location, panchangaOptionsFrom(preferences));
   });
 
   // Populate the per-day cache after each month computation so
@@ -38,12 +35,7 @@
   $effect(() => {
     const loc = preferences.location;
     if (!days.length || !loc) return;
-    const opts = {
-      ayanamsa: preferences.ayanamsa,
-      monthSystem: preferences.monthSystem,
-      topocentric: preferences.topocentric,
-      sunriseHorizon: 'standard' as const,
-    };
+    const opts = panchangaOptionsFrom(preferences);
     for (const p of days) {
       void putCached(cacheKey(p.date, loc, opts), p);
     }

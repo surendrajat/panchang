@@ -12,7 +12,7 @@ import {
 } from '$lib/storage';
 import { browserTimezone } from '$lib/location/timezone';
 import { CITIES } from '$lib/location/cities';
-import type { Location } from '$lib/panchanga';
+import type { Location, PanchangaOptions } from '$lib/panchanga';
 import { setLanguage, type Language } from '$lib/i18n';
 
 // Default location: New Delhi when nothing else fits. If the user's
@@ -40,6 +40,19 @@ export const preferences = $state<PreferencesState>({
   location: defaultLocation(),
   hydrated: false,
 });
+
+// The single mapping from preferences → engine PanchangaOptions, so the
+// masthead and every route compute with identical options. sunriseHorizon is
+// always 'standard' (not a user preference). Reads the reactive `preferences`
+// by default, so calling it inside a $derived/$effect tracks the dependencies.
+export function panchangaOptionsFrom(prefs: PreferencesState = preferences): PanchangaOptions {
+  return {
+    ayanamsa: prefs.ayanamsa,
+    monthSystem: prefs.monthSystem,
+    topocentric: prefs.topocentric,
+    sunriseHorizon: 'standard',
+  };
+}
 
 export async function hydratePreferences(): Promise<void> {
   try {

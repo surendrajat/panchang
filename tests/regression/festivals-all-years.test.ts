@@ -34,9 +34,9 @@ const YEARS = [
   2016, 2022, 2026, 2028, 2034, 2040, 2046, 2050, 2058, 2070, 2082, 2094, 2100,
 ];
 
-const MONTH_SYSTEMS = ['purnimanta', 'amanta'] as const;
+type MonthSystem = 'purnimanta' | 'amanta';
 
-const present = (year: number, monthSystem: (typeof MONTH_SYSTEMS)[number]): Map<string, number> => {
+const present = (year: number, monthSystem: MonthSystem): Map<string, number> => {
   const occ = findFestivals(
     new Date(Date.UTC(year, 0, 1)),
     new Date(Date.UTC(year, 11, 31)),
@@ -50,16 +50,12 @@ const present = (year: number, monthSystem: (typeof MONTH_SYSTEMS)[number]): Map
 
 describe('every annual festival resolves to EXACTLY ONE date, 1950-2100 (sampled)', () => {
   for (const year of YEARS) {
-    it(`${year}: all ${ANNUAL.length} annual festivals fire exactly once (both month systems)`, () => {
+    it(`${year}: all ${ANNUAL.length} annual festivals fire exactly once`, () => {
       // Not missing (count 0) and not duplicated (count > 1) — a vriddhi
       // (doubled) tithi must resolve to one day, a kshaya (skipped) one too.
-      // Festival rules key on the system-invariant amantaName, so the result
-      // must be identical under purnimanta and amanta display.
-      for (const ms of MONTH_SYSTEMS) {
-        const counts = present(year, ms);
-        const wrong = ANNUAL.map((k) => [k, counts.get(k) ?? 0] as const).filter(([, c]) => c !== 1);
-        expect(wrong, `${year} (${ms}): ${wrong.map(([k, c]) => `${k}×${c}`).join(', ')}`).toEqual([]);
-      }
+      const counts = present(year, 'purnimanta');
+      const wrong = ANNUAL.map((k) => [k, counts.get(k) ?? 0] as const).filter(([, c]) => c !== 1);
+      expect(wrong, `${year}: ${wrong.map(([k, c]) => `${k}×${c}`).join(', ')}`).toEqual([]);
     });
   }
 
@@ -67,5 +63,20 @@ describe('every annual festival resolves to EXACTLY ONE date, 1950-2100 (sampled
     const counts = present(1983, 'purnimanta');
     const absent = ANNUAL.filter((k) => !counts.has(k));
     expect(absent.sort()).toEqual(['maha_shivaratri', 'vasant_panchami']);
+  });
+
+  // Festival rules key on the system-invariant amantaName, so resolution must be
+  // IDENTICAL under both display conventions — which is exactly what lets the
+  // sweep above check only purnimanta. Pin that directly on representative years
+  // (short-tithi 1975/2000, adhika-masa 2023, a normal year, and far-future)
+  // rather than re-running the whole slow sweep twice.
+  it('resolution is identical under amanta and purnimanta', () => {
+    const list = (year: number, ms: MonthSystem) =>
+      findFestivals(new Date(Date.UTC(year, 0, 1)), new Date(Date.UTC(year, 11, 31)), DELHI, { monthSystem: ms })
+        .map((o) => `${o.key}@${o.date.toISOString().slice(0, 10)}`)
+        .sort();
+    for (const year of [1975, 2000, 2023, 2025, 2052, 2080]) {
+      expect(list(year, 'amanta'), `${year}`).toEqual(list(year, 'purnimanta'));
+    }
   });
 });

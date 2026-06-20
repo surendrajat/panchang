@@ -81,13 +81,12 @@ describe('polar summer — Tromsø Jun 21 (midnight sun)', () => {
     expect(p).toBeDefined();
   });
 
-  it('sunrise exists (sun stays above horizon)', () => {
-    // In midsummer Tromsø the sun doesn't set; the model should still
-    // return a sunrise (it sets a conventional midnight-sun time).
-    // Accept either a valid Date or null — model behavior may be implementation-defined.
-    if (p.sunrise !== null) {
-      expect(p.sunrise).toBeInstanceOf(Date);
-    }
+  it('midnight sun: no sunrise/sunset event, but the panchanga still computes', () => {
+    // In midsummer Tromsø the sun never crosses the horizon, so there is no
+    // rise or set event — both are null. The engine must tolerate this; the
+    // angas (below) still come from the elongation math, not from sunrise.
+    expect(p.sunrise).toBeNull();
+    expect(p.sunset).toBeNull();
   });
 
   it('all five angas are populated', () => {

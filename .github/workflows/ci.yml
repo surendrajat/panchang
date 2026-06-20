@@ -31,8 +31,10 @@ jobs:
       - name: Svelte check
         run: pnpm exec svelte-check --tsconfig ./tsconfig.json
 
-      - name: Unit tests
-        run: pnpm test
-
+      # Build before tests so the offline-assets PWA budget test sees dist/
+      # (it self-skips when dist/ is absent — see tests/unit/offline-assets.test.ts).
       - name: Production build
         run: pnpm build
+
+      - name: Unit tests
+        run: pnpm test

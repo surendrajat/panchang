@@ -54,7 +54,10 @@ export default defineConfig({
   ],
   build: {
     target: 'es2020',
-    sourcemap: true,
+    // No prod sourcemaps: this is an offline-first PWA and shipping ~1.5 MB of
+    // .map files to the CDN bloats the deploy with no user benefit. Source is
+    // public on GitHub; build locally with `--sourcemap` when debugging.
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks(id) {

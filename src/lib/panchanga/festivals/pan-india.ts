@@ -526,39 +526,50 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'ekadashi',
     displayName: 'Ekadashi',
     displayNameHi: 'एकादशी',
-    matches: (p) => p.tithi.number === 11,
+    // Both pakshas, vriddhi-aware (purvaviddha) so a doubled Ekadashi fires on a
+    // single day rather than two consecutive sunrises.
+    matches: (p) =>
+      sunriseTithiObservedForDate(p.location, p.date, 11) ||
+      sunriseTithiObservedForDate(p.location, p.date, 26),
   },
   {
     key: 'pradosh',
     displayName: 'Pradosh Vrat',
     displayNameHi: 'प्रदोष व्रत',
-    matches: (p) => p.tithi.number === 13,
+    // Trayodashi prevailing at the pradosha (early-evening) window — Pradosh is an
+    // evening vrat, so it follows the same window rule as the marquee festivals.
+    matches: (p) =>
+      vyapiniWithSunriseFallback(p, 'pradosha', 13, 'earlier') ||
+      vyapiniWithSunriseFallback(p, 'pradosha', 28, 'earlier'),
   },
   {
     key: 'sankashti_chaturthi',
     displayName: 'Sankashti Chaturthi',
     displayNameHi: 'संकष्टी चतुर्थी',
-    matches: (p) => p.tithi.paksha === 'krishna' && p.tithi.number === 4,
+    // Krishna Chaturthi prevailing at MOONRISE (chandrodaya) — Sankashti's
+    // defining rule (the same one Karwa Chauth uses), often a day off from the
+    // sunrise tithi.
+    matches: (p) => vyapiniWithSunriseFallback(p, 'chandrodaya', 19, 'earlier'),
   },
   {
     key: 'amavasya',
     displayName: 'Amavasya',
     displayNameHi: 'अमावस्या',
-    matches: (p) => p.tithi.index === 30,
+    matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 30),
   },
   {
     key: 'purnima',
     displayName: 'Purnima',
     displayNameHi: 'पूर्णिमा',
-    matches: (p) => p.tithi.index === 15,
+    matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 15),
   },
   {
     key: 'masik_shivaratri',
     displayName: 'Masik Shivaratri',
     displayNameHi: 'मासिक शिवरात्रि',
-    // Monthly Shiva observance — Krishna 14, except the one in Magha
-    // (which is the major Maha Shivaratri above).
+    // Krishna Chaturdashi at nishita (midnight) every month except Magha (that
+    // one is the major Maha Shivaratri above).
     matches: (p) =>
-      p.tithi.paksha === 'krishna' && p.tithi.number === 14 && p.masa.amantaName !== 'Magha',
+      p.masa.amantaName !== 'Magha' && vyapiniWithSunriseFallback(p, 'nishita', 29, 'earlier'),
   },
 ];

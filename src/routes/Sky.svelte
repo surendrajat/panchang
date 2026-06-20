@@ -20,7 +20,7 @@
   import { RASHI_LORDS } from '$lib/jyotish/names';
   import { RASHI_ELEMENT, ELEMENT_LABEL } from '$lib/jyotish/rashi-art';
   // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
-  import { SIGN_GLYPH, PLANET_GLYPH } from '$lib/jyotish/glyphs';
+  import { SIGN_GLYPH } from '$lib/jyotish/glyphs';
   // The lunar month + Gregorian span while the Sun sits in each sign (for the
   // tap-to-learn card), bilingual. Index 0 = Mesha.
   type MonInfo = { mon: { en: string; hi: string }; greg: { en: string; hi: string } };
@@ -44,6 +44,7 @@
   import { applyNumerals } from '$lib/format/numerals';
   import MoonPhase from '../components/MoonPhase.svelte';
   import CelestialMark from '../components/CelestialMark.svelte';
+  import BodyIcon from '../components/BodyIcon.svelte';
 
   const lang = $derived(preferences.language);
   const num = (s: string | number) => applyNumerals(String(s), preferences.numerals);
@@ -130,19 +131,10 @@
   const sunRashi = $derived(displaySign(sunSid));
   const moonRashi = $derived(displaySign(moonSid));
 
-  // Traditional Vedic planet colours, tuned to read on both light and dark.
-  const GRAHA_META: { key: GrahaKey; color: string }[] = [
-    { key: 'mars', color: '#cc4433' },
-    { key: 'mercury', color: '#3a9d63' },
-    { key: 'jupiter', color: '#cf9a1e' },
-    { key: 'venus', color: '#7f86c4' },
-    { key: 'saturn', color: '#6878a0' },
-    { key: 'rahu', color: '#8a8a8a' },
-    { key: 'ketu', color: '#a07b45' },
-  ];
+  const GRAHA_KEYS: readonly GrahaKey[] = ['mars', 'mercury', 'jupiter', 'venus', 'saturn', 'rahu', 'ketu'];
   const grahaPositions = $derived.by(() =>
     showGrahas
-      ? GRAHA_META.map((g) => ({ ...g, lon: grahaSiderealLongitude(g.key, jd, preferences.ayanamsa, preferences.nodeType) }))
+      ? GRAHA_KEYS.map((key) => ({ key, lon: grahaSiderealLongitude(key, jd, preferences.ayanamsa, preferences.nodeType) }))
       : [],
   );
 
@@ -412,10 +404,9 @@
         {@const [gx, gy] = pt(g.lon, R_GRAHA)}
         {@const sel = selected?.type === 'graha' && selected.key === g.key}
         <g class="body" role="button" tabindex="0" aria-label={grahaLabel(g.key)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
-          {#if sel}<circle cx={gx} cy={gy} r="12" class="sel-glow" />{/if}
-          <circle cx={gx} cy={gy} r="9.5" class="graha" style:stroke={g.color} />
-          <text x={gx} y={gy} class="graha-glyph zsym" fill={g.color} text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
-          <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaLabel(g.key)}</text>
+          {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
+          <BodyIcon kind={g.key} cx={gx} cy={gy} r={9} />
+          <text x={gx} y={gy - 14} class="body-label" text-anchor="middle">{grahaLabel(g.key)}</text>
         </g>
       {/each}
 
@@ -695,10 +686,6 @@
   .rashi-glyph.on {
     fill: var(--ink);
   }
-  .graha-glyph {
-    font-size: 12px;
-    fill: var(--ink);
-  }
   /* body hover label — name appears on hover/focus, not always */
   .body[role='button'] {
     cursor: pointer;
@@ -799,11 +786,6 @@
   .crater {
     fill: #cfc7b4;
     opacity: 0.8;
-  }
-  .graha {
-    fill: var(--paper);
-    stroke: var(--ink-faint, #999);
-    stroke-width: 1;
   }
   .earth-land {
     fill: #4e9a5b;

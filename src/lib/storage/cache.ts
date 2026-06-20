@@ -30,7 +30,8 @@ import { db, type CachedPanchangaRow, type CachedFestivalsRow } from './db';
 import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
 import type { Location, Panchanga, PanchangaOptions, FestivalOccurrence } from '$lib/panchanga';
 
-export const CALCULATION_VERSION = 3;
+// v4: KP/Raman/Yukteshwar ayanamsa values re-pinned to Swiss Ephemeris.
+export const CALCULATION_VERSION = 4;
 // Bump to force-invalidate all client caches on the next deploy without
 // changing CALCULATION_VERSION (e.g. display name fix, data correction).
 export const CACHE_BUST = 1;

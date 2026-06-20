@@ -45,8 +45,8 @@ const JULIAN_CENTURY_DAYS = 36525;
 // practical significance but is still a measurable bias. (Two earlier values
 // were wrong and must not be restored: 23.8635° = Drik's variant; 23.8267° =
 // a transcription of Drik's rounded *display text*, 2.2′ low.)
-// KP shifts Lahiri by 6′ (Krishnamurti); Raman and Yukteshwar use
-// independent reference values.
+// KP, Raman, and Yukteshwar are likewise pinned to Swiss Ephemeris's
+// realizations at J2000 (see COEFFS below) — not approximations.
 interface AyanamsaCoeffs {
   baseDegreesAtJ2000: number;
   // Arcseconds per Julian century (T) — the leading-order precession.
@@ -69,22 +69,26 @@ const COEFFS: Record<AyanamsaSystem, AyanamsaCoeffs> = {
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },
+  // KP, Raman, and Yukteshwar are pinned to Swiss Ephemeris's realizations
+  // (SE_SIDM_KRISHNAMURTI / _RAMAN / _YUKTESHWAR) at J2000 and carried by the
+  // same IAU-2006 precession — the same accuracy-first choice as Lahiri. Each
+  // matches Swiss-Eph to <0.01′ across 1900–2100. (Earlier values were
+  // independent realizations that drifted from Swiss-Eph by up to ~3′ for Raman
+  // and ~7′ for Yukteshwar, whose literal 54″/yr rate was the worst offender.)
   kp: {
-    baseDegreesAtJ2000: LAHIRI_J2000_DEG - 6 / 60, // Lahiri minus 6 arcminutes
+    baseDegreesAtJ2000: 23.76024, // SE_SIDM_KRISHNAMURTI (≈ Lahiri − 5.8′)
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },
   raman: {
-    baseDegreesAtJ2000: 22.4602,
+    baseDegreesAtJ2000: 22.410791, // SE_SIDM_RAMAN
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },
   yukteshwar: {
-    // Yukteshwar's rate (54"/year ≈ 5400"/century) was his original
-    // proposal; modern Drik treatments don't add a quadratic term.
-    baseDegreesAtJ2000: 22.46389,
-    precessionArcsecPerCenturyT: 5400,
-    precessionArcsecPerCenturyTSq: 0,
+    baseDegreesAtJ2000: 22.478803, // SE_SIDM_YUKTESHWAR
+    precessionArcsecPerCenturyT: IAU_PRECESSION_T,
+    precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },
   true_chitra: {
     // True Chitra-paksha: ayanamsa such that the ecliptic longitude of Spica

@@ -4,9 +4,11 @@
   import { preferences, updatePreferences } from '$lib/state/preferences.svelte';
   import { clearAll, DEFAULT_PREFERENCES } from '$lib/storage';
   import { t, type TranslationKey, type Language } from '$lib/i18n';
+  import { applyNumerals } from '$lib/format/numerals';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
+  const num = (s: string) => applyNumerals(s, preferences.numerals);
 
   let clearedAt = $state<Date | null>(null);
   let resetAt = $state<Date | null>(null);
@@ -90,8 +92,8 @@
               timeFormat: (e.currentTarget as HTMLSelectElement).value as '12h' | '24h',
             })}
         >
-          <option value="24h">{tr('settings.timeFormat24')}</option>
-          <option value="12h">{tr('settings.timeFormat12')}</option>
+          <option value="24h">{tr('settings.timeFormat24', { h: num('24'), eg: num('18:30') })}</option>
+          <option value="12h">{tr('settings.timeFormat12', { h: num('12'), eg: num('6:30') })}</option>
         </select>
       </label>
       <label class="label">

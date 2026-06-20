@@ -17,6 +17,7 @@
   } from '$lib/astro';
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
+  import { tithiIndexFromElongation, clusterTiers } from '$lib/jyotish/sky-math';
   import { RASHI_LORDS } from '$lib/jyotish/names';
   import { RASHI_ELEMENT, ELEMENT_LABEL } from '$lib/jyotish/rashi-art';
   // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
@@ -163,7 +164,7 @@
   const elong = $derived(sunMoonElongationAtJD(jd));
 
   const NAK_ARC = 360 / 27;
-  const tithiNum = $derived(Math.floor(elong / 12) + 1);
+  const tithiNum = $derived(tithiIndexFromElongation(elong));
   const tithiFrac = $derived((elong % 12) / 12);
   const paksha = $derived(elong < 180 ? hi('शुक्ल', 'Shukla') : hi('कृष्ण', 'Krishna'));
   const nakNum = $derived(Math.floor(moonSid / NAK_ARC) + 1);
@@ -352,14 +353,11 @@
   // slightly different radii so their globes + names don't collide into a mash.
   const grahaLayout = $derived.by(() => {
     const sorted = [...grahaPositions].sort((a, b) => a.lon - b.lon);
-    let tier = 0;
-    return sorted.map((g, i) => {
-      const prev = sorted[i - 1];
-      const d = prev ? Math.abs(g.lon - prev.lon) : 999;
-      const sep = Math.min(d, 360 - d);
-      tier = sep < 12 ? tier + 1 : 0;
-      return { ...g, r: Math.max(46, R_GRAHA - tier * 17) };
-    });
+    const tiers = clusterTiers(
+      sorted.map((g) => g.lon),
+      12,
+    );
+    return sorted.map((g, i) => ({ ...g, r: Math.max(46, R_GRAHA - tiers[i] * 17) }));
   });
 
   function pt(deg: number, r: number): [number, number] {

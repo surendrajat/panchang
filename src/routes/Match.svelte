@@ -7,7 +7,6 @@
     computeBirthChart,
     birthInstant,
     computeMatch,
-    type MatchResult,
     type KootaKey,
   } from '$lib/jyotish';
   import { nakshatraNameByIndex } from '$lib/i18n';
@@ -27,10 +26,12 @@
     place: Location | null;
   }
 
-  // Init from the module draft so the form survives navigating away from this
-  // lazy-loaded route and back (see jyotish-draft).
-  let groom = $state<Person>(matchDraft.groom);
-  let bride = $state<Person>(matchDraft.bride);
+  // Bind straight to the module-scope draft so a half-entered form survives
+  // leaving this lazy route and coming back — no local copy or sync effect that
+  // could drift out of step (see jyotish-draft). These aliases stay reactive
+  // because matchDraft is itself $state; writes go to matchDraft.* directly.
+  const groom = $derived(matchDraft.groom);
+  const bride = $derived(matchDraft.bride);
   let error = $state<string | null>(null);
 
   // Saved profiles for quick-pick.
@@ -49,23 +50,11 @@
     const p = profiles.find((x) => String(x.id) === id);
     if (!p) return;
     const person: Person = { name: p.name, date: p.date, time: p.time, place: p.location };
-    if (role === 'groom') groom = person;
-    else bride = person;
+    if (role === 'groom') matchDraft.groom = person;
+    else matchDraft.bride = person;
   }
 
-  interface Computed {
-    result: MatchResult;
-    g: { nak: number; rashi: number };
-    b: { nak: number; rashi: number };
-  }
-  let out = $state<Computed | null>(matchDraft.out);
-
-  // Persist form + result back to the module draft on every change.
-  $effect(() => {
-    matchDraft.groom = groom;
-    matchDraft.bride = bride;
-    matchDraft.out = out;
-  });
+  const out = $derived(matchDraft.out);
 
   const canMatch = $derived(!!groom.date && !!groom.place && !!bride.date && !!bride.place);
 
@@ -103,7 +92,7 @@
     try {
       const g = moonOf(groom);
       const b = moonOf(bride);
-      out = {
+      matchDraft.out = {
         result: computeMatch(g, b),
         g: { nak: g.nakshatra, rashi: g.rashi },
         b: { nak: b.nakshatra, rashi: b.rashi },

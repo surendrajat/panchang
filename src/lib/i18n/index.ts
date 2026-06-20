@@ -106,5 +106,4 @@ export {
   rashiNameByIndex,
   samvatsaraNameByIndex,
   karanaNameByPosition,
-  localizeTithi,
 } from './names';

@@ -72,11 +72,3 @@ export function karanaNameByPosition(pos0to59: number, lang: Language): string {
   }
   return fixed[pos0to59 - 57]; // Shakuni / Chatushpada / Naga
 }
-
-// Resolve a tithi name that the compute layer has already produced
-// (an English/Sanskrit string from `TITHI_NAMES`). We re-map by
-// matching against TITHI_NAMES — exact match by index.
-export function localizeTithi(englishName: string, index1to30: number, lang: Language): string {
-  if (lang === 'en') return englishName;
-  return tithiNameByIndex(index1to30, lang);
-}

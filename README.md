@@ -15,11 +15,13 @@ No accounts. No ads. No tracking. Install once, works on a plane.
 - **Year context** — Vikram Samvat, Shaka Samvat, Kaliyuga, Ritu, Ayana.
 - **Sun & Moon** — sunrise, sunset, moonrise, moonset, moon phase with illumination %.
 - **Kundli (birth chart)** — Lagna, the nine grahas (sidereal Lahiri, mean/true node), whole-sign bhavas, Vimshottari dasha, Navamsa (D9), naamakshar, and Ashtakoota (guna milan) matching.
+- **Sky (live, experimental)** — a geocentric ecliptic wheel showing where the Sun, Moon and planets sit right now, with a sidereal/tropical toggle and tap-to-learn, to show where the panchanga comes from.
 
 ## Languages
 
 - **English** and **हिन्दी** (auto-detected from your system language on first launch).
 - Numerals in Latin (1, 2, 3) or Devanagari (१, २, ३).
+- **Transliteration** toggle — keep the Sanskrit names (Mesha, Maṅgala) in English mode, or switch to English equivalents (Aries, Mars) where they exist.
 
 ## Locations
 

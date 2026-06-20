@@ -24,15 +24,14 @@ pnpm install
 pnpm test         # unit + regression — must be green before pushing
 pnpm dev          # http://localhost:5173
 pnpm build        # static output in ./dist
-pnpm exec tsc --noEmit         # type-check
-pnpm exec svelte-check         # Svelte type-check
+pnpm lint         # tsc --noEmit + svelte-check + eslint (one gate)
+pnpm format:check # prettier --check (use `pnpm format` to fix)
 ```
 
 ## Adding a festival
 
 1. Add the rule predicate in
-   `src/lib/panchanga/festivals/pan-india.ts` (or `regional.ts` in
-   Phase 2).
+   `src/lib/panchanga/festivals/pan-india.ts`.
 2. Add a fixture under `tests/fixtures/drik-panchang/` with the date a
    reliable source (drikpanchang.com or the official panchanga of your
    tradition) gives for the next 1–2 years. One fixture per ambiguous

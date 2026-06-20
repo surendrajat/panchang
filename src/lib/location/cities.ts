@@ -1,7 +1,6 @@
-// Bundled city list. Phase 1 ships a small, hand-picked seed covering
-// India's major metros plus a sample diaspora set. The full
-// GeoNames cities500 list (~10K entries) is wired through scripts/
-// build-cities.ts in Phase 2 — see docs/ARCHITECTURE.md §14 (Open Decisions).
+// Bundled city list — a small, hand-picked seed covering India's major metros
+// plus a sample diaspora set. (A full GeoNames-derived list was considered but
+// not shipped; this curated seed keeps the bundle tiny and offline-friendly.)
 //
 // Sources: Wikipedia "List of cities in India by population" + GeoNames
 // for IANA timezones. Coordinates are decimal degrees (lat, lng), name

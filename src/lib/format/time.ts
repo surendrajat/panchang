@@ -3,17 +3,26 @@
 // 24h and 12h are obvious. Ghati/pala is the traditional Hindu time unit:
 // 1 day (sunrise to sunrise) = 60 ghati; 1 ghati = 60 pala = 24 minutes.
 
+import { applyNumerals, type NumeralSystem } from './numerals';
+
 export type TimeFormat = '24h' | '12h' | 'ghati';
+
+/** Localization for the ghati/pala format (it has Hindi words + numerals). */
+export interface TimeFormatOpts {
+  lang?: 'en' | 'hi';
+  numerals?: NumeralSystem;
+}
 
 export function formatTime(
   instant: Date,
   timezone: string,
   format: TimeFormat = '24h',
   sunriseAnchor?: Date | null,
+  opts?: TimeFormatOpts,
 ): string {
   if (format === 'ghati') {
     if (!sunriseAnchor) return formatTime(instant, timezone, '24h');
-    return formatGhatiPala(instant, sunriseAnchor);
+    return formatGhatiPala(instant, sunriseAnchor, opts);
   }
   const hour12 = format === '12h';
   const fmt = new Intl.DateTimeFormat('en-US', {
@@ -63,11 +72,16 @@ export function localYMD(instant: Date, timezone: string): string {
 const MS_PER_PALA = 24_000; // 24 seconds — 60 pala per ghati
 const MS_PER_GHATI = 24 * 60 * 1000; // 24 minutes
 
-function formatGhatiPala(instant: Date, sunrise: Date): string {
+function formatGhatiPala(instant: Date, sunrise: Date, opts?: TimeFormatOpts): string {
+  const lang = opts?.lang ?? 'en';
+  const numerals = opts?.numerals ?? 'latin';
   const elapsed = instant.getTime() - sunrise.getTime();
-  if (elapsed < 0) return 'before sunrise';
+  if (elapsed < 0) return lang === 'hi' ? 'सूर्योदय से पूर्व' : 'before sunrise';
   const ghati = Math.floor(elapsed / MS_PER_GHATI);
   const palaRemainderMs = elapsed - ghati * MS_PER_GHATI;
   const pala = Math.floor(palaRemainderMs / MS_PER_PALA);
-  return `${ghati}gh ${pala}p`;
+  const num = (n: number) => applyNumerals(String(n), numerals);
+  const gh = lang === 'hi' ? 'घ' : 'gh';
+  const pa = lang === 'hi' ? 'प' : 'p';
+  return `${num(ghati)}${gh} ${num(pala)}${pa}`;
 }

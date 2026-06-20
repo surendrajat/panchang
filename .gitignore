@@ -13,3 +13,8 @@ coverage
 .vscode
 design/
 .claude/
+
+# transient planning notes (kept locally, not part of the repo)
+/plan.md
+/status.md
+/PLAN_EVALUATION.md

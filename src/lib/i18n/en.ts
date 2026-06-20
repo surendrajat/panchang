@@ -7,6 +7,7 @@ export const en = {
   'tab.day': 'Day',
   'tab.month': 'Month',
   'tab.festivals': 'Festivals',
+  'tab.kundli': 'Kundli',
   'nav.back': 'Back',
   'nav.skipToContent': 'Skip to content',
   'nav.openSettings': 'Open settings',

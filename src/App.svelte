@@ -42,6 +42,7 @@
     | { name: 'day'; yyyymmdd: string }
     | { name: 'month'; yyyymm: string }
     | { name: 'festivals'; year: string }
+    | { name: 'kundli' }
     | { name: 'settings' };
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
@@ -55,6 +56,7 @@
     if (month) return { name: 'month', yyyymm: month[1] };
     const festivals = path.match(/^festivals\/(\d{4})$/);
     if (festivals) return { name: 'festivals', year: festivals[1] };
+    if (path === 'kundli') return { name: 'kundli' };
     if (path === 'settings') return { name: 'settings' };
     return { name: 'today' };
   }
@@ -95,19 +97,22 @@
   // tab since Day is conceptually a single-day variant of Today.
   // Settings does not match any tab; the strip stays visible so the
   // user has a one-click path back to the calendar.
-  const activeTab = $derived<'today' | 'month' | 'festivals' | null>(
+  const activeTab = $derived<'today' | 'month' | 'festivals' | 'kundli' | null>(
     route.name === 'today' || route.name === 'day'
       ? 'today'
       : route.name === 'month'
         ? 'month'
         : route.name === 'festivals'
           ? 'festivals'
-          : null,
+          : route.name === 'kundli'
+            ? 'kundli'
+            : null,
   );
 
-  function tabHref(view: 'today' | 'month' | 'festivals'): string {
+  function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli'): string {
     if (view === 'today') return '#/';
     if (view === 'month') return `#/month/${currentYYYYMM()}`;
+    if (view === 'kundli') return '#/kundli';
     return `#/festivals/${currentYear()}`;
   }
 </script>
@@ -247,7 +252,7 @@
     </nav>
   {:else}
     <nav class="tabs" aria-label="Primary views">
-      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }] as tab (tab.id)}
+      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }] as tab (tab.id)}
         <a
           class="tab"
           aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -268,6 +273,14 @@
       <Month yyyymm={route.yyyymm} />
     {:else if route.name === 'festivals'}
       <Festivals year={route.year} />
+    {:else if route.name === 'kundli'}
+      <!-- Lazy-loaded: panchang-only users never download the jyotish
+           engine or the planet-position code paths. -->
+      {#await import('./routes/Kundli.svelte')}
+        <p class="muted">{tr('month.loading')}</p>
+      {:then m}
+        <m.default />
+      {/await}
     {:else if route.name === 'settings'}
       <Settings />
     {/if}

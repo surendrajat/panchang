@@ -14,6 +14,7 @@
     sunMoonElongationAtJD,
     moonIlluminationAtJD,
     civilMidnightInZone,
+    bodyAltAz,
     ayanamsa,
     norm360,
   } from '$lib/astro';
@@ -449,6 +450,61 @@
   });
   const litHalf = (cx: number, cy: number, r: number) =>
     `M ${cx} ${cy - r} A ${r} ${r} 0 0 0 ${cx} ${cy + r} Z`;
+
+  // ── Sky dome: the Sun & Moon in YOUR local sky (all-sky view — zenith at the
+  // centre, horizon at the rim; N up, E left, S down, W right) ─────────────────
+  const DOME = 200;
+  const DC = DOME / 2;
+  const DR = 82;
+  function domePt(az: number, alt: number): [number, number] {
+    const r = (DR * (90 - alt)) / 90; // zenith → centre, horizon → rim
+    const a = (az * Math.PI) / 180;
+    return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
+  }
+  // Today's path of a body across the local sky — the above-horizon arc, sampled
+  // every 20 min over the civil day, as one or more polyline point-strings.
+  function domeTrack(body: 'sun' | 'moon', dayStartMs: number, lat: number, lon: number): string[] {
+    const N = 73;
+    const segs: string[] = [];
+    let cur: string[] = [];
+    for (let i = 0; i < N; i++) {
+      const { azimuth, altitude } = bodyAltAz(
+        body,
+        new Date(dayStartMs + (i * 86_400_000) / (N - 1)),
+        lat,
+        lon,
+      );
+      if (altitude >= 0)
+        cur.push(
+          domePt(azimuth, altitude)
+            .map((n) => n.toFixed(1))
+            .join(','),
+        );
+      else if (cur.length) {
+        segs.push(cur.join(' '));
+        cur = [];
+      }
+    }
+    if (cur.length) segs.push(cur.join(' '));
+    return segs;
+  }
+  const domeTracks = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc) return null;
+    const dayStart = civilMidnightInZone(new Date(eventsBaseMs), loc.timezone).getTime();
+    return {
+      sun: domeTrack('sun', dayStart, loc.latitude, loc.longitude),
+      moon: domeTrack('moon', dayStart, loc.latitude, loc.longitude),
+    };
+  });
+  const domeNow = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc) return null;
+    return {
+      sun: bodyAltAz('sun', simDate, loc.latitude, loc.longitude),
+      moon: bodyAltAz('moon', simDate, loc.latitude, loc.longitude),
+    };
+  });
 </script>
 
 <section class="sky">
@@ -931,6 +987,52 @@
       )}
     </figcaption>
   </figure>
+
+  {#if domeTracks && domeNow}
+    <figure class="skydome">
+      <svg
+        viewBox="0 0 {DOME} {DOME}"
+        role="img"
+        aria-label={hi(
+          'आज आपके आकाश में सूर्य व चन्द्र का पथ',
+          'The path of the Sun and Moon in your sky today',
+        )}
+      >
+        <circle cx={DC} cy={DC} r={DR} class="dome-sky" />
+        <circle cx={DC} cy={DC} r={(DR * 60) / 90} class="dome-ring" />
+        <circle cx={DC} cy={DC} r={(DR * 30) / 90} class="dome-ring" />
+        <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
+        <circle cx={DC} cy={DC} r="1.4" class="dome-zenith" />
+        <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+        <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+        <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
+          >{hi('पू', 'E')}</text
+        >
+        <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
+        >
+        {#each domeTracks.sun as pts (pts)}
+          <polyline points={pts} class="dome-path dome-path--sun" />
+        {/each}
+        {#each domeTracks.moon as pts (pts)}
+          <polyline points={pts} class="dome-path dome-path--moon" />
+        {/each}
+        {#if domeNow.sun.altitude >= 0}
+          {@const p = domePt(domeNow.sun.azimuth, domeNow.sun.altitude)}
+          <circle cx={p[0]} cy={p[1]} r="5" class="dome-now dome-now--sun" />
+        {/if}
+        {#if domeNow.moon.altitude >= 0}
+          {@const p = domePt(domeNow.moon.azimuth, domeNow.moon.altitude)}
+          <circle cx={p[0]} cy={p[1]} r="4.5" class="dome-now dome-now--moon" />
+        {/if}
+      </svg>
+      <figcaption>
+        {hi(
+          'यदि आप खड़े होकर आकाश देखें — केंद्र सिर के ऊपर, किनारा क्षितिज। सूर्य व चन्द्र आज इसी पथ पर चलते हैं।',
+          'As if you stood and looked up — the centre is overhead, the rim is the horizon. The Sun and Moon trace these paths across your sky today.',
+        )}
+      </figcaption>
+    </figure>
+  {/if}
 
   <p class="hint">
     {hi(
@@ -1451,6 +1553,69 @@
   .orbital svg {
     flex: 1 1 300px;
     max-width: 380px;
+  }
+  /* sky dome — the Sun & Moon's path in the local sky */
+  .skydome {
+    margin: 1.5rem auto 0;
+    max-width: 320px;
+    text-align: center;
+  }
+  .skydome svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .dome-sky {
+    fill: color-mix(in srgb, var(--indigo) 9%, var(--paper-2));
+  }
+  .dome-horizon {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.25;
+  }
+  .dome-ring {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 0.75;
+    stroke-dasharray: 2 3;
+  }
+  .dome-zenith {
+    fill: var(--ink-faint, #999);
+  }
+  .dome-card {
+    font-size: 10px;
+    font-weight: 700;
+    fill: var(--ink-soft);
+  }
+  .dome-path {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.85;
+  }
+  .dome-path--sun {
+    stroke: #e6a012;
+  }
+  .dome-path--moon {
+    stroke: #6f86b8;
+    stroke-dasharray: 3 3;
+  }
+  .dome-now--sun {
+    fill: #ffce3a;
+    stroke: #e07b00;
+    stroke-width: 1;
+  }
+  .dome-now--moon {
+    fill: #cfd6e6;
+    stroke: #6f86b8;
+    stroke-width: 1;
+  }
+  .skydome figcaption {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    line-height: 1.5;
   }
   .phase-side {
     display: flex;

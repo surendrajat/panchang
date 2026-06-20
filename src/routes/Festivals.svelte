@@ -112,13 +112,21 @@
       return;
     }
     const year = parsedYear;
-    const loc = preferences.location;
+    // Snapshot to a plain object — the reactive $state proxy can't be
+    // structured-cloned, so postMessage to the worker would throw DataCloneError.
+    const loc = $state.snapshot(preferences.location);
     const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
     let cancelled = false;
     loading = true;
     loadFestivals(year, loc, opts)
       .then((results) => {
         if (!cancelled) occurrences = results;
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          occurrences = [];
+          console.error('festival compute failed', e);
+        }
       })
       .finally(() => {
         if (!cancelled) loading = false;

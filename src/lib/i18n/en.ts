@@ -8,6 +8,7 @@ export const en = {
   'tab.month': 'Month',
   'tab.festivals': 'Festivals',
   'tab.kundli': 'Kundli',
+  'tab.match': 'Milan',
   'nav.back': 'Back',
   'nav.skipToContent': 'Skip to content',
   'nav.openSettings': 'Open settings',

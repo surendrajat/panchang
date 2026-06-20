@@ -13,6 +13,7 @@ export const hi: Record<TranslationKey, string> = {
   'tab.month': 'मास',
   'tab.festivals': 'त्योहार',
   'tab.kundli': 'कुण्डली',
+  'tab.match': 'मिलान',
   'nav.back': 'वापस',
   'nav.skipToContent': 'सामग्री पर जाएं',
   'nav.openSettings': 'विन्यास खोलें',

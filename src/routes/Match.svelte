@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import LocationPicker from '$components/LocationPicker.svelte';
   import { preferences } from '$lib/state/preferences.svelte';
   import type { Location } from '$lib/panchanga';
@@ -11,6 +12,7 @@
   } from '$lib/jyotish';
   import { rashiNameByIndex, nakshatraNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
+  import { listBirthProfiles, type BirthProfile } from '$lib/storage';
 
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
@@ -27,6 +29,23 @@
   let groom = $state<Person>(blank());
   let bride = $state<Person>(blank());
   let error = $state<string | null>(null);
+
+  // Saved profiles for quick-pick.
+  let profiles = $state<BirthProfile[]>([]);
+  onMount(async () => {
+    try {
+      profiles = await listBirthProfiles();
+    } catch {
+      profiles = [];
+    }
+  });
+  function applyProfile(role: 'groom' | 'bride', id: string): void {
+    const p = profiles.find((x) => String(x.id) === id);
+    if (!p) return;
+    const person: Person = { name: p.name, date: p.date, time: p.time, place: p.location };
+    if (role === 'groom') groom = person;
+    else bride = person;
+  }
 
   interface Computed {
     result: MatchResult;
@@ -103,6 +122,21 @@
         <span class="role-deva">{role === 'groom' ? '♂' : '♀'}</span>
       </h3>
       <div class="fields stack">
+        {#if profiles.length > 0}
+          <select
+            class="select"
+            value=""
+            onchange={(e) => {
+              applyProfile(role, e.currentTarget.value);
+              e.currentTarget.value = '';
+            }}
+          >
+            <option value="">{lang === 'hi' ? 'सहेजी कुण्डली चुनें…' : 'Load saved chart…'}</option>
+            {#each profiles as pr (pr.id)}
+              <option value={String(pr.id)}>{pr.name} · {num(pr.date)}</option>
+            {/each}
+          </select>
+        {/if}
         <input class="input" type="text" bind:value={p.name} placeholder={lang === 'hi' ? 'नाम (वैकल्पिक)' : 'Name (optional)'} />
         <div class="two-up">
           <label class="label">

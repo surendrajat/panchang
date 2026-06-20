@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import LocationPicker from '$components/LocationPicker.svelte';
   import KundliChart from '$components/KundliChart.svelte';
   import { preferences } from '$lib/state/preferences.svelte';
@@ -15,6 +16,12 @@
   } from '$lib/jyotish';
   import { rashiNameByIndex, nakshatraNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
+  import {
+    listBirthProfiles,
+    addBirthProfile,
+    deleteBirthProfile,
+    type BirthProfile,
+  } from '$lib/storage';
 
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
@@ -32,6 +39,58 @@
   let chart = $state<BirthChart | null>(null);
   let editing = $state(true); // form open vs. result shown
 
+  // ── saved profiles ──
+  let profiles = $state<BirthProfile[]>([]);
+  let saved = $state(false); // current chart already saved this session
+  async function refreshProfiles(): Promise<void> {
+    try {
+      profiles = await listBirthProfiles();
+    } catch {
+      profiles = [];
+    }
+  }
+  onMount(refreshProfiles);
+
+  function loadProfile(p: BirthProfile): void {
+    name = p.name;
+    date = p.date;
+    time = p.time;
+    timeKnown = p.timeKnown;
+    place = p.location;
+    cast();
+    saved = true; // came from a saved profile
+  }
+
+  async function saveCurrent(): Promise<void> {
+    if (!date || !place) return;
+    try {
+      // place is a Svelte $state proxy; IndexedDB can't structured-clone a
+      // proxy, so snapshot to a plain object before persisting.
+      await addBirthProfile({
+        name: name || (lang === 'hi' ? 'अनाम' : 'Unnamed'),
+        date,
+        time,
+        timeKnown,
+        location: $state.snapshot(place),
+      });
+      saved = true;
+      await refreshProfiles();
+    } catch (e) {
+      error = lang === 'hi' ? 'सहेजा नहीं जा सका।' : 'Could not save.';
+      console.error('saveBirthProfile failed', e);
+    }
+  }
+
+  async function removeProfile(id: number | undefined): Promise<void> {
+    if (id === undefined) return;
+    try {
+      await deleteBirthProfile(id);
+      await refreshProfiles();
+    } catch {
+      /* ignore */
+    }
+  }
+
   const canCast = $derived(!!date && !!place);
 
   function cast(): void {
@@ -48,6 +107,7 @@
         nodeType: 'mean',
         lagnaMethod: preferences.lagnaMethod,
       });
+      saved = false;
       editing = false;
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not cast the chart.';
@@ -142,6 +202,27 @@
           : 'Lagna, planetary positions, and Vimshottari dasha from a birth date, time, and place.'}
       </p>
 
+      {#if profiles.length > 0}
+        <div class="saved">
+          <div class="saved-lab">{lang === 'hi' ? 'सहेजी कुण्डलियाँ' : 'Saved charts'}</div>
+          <div class="saved-chips">
+            {#each profiles as p (p.id)}
+              <span class="chip">
+                <button class="chip-load" type="button" onclick={() => loadProfile(p)}>
+                  {p.name} <small class="num">· {num(p.date)}</small>
+                </button>
+                <button
+                  class="chip-del"
+                  type="button"
+                  aria-label={lang === 'hi' ? 'हटाएँ' : 'Delete'}
+                  onclick={() => removeProfile(p.id)}>×</button
+                >
+              </span>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
       <div class="fields stack">
         <label class="label">
           <span class="lab">{lang === 'hi' ? 'नाम' : 'Name'} <span class="hint">{lang === 'hi' ? '(वैकल्पिक)' : '(optional)'}</span></span>
@@ -188,13 +269,18 @@
     </div>
   {:else if chart}
     <!-- ───────── result ───────── -->
-    <button class="birth-bar" type="button" onclick={reopen} aria-label={lang === 'hi' ? 'विवरण संपादित करें' : 'Edit details'}>
-      <div class="birth-bar__name">{name || (lang === 'hi' ? 'जन्म कुण्डली' : 'Birth chart')}</div>
-      <div class="birth-bar__meta">{birthLine()}</div>
-      <svg class="birth-bar__edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-      </svg>
-    </button>
+    <div class="bar-row">
+      <button class="birth-bar" type="button" onclick={reopen} aria-label={lang === 'hi' ? 'विवरण संपादित करें' : 'Edit details'}>
+        <div class="birth-bar__name">{name || (lang === 'hi' ? 'जन्म कुण्डली' : 'Birth chart')}</div>
+        <div class="birth-bar__meta">{birthLine()}</div>
+        <svg class="birth-bar__edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      </button>
+      <button class="btn save-btn" type="button" onclick={saveCurrent} disabled={saved}>
+        {saved ? (lang === 'hi' ? '✓ सहेजा' : '✓ Saved') : lang === 'hi' ? 'सहेजें' : 'Save'}
+      </button>
+    </div>
 
     <!-- hero: the three facts people ask for -->
     <div class="identity stagger">
@@ -291,6 +377,73 @@
   .form-card {
     max-width: 560px;
     margin: 0 auto;
+  }
+  /* saved-chart chips */
+  .saved {
+    margin-bottom: 18px;
+  }
+  .saved-lab {
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .saved-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--paper-3);
+    overflow: hidden;
+  }
+  .chip-load {
+    border: none;
+    background: transparent;
+    padding: 7px 6px 7px 14px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .chip-load small {
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .chip-load:hover {
+    color: var(--red);
+  }
+  .chip-del {
+    border: none;
+    background: transparent;
+    padding: 0 11px;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+  .chip-del:hover {
+    color: var(--red);
+  }
+  /* result top bar: editable detail bar + save */
+  .bar-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .bar-row .birth-bar {
+    flex: 1;
+  }
+  .save-btn {
+    white-space: nowrap;
+    align-self: stretch;
   }
   .fields {
     gap: var(--space-4);

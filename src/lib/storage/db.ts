@@ -53,11 +53,24 @@ export interface CachedFestivalsRow {
   createdAt: Date;
 }
 
+// A saved birth record for the kundli / matching features. `timeKnown`
+// false means the lagna and houses are omitted (rashis + dasha still hold).
+export interface BirthProfile {
+  id?: number;
+  name: string;
+  date: string; // YYYY-MM-DD (civil, at birth place)
+  time: string; // HH:MM (24h, local at birth place)
+  timeKnown: boolean;
+  location: Location;
+  createdAt: Date;
+}
+
 export class PanchangaDB extends Dexie {
   preferences!: Table<Preferences, 'singleton'>;
   savedLocations!: Table<SavedLocation, number>;
   cachedPanchangas!: Table<CachedPanchangaRow, string>;
   cachedFestivals!: Table<CachedFestivalsRow, string>;
+  birthProfiles!: Table<BirthProfile, number>;
 
   constructor() {
     super('panchanga-db');
@@ -68,6 +81,10 @@ export class PanchangaDB extends Dexie {
     });
     this.version(2).stores({
       cachedFestivals: 'cacheKey, createdAt',
+    });
+    // v3: saved birth records for kundli + matching (additive).
+    this.version(3).stores({
+      birthProfiles: '++id, name, createdAt',
     });
   }
 }

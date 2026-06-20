@@ -19,15 +19,14 @@ mount(App, { target });
 // lazily so the dev experience stays snappy and so the registration
 // only happens in production builds.
 if (import.meta.env.PROD) {
-  import('virtual:pwa-register')
-    .then(({ registerSW }) => {
-      registerSW({
+  Promise.all([import('virtual:pwa-register'), import('./lib/state/sw-update.svelte')])
+    .then(([{ registerSW }, { onSwUpdateReady }]) => {
+      const updateSW = registerSW({
         immediate: true,
         onNeedRefresh() {
-          // Soft prompt — the architecture spec calls for an in-app
-          // banner; for v0.1 we just log and let the browser reload.
-          // eslint-disable-next-line no-console
-          console.info('Panchanga: a new version is available. Reload to update.');
+          // A new build's SW is waiting → surface the in-app reload banner.
+          // updateSW(true) activates it (skipWaiting) and reloads the page.
+          onSwUpdateReady(() => updateSW(true));
         },
       });
     })

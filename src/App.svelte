@@ -6,6 +6,7 @@
     updatePreferences,
     panchangaOptionsFrom,
   } from '$lib/state/preferences.svelte';
+  import { swUpdate, applySwUpdate, dismissSwUpdate } from '$lib/state/sw-update.svelte';
   import Today from './routes/Today.svelte';
   import Day from './routes/Day.svelte';
   import Month from './routes/Month.svelte';
@@ -45,6 +46,7 @@
     | { name: 'festivals'; year: string }
     | { name: 'kundli' }
     | { name: 'match' }
+    | { name: 'sky' }
     | { name: 'settings' };
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
@@ -60,6 +62,7 @@
     if (festivals) return { name: 'festivals', year: festivals[1] };
     if (path === 'kundli') return { name: 'kundli' };
     if (path === 'match') return { name: 'match' };
+    if (path === 'sky') return { name: 'sky' };
     if (path === 'settings') return { name: 'settings' };
     return { name: 'today' };
   }
@@ -98,7 +101,7 @@
   // tab since Day is conceptually a single-day variant of Today.
   // Settings does not match any tab; the strip stays visible so the
   // user has a one-click path back to the calendar.
-  const activeTab = $derived<'today' | 'month' | 'festivals' | 'kundli' | 'match' | null>(
+  const activeTab = $derived<'today' | 'month' | 'festivals' | 'kundli' | 'match' | 'sky' | null>(
     route.name === 'today' || route.name === 'day'
       ? 'today'
       : route.name === 'month'
@@ -109,14 +112,17 @@
             ? 'kundli'
             : route.name === 'match'
               ? 'match'
-              : null,
+              : route.name === 'sky'
+                ? 'sky'
+                : null,
   );
 
-  function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli' | 'match'): string {
+  function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli' | 'match' | 'sky'): string {
     if (view === 'today') return '#/';
     if (view === 'month') return `#/month/${currentYYYYMM()}`;
     if (view === 'kundli') return '#/kundli';
     if (view === 'match') return '#/match';
+    if (view === 'sky') return '#/sky';
     return `#/festivals/${currentYear()}`;
   }
 </script>
@@ -124,6 +130,22 @@
 <a class="skip-link" href="#main">{tr('nav.skipToContent')}</a>
 
 <div class="wrap">
+  {#if swUpdate.available}
+    <div class="update-banner" role="status">
+      <span class="update-banner__text">{tr('update.available')}</span>
+      <button type="button" class="update-banner__reload" onclick={applySwUpdate}>
+        {tr('update.reload')}
+      </button>
+      <button
+        type="button"
+        class="update-banner__dismiss"
+        onclick={dismissSwUpdate}
+        aria-label={tr('update.dismiss')}
+      >
+        ×
+      </button>
+    </div>
+  {/if}
   <header class="masthead">
     <div class="toprow">
       <a class="loc-pill" href="#/settings" aria-label={tr('nav.location')}>
@@ -256,7 +278,7 @@
     </nav>
   {:else}
     <nav class="tabs" aria-label="Primary views">
-      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }, { id: 'match' as const, labelKey: 'tab.match' as const }] as tab (tab.id)}
+      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }, { id: 'match' as const, labelKey: 'tab.match' as const }, { id: 'sky' as const, labelKey: 'tab.sky' as const }] as tab (tab.id)}
         <a
           class="tab"
           aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -287,6 +309,13 @@
       {/await}
     {:else if route.name === 'match'}
       {#await import('./routes/Match.svelte')}
+        <p class="muted">{tr('month.loading')}</p>
+      {:then m}
+        <m.default />
+      {/await}
+    {:else if route.name === 'sky'}
+      <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
+      {#await import('./routes/Sky.svelte')}
         <p class="muted">{tr('month.loading')}</p>
       {:then m}
         <m.default />
@@ -570,5 +599,53 @@
   }
   .footer-note :global(a) {
     color: var(--red);
+  }
+
+  /* Service-worker "new version available" banner. */
+  .update-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--red);
+    color: var(--paper);
+    border-radius: var(--radius-pill, 999px);
+    font-size: 0.85rem;
+  }
+  .update-banner__text {
+    flex: 1;
+  }
+  .update-banner__reload {
+    flex: none;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--paper);
+    border-radius: var(--radius-pill, 999px);
+    background: transparent;
+    color: var(--paper);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .update-banner__reload:hover {
+    background: var(--paper);
+    color: var(--red);
+  }
+  .update-banner__dismiss {
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--paper);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .update-banner__dismiss:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 </style>

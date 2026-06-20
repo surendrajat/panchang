@@ -101,6 +101,11 @@ describe('lagna vs Drik — both hemispheres, full day', () => {
 // SIDM_LAHIRI) — the same library astro.com and Jagannatha Hora use. This
 // pins our default method to the gold-standard ephemeris; Drik (above)
 // deviates from these by the documented longitude term.
+//
+// Cross-checked live, at the degree level, against ProKerala (a major Vedic
+// site) for Delhi 1990-08-15 06:30 IST: ProKerala gives Ascendant Leo 5°59′,
+// matching this 'swiss' value (Leo 6°00′) to ~1′ — while Drik shows Leo 6°10′.
+// i.e. ProKerala + Swiss Ephemeris + this engine agree; Drik is the outlier.
 describe("lagna 'swiss' method vs Swiss Ephemeris (pyswisseph, run directly)", () => {
   const SWISS: [string, Location, string, number][] = [
     ['Delhi 00:30', loc('Delhi', [28, 38, 8], [77, 13, 28]), '1990-08-15T00:30:00+05:30', 45.7698],

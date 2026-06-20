@@ -97,6 +97,20 @@
         </select>
       </label>
       <label class="label">
+        <span class="lab">{tr('settings.translit')}</span>
+        <select
+          class="select"
+          value={preferences.transliteration ? 'on' : 'off'}
+          onchange={(e) =>
+            updatePreferences({
+              transliteration: (e.currentTarget as HTMLSelectElement).value === 'on',
+            })}
+        >
+          <option value="on">{tr('settings.translitOn')}</option>
+          <option value="off">{tr('settings.translitOff')}</option>
+        </select>
+      </label>
+      <label class="label">
         <span class="lab">{tr('settings.theme')}</span>
         <select
           class="select"

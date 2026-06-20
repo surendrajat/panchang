@@ -17,8 +17,8 @@
   } from '$lib/astro';
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
-  import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
-  import { RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+  import { RASHI_LORDS } from '$lib/jyotish/names';
+  import { RASHI_ELEMENT, ELEMENT_LABEL } from '$lib/jyotish/rashi-art';
   // Sign / planet marks: real glyphs from the bundled 'Panchang Symbols' font.
   import { SIGN_GLYPH, SUN_GLYPH, MOON_GLYPH, PLANET_GLYPH } from '$lib/jyotish/glyphs';
   // The lunar month + Gregorian span while the Sun sits in each sign (for the
@@ -40,14 +40,15 @@
   ];
 
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
+  import { rashiLabel, grahaLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import MoonPhase from '../components/MoonPhase.svelte';
 
   const lang = $derived(preferences.language);
   const num = (s: string | number) => applyNumerals(String(s), preferences.numerals);
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
-  // English uses the familiar Western sign names; Hindi the Sanskrit rashi names.
-  const signName = (i: number) => (lang === 'hi' ? rashiNameByIndex(i, 'hi') : RASHI_SIGN_EN[i]);
+  // Respects the transliteration preference (Mesha vs Aries) — see lib/labels.
+  const signName = (i: number) => rashiLabel(i);
 
   // ── Time model (capped ~30 fps; idle when paused; torn down on unmount) ─────
   let simMs = $state(Date.now());
@@ -204,7 +205,7 @@
       { key: 'purnima', hi: 'पूर्णिमा', en: 'Full moon', jd: pJd, lon: moonSidAt(pJd) },
       { key: 'amavasya', hi: 'अमावस्या', en: 'New moon', jd: aJd, lon: moonSidAt(aJd) },
       { key: 'ekadashi', hi: 'एकादशी', en: 'Ekadashi', jd: ekJd, lon: moonSidAt(ekJd) },
-      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${RASHI_SIGN_EN[nextSign]} sankranti`, jd: sankrJd, lon: (nextSign * 30) % 360 },
+      { key: 'sankranti', hi: `${rashiNameByIndex(nextSign, 'hi')} संक्रांति`, en: `${rashiLabel(nextSign)} sankranti`, jd: sankrJd, lon: (nextSign * 30) % 360 },
     ]
       .sort((a, b) => a.jd - b.jd)
       .map((ev) => ({ ...ev, when: eventWhen(ev.jd, fromJd) }));
@@ -236,7 +237,7 @@
       const k = s.key!;
       const node = k === 'rahu' || k === 'ketu';
       return {
-        title: grahaName(k, lang),
+        title: grahaLabel(k),
         body: node
           ? hi(
               'चन्द्रपथ का संधि-बिंदु (राहु/केतु) — यहीं ग्रहण होते हैं। यह सदा वक्री चलता है।',
@@ -249,11 +250,11 @@
       };
     }
     const i = s.i!;
-    const lord = grahaName(RASHI_LORDS[i], lang);
+    const lord = grahaLabel(RASHI_LORDS[i]);
     const el = ELEMENT_LABEL[RASHI_ELEMENT[i]][lang === 'hi' ? 'hi' : 'en'];
     const m = SIGN_MONTH[i];
     return {
-      title: hi(rashiNameByIndex(i, 'hi'), `${rashiNameByIndex(i, 'en')} · ${RASHI_SIGN_EN[i]}`),
+      title: signName(i),
       body: hi(
         `तत्व: ${el} · स्वामी ग्रह: ${lord}। सूर्य जब इस राशि में हो (~${m.greg.hi}) तब ${m.mon.hi} मास होता है।`,
         `Element: ${el} · ruled by ${lord}. When the Sun is in this sign (~${m.greg.en}), it's the ${m.mon.en} month.`,
@@ -404,11 +405,11 @@
       {#each grahaPositions as g (g.key)}
         {@const [gx, gy] = pt(g.lon, R_GRAHA)}
         {@const sel = selected?.type === 'graha' && selected.key === g.key}
-        <g class="body" role="button" tabindex="0" aria-label={grahaName(g.key, lang)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
+        <g class="body" role="button" tabindex="0" aria-label={grahaLabel(g.key)} onclick={() => (selected = { type: 'graha', key: g.key })} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}>
           {#if sel}<circle cx={gx} cy={gy} r="12" class="sel-glow" />{/if}
           <circle cx={gx} cy={gy} r="9.5" class="graha" />
           <text x={gx} y={gy} class="graha-glyph zsym" text-anchor="middle" dominant-baseline="central">{PLANET_GLYPH[g.key]}</text>
-          <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaName(g.key, lang)}</text>
+          <text x={gx} y={gy - 12.5} class="body-label" text-anchor="middle">{grahaLabel(g.key)}</text>
         </g>
       {/each}
 

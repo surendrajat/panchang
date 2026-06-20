@@ -30,6 +30,10 @@ export interface Preferences {
   // Clock format for every time-of-day display, app-wide.
   timeFormat: '12h' | '24h';
   language: 'en' | 'hi';
+  // When true (default), sign/planet names keep their Sanskrit transliteration
+  // even in English mode (Mesha, Mangala) for consistency; when false, English
+  // equivalents are used where they exist (Aries, Mars).
+  transliteration: boolean;
 }
 
 export interface SavedLocation {
@@ -114,4 +118,5 @@ export const DEFAULT_PREFERENCES: Preferences = {
   numerals: 'latin',
   timeFormat: '24h',
   language: 'en',
+  transliteration: true,
 };

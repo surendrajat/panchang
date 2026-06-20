@@ -30,6 +30,20 @@ export const GRAHA_NAMES_HI: Record<GrahaKey, string> = {
   ketu: 'केतु',
 };
 
+// Plain-English planet names, used when the transliteration preference is off.
+// Rahu/Ketu have no Western equivalent, so they keep their Sanskrit names.
+export const GRAHA_NAMES_EN: Record<GrahaKey, string> = {
+  sun: 'Sun',
+  moon: 'Moon',
+  mars: 'Mars',
+  mercury: 'Mercury',
+  jupiter: 'Jupiter',
+  venus: 'Venus',
+  saturn: 'Saturn',
+  rahu: 'Rahu',
+  ketu: 'Ketu',
+};
+
 // Two-letter abbreviations used inside the chart cells, where space is
 // tight. Mirrors the convention printed in almanac kundlis.
 export const GRAHA_ABBR: Record<GrahaKey, string> = {

@@ -10,7 +10,8 @@
     type MatchResult,
     type KootaKey,
   } from '$lib/jyotish';
-  import { rashiNameByIndex, nakshatraNameByIndex } from '$lib/i18n';
+  import { nakshatraNameByIndex } from '$lib/i18n';
+  import { rashiLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import { listBirthProfiles, type BirthProfile } from '$lib/storage';
   import { matchDraft } from '$lib/state/jyotish-draft.svelte';
@@ -198,9 +199,9 @@
       </div>
       <div class="score-band score-band--{band.tone}">{lang === 'hi' ? band.hi : band.en}</div>
       <div class="pair-line">
-        <span>{groom.name || (lang === 'hi' ? 'वर' : 'Groom')}: {nakshatraNameByIndex(out.g.nak, lang)} · {rashiNameByIndex(out.g.rashi, lang)}</span>
+        <span>{groom.name || (lang === 'hi' ? 'वर' : 'Groom')}: {nakshatraNameByIndex(out.g.nak, lang)} · {rashiLabel(out.g.rashi)}</span>
         <span class="pair-amp">⚭</span>
-        <span>{bride.name || (lang === 'hi' ? 'वधू' : 'Bride')}: {nakshatraNameByIndex(out.b.nak, lang)} · {rashiNameByIndex(out.b.rashi, lang)}</span>
+        <span>{bride.name || (lang === 'hi' ? 'वधू' : 'Bride')}: {nakshatraNameByIndex(out.b.nak, lang)} · {rashiLabel(out.b.rashi)}</span>
       </div>
     </div>
 

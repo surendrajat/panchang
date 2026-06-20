@@ -10,7 +10,7 @@
 
   import type { BirthChart, GrahaKey } from '$lib/jyotish';
   import { grahaAbbr, navamsaSign } from '$lib/jyotish';
-  import { rashiNameByIndex } from '$lib/i18n';
+  import { rashiLabel } from '$lib/labels';
   import { applyNumerals, type NumeralSystem } from '$lib/format/numerals';
 
   interface Props {
@@ -130,8 +130,8 @@
         ? 'चन्द्र कुण्डली — जन्म समय अज्ञात'
         : 'Chandra (Moon) — birth time unknown'
       : lang === 'hi'
-        ? `लग्न — ${rashiNameByIndex(anchorRashi, lang)}`
-        : `Lagna — ${rashiNameByIndex(anchorRashi, lang)}`}
+        ? `लग्न — ${rashiLabel(anchorRashi)}`
+        : `Lagna — ${rashiLabel(anchorRashi)}`}
   </figcaption>
 </figure>
 

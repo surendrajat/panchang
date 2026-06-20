@@ -10,12 +10,12 @@
     vimshottariMahadashas,
     antardashasOf,
     activeDashaIndex,
-    grahaName,
     nameSyllable,
     type BirthChart,
     type GrahaKey,
   } from '$lib/jyotish';
-  import { rashiNameByIndex, nakshatraNameByIndex } from '$lib/i18n';
+  import { nakshatraNameByIndex } from '$lib/i18n';
+  import { rashiLabel, grahaLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import {
     listBirthProfiles,
@@ -197,7 +197,7 @@
   }
 
   function dashaLordName(lord: GrahaKey): string {
-    return grahaName(lord, lang);
+    return grahaLabel(lord);
   }
 </script>
 
@@ -321,12 +321,12 @@
     <div class="identity stagger">
       <div class="id-cell">
         <div class="id-lab">{lang === 'hi' ? 'लग्न' : 'Lagna'}</div>
-        <div class="id-val">{chart.lagna ? rashiNameByIndex(chart.lagna.rashi, lang) : '—'}</div>
+        <div class="id-val">{chart.lagna ? rashiLabel(chart.lagna.rashi) : '—'}</div>
         <div class="id-sub">{chart.lagna ? formatDeg(chart.lagna.degInRashi) : (lang === 'hi' ? 'समय अज्ञात' : 'time unknown')}</div>
       </div>
       <div class="id-cell">
         <div class="id-lab">{lang === 'hi' ? 'राशि' : 'Rashi'}</div>
-        <div class="id-val">{rashiNameByIndex(chart.moonRashi, lang)}</div>
+        <div class="id-val">{rashiLabel(chart.moonRashi)}</div>
         <div class="id-sub">{lang === 'hi' ? 'चन्द्र राशि' : 'Moon sign'}</div>
       </div>
       <div class="id-cell">
@@ -379,10 +379,10 @@
           {#if g}
             <div class="gt-row" role="row">
               <span class="gt-name" role="cell">
-                {grahaName(key, lang)}
+                {grahaLabel(key)}
                 {#if g.retrograde}<span class="retro" title={lang === 'hi' ? 'वक्री' : 'Retrograde'}>℞</span>{/if}
               </span>
-              <span role="cell">{rashiNameByIndex(g.rashi, lang)}</span>
+              <span role="cell">{rashiLabel(g.rashi)}</span>
               <span class="gt-deg num" role="cell">{formatDeg(g.degInRashi)}</span>
               <span role="cell">{nakshatraNameByIndex(g.nakshatra, lang)} <small class="muted">({num(g.pada)})</small></span>
               <span class="gt-house num" role="cell">{g.house ? num(g.house) : '—'}</span>

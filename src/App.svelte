@@ -503,9 +503,11 @@
   .tabs {
     display: flex;
     gap: 2px;
-    justify-content: center;
+    /* `safe center` centres when the row fits but falls back to start-aligned
+       (instead of clipping the first tab) once it overflows and scrolls */
+    justify-content: safe center;
     margin: 6px 0 24px;
-    padding-bottom: 0;
+    padding: 0 8px;
     overflow-x: auto;
     scrollbar-width: none;
     border-bottom: 1px solid var(--line);
@@ -546,10 +548,19 @@
     background: var(--paper-2);
     border-bottom-color: var(--red);
   }
-  @media (max-width: 400px) {
+  /* shrink the labels on phones so all five fit without scrolling on a
+     typical ≥360px screen; horizontal scroll remains the fallback below that */
+  @media (max-width: 460px) {
     :global(.tab) {
-      padding: 7px 13px 9px;
-      font-size: 16px;
+      padding: 7px 11px 9px;
+      font-size: 14.5px;
+    }
+  }
+  @media (max-width: 360px) {
+    :global(.tab) {
+      padding: 6px 8px 8px;
+      font-size: 13px;
+      letter-spacing: 0;
     }
   }
 

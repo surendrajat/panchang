@@ -18,7 +18,8 @@
   import { grahaSiderealLongitude } from '$lib/jyotish';
   import type { GrahaKey } from '$lib/jyotish';
   import { grahaName, RASHI_LORDS } from '$lib/jyotish/names';
-  import { RASHI_ICON_PATHS, RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+  import { RASHI_ELEMENT, ELEMENT_LABEL, RASHI_SIGN_EN } from '$lib/jyotish/rashi-art';
+
   import { nakshatraNameByIndex, tithiNameByIndex, yogaNameByIndex, rashiNameByIndex } from '$lib/i18n';
   import { applyNumerals } from '$lib/format/numerals';
   import MoonPhase from '../components/MoonPhase.svelte';
@@ -35,6 +36,7 @@
   let live = $state(true);
   let showGrahas = $state(false);
   let tropical = $state(false);
+  let iconStyle = $state<'line' | 'bold'>('line');
 
   $effect(() => {
     if (!live && speed === 0) return;
@@ -223,8 +225,7 @@
   const C = SIZE / 2;
   const R_OUT = 184;
   const R_IN = 138;
-  const R_NAME = 168; // curved sign names (outer)
-  const R_ICON = 151; // icon, tucked inside the name
+  const R_NAME = 161; // curved sign names, centered in the ring
   const R_BODY = 116; // Sun / Moon (clear of the ring and the grahas)
   const R_GRAHA = 84; // other planets
   const R_ARC = 54; // elongation arc (small, central)
@@ -315,13 +316,13 @@
         {#each rashis as i (i)}
           {@const isSun = i === sunRashi}
           {@const isMoon = i === moonRashi}
-          {@const [ix, iy] = pt(i * 30 + 15, R_ICON)}
           <path
             d={sector(i * 30, (i + 1) * 30)}
             class="rashi"
             class:rashi--alt={i % 2 === 1}
             class:rashi--sun={isSun}
             class:rashi--moon={isMoon && !isSun}
+            class:rashi--selected={selected?.type === 'rashi' && selected.i === i}
             role="button"
             tabindex="0"
             aria-label={signName(i)}
@@ -329,12 +330,7 @@
             onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'rashi', i })}
           />
           <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
-          <text class="rashi-name"><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle">{signName(i)}</textPath></text>
-          <g class="rashi-icon" class:on={isSun || isMoon} transform="translate({ix - 10} {iy - 10}) scale(0.625)" pointer-events="none">
-            {#each RASHI_ICON_PATHS[i] as d (d)}
-              <path {d} fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-            {/each}
-          </g>
+          <text class="rashi-name" class:on={isSun || isMoon}><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle">{signName(i)}</textPath></text>
         {/each}
         {#each nakTicks as deg (deg)}
           <line x1={pt(deg, R_IN)[0]} y1={pt(deg, R_IN)[1]} x2={pt(deg, R_IN - 5)[0]} y2={pt(deg, R_IN - 5)[1]} class="nak-tick" />
@@ -379,25 +375,19 @@
     </svg>
 
     <div class="readout">
-      <div class="phase-top">
-        <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={62} />
-        <div class="phase-top__txt">
-          <b>{num((illum * 100).toFixed(0))}%</b> {hi('प्रकाशित', 'lit')}<br />
-          <span class="muted">{paksha} {hi('पक्ष', 'paksha')}</span>
-        </div>
-      </div>
       <dl class="vals">
         <div class="val"><dt><span class="g g--sun">☉</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
         <div class="val"><dt><span class="g g--moon">☾</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
           <dt>{hi('अंतर', 'Gap')} (☾−☉) ÷ 12°</dt>
           <dd>
-            <span class="hero-num">{num(elong.toFixed(1))}° →</span>
-            <span class="hero-tithi"><b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b> <span class="muted">({paksha} {num((tithiFrac * 100).toFixed(0))}%)</span></span>
+            <span class="hero-num">{num(elong.toFixed(1))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b></span>
+            <span class="hero-tithi muted">({paksha} {num((tithiFrac * 100).toFixed(0))}%)</span>
           </dd>
         </div>
         <div class="val"><dt>{hi('नक्षत्र', 'Nakshatra')}</dt><dd>{nakshatraNameByIndex(nakNum, lang)}</dd></div>
         <div class="val"><dt>{hi('योग', 'Yoga')}</dt><dd>{yogaNameByIndex(yogaNum, lang)}</dd></div>
+        <div class="val"><dt>{hi('चन्द्र कला', 'Moon phase')}</dt><dd>{num((illum * 100).toFixed(0))}% {hi('प्रकाशित', 'lit')} <span class="muted">({paksha})</span></dd></div>
       </dl>
       {#if tropical}
         <p class="zodiac-note">{hi(`सायन राशियाँ — तारों से ~${num(ayan.toFixed(1))}° खिसकी हुई (अयनांश)। पंचांग स्वयं निरयन है।`, `Tropical signs — drifted ~${num(ayan.toFixed(1))}° from the stars (ayanāṁśa). The panchanga itself uses sidereal.`)}</p>
@@ -446,6 +436,10 @@
       <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
       <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
     </svg>
+    <div class="phase-side">
+      <MoonPhase illumination={illum} phaseAngle={elong} phaseName={paksha} size={76} />
+      <span class="phase-side__cap">{hi('हम जो देखते हैं', 'What we see')}</span>
+    </div>
     <figcaption>
       {hi(
         'चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित; पृथ्वी से हम उसे एक कोण पर देखते हैं — वही अंतर चन्द्र की कला है।',
@@ -580,17 +574,28 @@
     fill: color-mix(in srgb, #6f9fd0 34%, var(--paper));
     stroke: #4a79a8;
   }
+  /* selection highlight on the tapped wedge — replaces the browser's ugly
+     bounding-box focus rectangle (which we suppress below) */
+  .rashi--selected {
+    stroke: var(--ink);
+    stroke-width: 2.5;
+  }
+  .wheel :focus {
+    outline: none;
+  }
+  .wheel :focus-visible {
+    stroke: var(--ink);
+    stroke-width: 2.5;
+  }
   .rashi-name {
-    font-size: 11px;
-    fill: var(--ink);
+    font-size: 11.5px;
+    fill: var(--ink-soft);
     font-weight: 600;
     letter-spacing: 0.02em;
   }
-  .rashi-icon {
-    color: var(--ink-soft); /* theme-adaptive: visible on light and dark */
-  }
-  .rashi-icon.on {
-    color: var(--ink);
+  .rashi-name.on {
+    fill: var(--ink);
+    font-weight: 700;
   }
   .nak-tick {
     stroke: var(--line);
@@ -671,12 +676,11 @@
   }
   .hero-num {
     display: block;
-    font-size: 0.92rem;
-    color: var(--ink-soft);
+    font-size: 1.04rem;
   }
   .hero-tithi {
     display: block;
-    font-size: 1.06rem;
+    font-size: 0.86rem;
   }
   .val--hero b {
     color: var(--red);
@@ -777,22 +781,15 @@
     flex: 1 1 300px;
     max-width: 380px;
   }
-  .phase-top {
+  .phase-side {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.7rem;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.7rem;
-    border-bottom: 1px solid var(--line);
+    gap: 0.35rem;
   }
-  .phase-top__txt {
-    font-size: 0.9rem;
-    line-height: 1.45;
+  .phase-side__cap {
+    font-size: 0.76rem;
     color: var(--ink-soft);
-  }
-  .phase-top__txt b {
-    font-size: 1.15rem;
-    color: var(--ink);
   }
   .orbital figcaption {
     flex: 1 1 100%;

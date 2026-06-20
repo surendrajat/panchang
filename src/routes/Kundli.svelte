@@ -435,10 +435,11 @@
   /* Understated segmented control: a soft track with a raised active pill —
      no saturated fill. */
   .jyotish-tabs {
-    display: inline-flex;
+    display: flex;
+    width: fit-content;
     gap: 0.2rem;
     padding: 0.2rem;
-    margin-bottom: 1.25rem;
+    margin: 0 auto 1.25rem; /* centered */
     background: var(--paper-3);
     border-radius: var(--radius-pill, 999px);
   }

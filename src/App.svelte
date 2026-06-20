@@ -495,47 +495,55 @@
   }
 
   /* ───────── tabs ───────── */
+  /* Refined "raised tab" bar: a thin baseline rule the tabs sit on, the active
+     tab lifted on a soft paper panel with rounded top + a red underline that
+     meets the baseline (a bookmark/file-tab feel that suits the letterpress
+     look). Horizontally scrollable on narrow screens. */
   .tabs {
     display: flex;
-    gap: 4px;
+    gap: 2px;
     justify-content: center;
-    margin: 4px 0 26px;
+    margin: 6px 0 24px;
+    padding-bottom: 0;
     overflow-x: auto;
-    /* Hide scrollbar while keeping scroll functionality */
     scrollbar-width: none;
+    border-bottom: 1px solid var(--line);
   }
   .tabs::-webkit-scrollbar {
     display: none;
   }
   :global(.tab) {
     font-family: var(--font-serif);
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 500;
-    padding: 7px 20px 9px;
+    letter-spacing: 0.01em;
+    padding: 8px 17px 9px;
+    margin-bottom: -1px; /* overlap the baseline rule */
     color: var(--ink-soft);
     background: none;
     border: none;
-    cursor: pointer;
     border-bottom: 2.5px solid transparent;
+    border-radius: 7px 7px 0 0;
+    cursor: pointer;
+    white-space: nowrap;
     transition:
-      color 0.2s,
-      border-color 0.2s;
+      color 0.18s,
+      background 0.18s,
+      border-color 0.18s;
     text-decoration: none;
-  }
-  /* Active tab gets the red underline back — earlier removal was a
-     misread of the user's "remove underline" feedback (which was
-     about the spurious hyperlink underline, not this indicator).
-     `!important` defends against the global a:hover { underline }
-     rule in reset.css. */
-  :global(.tab[aria-current='page']) {
-    color: var(--red);
-    font-weight: 600;
-    border-bottom-color: var(--red);
   }
   :global(.tab:hover),
   :global(.tab:focus-visible) {
     color: var(--ink);
+    background: color-mix(in srgb, var(--paper-2) 70%, transparent);
     text-decoration: none !important;
+  }
+  /* Active tab — lifted panel + red underline meeting the baseline. */
+  :global(.tab[aria-current='page']) {
+    color: var(--red);
+    font-weight: 600;
+    background: var(--paper-2);
+    border-bottom-color: var(--red);
   }
   @media (max-width: 400px) {
     :global(.tab) {

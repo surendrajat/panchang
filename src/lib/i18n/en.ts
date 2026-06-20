@@ -249,6 +249,8 @@ export const en = {
   'month.computing': 'Computing…',
   'month.invalidDate': 'Invalid date: {value}',
   'month.loading': 'Loading panchanga…',
+  'kundli.loading': 'Loading kundli…',
+  'sky.loading': 'Loading sky…',
 
   // ── miscellaneous
   'common.purnima': 'Purnima',

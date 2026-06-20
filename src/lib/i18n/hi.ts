@@ -258,6 +258,8 @@ export const hi: Record<TranslationKey, string> = {
   'month.computing': 'गणना हो रही है…',
   'month.invalidDate': 'अमान्य दिनांक: {value}',
   'month.loading': 'पंचांग लोड हो रहा है…',
+  'kundli.loading': 'कुंडली लोड हो रही है…',
+  'sky.loading': 'आकाश लोड हो रहा है…',
 
   // ── miscellaneous
   'common.purnima': 'पूर्णिमा',

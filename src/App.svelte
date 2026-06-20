@@ -140,6 +140,13 @@
     if (view === 'sky') return '#/sky';
     return `#/festivals/${currentYear()}`;
   }
+
+  // Warm the lazy chunks on intent (hover / touch-start) so the tab is ready by
+  // the time the click lands — Vite caches the import, so repeats are no-ops.
+  function prefetchTab(view: string): void {
+    if (view === 'kundli') import('./routes/Kundli.svelte').catch(() => {});
+    else if (view === 'sky') import('./routes/Sky.svelte').catch(() => {});
+  }
 </script>
 
 <a class="skip-link" href="#main">{tr('nav.skipToContent')}</a>
@@ -312,6 +319,8 @@
           class="tab"
           aria-current={activeTab === tab.id ? 'page' : undefined}
           href={tabHref(tab.id)}
+          onpointerenter={() => prefetchTab(tab.id)}
+          onpointerdown={() => prefetchTab(tab.id)}
         >
           {tr(tab.labelKey)}
         </a>
@@ -332,14 +341,14 @@
       <!-- Lazy-loaded: panchang-only users never download the jyotish
            engine or the planet-position code paths. -->
       {#await import('./routes/Kundli.svelte')}
-        <p class="muted">{tr('month.loading')}</p>
+        <p class="muted">{tr('kundli.loading')}</p>
       {:then m}
         <m.default />
       {/await}
     {:else if route.name === 'sky'}
       <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
       {#await import('./routes/Sky.svelte')}
-        <p class="muted">{tr('month.loading')}</p>
+        <p class="muted">{tr('sky.loading')}</p>
       {:then m}
         <m.default />
       {/await}

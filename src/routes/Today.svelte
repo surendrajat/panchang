@@ -3,6 +3,7 @@
   import DayPager from '$components/DayPager.svelte';
   import { computePanchanga, type Panchanga } from '$lib/panchanga';
   import { preferences, panchangaOptionsFrom } from '$lib/state/preferences.svelte';
+  import { clock } from '$lib/state/clock.svelte';
   import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey } from '$lib/i18n';
   import { cacheKey, getCached, putCached } from '$lib/storage';
@@ -10,7 +11,7 @@
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
 
-  const now = new Date();
+  const now = $derived(clock.now);
   const todayYMD = $derived(localYMD(now, preferences.location?.timezone ?? 'UTC'));
 
   let panchanga = $state<Panchanga | null>(null);

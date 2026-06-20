@@ -7,6 +7,7 @@
     panchangaOptionsFrom,
   } from '$lib/state/preferences.svelte';
   import { swUpdate, applySwUpdate, dismissSwUpdate } from '$lib/state/sw-update.svelte';
+  import { clock } from '$lib/state/clock.svelte';
   import Today from './routes/Today.svelte';
   import Day from './routes/Day.svelte';
   import Month from './routes/Month.svelte';
@@ -72,7 +73,7 @@
   const todayPanchanga = $derived.by<Panchanga | null>(() => {
     if (!preferences.location || !preferences.hydrated) return null;
     try {
-      return computePanchanga(new Date(), preferences.location, panchangaOptionsFrom(preferences));
+      return computePanchanga(clock.now, preferences.location, panchangaOptionsFrom(preferences));
     } catch {
       return null;
     }

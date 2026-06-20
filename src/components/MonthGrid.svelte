@@ -370,10 +370,13 @@
     color: var(--indigo);
   }
   @media (max-width: 460px) {
-    /* Wider fixed-width week columns so festival/tithi names show in full; the
-       grid then overflows and .calendar-scroll scrolls horizontally. */
+    /* Wider fixed-width week columns so festival/tithi names show in full.
+       width: max-content sizes the grid to its real width (otherwise it's
+       clamped to the viewport and overflow:hidden clips the right columns) so it
+       overflows and .calendar-scroll scrolls horizontally instead. */
     .cal {
       grid-auto-columns: 92px;
+      width: max-content;
     }
     .gd {
       font-size: 15px;

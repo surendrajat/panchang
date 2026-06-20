@@ -497,14 +497,18 @@
       moon: domeTrack('moon', dayStart, loc.latitude, loc.longitude),
     };
   });
+  // Every visible body's current position in the local sky (the Sun & Moon plus
+  // the five naked-eye planets), drawn where each one actually is right now.
+  const DOME_BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'] as const;
   const domeNow = $derived.by(() => {
     const loc = preferences.location;
     if (!loc) return null;
-    return {
-      sun: bodyAltAz('sun', simDate, loc.latitude, loc.longitude),
-      moon: bodyAltAz('moon', simDate, loc.latitude, loc.longitude),
-    };
+    return DOME_BODIES.map((body) => {
+      const { azimuth, altitude } = bodyAltAz(body, simDate, loc.latitude, loc.longitude);
+      return { body, azimuth, altitude, pt: domePt(azimuth, altitude) };
+    });
   });
+  const domeLoc = $derived(preferences.location?.name?.split(',')[0] ?? '');
 </script>
 
 <section class="sky">
@@ -991,18 +995,25 @@
   {#if domeTracks && domeNow}
     <figure class="skydome">
       <svg
-        viewBox="0 0 {DOME} {DOME}"
+        viewBox="-14 -14 {DOME + 28} {DOME + 28}"
         role="img"
         aria-label={hi(
-          'आज आपके आकाश में सूर्य व चन्द्र का पथ',
-          'The path of the Sun and Moon in your sky today',
+          'आज आपके आकाश में सूर्य, चन्द्र व ग्रह',
+          'The Sun, Moon and planets in your sky today',
         )}
       >
-        <circle cx={DC} cy={DC} r={DR} class="dome-sky" />
+        <defs>
+          <radialGradient id="dome-grad" cx="50%" cy="40%" r="62%">
+            <stop offset="0%" stop-color="#161f44" />
+            <stop offset="66%" stop-color="#27315c" />
+            <stop offset="100%" stop-color="#6a5160" />
+          </radialGradient>
+        </defs>
+        <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
         <circle cx={DC} cy={DC} r={(DR * 60) / 90} class="dome-ring" />
         <circle cx={DC} cy={DC} r={(DR * 30) / 90} class="dome-ring" />
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
-        <circle cx={DC} cy={DC} r="1.4" class="dome-zenith" />
+        <circle cx={DC} cy={DC} r="1.3" class="dome-zenith" />
         <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
         <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
         <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
@@ -1016,19 +1027,21 @@
         {#each domeTracks.moon as pts (pts)}
           <polyline points={pts} class="dome-path dome-path--moon" />
         {/each}
-        {#if domeNow.sun.altitude >= 0}
-          {@const p = domePt(domeNow.sun.azimuth, domeNow.sun.altitude)}
-          <circle cx={p[0]} cy={p[1]} r="5" class="dome-now dome-now--sun" />
-        {/if}
-        {#if domeNow.moon.altitude >= 0}
-          {@const p = domePt(domeNow.moon.azimuth, domeNow.moon.altitude)}
-          <circle cx={p[0]} cy={p[1]} r="4.5" class="dome-now dome-now--moon" />
-        {/if}
+        {#each domeNow as b (b.body)}
+          {#if b.altitude >= 0}
+            <g class="dome-body">
+              <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={6} />
+              <text x={b.pt[0]} y={b.pt[1] - 9.5} class="dome-label" text-anchor="middle"
+                >{grahaLabel(b.body)}</text
+              >
+            </g>
+          {/if}
+        {/each}
       </svg>
       <figcaption>
         {hi(
-          'यदि आप खड़े होकर आकाश देखें — केंद्र सिर के ऊपर, किनारा क्षितिज। सूर्य व चन्द्र आज इसी पथ पर चलते हैं।',
-          'As if you stood and looked up — the centre is overhead, the rim is the horizon. The Sun and Moon trace these paths across your sky today.',
+          `यदि आप ${domeLoc ? domeLoc + ' में ' : ''}खड़े होकर ऊपर देखें — केंद्र सिर के ऊपर, किनारा क्षितिज; पूर्व बाएँ, पश्चिम दाएँ (असली आकाश की तरह)।`,
+          `As if you stood${domeLoc ? ' in ' + domeLoc : ''} and looked up — the centre is overhead, the rim is the horizon, east on the left and west on the right, like the real sky.`,
         )}
       </figcaption>
     </figure>
@@ -1554,10 +1567,10 @@
     flex: 1 1 300px;
     max-width: 380px;
   }
-  /* sky dome — the Sun & Moon's path in the local sky */
+  /* sky dome — a dark twilight all-sky view of the local sky */
   .skydome {
     margin: 1.5rem auto 0;
-    max-width: 320px;
+    max-width: 340px;
     text-align: center;
   }
   .skydome svg {
@@ -1565,22 +1578,20 @@
     height: auto;
     overflow: visible;
   }
-  .dome-sky {
-    fill: color-mix(in srgb, var(--indigo) 9%, var(--paper-2));
-  }
+  /* light marks on the dark sky */
   .dome-horizon {
     fill: none;
-    stroke: var(--ink-soft);
+    stroke: rgba(255, 255, 255, 0.45);
     stroke-width: 1.25;
   }
   .dome-ring {
     fill: none;
-    stroke: var(--line);
+    stroke: rgba(255, 255, 255, 0.16);
     stroke-width: 0.75;
     stroke-dasharray: 2 3;
   }
   .dome-zenith {
-    fill: var(--ink-faint, #999);
+    fill: rgba(255, 255, 255, 0.5);
   }
   .dome-card {
     font-size: 10px;
@@ -1589,27 +1600,27 @@
   }
   .dome-path {
     fill: none;
-    stroke-width: 2;
+    stroke-width: 1.1;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.85;
+    opacity: 0.9;
   }
   .dome-path--sun {
-    stroke: #e6a012;
+    stroke: #ffcb52;
   }
   .dome-path--moon {
-    stroke: #6f86b8;
-    stroke-dasharray: 3 3;
+    stroke: #aeb9d8;
+    stroke-dasharray: 2.5 2.5;
   }
-  .dome-now--sun {
-    fill: #ffce3a;
-    stroke: #e07b00;
-    stroke-width: 1;
-  }
-  .dome-now--moon {
-    fill: #cfd6e6;
-    stroke: #6f86b8;
-    stroke-width: 1;
+  .dome-label {
+    font-size: 7px;
+    font-weight: 600;
+    fill: rgba(255, 255, 255, 0.82);
+    paint-order: stroke;
+    stroke: rgba(10, 14, 30, 0.55);
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+    pointer-events: none;
   }
   .skydome figcaption {
     font-size: 12.5px;

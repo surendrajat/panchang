@@ -32,9 +32,24 @@ export function julianYearsSinceJ2000(jd: number): number {
 // UTC instant, compare it to the desired local midnight (also encoded as
 // fake UTC), and shift `guess` by the difference. Converges in 1–2 steps
 // even across DST boundaries because the formatter is exact at each step.
+//
+// Some zones spring forward *at* midnight (e.g. America/Sao_Paulo,
+// America/Santiago, Asia/Beirut), so 00:00 does not exist on the transition
+// date — but the panchanga day still does. Anchor to the first hour that
+// exists (the post-transition instant) instead of throwing; the day's sunrise
+// and tithis are unaffected by which hour anchors it.
 export function civilMidnightInZone(date: Date, timezone: string): Date {
   const { year, month, day } = civilYMDInZone(date, timezone);
-  return civilTimeInZone(year, month, day, timezone);
+  for (let hour = 0; hour < 4; hour++) {
+    try {
+      return civilTimeInZone(year, month, day, timezone, hour);
+    } catch (e) {
+      if (e instanceof RangeError && hour < 3) continue; // DST midnight gap — try the next hour
+      throw e;
+    }
+  }
+  // Unreachable: a DST gap is at most ~1h, so hour=1 always succeeds.
+  throw new RangeError(`No valid civil anchor for ${year}-${month}-${day} in ${timezone}`);
 }
 
 export function civilTimeInZone(

@@ -177,3 +177,21 @@ describe('DST does not cause off-by-one date in panchanga', () => {
     expect(localDate).toBe('2026-03-29');
   });
 });
+
+describe('DST spring-forward AT MIDNIGHT does not crash the day', () => {
+  // Some zones jump 00:00 → 01:00, so local midnight does not exist on the
+  // transition date. The panchanga day still does — it must not throw.
+  const cases: Array<[string, string, string]> = [
+    ['America/Sao_Paulo', '2017-10-15T12:00:00-02:00', 'Sao Paulo'],
+    ['America/Santiago', '2019-09-08T12:00:00-03:00', 'Santiago'],
+    ['Asia/Beirut', '2026-03-29T12:00:00+03:00', 'Beirut'],
+  ];
+  for (const [tz, iso, name] of cases) {
+    it(`${name}: midnight-gap day computes (no RangeError)`, () => {
+      const loc: Location = { name, latitude: 0, longitude: 0, altitude: 0, timezone: tz };
+      const p = computePanchanga(new Date(iso), loc);
+      expect(p.tithi.index).toBeGreaterThanOrEqual(1);
+      expect(p.tithi.index).toBeLessThanOrEqual(30);
+    });
+  }
+});

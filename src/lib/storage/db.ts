@@ -109,7 +109,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // most published Hindi/Sanskrit panchangas (and Drik Panchang's
   // default for non-southern locations).
   monthSystem: 'purnimanta',
-  nodeType: 'mean',
+  // True (osculating) node by default — what Drik Panchang and most modern
+  // Vedic software show for Rahu/Ketu; matches our SE_TRUE_NODE regression to
+  // ≤0.8′. 'mean' stays available as an opt-in.
+  nodeType: 'true',
   topocentric: false,
   theme: 'auto',
   // Sunday-first matches the canonical Vedic week — Ravi/Sunday is

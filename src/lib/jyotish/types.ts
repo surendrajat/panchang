@@ -56,7 +56,8 @@ export interface BirthChartOptions {
 
 export const DEFAULT_CHART_OPTIONS: BirthChartOptions = {
   ayanamsa: 'lahiri',
-  nodeType: 'mean',
+  // True node — matches Drik / modern Vedic software (see DEFAULT_PREFERENCES).
+  nodeType: 'true',
 };
 
 export interface BirthChart {

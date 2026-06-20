@@ -14,10 +14,15 @@ import type { BirthChart, BirthChartOptions } from './types';
 
 // Build the UTC birth instant from civil date + time in the birth place's
 // IANA time zone. `date` is "YYYY-MM-DD", `time` is "HH:MM" (24h, local).
+// A blank or malformed time defaults to NOON — the standard "birth time
+// unknown" convention. (Without this, Number('') === 0 would silently produce
+// a midnight chart with a meaningless lagna instead of the noon default.)
 export function birthInstant(date: string, time: string, timezone: string): Date {
   const [y, m, d] = date.split('-').map(Number);
-  const [hh, mm] = time.split(':').map(Number);
-  return civilTimeInZone(y, m, d, timezone, hh, mm, 0);
+  const hm = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
+  const hour = hm ? Number(hm[1]) : 12;
+  const minute = hm ? Number(hm[2]) : 0;
+  return civilTimeInZone(y, m, d, timezone, hour, minute, 0);
 }
 
 export function computeBirthChart(

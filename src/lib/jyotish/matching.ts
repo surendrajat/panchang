@@ -168,7 +168,15 @@ export function computeMatch(groom: MatchPerson, bride: MatchPerson): MatchResul
   const gana = GANA_SCORE[GANA[bride.nakshatra - 1]][GANA[groom.nakshatra - 1]];
 
   const bhakootDiff = (((bride.rashi - groom.rashi) % 12) + 12) % 12;
-  const bhakoot = BHAKOOT_DOSHA.has(bhakootDiff) ? 0 : 7;
+  // Classical cancellation: the 2/12, 5/9, 6/8 dosha is nullified when the two
+  // Moon-sign lords are the same planet, or are mutual friends (e.g. Aries &
+  // Scorpio, both ruled by Mars). Without this, common benign pairings draw a
+  // false dosha flag and a deflated score.
+  const groomLord = RASHI_LORDS[groom.rashi];
+  const brideLord = RASHI_LORDS[bride.rashi];
+  const bhakootCancelled =
+    groomLord === brideLord || (rel(groomLord, brideLord) === 2 && rel(brideLord, groomLord) === 2);
+  const bhakoot = BHAKOOT_DOSHA.has(bhakootDiff) && !bhakootCancelled ? 0 : 7;
 
   const nadiScore = nadi(groom.nakshatra) !== nadi(bride.nakshatra) ? 8 : 0;
 

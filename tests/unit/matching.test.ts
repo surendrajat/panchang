@@ -55,6 +55,20 @@ describe('guna milan — asymmetry and doshas', () => {
     expect(r.bhakootDosha).toBe(true);
   });
 
+  it('Bhakoot dosha is cancelled when both Moon-lords are the same planet', () => {
+    // Aries × Scorpio: a 6/8 relationship, but both ruled by Mars → cancelled.
+    const r = computeMatch(P(1, 0), P(17, 7));
+    expect(by(r, 'bhakoot')).toBe(7);
+    expect(r.bhakootDosha).toBe(false);
+  });
+
+  it('Bhakoot dosha is cancelled when the Moon-lords are mutual friends', () => {
+    // Cancer (Moon) × Leo (Sun): a 2/12 relationship, lords mutually friendly → cancelled.
+    const r = computeMatch(P(8, 3), P(10, 4));
+    expect(by(r, 'bhakoot')).toBe(7);
+    expect(r.bhakootDosha).toBe(false);
+  });
+
   it('Yoni mortal enemies (Cat × Rat) → 0', () => {
     // Punarvasu (Cat) × Magha (Rat) are sworn-enemy yonis.
     const r = computeMatch(P(7, 2), P(10, 4));

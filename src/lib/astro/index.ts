@@ -20,6 +20,9 @@ export {
   sunMoonLongitudeAtJD,
   sunMoonElongationAtJD,
   moonIlluminationAtJD,
+  bodyLongitudeAtJD,
+  gastHoursAtJD,
+  Body,
 } from './ephemeris';
 
 export { ayanamsa, siderealFromTropical } from './ayanamsa';

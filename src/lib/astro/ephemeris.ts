@@ -6,9 +6,11 @@
 import {
   Body,
   GeoMoon,
+  GeoVector,
   Rotation_EQJ_ECT,
   RotateVector,
   SphereFromVector,
+  SiderealTime,
   SunPosition,
   MakeTime,
   Illumination,
@@ -60,6 +62,28 @@ export function sunMoonLongitudeAtJD(jd: number): { sun: number; moon: number } 
   const ectMoon = RotateVector(rot, eqjMoon);
   const moon = normalize(SphereFromVector(ectMoon).lon);
   return { sun, moon };
+}
+
+// Apparent geocentric ecliptic-of-date longitude of any planetary body
+// (Mercury, Venus, Mars, Jupiter, Saturn, …), in degrees [0, 360). Uses
+// the same EQJ→ECT rotation as moonLongitudeAtJD so every graha lands in
+// the identical reference frame as the Sun and Moon — one ayanamsa then
+// converts all of them to sidereal consistently. This is the seam the
+// jyotish (kundli) layer builds on; the panchanga layer doesn't use it.
+export function bodyLongitudeAtJD(body: Body, jd: number): number {
+  const time = jdToAstroTime(jd);
+  const eqj = GeoVector(body, time, true); // apparent: aberration-corrected
+  const rot = Rotation_EQJ_ECT(time);
+  const ect = RotateVector(rot, eqj);
+  return normalize(SphereFromVector(ect).lon);
+}
+
+// Greenwich Apparent Sidereal Time at the instant, in hours [0, 24).
+// The jyotish lagna (ascendant) needs local apparent sidereal time:
+// LST = GAST·15 + longitudeEast (in degrees). Kept here so all
+// astronomy-engine calls stay inside the ephemeris adapter.
+export function gastHoursAtJD(jd: number): number {
+  return SiderealTime(jdToAstroTime(jd));
 }
 
 // Geocentric moon illumination [0..1].

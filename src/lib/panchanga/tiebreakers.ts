@@ -525,10 +525,16 @@ function findSankrantiTransitJD(
 ): number {
   let lo = bracketStartJD;
   let hi = lo + 4;
-  const siderealAt = (jd: number) => siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys);
+  const raw = (jd: number) => siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys);
+  // Unwrap longitudes that cross the 360°→0° seam within the bracket, so a
+  // transit INTO Mesha (target 0°) bisects like any other — otherwise
+  // `raw(mid) < 0` is never true and the search collapses to `lo`.
+  const base = raw(bracketStartJD);
+  const unwrap = (v: number) => (v < base - 180 ? v + 360 : v);
+  const tgt = targetDeg < base - 180 ? targetDeg + 360 : targetDeg;
   for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
-    if (siderealAt(mid) < targetDeg) lo = mid;
+    if (unwrap(raw(mid)) < tgt) lo = mid;
     else hi = mid;
     if (hi - lo < 1e-8) break;
   }

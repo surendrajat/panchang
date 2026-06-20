@@ -343,10 +343,10 @@
         <button type="button" class:on={activeSpeedKey === s.key} onclick={() => setSpeed(s)}>{s.n ? num(s.n) + ' ' : ''}{lang === 'hi' ? s.hi : s.en}</button>
       {/each}
     </div>
-    <div class="toggles">
-      <label><input type="checkbox" bind:checked={showGrahas} /> {hi('सभी ग्रह', 'All planets')}</label>
-      <label><input type="checkbox" bind:checked={tropical} /> {hi('सायन (पाश्चात्य)', 'Tropical zodiac')}</label>
-      <label><input type="checkbox" bind:checked={showAngles} /> {hi('कोण दिखाएँ', 'Show angles')}</label>
+    <div class="chips" role="group" aria-label={hi('दृश्य विकल्प', 'Display options')}>
+      <button type="button" class="chip" class:on={showGrahas} aria-pressed={showGrahas} onclick={() => (showGrahas = !showGrahas)}><span class="chip__dot"></span>{hi('ग्रह', 'Planets')}</button>
+      <button type="button" class="chip" class:on={tropical} aria-pressed={tropical} onclick={() => (tropical = !tropical)}><span class="chip__dot"></span>{hi('सायन', 'Tropical')}</button>
+      <button type="button" class="chip" class:on={showAngles} aria-pressed={showAngles} onclick={() => (showAngles = !showAngles)}><span class="chip__dot"></span>{hi('कोण', 'Angles')}</button>
     </div>
   </div>
 
@@ -577,43 +577,83 @@
     white-space: nowrap;
     line-height: 1.5;
   }
+  /* speed: a segmented control — connected pills in a soft track, active filled */
   .speeds {
     display: inline-flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.3rem;
-    margin-top: 0.45rem;
-  }
-  .speeds button {
-    padding: 0.3rem 0.8rem;
+    gap: 2px;
+    margin-top: 0.55rem;
+    padding: 3px;
+    background: var(--paper-2);
     border: 1px solid var(--line);
     border-radius: var(--radius-pill, 999px);
-    background: var(--paper-2);
-    color: var(--ink);
+  }
+  .speeds button {
+    padding: 0.32rem 0.78rem;
+    border: none;
+    border-radius: var(--radius-pill, 999px);
+    background: none;
+    color: var(--ink-soft);
     font: inherit;
     font-size: 0.82rem;
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+  .speeds button:hover {
+    color: var(--ink);
   }
   .speeds button.on {
     background: var(--red);
     color: var(--paper);
-    border-color: var(--red);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
   }
-  .toggles {
+  /* display options: toggle chips with a fill-dot, clearer than checkboxes */
+  .chips {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.4rem 1.1rem;
-    margin-top: 0.6rem;
-    font-size: 0.85rem;
-    color: var(--ink-soft);
+    gap: 0.4rem;
+    margin-top: 0.55rem;
   }
-  .toggles label {
+  .chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.42em;
+    padding: 0.28rem 0.72rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill, 999px);
+    background: var(--paper);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.82rem;
     cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+  .chip__dot {
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-faint, #aaa);
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+  }
+  .chip.on {
+    background: color-mix(in srgb, var(--gold, #b8860b) 16%, var(--paper));
+    border-color: var(--gold, #b8860b);
+    color: var(--ink);
+  }
+  .chip.on .chip__dot {
+    background: var(--gold, #b8860b);
+    border-color: var(--gold, #b8860b);
   }
 
   .sky__grid {

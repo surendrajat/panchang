@@ -4,7 +4,7 @@
   import { renderNumber } from '$lib/format/numerals';
   import { localYMD } from '$lib/format/time';
   import { preferences } from '$lib/state/preferences.svelte';
-  import { t, type TranslationKey, tithiNameByIndex } from '$lib/i18n';
+  import { t, type TranslationKey, tithiNameByIndex, masaNameByIndex } from '$lib/i18n';
 
   const tr = (k: TranslationKey) => t(k, undefined, preferences.language);
 
@@ -51,6 +51,28 @@
     for (const d of days) cells.push(d);
     while (cells.length % 7 !== 0) cells.push(null);
     return cells;
+  }
+
+  // Accessible name for a day cell — fully localized, so screen-reader users
+  // hear the same language they see (not raw English/romanized fields).
+  function cellAria(cell: Panchanga, gregYmd: string, fest: string | null): string {
+    const lang = preferences.language;
+    const masa = masaNameByIndex(cell.masa.index, lang);
+    const paksha =
+      lang === 'hi'
+        ? cell.paksha === 'shukla'
+          ? 'शुक्ल'
+          : 'कृष्ण'
+        : cell.paksha === 'shukla'
+          ? 'Shukla'
+          : 'Krishna';
+    const tithi = tithiNameByIndex(cell.tithi.index, lang);
+    let label = `${gregYmd}, ${masa} ${paksha} ${tithi}`;
+    if (fest) {
+      const r = PAN_INDIA_FESTIVALS.find((f) => f.key === fest);
+      label += `, ${r ? (lang === 'hi' && r.displayNameHi ? r.displayNameHi : r.displayName) : fest}`;
+    }
+    return label;
   }
 
   function festivalShortName(key: string): string {
@@ -106,7 +128,7 @@
           role="gridcell"
           type="button"
           onclick={() => onSelectDay?.(cell.date)}
-          aria-label={`${gregYmd}, ${cell.masa.name} ${cell.paksha} ${cell.tithi.name}${fest ? `, ${PAN_INDIA_FESTIVALS.find((f) => f.key === fest)?.displayName ?? fest}` : ''}`}
+          aria-label={cellAria(cell, gregYmd, fest)}
         >
           {#if fest}<span class="fdot" aria-hidden="true"></span>{/if}
           <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>

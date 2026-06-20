@@ -90,7 +90,7 @@
     />
   </label>
   {#if results.length > 0}
-    <ul class="results" role="listbox">
+    <ul class="results">
       {#each results as c (c.searchKey)}
         <li>
           <button class="result-row" type="button" onclick={() => pick(c)}>

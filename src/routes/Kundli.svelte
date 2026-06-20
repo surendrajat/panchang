@@ -210,6 +210,8 @@
   <button
     type="button"
     role="tab"
+    id="tab-chart"
+    aria-controls="panel-chart"
     aria-selected={mode === 'chart'}
     class:on={mode === 'chart'}
     onclick={() => (mode = 'chart')}
@@ -219,6 +221,8 @@
   <button
     type="button"
     role="tab"
+    id="tab-match"
+    aria-controls="panel-match"
     aria-selected={mode === 'match'}
     class:on={mode === 'match'}
     onclick={() => (mode = 'match')}
@@ -228,7 +232,7 @@
 </div>
 
 {#if mode === 'chart'}
-  <section class="view stack stack--lg">
+  <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart" class="view stack stack--lg">
     {#if editing}
       <!-- ───────── birth-detail form ───────── -->
       <div class="card form-card">
@@ -504,9 +508,9 @@
           : 'Computed with Lahiri ayanamsa · mean node · whole-sign houses · jyotish engine (preview). A few minutes of birth-time uncertainty can shift the lagna near a cusp.'}
       </p>
     {/if}
-  </section>
+  </div>
 {:else}
-  <Match />
+  <div id="panel-match" role="tabpanel" aria-labelledby="tab-match"><Match /></div>
 {/if}
 
 <style>

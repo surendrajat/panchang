@@ -456,10 +456,10 @@
 
     <div class="readout">
       <dl class="vals">
-        <div class="val"><dt><span class="zsym g--sun">{SUN_GLYPH}</span> {hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
-        <div class="val"><dt><span class="zsym g--moon">{MOON_GLYPH}</span> {hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt class="dt-body"><span class="zsym g--sun body-ic">{SUN_GLYPH}</span>{hi('सूर्य', 'Sun')}</dt><dd>{signName(sunRashi)} <span class="muted">{num(sunSid.toFixed(1))}°</span></dd></div>
+        <div class="val"><dt class="dt-body"><span class="zsym g--moon body-ic">{MOON_GLYPH}</span>{hi('चन्द्र', 'Moon')}</dt><dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd></div>
         <div class="val val--hero">
-          <dt>{hi('अंतर', 'Gap')} (<span class="zsym g--moon">{MOON_GLYPH}</span> − <span class="zsym g--sun">{SUN_GLYPH}</span>) ÷ 12°</dt>
+          <dt>{hi('अंतर', 'Gap')} (<span class="zsym g--moon body-ic">{MOON_GLYPH}</span>−<span class="zsym g--sun body-ic">{SUN_GLYPH}</span>) ÷ 12°</dt>
           <dd>
             <span class="hero-num">{num(elong.toFixed(1))}° → <b>{hi('तिथि', 'Tithi')} {tithiNameByIndex(tithiNum, lang)}</b></span>
             <span class="hero-tithi muted">{paksha} · {num((tithiFrac * 100).toFixed(0))}%</span>
@@ -823,6 +823,20 @@
   .val dt {
     font-size: 0.8rem;
     color: var(--ink-soft);
+  }
+  /* icon-bearing labels: flex with a controlled gap (the nerd-font glyph's own
+     advance width is absorbed by a fixed-width centred box) */
+  .dt-body {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+  .body-ic {
+    display: inline-block;
+    width: 1.25em;
+    text-align: center;
+    vertical-align: -0.1em;
+    font-size: 1.05em;
   }
   .val dd {
     margin: 0.12rem 0 0;

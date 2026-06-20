@@ -24,10 +24,15 @@
     type BirthProfile,
   } from '$lib/storage';
   import { kundliDraft } from '$lib/state/jyotish-draft.svelte';
+  import Match from './Match.svelte';
 
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
   const num = (s: string | number) => applyNumerals(String(s), numerals);
+
+  // The two jyotish tools live on one page: a single birth chart, and Milan
+  // (two-chart compatibility) — switched here, not via a separate route.
+  let mode = $state<'chart' | 'match'>('chart');
 
   // Form + result state, initialised from the module draft so it survives
   // navigating away from this lazy-loaded route and back (see jyotish-draft).
@@ -194,6 +199,28 @@
   }
 </script>
 
+<div class="jyotish-tabs" role="tablist" aria-label={lang === 'hi' ? 'ज्योतिष' : 'Jyotish'}>
+  <button
+    type="button"
+    role="tab"
+    aria-selected={mode === 'chart'}
+    class:on={mode === 'chart'}
+    onclick={() => (mode = 'chart')}
+  >
+    {lang === 'hi' ? 'जन्म कुण्डली' : 'Birth Chart'}
+  </button>
+  <button
+    type="button"
+    role="tab"
+    aria-selected={mode === 'match'}
+    class:on={mode === 'match'}
+    onclick={() => (mode = 'match')}
+  >
+    {lang === 'hi' ? 'मिलान (गुण मिलान)' : 'Match (Milan)'}
+  </button>
+</div>
+
+{#if mode === 'chart'}
 <section class="view stack stack--lg">
   {#if editing}
     <!-- ───────── birth-detail form ───────── -->
@@ -398,8 +425,32 @@
     </p>
   {/if}
 </section>
+{:else}
+  <Match />
+{/if}
 
 <style>
+  .jyotish-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .jyotish-tabs button {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius, 8px);
+    background: var(--paper-2);
+    color: var(--ink-soft);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .jyotish-tabs button.on {
+    background: var(--red);
+    color: var(--paper);
+    border-color: var(--red);
+  }
   .form-card {
     max-width: 560px;
     margin: 0 auto;

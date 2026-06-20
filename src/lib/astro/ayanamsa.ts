@@ -19,6 +19,7 @@
 //   - Drik Panchang methodology notes (Karthik Raman)
 
 import { JD_J2000 } from './julian';
+import { norm360 } from './angle';
 import type { AyanamsaSystem } from '$lib/panchanga/types';
 
 const SECONDS_PER_DEGREE = 3600;
@@ -118,6 +119,5 @@ export function siderealFromTropical(
   jd: number,
   system: AyanamsaSystem = 'lahiri',
 ): number {
-  const result = tropicalLongitude - ayanamsa(jd, system);
-  return ((result % 360) + 360) % 360;
+  return norm360(tropicalLongitude - ayanamsa(jd, system));
 }

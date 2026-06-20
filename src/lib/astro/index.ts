@@ -29,6 +29,8 @@ export {
 
 export { ayanamsa, siderealFromTropical } from './ayanamsa';
 
+export { norm360 } from './angle';
+
 export { sunRiseSet, moonRiseSet, sunriseOnDay, sunsetOnDay } from './sunrise';
 
 export type { RiseSetEvents } from './sunrise';

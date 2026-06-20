@@ -23,24 +23,18 @@ import {
 } from 'astronomy-engine';
 
 import { dateToJulian, JD_UNIX_EPOCH, MS_PER_DAY } from './julian';
+import { norm360 } from './angle';
 
 // Wall-clock instant the panchanga layer reasons about. We pass Date
 // instances around freely; astronomy-engine accepts FlexibleDateTime.
 export type Instant = Date;
-
-const DEG_PER_CIRCLE = 360;
-
-function normalize(deg: number): number {
-  const m = deg % DEG_PER_CIRCLE;
-  return m < 0 ? m + DEG_PER_CIRCLE : m;
-}
 
 // Apparent geocentric ecliptic longitude of the Sun, true equinox and
 // ecliptic of date, in degrees [0, 360).
 export function sunLongitudeAtJD(jd: number): number {
   const date = jdToDateForAstronomy(jd);
   const ecl = SunPosition(date);
-  return normalize(ecl.elon);
+  return norm360(ecl.elon);
 }
 
 // Apparent geocentric ecliptic longitude of the Moon, true equinox and
@@ -53,18 +47,18 @@ export function moonLongitudeAtJD(jd: number): number {
   const rot = Rotation_EQJ_ECT(time);
   const ectMoon = RotateVector(rot, eqjMoon);
   const sph = SphereFromVector(ectMoon);
-  return normalize(sph.lon);
+  return norm360(sph.lon);
 }
 
 // Convenience for the simultaneous case (cheaper if called together —
 // AstroTime is built once).
 export function sunMoonLongitudeAtJD(jd: number): { sun: number; moon: number } {
   const time = jdToAstroTime(jd);
-  const sun = normalize(SunPosition(time).elon);
+  const sun = norm360(SunPosition(time).elon);
   const eqjMoon = GeoMoon(time);
   const rot = Rotation_EQJ_ECT(time);
   const ectMoon = RotateVector(rot, eqjMoon);
-  const moon = normalize(SphereFromVector(ectMoon).lon);
+  const moon = norm360(SphereFromVector(ectMoon).lon);
   return { sun, moon };
 }
 
@@ -79,7 +73,7 @@ export function bodyLongitudeAtJD(body: Body, jd: number): number {
   const eqj = GeoVector(body, time, true); // apparent: aberration-corrected
   const rot = Rotation_EQJ_ECT(time);
   const ect = RotateVector(rot, eqj);
-  return normalize(SphereFromVector(ect).lon);
+  return norm360(SphereFromVector(ect).lon);
 }
 
 // True obliquity of the ecliptic (mean + IAU 2000B nutation in obliquity), in
@@ -104,7 +98,7 @@ export function trueNodeLongitudeAtJD(jd: number): number {
   const v = RotateVector(rot, new Vector(s.vx, s.vy, s.vz, time));
   const hx = r.y * v.z - r.z * v.y;
   const hy = r.z * v.x - r.x * v.z;
-  return normalize((Math.atan2(hx, -hy) * 180) / Math.PI);
+  return norm360((Math.atan2(hx, -hy) * 180) / Math.PI);
 }
 
 // Greenwich Apparent Sidereal Time at the instant, in hours [0, 24).
@@ -123,7 +117,7 @@ export function moonIlluminationAtJD(jd: number): number {
 // Sun-to-Moon elongation in degrees, 0..360, matching the tithi definition
 // directly. Faster than separate longitudes when only the difference matters.
 export function sunMoonElongationAtJD(jd: number): number {
-  return normalize(AeMoonPhase(jdToDateForAstronomy(jd)));
+  return norm360(AeMoonPhase(jdToDateForAstronomy(jd)));
 }
 
 // astronomy-engine accepts native Date or its own AstroTime. We prefer

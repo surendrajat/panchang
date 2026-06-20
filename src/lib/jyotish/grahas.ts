@@ -14,6 +14,7 @@ import {
   trueNodeLongitudeAtJD,
   ayanamsa,
   dateToJulian,
+  norm360,
   JD_J2000,
 } from '$lib/astro';
 import type { AyanamsaSystem } from '$lib/panchanga/types';
@@ -22,10 +23,6 @@ import { GRAHA_ORDER, type GrahaKey, type GrahaPosition, type NodeType } from '.
 const NAK_DEGREES = 360 / 27; // 13°20′
 const PADA_DEGREES = NAK_DEGREES / 4; // 3°20′
 const JULIAN_CENTURY_DAYS = 36525;
-
-function norm360(deg: number): number {
-  return ((deg % 360) + 360) % 360;
-}
 
 // Map the five true planets to astronomy-engine bodies.
 const PLANET_BODY: Partial<Record<GrahaKey, Body>> = {

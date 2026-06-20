@@ -14,7 +14,7 @@ import {
   sunRiseSet,
   moonRiseSet,
   dateToJulian,
-  ayanamsa,
+  siderealFromTropical,
   sunLongitudeAtJD,
   MS_PER_DAY,
 } from '$lib/astro';
@@ -84,10 +84,8 @@ export function computePanchanga(
   // ayana) and at the civil-day boundaries (drives sankranti detection).
   // A sankranti happens on the civil day during which the sun crosses
   // a sign boundary, i.e. `signAtDayStart !== signAtDayEnd`.
-  const sunSiderealAt = (jd: number): number => {
-    const trop = sunLongitudeAtJD(jd);
-    return (((trop - ayanamsa(jd, opts.ayanamsa)) % 360) + 360) % 360;
-  };
+  const sunSiderealAt = (jd: number): number =>
+    siderealFromTropical(sunLongitudeAtJD(jd), jd, opts.ayanamsa);
   const sunSidereal = sunSiderealAt(anchorJD);
   const sunSign = Math.floor(sunSidereal / 30);
 

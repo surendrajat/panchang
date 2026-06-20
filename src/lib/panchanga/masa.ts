@@ -20,7 +20,7 @@
 import { SearchMoonPhase, type AstroTime } from 'astronomy-engine';
 
 import {
-  ayanamsa,
+  siderealFromTropical,
   dateToJulian,
   JD_UNIX_EPOCH,
   julianToDate,
@@ -36,8 +36,7 @@ const NEW_MOON_PHASE = 0;
 
 // Sidereal solar sign index 0..11 (Mesha = 0).
 function sunSiderealSign(jd: number, system: AyanamsaSystem): number {
-  const tropLong = sunLongitudeAtJD(jd);
-  const sidLong = (((tropLong - ayanamsa(jd, system)) % 360) + 360) % 360;
+  const sidLong = siderealFromTropical(sunLongitudeAtJD(jd), jd, system);
   return Math.floor(sidLong / 30);
 }
 

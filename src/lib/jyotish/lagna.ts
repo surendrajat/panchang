@@ -27,15 +27,11 @@
 // unaffected — they match every source (incl. Drik) to ≤0.04′.
 // Proven in tests/regression/kundli-vs-drik.test.ts (run via pyswisseph).
 
-import { dateToJulian, gastHoursAtJD, ayanamsa, trueObliquityDeg } from '$lib/astro';
+import { dateToJulian, gastHoursAtJD, ayanamsa, trueObliquityDeg, norm360 } from '$lib/astro';
 import type { AyanamsaSystem, Location } from '$lib/panchanga/types';
 import type { Lagna } from './types';
 
 const DEG = Math.PI / 180;
-
-function norm360(d: number): number {
-  return ((d % 360) + 360) % 360;
-}
 
 export function computeLagna(instant: Date, location: Location, system: AyanamsaSystem): Lagna {
   const jd = dateToJulian(instant);

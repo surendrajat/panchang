@@ -4,7 +4,7 @@
 // each. Each nakshatra has 4 padas of 3°20′. Nakshatra is determined by
 // the Moon's sidereal longitude (tropical − ayanamsa).
 
-import { dateToJulian, moonLongitudeAtJD, ayanamsa } from '$lib/astro';
+import { dateToJulian, moonLongitudeAtJD, siderealFromTropical } from '$lib/astro';
 import { NAKSHATRA_NAMES } from './names';
 import { bisectAngularCrossing } from './bisect';
 import type { AyanamsaSystem, NakshatraInfo } from './types';
@@ -13,9 +13,7 @@ export const NAKSHATRA_DEGREES = 360 / 27; // 13.333...
 const PADA_DEGREES = NAKSHATRA_DEGREES / 4; // 3.333...
 
 function moonSiderealLongitudeAtJD(jd: number, system: AyanamsaSystem): number {
-  const trop = moonLongitudeAtJD(jd);
-  const sid = trop - ayanamsa(jd, system);
-  return ((sid % 360) + 360) % 360;
+  return siderealFromTropical(moonLongitudeAtJD(jd), jd, system);
 }
 
 export function nakshatraAtInstant(instant: Date, ayanamsaSystem: AyanamsaSystem): NakshatraInfo {
@@ -33,7 +31,7 @@ export function nakshatraAtInstant(instant: Date, ayanamsaSystem: AyanamsaSystem
   );
 
   const padaIndex = Math.floor((siderealLong % NAKSHATRA_DEGREES) / PADA_DEGREES) + 1;
-  const pada = (padaIndex >= 1 && padaIndex <= 4 ? padaIndex : 1) as 1 | 2 | 3 | 4;
+  const pada = (padaIndex >= 1 && padaIndex <= 4 ? padaIndex : 4) as 1 | 2 | 3 | 4;
   const fraction = (siderealLong - (index - 1) * NAKSHATRA_DEGREES) / NAKSHATRA_DEGREES;
 
   return {

@@ -39,7 +39,7 @@ import {
   sunRiseSet,
   moonRiseSet,
   moonLongitudeAtJD,
-  ayanamsa,
+  siderealFromTropical,
   sunLongitudeAtJD,
   julianToDate,
   civilMidnightInZone,
@@ -63,8 +63,7 @@ const BHADRA_GUARD_BAND_MS = 5 * 60_000;
 // Sidereal nakshatra index (1..27, Ashwini = 1) at a given JD.
 // Used by Vijayadashami's Shravana-preferred tiebreaker.
 export function nakshatraIndexAtJD(jd: number, ayanamsaSys: AyanamsaSystem): number {
-  const moonTrop = moonLongitudeAtJD(jd);
-  const moonSid = (((moonTrop - ayanamsa(jd, ayanamsaSys)) % 360) + 360) % 360;
+  const moonSid = siderealFromTropical(moonLongitudeAtJD(jd), jd, ayanamsaSys);
   return Math.floor(moonSid / NAKSHATRA_DEGREES) + 1;
 }
 
@@ -527,7 +526,7 @@ function findSankrantiTransitJD(
   let lo = bracketStartJD;
   let hi = lo + 4;
   const siderealAt = (jd: number) =>
-    (((sunLongitudeAtJD(jd) - ayanamsa(jd, ayanamsaSys)) % 360) + 360) % 360;
+    siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys);
   for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
     if (siderealAt(mid) < targetDeg) lo = mid;

@@ -6,7 +6,7 @@
 // lasts roughly 20–27 hours (varies with Moon speed). Usually one yoga
 // per panchanga day; rarely two when the Moon is near perigee.
 
-import { dateToJulian, sunMoonLongitudeAtJD, ayanamsa } from '$lib/astro';
+import { dateToJulian, sunMoonLongitudeAtJD, ayanamsa, norm360 } from '$lib/astro';
 import { YOGA_NAMES } from './names';
 import { bisectAngularCrossing } from './bisect';
 import type { AyanamsaSystem, YogaInfo } from './types';
@@ -16,7 +16,7 @@ const YOGA_DEGREES = 360 / 27;
 function sumSiderealLongitudeAtJD(jd: number, system: AyanamsaSystem): number {
   const { sun, moon } = sunMoonLongitudeAtJD(jd);
   const sum = sun + moon - 2 * ayanamsa(jd, system);
-  return ((sum % 360) + 360) % 360;
+  return norm360(sum);
 }
 
 export function yogaAtInstant(instant: Date, ayanamsaSystem: AyanamsaSystem): YogaInfo {

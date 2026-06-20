@@ -111,16 +111,22 @@
       if (dt < 30) return;
       last = t;
       if (live) {
+        // Real time barely moves between frames and nothing on the wheel shifts
+        // visibly — 1 Hz is plenty and keeps the ephemeris/derived work idle.
         liveAcc += dt;
-        if (liveAcc >= 250) {
+        if (liveAcc >= 1000) {
           simMs = Date.now();
           liveAcc = 0;
         }
       } else simMs += speed * dt;
+      // The events (4 boundary bisections) only change when the simulated DAY
+      // changes, so refresh their base then rather than every 400 ms.
       evAcc += dt;
       if (evAcc >= 400) {
-        eventsBaseMs = simMs;
         evAcc = 0;
+        if (Math.floor(simMs / 86_400_000) !== Math.floor(eventsBaseMs / 86_400_000)) {
+          eventsBaseMs = simMs;
+        }
       }
     };
     raf = requestAnimationFrame(tick);

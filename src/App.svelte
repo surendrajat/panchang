@@ -31,11 +31,21 @@
   // Settings lives behind a dedicated icon button.
 
   let hash = $state(typeof location !== 'undefined' ? location.hash : '');
+  // Remember scroll position per route so switching tabs and coming back doesn't
+  // jump to the top. Plain Map (not reactive state) — read only in the restore
+  // effect below.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
+  const scrollByRoute = new Map<string, number>();
 
   onMount(() => {
     hydratePreferences();
     void evictStale();
-    const handler = () => (hash = location.hash);
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    const handler = () => {
+      // Save where we were on the route we're leaving, then switch.
+      scrollByRoute.set(parseHash(hash).name, window.scrollY);
+      hash = location.hash;
+    };
     window.addEventListener('hashchange', handler);
     return () => window.removeEventListener('hashchange', handler);
   });
@@ -50,6 +60,13 @@
     | { name: 'settings' };
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
+
+  // On entering a route, restore its remembered scroll (or top on a first visit).
+  // Two rAFs so the new view has painted before we scroll.
+  $effect(() => {
+    const y = scrollByRoute.get(route.name) ?? 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
+  });
 
   function parseHash(h: string): ResolvedRoute {
     const path = h.replace(/^#/, '').replace(/^\//, '');

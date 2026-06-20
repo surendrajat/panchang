@@ -1,6 +1,6 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import {
-    findFestivals,
     PAN_INDIA_FESTIVALS,
     type FestivalOccurrence,
     type Location,
@@ -46,9 +46,46 @@
     'masik_shivaratri',
   ]);
 
-  // Compute and cache all festival occurrences for the selected year.
-  // Uses IndexedDB so repeated visits are near-instant; falls back to
-  // synchronous compute on cache miss (first load or after eviction).
+  // Festival computation runs in a Web Worker so a first visit (cache miss)
+  // doesn't freeze the UI while ~a year of dates is computed — the spinner keeps
+  // animating. Repeat visits hit the IndexedDB cache and never reach the worker.
+  let worker: Worker | null = null;
+  let reqId = 0;
+  // Plain bookkeeping for in-flight worker requests — not reactive state, so a
+  // SvelteMap isn't needed here.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
+  const pending = new Map<
+    number,
+    { resolve: (r: FestivalOccurrence[]) => void; reject: (e: Error) => void }
+  >();
+
+  function computeInWorker(
+    fromMs: number,
+    toMs: number,
+    loc: Location,
+    opts: { ayanamsa: AyanamsaSystem; monthSystem: MonthSystem },
+  ): Promise<FestivalOccurrence[]> {
+    if (!worker) {
+      worker = new Worker(new URL('./festivals.worker.ts', import.meta.url), { type: 'module' });
+      worker.onmessage = (
+        e: MessageEvent<{ id: number; results?: FestivalOccurrence[]; error?: string }>,
+      ) => {
+        const p = pending.get(e.data.id);
+        if (!p) return;
+        pending.delete(e.data.id);
+        if (e.data.error) p.reject(new Error(e.data.error));
+        else p.resolve(e.data.results ?? []);
+      };
+    }
+    const id = ++reqId;
+    return new Promise((resolve, reject) => {
+      pending.set(id, { resolve, reject });
+      worker!.postMessage({ id, fromMs, toMs, loc, opts });
+    });
+  }
+  onDestroy(() => worker?.terminate());
+
+  // Cache hit → instant; miss → compute off-thread (with a spinner).
   async function loadFestivals(
     year: number,
     loc: Location,
@@ -59,26 +96,33 @@
     if (cached) return cached;
     const from = civilTimeInZone(year, 1, 1, loc.timezone, 12);
     const to = civilTimeInZone(year, 12, 31, loc.timezone, 12);
-    const all = findFestivals(from, to, loc, opts);
+    const all = await computeInWorker(from.getTime(), to.getTime(), loc, opts);
     const results = all.filter((o) => !MONTHLY_KEYS.has(o.key));
     await putFestivalsCached(key, results);
     return results;
   }
 
   let occurrences = $state<FestivalOccurrence[]>([]);
+  let loading = $state(false);
 
   $effect(() => {
     if (!parsedYear || !preferences.location || !preferences.hydrated) {
       occurrences = [];
+      loading = false;
       return;
     }
     const year = parsedYear;
     const loc = preferences.location;
     const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
     let cancelled = false;
-    loadFestivals(year, loc, opts).then((results) => {
-      if (!cancelled) occurrences = results;
-    });
+    loading = true;
+    loadFestivals(year, loc, opts)
+      .then((results) => {
+        if (!cancelled) occurrences = results;
+      })
+      .finally(() => {
+        if (!cancelled) loading = false;
+      });
     return () => {
       cancelled = true;
     };
@@ -148,7 +192,12 @@
         </a>
       </div>
     </header>
-    {#if occurrences.length > 0}
+    {#if loading}
+      <div class="loading" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="muted">{tr('fest.computing')}</span>
+      </div>
+    {:else if occurrences.length > 0}
       <ol class="festival-year">
         {#each occurrences as occ (occ.date.toISOString() + occ.key)}
           <li>
@@ -184,6 +233,31 @@
   }
   .icon-btn--link {
     text-decoration: none;
+  }
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 44px 0;
+  }
+  .spinner {
+    width: 22px;
+    height: 22px;
+    border: 2.5px solid var(--line);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2s;
+    }
   }
   .festival-year {
     list-style: none;

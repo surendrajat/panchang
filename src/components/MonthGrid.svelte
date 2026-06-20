@@ -162,10 +162,10 @@
      old 7-wide layout, so it fits a phone better and reads top-to-bottom. */
   .cal {
     display: grid;
-    grid-template-rows: repeat(7, minmax(54px, auto));
+    grid-template-rows: repeat(7, minmax(74px, auto));
     grid-template-columns: max-content; /* the weekday-label column */
     grid-auto-flow: column;
-    grid-auto-columns: minmax(58px, 1fr); /* one column per week */
+    grid-auto-columns: minmax(72px, 1fr); /* one column per week */
     gap: 2px;
     background: var(--line);
     border: 1px solid var(--line);
@@ -187,8 +187,8 @@
   }
   .cell {
     background: var(--cell-bg, var(--paper));
-    min-height: 54px;
-    padding: 5px 7px 6px;
+    min-height: 74px;
+    padding: 6px 8px 7px;
     position: relative;
     cursor: pointer;
     transition:
@@ -299,9 +299,12 @@
     margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    white-space: nowrap;
+    /* wrap to up to two lines (cells are tall enough) so the name isn't cut off */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
   }
   .legend {
     display: flex;
@@ -367,11 +370,13 @@
     color: var(--indigo);
   }
   @media (max-width: 460px) {
+    /* Wider fixed-width week columns so festival/tithi names show in full; the
+       grid then overflows and .calendar-scroll scrolls horizontally. */
+    .cal {
+      grid-auto-columns: 92px;
+    }
     .gd {
       font-size: 15px;
-    }
-    .fname {
-      display: none;
     }
     .dh {
       padding: 0 7px;

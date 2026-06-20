@@ -860,12 +860,15 @@
       role="img"
       aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}
     >
+      <!-- Parallel sunlight: the Sun is effectively at infinity, so its rays
+           reach the Earth–Moon system parallel (that's why the Moon's sunward
+           half is always the lit half). -->
       {#each [-20, 0, 20] as dy (dy)}
         <line
           x1={SUNX + 26}
           y1={EARTH.y + dy}
           x2={EARTH.x - 16}
-          y2={EARTH.y + dy * 0.4}
+          y2={EARTH.y + dy}
           class="sunlight"
         />
       {/each}
@@ -1007,6 +1010,17 @@
     transition:
       background 0.15s,
       color 0.15s;
+  }
+  /* keep the speed control on one row on phones */
+  @media (max-width: 460px) {
+    .speeds {
+      gap: 1px;
+      padding: 2px;
+    }
+    .speeds button {
+      padding: 0.3rem 0.46rem;
+      font-size: 0.72rem;
+    }
   }
   .speeds button:hover {
     color: var(--ink);

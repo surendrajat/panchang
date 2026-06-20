@@ -33,6 +33,19 @@
 
   const gradientId = `moon-lit-${Math.random().toString(36).slice(2, 8)}`;
   const darkSheenId = `moon-dark-${Math.random().toString(36).slice(2, 8)}`;
+  const litClipId = `moon-clip-${Math.random().toString(36).slice(2, 8)}`;
+
+  // A few maria/craters (offset x, offset y, radius — all as fractions of R) so
+  // the lit face reads as the real Moon rather than a blank disc.
+  const CRATERS: [number, number, number][] = [
+    [-0.32, -0.3, 0.15],
+    [0.3, 0.18, 0.11],
+    [0.08, 0.44, 0.085],
+    [-0.46, 0.26, 0.07],
+    [0.42, -0.3, 0.075],
+    [-0.05, -0.02, 0.055],
+    [0.5, 0.4, 0.05],
+  ];
 </script>
 
 <figure class="moon">
@@ -55,11 +68,18 @@
         <stop offset="60%" stop-color="rgba(255, 255, 255, 0.02)" />
         <stop offset="100%" stop-color="rgba(0, 0, 0, 0.14)" />
       </radialGradient>
+      <clipPath id={litClipId}><path d={litPath} /></clipPath>
     </defs>
     <circle {cx} {cy} r={R} fill="var(--moon-dark)" stroke="var(--line)" stroke-width="1" />
     <!-- faint earthshine sheen on the dark limb so it reads as a sphere, not a hole -->
     <circle {cx} {cy} r={R} fill="url(#{darkSheenId})" />
     <path d={litPath} fill="url(#{gradientId})" />
+    <!-- craters/maria, only on the lit face (clipped to the lit path) -->
+    <g clip-path="url(#{litClipId})">
+      {#each CRATERS as [dx, dy, cr] (`${dx},${dy}`)}
+        <ellipse cx={cx + dx * R} cy={cy + dy * R} rx={cr * R} ry={cr * R * 0.82} class="crater" />
+      {/each}
+    </g>
     <circle {cx} {cy} r={R} fill="none" stroke="var(--line)" stroke-width="1" />
   </svg>
 </figure>
@@ -88,5 +108,8 @@
   }
   .moon-svg {
     filter: drop-shadow(0 4px 10px var(--shadow));
+  }
+  .crater {
+    fill: rgba(120, 100, 62, 0.16);
   }
 </style>

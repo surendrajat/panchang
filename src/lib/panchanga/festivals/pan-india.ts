@@ -129,9 +129,17 @@ function vyapiniShuklaBhadra(
   };
 }
 
-// Shukla-paksha festivals: month name is the same in Amanta and
-// Purnimanta, so we can match either `masa.name` or `masa.amantaName` —
-// we use `amantaName` for consistency with the Krishna helpers.
+// Shukla-paksha festivals on the UDAYA-TITHI (suryodaya/sunrise) rule — the day
+// whose SUNRISE carries the tithi. This is the Government-of-India / Rashtriya
+// Panchang convention (Calendar Reform Committee: sunrise-anchored civil day).
+// NOT naive "tithi at the sunrise instant": the vriddhi branch takes the first of
+// a doubled tithi, and the kshaya branch claims a skipped tithi for the day it
+// falls within — so a tithi that begins shortly AFTER sunrise still claims that
+// day (e.g. Ugadi 2026, Ghatasthapana 2027). Used by the festivals whose
+// observance is genuinely sunrise/udaya (verified vs Drik 2024-2028).
+//
+// Month name is the same in Amanta and Purnimanta; we key on `amantaName` for
+// consistency with the Krishna helpers.
 function inShukla(tithiNumber: number, amantaMasa: string) {
   return (p: Panchanga): boolean => {
     if (p.masa.isAdhika) return false;
@@ -168,18 +176,11 @@ function inShukla(tithiNumber: number, amantaMasa: string) {
   };
 }
 
-// Krishna-paksha festivals: must dispatch on the canonical Amanta name,
-// not the display name. In Purnimanta the same Krishna paksha is
-// re-labelled as the next month, so a `(Ashvina || Kartika)` OR-rule
-// would fire on TWO different lunar months (Bhadrapada-krishna and
-// Ashvina-krishna for a Purnimanta user). Using `amantaName` keys on
-// the underlying lunar bracket regardless of display system.
-function inKrishna(tithiNumber: number, amantaMasa: string) {
-  return (p: Panchanga): boolean =>
-    p.masa.amantaName === amantaMasa &&
-    !p.masa.isAdhika &&
-    sunriseTithiObservedForDate(p.location, p.date, 15 + tithiNumber);
-}
+// Krishna-paksha festivals dispatch on the canonical Amanta name (via
+// `vyapiniKrishna`), not the display name: in Purnimanta the same Krishna paksha
+// is re-labelled as the next month, so an `(Ashvina || Kartika)` OR-rule would
+// fire on two different lunar months. Keying on `amantaName` ties the rule to the
+// underlying lunar bracket regardless of display system.
 
 // Solar sankrantis use the Drik "Punya Kaal" sunset rule: if the Sun
 // enters the target sidereal sign *after* sunset on day N, observance
@@ -310,7 +311,10 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     },
   },
 
-  // Ugadi / Gudi Padwa — Chaitra Shukla 1
+  // Ugadi / Gudi Padwa — Chaitra Shukla 1 (Pratipada), udaya. inShukla's kshaya
+  // branch is what makes the boundary right: 2026 Pratipada begins 06:52 (after
+  // sunrise) so it touches no sunrise -> claimed for Mar 19, matching Drik (a
+  // naive sunrise-instant rule would wrongly give Mar 20). Verified Drik 2024-2028.
   {
     key: 'ugadi',
     displayName: 'Ugadi / Gudi Padwa',
@@ -332,7 +336,10 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: vyapiniShukla(9, 'Chaitra', 'madhyahna'),
   },
 
-  // Hanuman Jayanti — Chaitra Shukla 15 (Purnima)
+  // Hanuman Jayanti — Chaitra Shukla 15 (Purnima), sunrise/udaya: Hanuman is held
+  // to be born at sunrise/Brahma-muhurta, so the udaya-Purnima day is taken (the
+  // 2026/2028 boundaries land right only because inShukla tests the sunrise tithi,
+  // not a "day overlap"). Verified vs Drik New Delhi 2024-2028.
   {
     key: 'hanuman_jayanti',
     displayName: 'Hanuman Jayanti',
@@ -358,7 +365,8 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(3, 'Vaishakha'),
   },
 
-  // Buddha Purnima — Vaishakha Shukla 15
+  // Buddha Purnima — Vaishakha Shukla 15 (Purnima) at sunrise/udaya. Verified
+  // vs Drik New Delhi 2024-2028.
   {
     key: 'buddha_purnima',
     displayName: 'Buddha Purnima',
@@ -366,7 +374,8 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Vaishakha'),
   },
 
-  // Guru Purnima — Ashadha Shukla 15
+  // Guru Purnima / Vyasa Purnima — Ashadha Shukla 15 at sunrise/udaya. Verified
+  // vs Drik New Delhi 2024-2028.
   {
     key: 'guru_purnima',
     displayName: 'Guru Purnima',
@@ -374,7 +383,9 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Ashadha'),
   },
 
-  // Nag Panchami — Shravana Shukla 5. Sunrise rule matches Drik.
+  // Nag Panchami — Shravana Shukla 5 at sunrise/udaya (the puja muhurat is
+  // morning, but the day-selection is the sunrise Panchami). Verified vs Drik
+  // New Delhi 2024-2028.
   {
     key: 'nag_panchami',
     displayName: 'Nag Panchami',
@@ -435,7 +446,10 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: (p) => p.nakshatra.name === 'Shravana' && p.masa.amantaName === 'Bhadrapada',
   },
 
-  // Navaratri start — Ashvina Shukla 1
+  // Sharad Navaratri / Ghatasthapana — Ashvina Shukla 1 (Pratipada). The puja is
+  // a forenoon muhurta while Pratipada prevails; the udaya/kshaya inShukla rule
+  // reproduces it (2027 Pratipada begins 08:05 after sunrise -> still Sep 30, =
+  // Drik). Verified vs Drik New Delhi 2024-2028.
   {
     key: 'navaratri_start',
     displayName: 'Sharad Navaratri (Day 1)',
@@ -476,14 +490,18 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: vyapiniKrishna(13, 'Ashvina', 'pradosha'),
   },
 
-  // Naraka Chaturdashi — Ashvina Krishna 14. Drik observes Abhyanga
-  // Snan at Chandrodaya in the early-morning hours; we approximate
-  // with the sunrise tithi which matches Drik in most years.
+  // Naraka Chaturdashi / Chhoti Diwali — Ashvina Krishna 14, observed at
+  // CHANDRODAYA: the Abhyanga Snan (oil bath) is done at the pre-dawn moonrise
+  // while Chaturdashi prevails (Drik). Same moonrise-vyapini family as Karva
+  // Chauth / Sankashti — here the waning-moon moonrise is in the early morning.
+  // Matches Drik New Delhi 2024-2028 (where it coincides with sunrise); the
+  // moonrise rule is correct on boundary years a sunrise rule would miss.
+  // Sunrise fallback covers a kshaya Chaturdashi.
   {
     key: 'naraka_chaturdashi',
     displayName: 'Naraka Chaturdashi',
     displayNameHi: 'नरक चतुर्दशी',
-    matches: inKrishna(14, 'Ashvina'),
+    matches: vyapiniKrishna(14, 'Ashvina', 'chandrodaya', 'earlier'),
   },
 
   // Diwali / Lakshmi Puja — Ashvina Krishna Amavasya (Pradosha-vyapini
@@ -521,15 +539,22 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
       kartikaPratipadaBridgeDay(p),
   },
 
-  // Bhai Dooj — Kartika Shukla 2
+  // Bhai Dooj / Bhau Beej — Kartika Shukla Dwitiya at APARAHNA: the tilak is an
+  // afternoon rite, so the day Dwitiya prevails at aparahna is taken (Drik
+  // publishes an Aparahna tilak muhurat). Matches Drik New Delhi 2024-2028 (where
+  // it coincides with sunrise); aparahna is correct on boundary years. Sunrise
+  // fallback for kshaya.
   {
     key: 'bhai_dooj',
     displayName: 'Bhai Dooj',
     displayNameHi: 'भाई दूज',
-    matches: inShukla(2, 'Kartika'),
+    matches: vyapiniShukla(2, 'Kartika', 'aparahna', 'earlier'),
   },
 
-  // Tulsi Vivaha — Kartika Shukla 12
+  // Tulsi Vivaha — Kartika Shukla Dwadashi. The wedding CEREMONY is at pradosha
+  // (dusk), but the OBSERVANCE DAY tracks the udaya (sunrise) Dwadashi with
+  // purva-viddha, NOT a pradosha-day rule (a pradosha-day rule mis-picks 2024 &
+  // 2027). So sunrise is correct here. Verified vs Drik New Delhi 2024-2028.
   {
     key: 'tulsi_vivaha',
     displayName: 'Tulsi Vivaha',

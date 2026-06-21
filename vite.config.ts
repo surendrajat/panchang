@@ -28,7 +28,7 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: '#fdf6e3',
+        background_color: '#f5e6c3', // matches --paper (light) so the install splash doesn't flash a foreign cream
         theme_color: '#8b1818',
         orientation: 'portrait-primary',
         icons: [

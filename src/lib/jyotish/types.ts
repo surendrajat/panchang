@@ -51,7 +51,7 @@ export type NodeType = 'mean' | 'true';
 
 export interface BirthChartOptions {
   ayanamsa: AyanamsaSystem; // default 'lahiri'
-  nodeType: NodeType; // default 'mean'
+  nodeType: NodeType; // default 'true' (see DEFAULT_CHART_OPTIONS)
 }
 
 export const DEFAULT_CHART_OPTIONS: BirthChartOptions = {

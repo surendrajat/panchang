@@ -946,20 +946,23 @@
               pointer-events="none">{SIGN_GLYPH[i]}</text
             >
           {/each}
-          {#each nakTicks as deg (deg)}
-            <line
-              x1={pt(deg, R_IN)[0]}
-              y1={pt(deg, R_IN)[1]}
-              x2={pt(deg, R_IN - 5)[0]}
-              y2={pt(deg, R_IN - 5)[1]}
-              class="nak-tick"
-            />
-          {/each}
         </g>
 
-        <!-- Highlight the nakshatra the Moon sits in, so the 27 inner ticks read
-           as the Moon's nakshatras; tap to learn. (Sidereal-framed like the
-           bodies; in tropical mode the ticks themselves rotate with the ring.) -->
+        <!-- Nakshatra ticks live in the SIDEREAL frame (OUTSIDE the rotate group)
+             because a nakshatra is fixed to the stars. In tropical mode the rashi
+             ring rotates by the ayanamsa, but these ticks stay put — aligned with
+             the Moon-nakshatra band and the bodies, which are also sidereal. -->
+        {#each nakTicks as deg (deg)}
+          <line
+            x1={pt(deg, R_IN)[0]}
+            y1={pt(deg, R_IN)[1]}
+            x2={pt(deg, R_IN - 5)[0]}
+            y2={pt(deg, R_IN - 5)[1]}
+            class="nak-tick"
+          />
+        {/each}
+
+        <!-- Highlight the nakshatra the Moon sits in; tap to learn. -->
         <path
           d={nakBandPath}
           class="nak-current"

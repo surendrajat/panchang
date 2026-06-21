@@ -260,6 +260,7 @@ export const hi: Record<TranslationKey, string> = {
   'month.loading': 'पंचांग लोड हो रहा है…',
   'kundli.loading': 'कुंडली लोड हो रही है…',
   'sky.loading': 'आकाश लोड हो रहा है…',
+  'route.loadError': 'यह भाग लोड नहीं हो सका — पुनः लोड करके देखें।',
 
   // ── miscellaneous
   'common.purnima': 'पूर्णिमा',

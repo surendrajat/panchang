@@ -251,6 +251,7 @@ export const en = {
   'month.loading': 'Loading panchanga…',
   'kundli.loading': 'Loading kundli…',
   'sky.loading': 'Loading sky…',
+  'route.loadError': "Couldn't load this section — reload to try again.",
 
   // ── miscellaneous
   'common.purnima': 'Purnima',

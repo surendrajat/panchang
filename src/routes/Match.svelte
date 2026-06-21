@@ -5,7 +5,7 @@
   import type { Location } from '$lib/panchanga';
   import { computeBirthChart, birthInstant, computeMatch, type KootaKey } from '$lib/jyotish';
   import { nakshatraNameByIndex } from '$lib/i18n';
-  import { rashiLabel } from '$lib/labels';
+  import { rashiLabel, ayanamsaShortLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import { listBirthProfiles, type BirthProfile } from '$lib/storage';
   import { matchDraft } from '$lib/state/jyotish-draft.svelte';
@@ -13,6 +13,9 @@
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
   const num = (s: string | number) => applyNumerals(String(s), numerals);
+  // Match uses the user's selected ayanamsa (Match.svelte computes the two charts
+  // with preferences.ayanamsa), so the note reports it rather than hardcoding.
+  const methodAyanamsa = $derived(ayanamsaShortLabel(preferences.ayanamsa));
 
   interface Person {
     name: string;
@@ -240,8 +243,8 @@
 
     <p class="method-note">
       {lang === 'hi'
-        ? 'अष्टकूट तालिकाएँ सरावली (शास्त्रीय संदर्भ) से · लाहिरी अयनांश · पूर्वावलोकन। दोष-परिहार (अपवाद) यहाँ सम्मिलित नहीं हैं।'
-        : 'Ashtakoota tables from Saravali (classical reference) · Lahiri ayanamsa · preview. Dosha cancellations (exceptions) are not yet applied.'}
+        ? `अष्टकूट तालिकाएँ सरावली (शास्त्रीय संदर्भ) से · ${methodAyanamsa} अयनांश · पूर्वावलोकन। भकूट दोष-परिहार लागू है; नाड़ी व अन्य अपवाद अभी नहीं।`
+        : `Ashtakoota tables from Saravali (classical reference) · ${methodAyanamsa} ayanamsa · preview. Bhakoot dosha cancellation is applied; Nadi and other exceptions are not yet.`}
     </p>
   {/if}
 </section>

@@ -15,7 +15,7 @@
     type GrahaKey,
   } from '$lib/jyotish';
   import { nakshatraNameByIndex } from '$lib/i18n';
-  import { rashiLabel, grahaLabel } from '$lib/labels';
+  import { rashiLabel, grahaLabel, ayanamsaShortLabel, nodeShortLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import {
     listBirthProfiles,
@@ -29,6 +29,12 @@
   const lang = $derived(preferences.language);
   const numerals = $derived(preferences.numerals);
   const num = (s: string | number) => applyNumerals(String(s), numerals);
+
+  // The methodology note must state what the chart was ACTUALLY computed with
+  // (ayanamsa + node are user-selectable in Settings), not hardcoded values —
+  // otherwise it misreports e.g. "mean node" while the default is the true node.
+  const methodAyanamsa = $derived(ayanamsaShortLabel(preferences.ayanamsa));
+  const methodNode = $derived(nodeShortLabel(preferences.nodeType));
 
   // The two jyotish tools live on one page: a single birth chart, and Milan
   // (two-chart compatibility) — switched here, not via a separate route.
@@ -504,8 +510,8 @@
       <!-- methodology / honesty -->
       <p class="method-note">
         {lang === 'hi'
-          ? 'गणना: लाहिरी अयनांश · मध्य राहु · पूर्ण-राशि भाव · ज्योतिष इंजन (पूर्वावलोकन)। जन्म समय में कुछ मिनटों का अंतर लग्न बदल सकता है।'
-          : 'Computed with Lahiri ayanamsa · mean node · whole-sign houses · jyotish engine (preview). A few minutes of birth-time uncertainty can shift the lagna near a cusp.'}
+          ? `गणना: ${methodAyanamsa} अयनांश · ${methodNode} · पूर्ण-राशि भाव · ज्योतिष इंजन (पूर्वावलोकन)। जन्म समय में कुछ मिनटों का अंतर लग्न बदल सकता है।`
+          : `Computed with ${methodAyanamsa} ayanamsa · ${methodNode} · whole-sign houses · jyotish engine (preview). A few minutes of birth-time uncertainty can shift the lagna near a cusp.`}
       </p>
     {/if}
   </div>

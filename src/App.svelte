@@ -385,6 +385,13 @@
         <p class="muted">{tr('kundli.loading')}</p>
       {:then m}
         <m.default />
+      {:catch}
+        <p class="muted">
+          {tr('route.loadError')}
+          <button class="btn btn--pill" type="button" onclick={() => location.reload()}
+            >{tr('update.reload')}</button
+          >
+        </p>
       {/await}
     {:else if route.name === 'sky'}
       <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
@@ -392,6 +399,13 @@
         <p class="muted">{tr('sky.loading')}</p>
       {:then m}
         <m.default />
+      {:catch}
+        <p class="muted">
+          {tr('route.loadError')}
+          <button class="btn btn--pill" type="button" onclick={() => location.reload()}
+            >{tr('update.reload')}</button
+          >
+        </p>
       {/await}
     {:else if route.name === 'settings'}
       <Settings />

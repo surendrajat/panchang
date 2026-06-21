@@ -7,6 +7,10 @@ import './styles/app.css';
 
 import { mount } from 'svelte';
 import App from './App.svelte';
+// Static import: App.svelte already imports this store eagerly, so importing it
+// dynamically here only earned an INEFFECTIVE_DYNAMIC_IMPORT build warning
+// without actually splitting it out. The module is tiny.
+import { onSwUpdateReady } from './lib/state/sw-update.svelte';
 
 const target = document.getElementById('app');
 if (!target) {
@@ -15,12 +19,11 @@ if (!target) {
 
 mount(App, { target });
 
-// PWA registration via vite-plugin-pwa's virtual module. We import
-// lazily so the dev experience stays snappy and so the registration
-// only happens in production builds.
+// PWA registration via vite-plugin-pwa's virtual module — imported lazily and
+// only in production builds, so the dev experience stays snappy.
 if (import.meta.env.PROD) {
-  Promise.all([import('virtual:pwa-register'), import('./lib/state/sw-update.svelte')])
-    .then(([{ registerSW }, { onSwUpdateReady }]) => {
+  import('virtual:pwa-register')
+    .then(({ registerSW }) => {
       const updateSW = registerSW({
         immediate: true,
         onNeedRefresh() {

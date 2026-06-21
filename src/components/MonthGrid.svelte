@@ -55,7 +55,7 @@
 
   // Accessible name for a day cell — fully localized, so screen-reader users
   // hear the same language they see (not raw English/romanized fields).
-  function cellAria(cell: Panchanga, gregYmd: string, fest: string | null): string {
+  function cellAria(cell: Panchanga, gregYmd: string, festName: string | null): string {
     const lang = preferences.language;
     const masa = masaNameByIndex(cell.masa.index, lang);
     const paksha =
@@ -68,7 +68,7 @@
           : 'Krishna';
     const tithi = tithiNameByIndex(cell.tithi.index, lang);
     let label = `${gregYmd}, ${masa} ${paksha} ${tithi}`;
-    if (fest) label += `, ${displayName(fest)}`;
+    if (festName) label += `, ${festName}`;
     return label;
   }
 
@@ -88,29 +88,43 @@
       .join(' ');
   }
 
-  // "Amavasya", with the distinguishing Pitru/Deva qualifier kept (the only
-  // monthly observance we name on the grid — Pitru and Deva karya fall on
-  // different days when the tithi spans two, and a single day can be both).
-  function amavasyaLabel(which: 'pitru' | 'deva' | 'both'): string {
-    const base = displayName('amavasya').split(' ')[0];
-    if (which === 'both') return base;
-    const qualifier = displayName(which === 'pitru' ? 'amavasya' : 'amavasya_devakarya').match(
-      /\(([^\s)]+)/,
-    )?.[1];
-    return qualifier ? `${base} (${qualifier})` : base;
+  // First word inside the "(Pitru Karya)" / "(Deva Karya)" parenthetical, localized.
+  function amavasyaQualifier(key: string): string | undefined {
+    return displayName(key).match(/\(([^\s)]+)/)?.[1]; // Pitru / Deva / पितृ / देव
   }
 
-  // The cell's headline observance: an annual festival if any, else the Amavasya
-  // (Pitru/Deva/both). Other monthly observances stay glyph-only (●○◆).
-  function cellFestival(keys: string[]): { key: string; label: string } | null {
-    const annual = keys.find((k) => !MONTHLY_OBSERVANCE_KEYS.has(k));
-    if (annual) return { key: annual, label: festivalShortName(annual) };
+  // "Amavasya" with the distinguishing qualifier — the only monthly observance we
+  // name on the grid. Pitru (aparahna) and Deva (udaya) karya fall on different days
+  // when the tithi spans two; a single day that is BOTH shows the combined label.
+  function amavasyaLabel(which: 'pitru' | 'deva' | 'both'): string {
+    const base = displayName('amavasya').split(' ')[0];
+    const pitru = amavasyaQualifier('amavasya');
+    const deva = amavasyaQualifier('amavasya_devakarya');
+    const q =
+      which === 'both'
+        ? deva && pitru
+          ? `${deva}-${pitru}`
+          : undefined
+        : which === 'pitru'
+          ? pitru
+          : deva;
+    return q ? `${base} (${q})` : base;
+  }
+
+  // The cell's named observances: ALL annual festivals that fall on the day (a few
+  // dates carry two, e.g. Naraka Chaturdashi + Diwali), else the Amavasya
+  // (Pitru / Deva / combined). Other monthly observances stay glyph-only (●○◆).
+  // `label` is the compact cell text; `name` is the full localized name for aria.
+  function cellFestivals(keys: string[]): { label: string; name: string }[] {
+    const annual = keys.filter((k) => !MONTHLY_OBSERVANCE_KEYS.has(k));
+    if (annual.length)
+      return annual.map((k) => ({ label: festivalShortName(k), name: displayName(k) }));
     const pitru = keys.includes('amavasya');
     const deva = keys.includes('amavasya_devakarya');
-    if (pitru && deva) return { key: 'amavasya', label: amavasyaLabel('both') };
-    if (pitru) return { key: 'amavasya', label: amavasyaLabel('pitru') };
-    if (deva) return { key: 'amavasya_devakarya', label: amavasyaLabel('deva') };
-    return null;
+    const which = pitru && deva ? 'both' : pitru ? 'pitru' : deva ? 'deva' : null;
+    if (!which) return [];
+    const label = amavasyaLabel(which);
+    return [{ label, name: label }];
   }
 
   function tithiGlyph(
@@ -132,19 +146,19 @@
       {#if cell}
         {@const gregYmd = localYMD(cell.date, cell.location.timezone)}
         {@const gregDay = Number(gregYmd.slice(-2))}
-        {@const fest = cellFestival(cell.festivals)}
+        {@const fests = cellFestivals(cell.festivals)}
         {@const glyph = tithiGlyph(cell)}
         {@const isToday = gregYmd === todayYMD}
         <button
-          class="cell {cell.paksha} {isToday ? 'today' : ''}"
+          class="cell {cell.paksha} {isToday ? 'today' : ''} {fests.length > 1 ? 'multi' : ''}"
           role="gridcell"
           type="button"
           onclick={() => onSelectDay?.(cell.date)}
-          aria-label={cellAria(cell, gregYmd, fest?.key ?? null)}
+          aria-label={cellAria(cell, gregYmd, fests.map((f) => f.name).join(', ') || null)}
         >
-          {#if fest}<span class="fdot" aria-hidden="true"></span>{/if}
+          {#if fests.length}<span class="fdot" aria-hidden="true"></span>{/if}
           <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>
-          {#if fest}<div class="fname">{fest.label}</div>{/if}
+          {#each fests as f (f.label)}<div class="fname">{f.label}</div>{/each}
           <div class="tt">
             {#if glyph}<span class="glyph glyph--{glyph.type}">{glyph.char}</span>
             {/if}{tithiNameByIndex(cell.tithi.index, preferences.language)}
@@ -207,6 +221,11 @@
     flex-direction: column;
     text-align: left;
     color: var(--ink);
+  }
+  /* Days carrying more than one named festival get extra room so every name is
+     visible (the grid row auto-grows to the tallest cell). */
+  .cell.multi {
+    min-height: 96px;
   }
   .cell:hover {
     background: color-mix(in srgb, var(--red) 4%, var(--cell-bg, var(--paper)));

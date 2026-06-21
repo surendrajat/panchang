@@ -493,12 +493,12 @@
       </g>
       <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
       {#if fDirs}
-        <text x={DC} y={DC - DR + 9} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-        <text x={DC} y={DC + DR - 3} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-        <text x={DC - DR + 9} y={DC + 3} class="dome-card" text-anchor="middle"
+        <text x={DC} y={DC - DR + 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+        <text x={DC} y={DC + DR - 1} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+        <text x={DC - DR + 5} y={DC + 3} class="dome-card" text-anchor="middle"
           >{hi('पू', 'E')}</text
         >
-        <text x={DC + DR - 9} y={DC + 3} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
+        <text x={DC + DR - 5} y={DC + 3} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
         >
       {/if}
     </svg>
@@ -546,7 +546,7 @@
     fill: rgba(214, 228, 255, 0.95);
   }
   .dome-con-name {
-    font-size: 6px;
+    font-size: 5px;
     fill: rgba(180, 200, 240, 0.62);
     letter-spacing: 0.3px;
     pointer-events: none;
@@ -554,8 +554,8 @@
     transition: opacity 0.14s ease;
   }
   .dome-star-name {
-    font-size: 6px;
-    fill: rgba(205, 218, 248, 0.92);
+    font-size: 5px;
+    fill: rgba(205, 218, 248, 0.62);
     letter-spacing: 0.2px;
     pointer-events: none;
     opacity: 0;
@@ -571,14 +571,9 @@
     fill: rgba(255, 255, 255, 0.16);
   }
   .dome-card {
-    font-size: 8px;
-    font-weight: 600;
-    fill: rgba(255, 255, 255, 0.92);
-    /* dark halo so N/S/E/W stay legible on the bright daytime sky too */
-    paint-order: stroke;
-    stroke: rgba(10, 20, 45, 0.55);
-    stroke-width: 1.4px;
-    stroke-linejoin: round;
+    font-size: 6px;
+    font-weight: 500;
+    fill: rgba(214, 224, 248, 0.5);
   }
   .dome-path {
     fill: none;
@@ -596,7 +591,7 @@
     stroke-dasharray: 2.5 2.5;
   }
   .dome-label {
-    font-size: 5.75px;
+    font-size: 5px;
     font-weight: 600;
     fill: rgba(255, 255, 255, 0.82);
     paint-order: stroke;
@@ -615,9 +610,10 @@
   .dome-con.revealed .dome-star-name {
     opacity: 1;
   }
+  /* the Labels toggle shows body + constellation names; individual bright-star
+     names stay hover-only (revealed one at a time) so the dome isn't a wall of text */
   .labels-shown .dome-label,
-  .labels-shown .dome-con-name,
-  .labels-shown .dome-star-name {
+  .labels-shown .dome-con-name {
     opacity: 1;
   }
   /* Only the invisible .dome-hit target should be interactive — not the Sun's

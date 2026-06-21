@@ -1,8 +1,9 @@
 // Draft state for the kundli + matching forms, held at module scope so it
-// survives component unmount/remount. The #/kundli and #/match routes are
-// lazy-loaded and unmount when you navigate away (or the lazy chunk reloads),
-// which would otherwise wipe a half-entered form. Components initialise their
-// local $state from these drafts and sync changes back via a single $effect.
+// survives component unmount/remount. The #/kundli route (chart + the Milan
+// matching section) is lazy-loaded and unmounts when you navigate away (or the
+// lazy chunk reloads), which would otherwise wipe a half-entered form. Components
+// initialise their local $state from these drafts and sync changes back via a
+// single $effect.
 
 import type { Location } from '$lib/panchanga';
 import type { BirthChart, MatchResult } from '$lib/jyotish';

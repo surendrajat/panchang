@@ -93,8 +93,6 @@
     const festivals = path.match(/^festivals\/(\d{4})$/);
     if (festivals) return { name: 'festivals', year: festivals[1] };
     if (path === 'kundli') return { name: 'kundli' };
-    // Match (Milan) is now a section inside Kundli — keep old links working.
-    if (path === 'match') return { name: 'kundli' };
     if (path === 'sky') return { name: 'sky' };
     if (path === 'learn') return { name: 'learn' };
     if (path === 'settings') return { name: 'settings' };

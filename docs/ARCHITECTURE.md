@@ -47,7 +47,7 @@ lib/panchanga/                    lib/jyotish/
   muhurta moon-phase tiebreakers    matching (ashtakoota) · sky-math · names
   festivals/
   ↓                                   ↓
-routes/ + components/   Day Month Festivals Kundli Match Sky Learn Settings
+routes/ + components/   Day Month Festivals Kundli Sky Learn Settings
 lib/state/  (runes)     preferences · clock · jyotish-draft · sw-update
 lib/storage/ (Dexie)    db · cache · birth-profiles · saved-locations · preferences
 lib/i18n/ + lib/format/ en/hi + names + transliteration · numerals · time
@@ -111,8 +111,7 @@ Sanskrit in both. `lib/format` handles numerals (Devanagari/Latin) and time.
 | `#/day/YYYY-MM-DD` | Day detail (same component) |
 | `#/month/YYYY-MM` | Month calendar |
 | `#/festivals/YYYY` | Festival list |
-| `#/kundli` | Birth chart |
-| `#/match` | Legacy alias → redirects to `#/kundli` (Milan is a section inside Kundli) |
+| `#/kundli` | Birth chart (+ the Milan matching section) |
 | `#/sky` | Sky view (local-sky dome + tonight's rise/set table) |
 | `#/learn` | Learn guide (how the panchanga works, interactive) |
 | `#/settings` | Settings |

@@ -9,12 +9,13 @@ is the page to read.
 
 - **Ephemeris**: [astronomy-engine](https://github.com/cosinekitty/astronomy) (MIT).
   Sub-arcminute accuracy for Sun and Moon; the apparent ecliptic-of-date
-  longitudes match Drik Panchang's Swiss-Ephemeris-derived values to
-  within a few arcseconds across 1900–2100.
+  longitudes match Swiss Ephemeris to within a few arcseconds across
+  1900–2100 (verified independently — `tests/reference/`).
 - **Ayanamsa**: Lahiri by default (the convention of the Indian
-  Astronomical Ephemeris). The base value at J2000 is tuned (23.8635°)
-  to match Drik Panchang's computational Lahiri values; the annual
-  drift is the standard ~50.29″.
+  Astronomical Ephemeris). The base value at J2000 is **23.85709°** =
+  Swiss Ephemeris `SE_SIDM_LAHIRI`, the official IAE value; the annual
+  drift is the standard ~50.29″. (drikpanchang.com uses a value ~0.4′
+  higher; we match the independent gold standard, not Drik.)
 - **Festivals**: rule-based, with conventions documented in this file.
   Smarta defaults where Smarta/Vaishnava disagree.
 

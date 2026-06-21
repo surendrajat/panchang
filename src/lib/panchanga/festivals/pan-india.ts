@@ -75,7 +75,7 @@ const KRISHNA = (n: number) => 15 + n; // krishna 1..15 → 16..30
 function vyapiniShukla(
   tithi: number,
   masa: string,
-  window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna',
+  window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'purvahna',
   pick: 'earlier' | 'later' = 'earlier',
   fallback: 'strict' | 'sunrise' = 'sunrise',
 ) {
@@ -251,7 +251,14 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'vasant_panchami',
     displayName: 'Vasant Panchami',
     displayNameHi: 'वसंत पंचमी',
-    matches: inShukla(5, 'Magha'),
+    // Vasant Panchami / Saraswati Puja — Magha Shukla Panchami at PURVAHNA
+    // (forenoon). Drik: "Purvahna Kala, the time between sunrise and midday,
+    // decides Vasant Panchami day" — Saraswati Puja is a forenoon rite, so the
+    // day Panchami pervades the forenoon is taken, even if absent at the sunrise
+    // instant. Sunrise was WRONG on boundary years (2024 Panchami ends ~12:09pm,
+    // before midday → only purvahna catches Feb 14; 2028 ours gave Feb 1 vs Drik
+    // Jan 31). Verified vs Drik New Delhi 2024-2028.
+    matches: vyapiniShukla(5, 'Magha', 'purvahna', 'earlier'),
   },
 
   // Holika Dahan — Phalguna Shukla 15. Drik rule: Pradosha-vyapini
@@ -339,6 +346,15 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'akshaya_tritiya',
     displayName: 'Akshaya Tritiya',
     displayNameHi: 'अक्षय तृतीया',
+    // Akshaya Tritiya — Vaishakha Shukla Tritiya. KNOWN LIMITATION: the true rule
+    // is "Tritiya overlaps the forenoon [sunrise..midday] puja window" — a tithi-
+    // INTERVAL-vs-period overlap that this instant-vyapini engine can't express,
+    // and the day-pick when both days qualify depends on which holds more of the
+    // forenoon (Drik prose not published). No single window matches every year:
+    // sunrise is off in 2026 (ours Apr 20 vs Drik Apr 19), a midday instant is off
+    // in 2027 (May 8 vs Drik May 9). Kept on the udaya/sunrise default; the rare
+    // boundary-year (~once/decade) ±1 divergence is documented, not silently
+    // hidden. Matches Drik New Delhi for 2024, 2025, 2027, 2028; off by 1 in 2026.
     matches: inShukla(3, 'Vaishakha'),
   },
 

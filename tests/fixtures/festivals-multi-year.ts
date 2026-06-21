@@ -178,7 +178,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'vasant_panchami',
     auditTier: 'tiebreaker',
     ruleNote:
-      'Rule note: Drik uses a daytime/Purvahna-Madhyahna Panchami rule; pinned years currently match the sunrise rule, but short-tithi years still need explicit fixtures.',
+      'Rule: Purvahna-vyapini Panchami (forenoon) — Drik takes the day Panchami pervades sunrise..midday. Now implemented (was the sunrise approximation); verified vs Drik New Delhi 2024-2028, incl the 2028 boundary (Jan 31, not the sunrise Feb 1).',
     expected: {
       2015: '2015-01-24',
       2017: '2017-02-01',
@@ -191,7 +191,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
       2024: '2024-02-14',
       2026: '2026-01-23',
       2027: '2027-02-11',
-      2028: '2028-02-01',
+      2028: '2028-01-31', // purvahna/Drik (was the sunrise approximation 2028-02-01)
     },
   },
   {

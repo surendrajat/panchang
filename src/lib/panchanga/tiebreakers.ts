@@ -50,7 +50,7 @@ import { tithiAtJD } from './tithi';
 import { KARANA_DEGREES } from './karana';
 import { NAKSHATRA_DEGREES } from './nakshatra';
 
-export type Window = 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'chandrodaya';
+export type Window = 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'chandrodaya' | 'purvahna';
 
 const PRADOSHA_OFFSET_MIN = 48;
 // Bhadra ephemeris-drift tolerance. astronomy-engine's Moon position
@@ -179,6 +179,14 @@ export function windowInstant(
       // Midday — exact midpoint of daylight.
       const daylight = sunset.getTime() - sunrise.getTime();
       return new Date(sunrise.getTime() + daylight / 2);
+    }
+    case 'purvahna': {
+      // Purvahna = forenoon, the period from sunrise to midday (per the PAC
+      // Indian Calendar's day-division). We probe its midpoint (1/4 of daylight
+      // after sunrise) as the representative "tithi prevails in the forenoon"
+      // instant. Used by Vasant Panchami (Purvahna-vyapini Panchami, per Drik).
+      const daylight = sunset.getTime() - sunrise.getTime();
+      return new Date(sunrise.getTime() + daylight / 4);
     }
     case 'chandrodaya':
       return moonrise;

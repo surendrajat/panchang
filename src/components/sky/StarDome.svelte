@@ -172,9 +172,17 @@
     if (!sun || !moon || sun.altitude < 0) return false;
     return Math.hypot(sun.pt[0] - moon.pt[0], sun.pt[1] - moon.pt[1]) < 13;
   });
+  // Daylight wash-out, applied as a whole-body opacity. Both are exactly 1 while
+  // the Sun is below the horizon, so at night every body is fully opaque (the
+  // Moon's dark limb stays solid — no see-through). The Moon is far brighter than
+  // the planets, so by day it fades only a little; the planets fade hard.
   const dayFade = $derived.by(() => {
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
     return !fAtmo || sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
+  });
+  const moonFade = $derived.by(() => {
+    const sunAlt = domeSunMoon[0]?.altitude ?? -90;
+    return !fAtmo || sunAlt <= 0 ? 1 : Math.max(0.62, 1 - sunAlt / 28);
   });
   const showStars = $derived(fStars && (!fAtmo || (domeSunMoon[0]?.altitude ?? -90) <= 0));
 
@@ -543,7 +551,7 @@
         {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
           {@const m = domeSunMoon[1]}
           {@const litD = moonLitPath(m.pt[0], m.pt[1], 8, illum, elong)}
-          <g class="dome-body" class:revealed={revealed === 'moon'}>
+          <g class="dome-body" class:revealed={revealed === 'moon'} opacity={moonFade}>
             <circle
               cx={m.pt[0]}
               cy={m.pt[1]}

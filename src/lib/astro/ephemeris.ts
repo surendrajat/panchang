@@ -91,14 +91,10 @@ export function trueObliquityDeg(jd: number): number {
 }
 
 // Tropical ecliptic-of-date longitude of the Moon's TRUE (osculating)
-// ascending node — "true Rahu", in degrees [0, 360). Computed from the
-// Moon's instantaneous state vector: the orbital angular momentum
-// h = r × v defines the orbit plane, and the ascending-node line is
-// ẑ × h = (−h_y, h_x, 0), so its ecliptic longitude is atan2(h_x, −h_y).
-// Position and velocity are rotated into the true ecliptic of date first,
-// so the result is in the same frame as the planets. Matches Swiss
-// Ephemeris SE_TRUE_NODE to < 1′ (before ayanamsa). The mean node
-// (a smoothed average) lives in the jyotish layer; this is the real one.
+// ascending node — "true Rahu", degrees [0, 360). From the Moon's state
+// vector (rotated into the ecliptic of date): the orbital angular momentum
+// h = r × v gives the node line ẑ × h, so the longitude is atan2(h_x, −h_y).
+// Matches Swiss Ephemeris SE_TRUE_NODE to < 1′ before ayanamsa.
 export function trueNodeLongitudeAtJD(jd: number): number {
   const time = jdToAstroTime(jd);
   const s = GeoMoonState(time);

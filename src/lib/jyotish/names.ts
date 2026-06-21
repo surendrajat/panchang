@@ -81,15 +81,11 @@ export function grahaAbbr(key: GrahaKey, lang: 'en' | 'hi'): string {
   return (lang === 'hi' ? GRAHA_ABBR_HI : GRAHA_ABBR)[key];
 }
 
-// Naamakshar — the traditional name-starting syllable, fixed by the Moon's
-// janma-nakshatra and its pada (108 padas → 108 syllables). In the namkaran
-// (naming) ceremony the child's name is chosen to begin with this sound. Each
-// nakshatra (13°20′) has four padas (3°20′), one syllable each.
-//
-// The Devanagari akshar is the canonical form (shown in Hindi mode); the Latin
-// is its romanization (shown in English mode). Both rows below are from
-// Wikipedia's nakshatra-pada table; the Latin loses the retroflex/dental
-// distinction, so where they could disagree the Devanagari is authoritative.
+// Naamakshar — the traditional name-starting syllable, one per pada (27
+// nakshatras × 4 = 108), used at the namkaran (naming) ceremony. Both tables
+// are Wikipedia's nakshatra-pada table; the Devanagari akshar is canonical
+// (Hindi mode), the Latin its romanization (English mode). The Latin loses the
+// retroflex/dental distinction, so the Devanagari is authoritative.
 type Quad = readonly [string, string, string, string];
 const NAME_SYLLABLES_LATIN: readonly Quad[] = [
   ['Chu', 'Che', 'Cho', 'La'], // 1 Ashwini

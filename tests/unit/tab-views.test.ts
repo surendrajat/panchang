@@ -9,7 +9,12 @@
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { render, cleanup } from '@testing-library/svelte';
 import { preferences } from '$lib/state/preferences.svelte';
-import { findFestivals, MONTHLY_OBSERVANCE_KEYS, type Location } from '$lib/panchanga';
+import {
+  findFestivals,
+  MONTHLY_OBSERVANCE_KEYS,
+  PAN_INDIA_FESTIVALS,
+  type Location,
+} from '$lib/panchanga';
 import { computeBirthChart } from '$lib/jyotish/chart';
 import KundliChart from '$components/KundliChart.svelte';
 import Day from '../../src/routes/Day.svelte';
@@ -92,6 +97,37 @@ describe('Festivals tab (annual list data)', () => {
     for (const k of MONTHLY_OBSERVANCE_KEYS)
       expect(keys.has(k), `monthly key ${k} leaked into annual list`).toBe(false);
     expect(keys.has('amavasya_devakarya')).toBe(false);
+  });
+});
+
+// Devanagari range — used to assert Hindi text actually rendered (not just
+// fell back to English / blanked out).
+const DEVANAGARI = /[ऀ-ॿ]/;
+
+describe('Hindi-mode rendering (no crash + Devanagari present)', () => {
+  beforeEach(() => {
+    preferences.language = 'hi';
+  });
+
+  it('Day renders Hindi panchanga text', () => {
+    const { container } = render(Day, { props: { yyyymmdd: '2026-11-08' } });
+    expect(DEVANAGARI.test(container.textContent ?? '')).toBe(true);
+  });
+
+  it('Month renders Hindi weekday + festival text', () => {
+    const { container } = render(Month, { props: { yyyymm: '2026-11' } });
+    const text = container.textContent ?? '';
+    expect(DEVANAGARI.test(text)).toBe(true);
+    const headers = Array.from(container.querySelectorAll('.dh')).map((e) => e.textContent?.trim());
+    expect(headers).toContain('सोमवार'); // full Hindi vara name in the header
+  });
+
+  it('every monthly + festival display name has a Hindi (displayNameHi) form', () => {
+    // A missing displayNameHi silently falls back to romanized English in Hindi mode.
+    for (const r of PAN_INDIA_FESTIVALS)
+      expect(DEVANAGARI.test(r.displayNameHi ?? ''), `${r.key} has no Devanagari displayNameHi`).toBe(
+        true,
+      );
   });
 });
 

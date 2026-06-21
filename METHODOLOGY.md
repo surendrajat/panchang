@@ -183,6 +183,37 @@ Navami = Chaitra Shukla 9). The major festivals where Drik's published
 date diverges from the naive sunrise-tithi check are routed through
 the tiebreaker engine in `src/lib/panchanga/tiebreakers.ts`.
 
+### Provenance — what is sourced vs Drik-aligned
+
+Be honest about which parts rest on a citable source and which are
+calibrated to drikpanchang.com:
+
+- **Verifiable.** The astronomy (tithi/nakshatra/yoga from Sun/Moon,
+  ayanamsa, sunrise) is pinned to Swiss Ephemeris. The *rule type* for
+  each festival (Ganesh = Madhyahna-vyapini, Shivaratri = Nishita-vyapini,
+  etc.) is classical (Dharmasindhu / Nirnaya Sindhu). The principle that a
+  festival's tithi **occurs every year** and a kshaya (skipped) tithi is
+  observed **on the day it occurs** is classical and is a fact, not a
+  convention — enforced by `tests/regression/festivals-all-years.test.ts`.
+- **Drik-aligned (calibrated, not independently sourced).** The *exact
+  numerical* window spans, the Bhadra cutoffs (`prahar4` etc.), and the
+  `pick`/tiebreaker choices are tuned so the strict-day output matches
+  drikpanchang.com across 2015–2028 (`festivals-multi-year`). They follow
+  classical rule *types* but the precise numbers are reverse-engineered to
+  Drik, not derived from a single authority. Treat normal-year dates as
+  "Smarta, Drik-aligned."
+
+### Known limitations
+
+- **Short-tithi years.** When a tithi pervades no day's named window, the
+  festival falls back to the general sunrise rule (above) so it never
+  vanishes — but the *day* can differ from Drik's festival-specific
+  handling by ±1 (e.g. Ganesh Chaturthi 1975). Presence is guaranteed;
+  exactness in these rare years is not.
+- **1983 Kshaya Masa.** The Pausha–Magha "lost month" (the only kshaya
+  masa in 1950–2100; next 2124) is not specially handled, so its Magha
+  festivals are absent. Documented, not silently dropped.
+
 ### Tiebreaker engine
 
 The engine has four families. Each rule cites the muhurta window it's

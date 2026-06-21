@@ -200,6 +200,30 @@ function probeWindow(loc: Location, date: Date, win: Window): WindowProbe | null
   return { instant, tithiIndex: tithiAtJD(dateToJulian(instant)).index };
 }
 
+// Sunrise tithi index (1..30) for a civil day, or null at polar latitudes.
+export function sunriseTithiIndex(loc: Location, date: Date): number | null {
+  const rise = sunRiseSet(loc, date).rise;
+  return rise ? tithiAtJD(dateToJulian(rise)).index : null;
+}
+
+// The general (documented, Smarta) rule for which civil day a tithi belongs to:
+// the day at whose SUNRISE it prevails. A KSHAYA tithi — one that begins after
+// a sunrise and ends before the next, touching no sunrise — belongs to the day
+// it falls within (sunrise = index-1, next sunrise = index+1). This is a fact,
+// not a convention: a festival's tithi occurs every year, so it must resolve to
+// a day. Adjacency is modular so a skipped Pratipada / Amavasya at the month
+// boundary is handled too.
+export function sunriseTithiObservedForDate(loc: Location, date: Date, index: number): boolean {
+  const today = sunriseTithiIndex(loc, date);
+  if (today === index) return true;
+  const prev = index === 1 ? 30 : index - 1;
+  const next = index === 30 ? 1 : index + 1;
+  if (today === prev) {
+    return sunriseTithiIndex(loc, new Date(date.getTime() + MS_PER_DAY)) === next;
+  }
+  return false;
+}
+
 // Date-based vyapini check. The festival fires on `date` when the
 // target tithi is present at TODAY'S window, AND the adjacent "other"
 // day does NOT also qualify — `pick` decides which side wins when two
@@ -338,7 +362,6 @@ const SUNRISE_MINUS_120_NOMINAL_MS = 115 * 60_000;
 function bhadraCutoffInstant(
   loc: Location,
   date: Date,
-  win: Window,
   cutoff: BhadraCutoff,
   windowInstantValue: Date,
 ): Date | null {
@@ -389,7 +412,7 @@ export function bhadraAwareVyapiniMatchesForDate(
     // Bhadra at window. Check cutoff (with guard band — see comment
     // on BHADRA_GUARD_BAND_MS). "Bhadra extends past cutoff" if it's
     // active at (cutoff - guard).
-    const cutoffInstant = bhadraCutoffInstant(loc, date, win, cutoff, todayProbe.instant);
+    const cutoffInstant = bhadraCutoffInstant(loc, date, cutoff, todayProbe.instant);
     if (!cutoffInstant) return false;
     const cutoffMinusGuard = new Date(cutoffInstant.getTime() - BHADRA_GUARD_BAND_MS);
     return !isBhadraAtJD(dateToJulian(cutoffMinusGuard));
@@ -400,13 +423,7 @@ export function bhadraAwareVyapiniMatchesForDate(
   const yesterdayProbe = probeWindow(loc, yesterdayDate, win);
   if (!yesterdayProbe || yesterdayProbe.tithiIndex !== tithiIndex) return false;
   if (!isBhadraAtJD(dateToJulian(yesterdayProbe.instant))) return false;
-  const yCutoffInstant = bhadraCutoffInstant(
-    loc,
-    yesterdayDate,
-    win,
-    cutoff,
-    yesterdayProbe.instant,
-  );
+  const yCutoffInstant = bhadraCutoffInstant(loc, yesterdayDate, cutoff, yesterdayProbe.instant);
   if (!yCutoffInstant) return false;
   const yCutoffMinusGuard = new Date(yCutoffInstant.getTime() - BHADRA_GUARD_BAND_MS);
   return isBhadraAtJD(dateToJulian(yCutoffMinusGuard));
@@ -434,12 +451,30 @@ export function bhadraAwareVyapiniWithSunriseFallback(
   cutoff: BhadraCutoff,
 ): boolean {
   if (bhadraAwareVyapiniMatchesForDate(p.location, p.date, win, tithiIndex, cutoff)) return true;
-  if (p.tithi.index !== tithiIndex) return false;
+  if (!sunriseTithiObservedForDate(p.location, p.date, tithiIndex)) return false;
   const yesterday = new Date(p.date.getTime() - MS_PER_DAY);
   const tomorrow = new Date(p.date.getTime() + MS_PER_DAY);
   if (bhadraAwareVyapiniMatchesForDate(p.location, yesterday, win, tithiIndex, cutoff))
     return false;
   if (bhadraAwareVyapiniMatchesForDate(p.location, tomorrow, win, tithiIndex, cutoff)) return false;
+  return true;
+}
+
+// Date-based form of bhadraAwareVyapiniWithSunriseFallback, for festivals that
+// replay the rule on a neighbouring day (Holi = the day after Holika Dahan).
+export function bhadraAwareVyapiniWithSunriseFallbackForDate(
+  loc: Location,
+  date: Date,
+  win: Window,
+  tithiIndex: number,
+  cutoff: BhadraCutoff,
+): boolean {
+  if (bhadraAwareVyapiniMatchesForDate(loc, date, win, tithiIndex, cutoff)) return true;
+  if (!sunriseTithiObservedForDate(loc, date, tithiIndex)) return false;
+  const yesterday = new Date(date.getTime() - MS_PER_DAY);
+  const tomorrow = new Date(date.getTime() + MS_PER_DAY);
+  if (bhadraAwareVyapiniMatchesForDate(loc, yesterday, win, tithiIndex, cutoff)) return false;
+  if (bhadraAwareVyapiniMatchesForDate(loc, tomorrow, win, tithiIndex, cutoff)) return false;
   return true;
 }
 
@@ -459,10 +494,10 @@ export function vyapiniWithSunriseFallback(
   pick: 'earlier' | 'later' = 'earlier',
 ): boolean {
   if (vyapiniMatchesForDate(p.location, p.date, win, tithiIndex, pick)) return true;
-  // Fallback: today's sunrise tithi is the target AND neither adjacent
-  // day fires the strict vyapini rule. The "adjacent" search has to
-  // cover both sides because the kshaya could fall either way.
-  if (p.tithi.index !== tithiIndex) return false;
+  // Fallback: the target tithi is the one OBSERVED today by the general
+  // sunrise rule (kshaya-aware) AND neither adjacent day fires the strict
+  // vyapini rule. Recovers a festival whose tithi pervades no day's window.
+  if (!sunriseTithiObservedForDate(p.location, p.date, tithiIndex)) return false;
   const yesterday = new Date(p.date.getTime() - MS_PER_DAY);
   const tomorrow = new Date(p.date.getTime() + MS_PER_DAY);
   if (vyapiniMatchesForDate(p.location, yesterday, win, tithiIndex, pick)) return false;

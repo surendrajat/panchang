@@ -19,15 +19,26 @@ import type { FestivalRule } from './rules';
 import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
 import {
   vyapiniMatches,
-  bhadraAwareVyapiniMatches,
-  bhadraAwareVyapiniMatchesForDate,
   bhadraAwareVyapiniWithSunriseFallback,
+  bhadraAwareVyapiniWithSunriseFallbackForDate,
   vyapiniWithSunriseFallback,
   vyapiniWithNakshatraPreference,
   smartaJanmashtamiMatches,
   sankrantiInto,
   kartikaPratipadaBridgeDay,
+  sunriseTithiObservedForDate,
+  sunriseTithiIndex,
 } from '../tiebreakers';
+
+// Amanta month order, for the kshaya-Pratipada boundary rule in `inShukla`.
+const AMANTA_ORDER = [
+  'Chaitra', 'Vaishakha', 'Jyeshtha', 'Ashadha', 'Shravana', 'Bhadrapada',
+  'Ashvina', 'Kartika', 'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
+];
+const prevAmanta = (m: string): string => {
+  const i = AMANTA_ORDER.indexOf(m);
+  return i < 0 ? m : AMANTA_ORDER[(i + 11) % 12];
+};
 
 // Nakshatra index for Shravana (used by Vijayadashami).
 const NAK_SHRAVANA = 22;
@@ -55,7 +66,7 @@ function vyapiniShukla(
   masa: string,
   window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna',
   pick: 'earlier' | 'later' = 'earlier',
-  fallback: 'strict' | 'sunrise' = 'strict',
+  fallback: 'strict' | 'sunrise' = 'sunrise',
 ) {
   return (p: Panchanga): boolean => {
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
@@ -71,7 +82,7 @@ function vyapiniKrishna(
   masa: string,
   window: 'pradosha' | 'nishita' | 'aparahna' | 'madhyahna' | 'chandrodaya',
   pick: 'earlier' | 'later' = 'earlier',
-  fallback: 'strict' | 'sunrise' = 'strict',
+  fallback: 'strict' | 'sunrise' = 'sunrise',
 ) {
   return (p: Panchanga): boolean => {
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
@@ -102,7 +113,7 @@ function vyapiniShuklaBhadra(
     // their Krishna 1 day. Allow either Purnima-of-target-masa or
     // Krishna-1-of-target-masa under amantaName.
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
-    return bhadraAwareVyapiniMatches(p, window, SHUKLA(tithi), cutoff);
+    return bhadraAwareVyapiniWithSunriseFallback(p, window, SHUKLA(tithi), cutoff);
   };
 }
 
@@ -110,11 +121,19 @@ function vyapiniShuklaBhadra(
 // Purnimanta, so we can match either `masa.name` or `masa.amantaName` —
 // we use `amantaName` for consistency with the Krishna helpers.
 function inShukla(tithiNumber: number, amantaMasa: string) {
-  return (p: Panchanga): boolean =>
-    p.tithi.paksha === 'shukla' &&
-    p.tithi.number === tithiNumber &&
-    p.masa.amantaName === amantaMasa &&
-    !p.masa.isAdhika;
+  return (p: Panchanga): boolean => {
+    if (p.masa.isAdhika) return false;
+    if (!sunriseTithiObservedForDate(p.location, p.date, tithiNumber)) return false;
+    if (p.masa.amantaName === amantaMasa) return true;
+    // A kshaya Pratipada (Shukla 1) is observed on the prior month's Amavasya
+    // day, which is labelled M-1; the Amavasya-sunrise guard stops this from
+    // firing on the prior month's own Shukla 1.
+    return (
+      tithiNumber === 1 &&
+      p.masa.amantaName === prevAmanta(amantaMasa) &&
+      sunriseTithiIndex(p.location, p.date) === 30
+    );
+  };
 }
 
 // Krishna-paksha festivals: must dispatch on the canonical Amanta name,
@@ -125,10 +144,9 @@ function inShukla(tithiNumber: number, amantaMasa: string) {
 // the underlying lunar bracket regardless of display system.
 function inKrishna(tithiNumber: number, amantaMasa: string) {
   return (p: Panchanga): boolean =>
-    p.tithi.paksha === 'krishna' &&
-    p.tithi.number === tithiNumber &&
     p.masa.amantaName === amantaMasa &&
-    !p.masa.isAdhika;
+    !p.masa.isAdhika &&
+    sunriseTithiObservedForDate(p.location, p.date, 15 + tithiNumber);
 }
 
 // Solar sankrantis use the Drik "Punya Kaal" sunset rule: if the Sun
@@ -230,7 +248,13 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
       const yesterday = new Date(p.date.getTime() - MS_PER_DAY);
       // Replay the Bhadra-aware Holika Dahan check for `yesterday`
       // using the date-based primitive (no yesterday-Panchanga needed).
-      return bhadraAwareVyapiniMatchesForDate(p.location, yesterday, 'pradosha', SHUKLA(15));
+      return bhadraAwareVyapiniWithSunriseFallbackForDate(
+        p.location,
+        yesterday,
+        'pradosha',
+        SHUKLA(15),
+        'prahar4',
+      );
     },
   },
 

@@ -398,6 +398,15 @@
     {/if}
   </main>
 
+  <!-- Mirror the masthead's petal garland to mark the end of the page -->
+  <div class="title-ornament title-ornament--end" aria-hidden="true">
+    <span class="title-ornament__rule"></span>
+    <span class="title-ornament__petal">❀</span>
+    <span class="title-ornament__petal">❦</span>
+    <span class="title-ornament__petal">❀</span>
+    <span class="title-ornament__rule"></span>
+  </div>
+
   <footer class="footer-note">
     {tr('footer.method')}<br />
     {tr('footer.privacy')}
@@ -531,6 +540,12 @@
     color: var(--gold);
     line-height: 1;
     text-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 30%, transparent);
+  }
+  /* The same garland repeated before the footer to mark page-end —
+     book-printing convention (frontispiece at top, colophon ornament at bottom) */
+  .title-ornament--end {
+    margin-top: 56px;
+    margin-bottom: 16px;
   }
   .title-ornament__petal {
     font-size: 14px;

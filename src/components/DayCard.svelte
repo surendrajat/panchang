@@ -245,26 +245,50 @@
 </script>
 
 <article class="day-card stagger">
-  <!-- HERO: tithi name + meta + moon -->
+  <!-- HERO: kicker + tithi name on the left, moon on the right (bottoms aligned);
+       meta + greg + rashi line beneath them in a full-width details block. -->
   <div class="hero">
-    <div class="hero__text">
-      <div class="kicker">
-        {panchanga.paksha === 'shukla' ? tr('paksha.shukla') : tr('paksha.krishna')} · {masaName}
-        {#if panchanga.masa.isAdhika}<span class="badge">{tr('masa.adhika')}</span>{/if}
-        {#if panchanga.masa.isKshaya}<span class="badge">{tr('masa.kshaya')}</span>{/if}
-        <span class="kicker__system" title="Lunar-month convention"
-          >· {panchanga.masa.system === 'purnimanta'
-            ? tr('system.purnimanta')
-            : tr('system.amanta')}</span
-        >
+    <div class="hero__top">
+      <div class="hero__head">
+        <div class="kicker">
+          {panchanga.paksha === 'shukla' ? tr('paksha.shukla') : tr('paksha.krishna')} · {masaName}
+          {#if panchanga.masa.isAdhika}<span class="badge">{tr('masa.adhika')}</span>{/if}
+          {#if panchanga.masa.isKshaya}<span class="badge">{tr('masa.kshaya')}</span>{/if}
+          <span class="kicker__system" title="Lunar-month convention"
+            >· {panchanga.masa.system === 'purnimanta'
+              ? tr('system.purnimanta')
+              : tr('system.amanta')}</span
+          >
+        </div>
+        <div class="tithi-name">
+          {tithiName}
+          <!-- Tiny number-in-brackets after the hero tithi name — gives
+               readers a quick handle on "where am I in the lunar
+               month" (1..15 within a paksha). -->
+          <span class="tithi-name__num num">({num(String(panchanga.tithi.number))})</span>
+        </div>
       </div>
-      <div class="tithi-name">
-        {tithiName}
-        <!-- Tiny number-in-brackets after the hero tithi name — gives
-             readers a quick handle on "where am I in the lunar
-             month" (1..15 within a paksha). -->
-        <span class="tithi-name__num num">({num(String(panchanga.tithi.number))})</span>
+      <div class="hero__moon">
+        <MoonPhase
+          illumination={panchanga.moonPhase.illumination}
+          phaseAngle={panchanga.moonPhase.phaseAngle}
+          phaseName={panchanga.moonPhase.phaseName}
+          size={104}
+        />
+        <div class="moon-pct num">
+          {tr('moon.lit', {
+            percent: renderNumber(
+              Math.round(panchanga.moonPhase.illumination * 100),
+              preferences.numerals,
+            ),
+          })}
+        </div>
+        <div class="moon-phase-name">
+          {tr(MOON_PHASE_KEYS[panchanga.moonPhase.phaseName] ?? 'moonPhase.new')}
+        </div>
       </div>
+    </div>
+    <div class="hero__details">
       {#if sunrise}
         <div class="tithi-meta">
           {tr('tithi.endsBefore')}<b class="num">{tithiEndsAtLabel()}</b>{tr('tithi.endsAfter')} ·
@@ -322,25 +346,6 @@
             />
           </svg>{rashiLabel(moonRashiIndex)}
         </span>
-      </div>
-    </div>
-    <div class="hero__moon">
-      <MoonPhase
-        illumination={panchanga.moonPhase.illumination}
-        phaseAngle={panchanga.moonPhase.phaseAngle}
-        phaseName={panchanga.moonPhase.phaseName}
-        size={104}
-      />
-      <div class="moon-pct num">
-        {tr('moon.lit', {
-          percent: renderNumber(
-            Math.round(panchanga.moonPhase.illumination * 100),
-            preferences.numerals,
-          ),
-        })}
-      </div>
-      <div class="moon-phase-name">
-        {tr(MOON_PHASE_KEYS[panchanga.moonPhase.phaseName] ?? 'moonPhase.new')}
       </div>
     </div>
   </div>
@@ -517,16 +522,28 @@
     margin-top: 6px;
   }
 
-  /* ── hero ── */
+  /* ── hero ──
+     Top row: kicker+tithi name (left) and the moon block (right), aligned at
+     their bottoms — so the moon-phase image + caption end on the same baseline
+     as the big tithi title. Details (meta + greg + rashi line) sit beneath. */
   .hero {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 22px;
-    align-items: center;
+    display: block;
     margin-bottom: 8px;
   }
-  .hero__text {
+  .hero__top {
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    /* clip a very long tithi-name's overflow at the card edge without ever
+       causing page-level horizontal scroll */
+    overflow: hidden;
+  }
+  .hero__head {
+    flex: 1;
     min-width: 0;
+  }
+  .hero__details {
+    margin-top: 10px;
   }
   .tithi-name__num {
     font-family: var(--font-serif);
@@ -856,43 +873,27 @@
   }
 
   @media (max-width: 460px) {
-    /* On phones, keep the moon on the right rather than dropping it under the
-       text. The tithi-name (top line) is allowed to overflow horizontally
-       across/behind the moon area; the meta + greg + rashi-line beneath it wrap
-       within the remaining text column. The moon is absolutely positioned so the
-       overflowing title doesn't push it down. */
-    .hero {
-      display: block;
-      position: relative;
-      padding-right: 92px;
-      min-height: 96px;
-      /* clip the overflowing tithi-name at the card edge (so it never causes a
-         page-level horizontal scroll); the moon sits on top of the overflow */
-      overflow: hidden;
-    }
-    .hero__text {
-      min-width: 0;
+    /* The flex hero__top already bottom-aligns the head text + moon; on phones
+       we just keep the moon a touch smaller so its block isn't taller than
+       (kicker + tithi-name), and let the tithi name overflow horizontally
+       behind it rather than wrap. */
+    .hero__top {
+      gap: 14px;
     }
     .tithi-name {
-      /* let the big tithi title bleed past the right-hand moon column rather
-         than wrapping early — fine because the moon hugs the top right corner */
       white-space: nowrap;
       overflow: visible;
     }
-    .hero__moon {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 84px;
-      text-align: center;
-    }
     .hero__moon :global(.moon-svg) {
-      width: 80px;
-      height: 80px;
+      width: 76px;
+      height: 76px;
     }
     .moon-pct {
-      font-size: 13px;
+      font-size: 12.5px;
       margin-top: 4px;
+    }
+    .moon-phase-name {
+      font-size: 10px;
     }
     .timings {
       grid-template-columns: repeat(2, 1fr);

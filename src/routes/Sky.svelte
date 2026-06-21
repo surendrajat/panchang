@@ -184,9 +184,11 @@
 
   const SPEEDS = [
     { key: 'pause', live: false, speed: 0, n: '', hi: 'रोकें', en: 'Pause' },
-    { key: 'hour', live: false, speed: 3600, n: '1', hi: 'घंटा/से', en: 'hour/s' },
-    { key: 'day', live: false, speed: 86400, n: '1', hi: 'दिन/से', en: 'day/s' },
-    { key: 'week', live: false, speed: 604800, n: '1', hi: 'सप्ताह/से', en: 'week/s' },
+    // "से." with the trailing dot — abbreviation of "सेकंड" (second), so it
+    // doesn't read as "से" (the postposition meaning "from")
+    { key: 'hour', live: false, speed: 3600, n: '1', hi: 'घंटा/से.', en: 'hour/s' },
+    { key: 'day', live: false, speed: 86400, n: '1', hi: 'दिन/से.', en: 'day/s' },
+    { key: 'week', live: false, speed: 604800, n: '1', hi: 'सप्ताह/से.', en: 'week/s' },
   ];
   const activeSpeedKey = $derived(
     live ? 'now' : (SPEEDS.find((s) => s.speed === speed)?.key ?? 'pause'),
@@ -1664,7 +1666,7 @@
   /* small italic affordance under the speed control — the segmented buttons
      don't immediately read as "time controls," so this names them */
   .speed-hint {
-    margin: 0.35rem 0 0;
+    margin: 0.75rem 0 0;
     font-size: 0.72rem;
     color: var(--ink-faint);
     line-height: 1.2;

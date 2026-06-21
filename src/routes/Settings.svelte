@@ -167,7 +167,7 @@
       <span class="k">{tr('settings.aboutMethodology')}</span>
       <span class="v"
         ><a
-          href="https://github.com/surendrajat/panchang/blob/main/METHODOLOGY.md"
+          href="https://github.com/surendrajat/panchang/tree/main/docs/guide"
           rel="noopener"
           target="_blank">{tr('settings.methodologyLink')}</a
         ></span

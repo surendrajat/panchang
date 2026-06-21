@@ -42,11 +42,12 @@
     return () => cancelAnimationFrame(raf);
   });
 
+  // Full speed labels — same text as the original Sky tab (not abbreviated).
   const SPEEDS = [
     { key: 'pause', live: false, speed: 0, hi: 'रोकें', en: 'Pause' },
-    { key: 'hour', live: false, speed: 3600, hi: '1 घं/से.', en: '1 hr/s' },
+    { key: 'hour', live: false, speed: 3600, hi: '1 घंटा/से.', en: '1 hour/s' },
     { key: 'day', live: false, speed: 86400, hi: '1 दिन/से.', en: '1 day/s' },
-    { key: 'week', live: false, speed: 604800, hi: '1 सप्ताह/से.', en: '1 wk/s' },
+    { key: 'week', live: false, speed: 604800, hi: '1 सप्ताह/से.', en: '1 week/s' },
   ];
   const activeKey = $derived(
     live ? 'now' : (SPEEDS.find((s) => s.speed === speed)?.key ?? 'pause'),

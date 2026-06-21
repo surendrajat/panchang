@@ -92,9 +92,15 @@ That has two consequences you must internalise now, because Lessons 9 and 11
 spend all their effort on them:
 
 - A tithi **shorter than 24 hours** can begin *and* end between two sunrises —
-  so it touches **no** sunrise. This is a **क्षय tithi** (*kṣaya*, "skipped").
+  so it touches **no** sunrise. This is a **क्षय tithi** (*kṣaya*, literally "to
+  shrink, to diminish") — a short tithi that is **lost** from the day-count.
 - A tithi **longer than 24 hours** can be running at **two** consecutive
-  sunrises. This is a **वृद्धि tithi** (*vṛddhi*, "doubled").
+  sunrises. This is a **वृद्धि tithi** (*vṛddhi*, literally "to grow, to
+  increase") — a long tithi **repeated** across two days.
+
+The names describe the tithi's *length* (kṣaya = short, vṛddhi = long); the
+*effect* on the calendar is that the short one is dropped and the long one is
+counted twice.
 
 ```
 sunrise      sunrise      sunrise      sunrise

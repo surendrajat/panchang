@@ -200,7 +200,7 @@
     <div class="card form-card">
       <h2>
         {lang === 'hi' ? 'कुण्डली' : 'Kundli'}
-        <span class="deva">{lang === 'hi' ? 'जन्म कुण्डली' : 'जन्म कुण्डली'}</span>
+        <span class="deva">जन्म कुण्डली</span>
       </h2>
       <p class="desc">
         {lang === 'hi'
@@ -334,7 +334,7 @@
     <div>
       <div class="sec-head">
         <h2>{lang === 'hi' ? 'ग्रह' : 'Grahas'}</h2>
-        <span class="deva-sm">{lang === 'hi' ? 'नव ग्रह' : 'नव ग्रह'}</span>
+        <span class="deva-sm">नव ग्रह</span>
         <span class="fill"></span>
       </div>
       <div class="graha-table" role="table">

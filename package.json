@@ -1,7 +1,7 @@
 {
   "name": "panchanga",
   "version": "0.1.0",
-  "description": "Hindu calendar (panchanga)",
+  "description": "Offline Hindu calendar (panchanga) and Vedic birth charts (kundli) — tithi, nakshatra, yoga, karana, festivals.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "private": true,

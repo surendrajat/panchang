@@ -12,9 +12,6 @@ export const en = {
   'nav.back': 'Back',
   'nav.skipToContent': 'Skip to content',
   'nav.openSettings': 'Open settings',
-  'nav.themeAuto': 'Switch to light theme',
-  'nav.themeLight': 'Switch to dark theme',
-  'nav.themeDark': 'Switch to auto theme',
   'nav.location': 'Change location',
   'nav.switchLanguage': 'Switch to Hindi',
   'nav.prevMonth': 'Previous month',
@@ -80,7 +77,6 @@ export const en = {
   'section.panchanga': 'Panchanga',
   'section.muhurta': 'Muhurta',
   'section.year': 'Year',
-  'section.upcoming': 'Upcoming',
   // Per-section kickers (the small text next to each h2). English mode
   // renders these in Devanagari; Hindi mode renders Latin so the
   // ornament reads as a cross-language gloss either way.

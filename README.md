@@ -14,6 +14,7 @@ No accounts. No ads. No tracking. Install once, works on a plane.
 - **Festivals** — Pan-India set with rules aligned to Drik Panchang (Pradosha, Aparahna Nishita, Bhadra-aware dates, Sankranti sunset cutoff).
 - **Year context** — Vikram Samvat, Shaka Samvat, Kaliyuga, Ritu, Ayana.
 - **Sun & Moon** — sunrise, sunset, moonrise, moonset, moon phase with illumination %.
+- **Kundli (birth chart)** — Lagna, the nine grahas (sidereal Lahiri, mean/true node), whole-sign bhavas, Vimshottari dasha, Navamsa (D9), naamakshar, and Ashtakoota (guna milan) matching.
 
 ## Languages
 

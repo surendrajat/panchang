@@ -82,7 +82,9 @@
   const kootaLabel = (k: KootaKey) => (lang === 'hi' ? KOOTA[k][1] : KOOTA[k][0]);
 
   function moonOf(p: Person) {
-    const instant = birthInstant(p.date, p.time, p.place!.timezone);
+    // Default a blank birth time to noon (as the Kundli route does) — otherwise
+    // birthInstant would parse '' to NaN and the match would silently break.
+    const instant = birthInstant(p.date, p.time || '12:00', p.place!.timezone);
     const chart = computeBirthChart(instant, p.place!, true, {
       ayanamsa: preferences.ayanamsa,
       nodeType: preferences.nodeType,
@@ -137,6 +139,7 @@
           <select
             class="select"
             value=""
+            aria-label={lang === 'hi' ? 'सहेजी कुण्डली चुनें' : 'Load saved chart'}
             onchange={(e) => {
               applyProfile(role, e.currentTarget.value);
               e.currentTarget.value = '';
@@ -148,7 +151,7 @@
             {/each}
           </select>
         {/if}
-        <input class="input" type="text" bind:value={p.name} placeholder={lang === 'hi' ? 'नाम (वैकल्पिक)' : 'Name (optional)'} />
+        <input class="input" type="text" bind:value={p.name} aria-label={lang === 'hi' ? 'नाम' : 'Name'} placeholder={lang === 'hi' ? 'नाम (वैकल्पिक)' : 'Name (optional)'} />
         <div class="two-up">
           <label class="label">
             <span class="lab">{lang === 'hi' ? 'जन्म तिथि' : 'Date'}</span>

@@ -17,9 +17,6 @@ export const hi: Record<TranslationKey, string> = {
   'nav.back': 'वापस',
   'nav.skipToContent': 'सामग्री पर जाएं',
   'nav.openSettings': 'विन्यास खोलें',
-  'nav.themeAuto': 'दिन की पृष्ठभूमि',
-  'nav.themeLight': 'रात की पृष्ठभूमि',
-  'nav.themeDark': 'स्वतः पृष्ठभूमि',
   'nav.location': 'स्थान बदलें',
   'nav.switchLanguage': 'Switch to English',
   'nav.prevMonth': 'विगत मास',
@@ -91,7 +88,6 @@ export const hi: Record<TranslationKey, string> = {
   // "Year" was the literal English; user prefers the Sanskrit-Hindi
   // "सम्वत" (era/year-count) here with Latin "year" as the kicker.
   'section.year': 'सम्वत',
-  'section.upcoming': 'आगामी',
   // Section kickers carry the Latin transliteration in Hindi mode.
   'kicker.panchanga': 'Panchanga',
   'kicker.muhurta': 'Muhurta',

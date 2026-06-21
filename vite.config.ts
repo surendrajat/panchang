@@ -24,7 +24,7 @@ export default defineConfig({
         name: 'Panchanga',
         short_name: 'Panchanga',
         description:
-          'Hindu calendar with tithi, nakshatra, yoga, karana, and festivals. Offline-first PWA.',
+          'Offline Hindu calendar (panchanga) — tithi, nakshatra, yoga, karana, festivals — with Vedic birth charts (kundli).',
         start_url: '/',
         scope: '/',
         display: 'standalone',

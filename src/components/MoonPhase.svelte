@@ -34,6 +34,7 @@
   const gradientId = `moon-lit-${Math.random().toString(36).slice(2, 8)}`;
   const darkSheenId = `moon-dark-${Math.random().toString(36).slice(2, 8)}`;
   const litClipId = `moon-clip-${Math.random().toString(36).slice(2, 8)}`;
+  const fullClipId = `moon-full-${Math.random().toString(36).slice(2, 8)}`;
 
   // A few maria/craters (offset x, offset y, radius — all as fractions of R) so
   // the lit face reads as the real Moon rather than a blank disc.
@@ -69,10 +70,17 @@
         <stop offset="100%" stop-color="rgba(0, 0, 0, 0.14)" />
       </radialGradient>
       <clipPath id={litClipId}><path d={litPath} /></clipPath>
+      <clipPath id={fullClipId}><circle {cx} {cy} r={R} /></clipPath>
     </defs>
     <circle {cx} {cy} r={R} fill="var(--moon-dark)" stroke="var(--line)" stroke-width="1" />
     <!-- faint earthshine sheen on the dark limb so it reads as a sphere, not a hole -->
     <circle {cx} {cy} r={R} fill="url(#{darkSheenId})" />
+    <!-- craters faintly across the whole disc, so the dark limb isn't featureless -->
+    <g clip-path="url(#{fullClipId})">
+      {#each CRATERS as [dx, dy, cr] (`dk${dx},${dy}`)}
+        <ellipse cx={cx + dx * R} cy={cy + dy * R} rx={cr * R} ry={cr * R * 0.82} class="crater-dark" />
+      {/each}
+    </g>
     <path d={litPath} fill="url(#{gradientId})" />
     <!-- craters/maria, only on the lit face (clipped to the lit path) -->
     <g clip-path="url(#{litClipId})">
@@ -111,5 +119,8 @@
   }
   .crater {
     fill: rgba(120, 100, 62, 0.16);
+  }
+  .crater-dark {
+    fill: rgba(216, 220, 235, 0.07);
   }
 </style>

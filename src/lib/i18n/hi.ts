@@ -14,6 +14,7 @@ export const hi: Record<TranslationKey, string> = {
   'tab.festivals': 'त्योहार',
   'tab.kundli': 'कुण्डली',
   'tab.sky': 'आकाश',
+  'tab.learn': 'सीखें',
   'update.available': 'नया संस्करण उपलब्ध है।',
   'update.reload': 'पुनः लोड करें',
   'update.dismiss': 'खारिज करें',
@@ -260,6 +261,7 @@ export const hi: Record<TranslationKey, string> = {
   'month.loading': 'पंचांग लोड हो रहा है…',
   'kundli.loading': 'कुंडली लोड हो रही है…',
   'sky.loading': 'आकाश लोड हो रहा है…',
+  'learn.loading': 'नोटबुक लोड हो रही है…',
   'route.loadError': 'यह भाग लोड नहीं हो सका — पुनः लोड करके देखें।',
 
   // ── miscellaneous

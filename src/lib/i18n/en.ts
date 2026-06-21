@@ -9,6 +9,7 @@ export const en = {
   'tab.festivals': 'Festivals',
   'tab.kundli': 'Kundli',
   'tab.sky': 'Sky',
+  'tab.learn': 'Learn',
   'update.available': 'A new version is available.',
   'update.reload': 'Reload',
   'update.dismiss': 'Dismiss',
@@ -251,6 +252,7 @@ export const en = {
   'month.loading': 'Loading panchanga…',
   'kundli.loading': 'Loading kundli…',
   'sky.loading': 'Loading sky…',
+  'learn.loading': 'Loading notebook…',
   'route.loadError': "Couldn't load this section — reload to try again.",
 
   // ── miscellaneous

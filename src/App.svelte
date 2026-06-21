@@ -59,6 +59,7 @@
     | { name: 'festivals'; year: string }
     | { name: 'kundli' }
     | { name: 'sky' }
+    | { name: 'learn' }
     | { name: 'settings' };
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
@@ -94,6 +95,7 @@
     // Match (Milan) is now a section inside Kundli — keep old links working.
     if (path === 'match') return { name: 'kundli' };
     if (path === 'sky') return { name: 'sky' };
+    if (path === 'learn') return { name: 'learn' };
     if (path === 'settings') return { name: 'settings' };
     return { name: 'today' };
   }
@@ -157,7 +159,7 @@
   // tab since Day is conceptually a single-day variant of Today.
   // Settings does not match any tab; the strip stays visible so the
   // user has a one-click path back to the calendar.
-  const activeTab = $derived<'today' | 'month' | 'festivals' | 'kundli' | 'sky' | null>(
+  const activeTab = $derived<'today' | 'month' | 'festivals' | 'kundli' | 'sky' | 'learn' | null>(
     route.name === 'today' || route.name === 'day'
       ? 'today'
       : route.name === 'month'
@@ -168,7 +170,9 @@
             ? 'kundli'
             : route.name === 'sky'
               ? 'sky'
-              : null,
+              : route.name === 'learn'
+                ? 'learn'
+                : null,
   );
 
   // On narrow phones the 5 tabs overflow horizontally; tabs to the right
@@ -182,11 +186,12 @@
     el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
 
-  function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli' | 'sky'): string {
+  function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli' | 'sky' | 'learn'): string {
     if (view === 'today') return '#/';
     if (view === 'month') return `#/month/${currentYYYYMM()}`;
     if (view === 'kundli') return '#/kundli';
     if (view === 'sky') return '#/sky';
+    if (view === 'learn') return '#/learn';
     return `#/festivals/${currentYear()}`;
   }
 
@@ -195,6 +200,7 @@
   function prefetchTab(view: string): void {
     if (view === 'kundli') import('./routes/Kundli.svelte').catch(() => {});
     else if (view === 'sky') import('./routes/Sky.svelte').catch(() => {});
+    else if (view === 'learn') import('./routes/Learn.svelte').catch(() => {});
   }
 </script>
 
@@ -361,7 +367,7 @@
     </nav>
   {:else}
     <nav class="tabs" bind:this={tabsEl} aria-label="Primary views">
-      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }, { id: 'sky' as const, labelKey: 'tab.sky' as const }] as tab (tab.id)}
+      {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }, { id: 'sky' as const, labelKey: 'tab.sky' as const }, { id: 'learn' as const, labelKey: 'tab.learn' as const }] as tab (tab.id)}
         <a
           class="tab"
           aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -404,6 +410,20 @@
       <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
       {#await import('./routes/Sky.svelte')}
         <Loading label={tr('sky.loading')} />
+      {:then m}
+        <m.default />
+      {:catch}
+        <p class="muted">
+          {tr('route.loadError')}
+          <button class="btn btn--pill" type="button" onclick={() => location.reload()}
+            >{tr('update.reload')}</button
+          >
+        </p>
+      {/await}
+    {:else if route.name === 'learn'}
+      <!-- Experimental notebook-style explainer; lazy-loaded (animation loop). -->
+      {#await import('./routes/Learn.svelte')}
+        <Loading label={tr('learn.loading')} />
       {:then m}
         <m.default />
       {:catch}

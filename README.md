@@ -30,7 +30,7 @@ Bundled city list covers India's metros, Hindu-diaspora centres in Southeast Asi
 - **Ayanamsa**: Lahiri (Chitra Paksha) by default; KP, Raman, Yukteshwar, True Chitra available.
 - **Sunrise**: Upper limb with atmospheric refraction, matching the Drik default.
 - **Learn how it all works** — a from-scratch course on the math, the code, and
-  the *why* of the Hindu calendar: **[docs/methodology/](./docs/methodology/)**.
+  the *why* of the Hindu calendar: **[docs/guide/](./docs/guide/)**.
 - Reference summaries: [docs/METHODOLOGY.md](./docs/METHODOLOGY.md) (panchanga),
   [docs/METHODOLOGY_JYOTISH.md](./docs/METHODOLOGY_JYOTISH.md) (kundli),
   [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).

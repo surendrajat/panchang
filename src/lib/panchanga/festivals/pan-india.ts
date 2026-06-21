@@ -10,7 +10,7 @@
 // The 11 monthly observances (Ekadashi, Pradosh, Sankashti, etc.) appear
 // at the bottom.
 //
-// Naming choices per docs/ARCHITECTURE.md §14: Smarta defaults. docs/methodology/
+// Naming choices per docs/ARCHITECTURE.md §14: Smarta defaults. docs/guide/
 // documents the tie-breakers we apply for Janmashtami, Diwali, and a
 // few others.
 

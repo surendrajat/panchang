@@ -573,7 +573,17 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Kartika'),
   },
 
-  // Vaikuntha Ekadashi — Margashirsha Shukla 11 (Dhanurmasa Ekadashi).
+  // Vaikuntha Ekadashi — we compute Margashirsha Shukla Ekadashi = MOKSHADA
+  // Ekadashi, which in NORTH India is observed as Vaikuntha Ekadashi (also Gita
+  // Jayanti). Sunrise/udaya (standard Smarta Ekadashi). Verified vs Drik's
+  // Mokshada page, New Delhi 2025 = Dec 1 = ours.
+  //
+  // REGIONAL SPLIT (not a bug): the SOUTH Indian Vaikuntha Ekadashi
+  // (Tirupati/Srirangam) is the DHANURMASA (solar Sagittarius month) Shukla
+  // Ekadashi — a DIFFERENT date, and because it is solar-anchored a Gregorian year
+  // can carry 0, 1 or 2 of them. We use the North-Indian lunar convention (the
+  // app's default); a solar Dhanurmasa variant would need a solar-month rule and
+  // is a documented future addition, not folded in here.
   {
     key: 'vaikuntha_ekadashi',
     displayName: 'Vaikuntha Ekadashi',

@@ -203,6 +203,32 @@ calibrated to drikpanchang.com:
   Drik, not derived from a single authority. Treat normal-year dates as
   "Smarta, Drik-aligned."
 
+### Cross-checked against the Government of India standard
+
+The **rule framework** matches the official national standard, not just Drik:
+- The **Calendar Reform Committee (1955, Meghnad Saha)** adopted **Lahiri
+  ayanamsa** — what this engine uses — published by the Government of India
+  through the **Rashtriya Panchang** (Positional Astronomy Centre, IMD).
+- The Rashtriya Panchang uses the **suryodaya (sunrise) tithi** rule with
+  festivals on **tithi + chandra-masa** — our structure.
+
+Major-festival **dates** for 2026 were cross-checked against the Government of
+India gazetted/restricted-holiday list and Drik per-city (New Delhi): Makar
+Sankranti, Maha Shivaratri, Holi, Buddha Purnima, Raksha Bandhan, Janmashtami,
+Ganesh Chaturthi, Vijayadashami, Diwali all match.
+
+This independent cross-check **found one real bug**: Rama Navami used the plain
+sunrise rule, but it is **madhyahna-vyapini** (Rama's midday birth) — the Govt
+list + Drik give the madhyahna/Smarta date (2026-03-26), and the sunrise output
+was landing on the Vaishnava day. Worse, 5 "Drik-verified" fixtures had been
+circularly pinned to our *own* sunrise/Vaishnava output (2013/2017/2019/2026/2028),
+never independently checked. Both fixed (see `festivals/pan-india.ts`,
+`fixtures/festivals-multi-year.ts`). **Lesson: cross-validate against an
+independent authority, not our own prior output.** The remaining sunrise-rule
+"easy case" festivals (Hanuman Jayanti, Guru/Kartik Purnima, Ugadi, Bhai Dooj,
+Tulsi Vivaha, Vaikuntha Ekadashi, Navaratri start, Akshaya Tritiya, Nag Panchami)
+are candidates for the same boundary-year re-verification — a tracked follow-up.
+
 ### Known limitations
 
 - **Short-tithi years.** When a tithi pervades no day's named window, the

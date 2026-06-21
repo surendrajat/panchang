@@ -107,10 +107,21 @@
   let simMs = $state(Date.now());
   let speed = $state(0);
   let live = $state(true);
-  let showGrahas = $state(false);
-  let showLabels = $state(false);
+  // Per-view display options. The wheel and the dome each have their own local
+  // controls (and their own defaults); the orbital model has none — its labels
+  // show on hover/tap only.
+  let wheelGrahas = $state(false);
+  let wheelLabels = $state(false);
   let tropical = $state(false);
   let showAngles = $state(false);
+  let domeGrahas = $state(true);
+  let domeLabels = $state(false);
+  let domeAtmosphere = $state(true);
+  let domePaths = $state(true);
+  let domeDirections = $state(true);
+  // each view's options live behind a gear in its own corner
+  let wheelMenu = $state(false);
+  let domeMenu = $state(false);
   // Hover (desktop) or tap (phones, where there's no hover) a body to reveal its
   // label even when labels are off — one body at a time. Action attaches the
   // tap/keyboard toggle so the template stays free of inline handlers.
@@ -132,24 +143,10 @@
       },
     };
   }
-  // The sidereal/tropical + angle toggles only matter for the wheel, so they're
-  // shown only while the wheel is on screen (hidden once you scroll past it).
-  let wheelEl = $state<SVGSVGElement | null>(null);
-  let wheelInView = $state(true);
-  $effect(() => {
-    const el = wheelEl;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    // Show the wheel-only chips while the wheel is in view OR still below (not yet
-    // scrolled to, e.g. at the top of a narrow screen); hide them only once it has
-    // scrolled up out of view past the sticky bar.
-    const io = new IntersectionObserver(
-      ([e]) => (wheelInView = e.isIntersecting || e.boundingClientRect.top > 0),
-      { rootMargin: '-90px 0px 0px 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  });
 
+  // On touch / low-power devices, scrub at a lower framerate — roughly halves the
+  // per-frame SVG re-render + GC cost while staying perfectly legible.
+  const coarsePointer = typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches;
   $effect(() => {
     if (!live && speed === 0) return;
     let raf = 0;
@@ -159,7 +156,7 @@
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick);
       const dt = t - last;
-      if (dt < 30) return;
+      if (dt < (coarsePointer && !live ? 64 : 30)) return;
       last = t;
       if (live) {
         // Real time barely moves between frames and nothing on the wheel shifts
@@ -241,7 +238,7 @@
     'ketu',
   ];
   const grahaPositions = $derived.by(() =>
-    showGrahas
+    wheelGrahas
       ? GRAHA_KEYS.map((key) => ({
           key,
           lon: grahaSiderealLongitude(key, jd, preferences.ayanamsa, preferences.nodeType),
@@ -602,8 +599,11 @@
   // Sun itself stays full). Full at/below the horizon → ~0.45 in broad daylight.
   const dayFade = $derived.by(() => {
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
-    return sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
+    return !domeAtmosphere || sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
   });
+  // Stars/constellations are visible when it is dark — or always, if the
+  // atmosphere (the daylight wash) is switched off.
+  const domeShowStars = $derived(!domeAtmosphere || (domeSunMoon[0]?.altitude ?? -90) <= 0);
 
   function lerpRGB(a: number[], b: number[], t: number): string {
     const k = Math.max(0, Math.min(1, t));
@@ -613,7 +613,8 @@
   // a warm twilight rim between (a little atmospheric glow), updated live.
   const domeSky = $derived.by(() => {
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
-    const day = (sunAlt + 6) / 12; // 0 below −6°, 1 above +6°
+    // atmosphere off → always the dark night sky (day = 0)
+    const day = domeAtmosphere ? (sunAlt + 6) / 12 : 0; // 0 below −6°, 1 above +6°
     return {
       zen: lerpRGB([22, 31, 68], [39, 82, 132], day),
       mid: lerpRGB([39, 49, 92], [72, 122, 168], day),
@@ -646,7 +647,7 @@
   // same reason as the planets (their alt/az rotates with the sky as time runs).
   const domeStars = $derived.by(() => {
     const loc = preferences.location;
-    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return [];
+    if (!loc || !domeShowStars) return [];
     return BRIGHT_STARS.map((st) => {
       const { azimuth, altitude } = starAltAz(st.ra, st.dec, simDate, loc.latitude, loc.longitude);
       return { ra: st.ra, mag: st.mag, altitude, pt: domePt(azimuth, altitude) };
@@ -657,7 +658,7 @@
   // altitude equal to your latitude. RA 2.53 h, Dec +89.26° (J2000).
   const domePolaris = $derived.by(() => {
     const loc = preferences.location;
-    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return null;
+    if (!loc || !domeShowStars) return null;
     const { azimuth, altitude } = starAltAz(2.53, 89.26, simDate, loc.latitude, loc.longitude);
     if (altitude < 0) return null;
     return { pt: domePt(azimuth, altitude) };
@@ -773,7 +774,7 @@
   // Constellations with enough stars above the horizon to draw — when it's dark.
   const domeConstellations = $derived.by(() => {
     const loc = preferences.location;
-    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return [];
+    if (!loc || !domeShowStars) return [];
     return CONSTELLATIONS.map((con) => {
       const pts = con.stars.map(([ra, dec]) => {
         const { azimuth, altitude } = starAltAz(ra, dec, simDate, loc.latitude, loc.longitude);
@@ -803,6 +804,31 @@
   });
 </script>
 
+<!-- a small toggle chip, reused by the per-view control rows -->
+{#snippet ctrl(active: boolean, toggle: () => void, label: string)}
+  <button type="button" class="chip" class:on={active} aria-pressed={active} onclick={toggle}>
+    <span class="chip__dot"></span>{label}
+  </button>
+{/snippet}
+
+<!-- a gear button that sits in a view's corner and opens its options menu -->
+{#snippet gear(open: boolean, toggle: () => void, label: string)}
+  <button
+    type="button"
+    class="view-gear"
+    class:on={open}
+    onclick={toggle}
+    aria-expanded={open}
+    aria-label={label}
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"
+      ><path
+        d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+      /></svg
+    >
+  </button>
+{/snippet}
+
 <section class="sky">
   <header class="sky__head">
     <h2>
@@ -829,285 +855,273 @@
         >
       {/each}
     </div>
-    <div class="chips" role="group" aria-label={hi('दृश्य विकल्प', 'Display options')}>
-      <button
-        type="button"
-        class="chip"
-        class:on={showGrahas}
-        aria-pressed={showGrahas}
-        onclick={() => (showGrahas = !showGrahas)}
-        ><span class="chip__dot"></span>{hi('ग्रह', 'Planets')}</button
-      >
-      <button
-        type="button"
-        class="chip"
-        class:on={showLabels}
-        aria-pressed={showLabels}
-        onclick={() => (showLabels = !showLabels)}
-        ><span class="chip__dot"></span>{hi('नाम', 'Labels')}</button
-      >
-      {#if wheelInView}
-        <button
-          type="button"
-          class="chip"
-          class:on={tropical}
-          aria-pressed={tropical}
-          onclick={() => (tropical = !tropical)}
-          ><span class="chip__dot"></span>{hi('सायन', 'Tropical')}</button
-        >
-        <button
-          type="button"
-          class="chip"
-          class:on={showAngles}
-          aria-pressed={showAngles}
-          onclick={() => (showAngles = !showAngles)}
-          ><span class="chip__dot"></span>{hi('कोण', 'Angles')}</button
-        >
-      {/if}
-    </div>
   </div>
 
   <div class="sky__grid">
-    <svg
-      bind:this={wheelEl}
-      class="wheel"
-      class:labels-shown={showLabels}
-      viewBox="0 0 {SIZE} {SIZE}"
-      role="img"
-      aria-label={hi('आकाश चक्र', 'Ecliptic wheel')}
-    >
-      <defs>
-        <radialGradient id="sun-grad" cx="38%" cy="36%" r="68%"
-          ><stop offset="0%" stop-color="#fff8d8" /><stop offset="48%" stop-color="#ffce3a" /><stop
-            offset="100%"
-            stop-color="#f08a00"
-          /></radialGradient
-        >
-        <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%"
-          ><stop offset="0%" stop-color="#ffcf4d" stop-opacity="0.4" /><stop
-            offset="100%"
-            stop-color="#ffcf4d"
-            stop-opacity="0"
-          /></radialGradient
-        >
-        <radialGradient id="earth-grad" cx="36%" cy="32%" r="75%"
-          ><stop offset="0%" stop-color="#8ec3ee" /><stop offset="60%" stop-color="#3f7ab3" /><stop
-            offset="100%"
-            stop-color="#255a8c"
-          /></radialGradient
-        >
-        <radialGradient id="moon-grad" cx="38%" cy="36%" r="70%"
-          ><stop offset="0%" stop-color="#f2efe6" /><stop
-            offset="100%"
-            stop-color="#d9d2c2"
-          /></radialGradient
-        >
-      </defs>
-
-      <!-- ZODIAC RING (rotates by the ayanamsa in tropical mode) -->
-      <g transform="rotate({ringShift} {C} {C})">
-        {#each rashis as i (i)}
-          {@const isSun = i === sunRashi}
-          {@const isMoon = i === moonRashi}
-          {@const [ix, iy] = pt(i * 30 + 15, R_ICON)}
-          <path
-            d={sector(i * 30, (i + 1) * 30)}
-            class="rashi"
-            class:rashi--alt={i % 2 === 1}
-            class:rashi--sun={isSun}
-            class:rashi--moon={isMoon && !isSun}
-            class:rashi--selected={selected?.type === 'rashi' && selected.i === i}
-            role="button"
-            tabindex="0"
-            aria-label={signName(i)}
-            onclick={() => (selected = { type: 'rashi', i })}
-            onkeydown={(e) =>
-              (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'rashi', i })}
-          />
-          <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
-          <text class="rashi-name" class:on={isSun || isMoon}
-            ><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle"
-              >{signName(i)}</textPath
-            ></text
+    <div class="view-frame">
+      <svg
+        class="wheel"
+        class:labels-shown={wheelLabels}
+        viewBox="0 0 {SIZE} {SIZE}"
+        role="img"
+        aria-label={hi('आकाश चक्र', 'Ecliptic wheel')}
+      >
+        <defs>
+          <radialGradient id="sun-grad" cx="38%" cy="36%" r="68%"
+            ><stop offset="0%" stop-color="#fff8d8" /><stop
+              offset="48%"
+              stop-color="#ffce3a"
+            /><stop offset="100%" stop-color="#f08a00" /></radialGradient
           >
-          <text
-            class="rashi-glyph zsym"
-            class:on={isSun || isMoon}
-            x={ix}
-            y={iy}
-            text-anchor="middle"
-            dominant-baseline="central"
-            pointer-events="none">{SIGN_GLYPH[i]}</text
+          <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%"
+            ><stop offset="0%" stop-color="#ffcf4d" stop-opacity="0.4" /><stop
+              offset="100%"
+              stop-color="#ffcf4d"
+              stop-opacity="0"
+            /></radialGradient
           >
-        {/each}
-        {#each nakTicks as deg (deg)}
-          <line
-            x1={pt(deg, R_IN)[0]}
-            y1={pt(deg, R_IN)[1]}
-            x2={pt(deg, R_IN - 5)[0]}
-            y2={pt(deg, R_IN - 5)[1]}
-            class="nak-tick"
-          />
-        {/each}
-      </g>
+          <radialGradient id="earth-grad" cx="36%" cy="32%" r="75%"
+            ><stop offset="0%" stop-color="#8ec3ee" /><stop
+              offset="60%"
+              stop-color="#3f7ab3"
+            /><stop offset="100%" stop-color="#255a8c" /></radialGradient
+          >
+          <radialGradient id="moon-grad" cx="38%" cy="36%" r="70%"
+            ><stop offset="0%" stop-color="#f2efe6" /><stop
+              offset="100%"
+              stop-color="#d9d2c2"
+            /></radialGradient
+          >
+        </defs>
 
-      <!-- Highlight the nakshatra the Moon sits in, so the 27 inner ticks read
+        <!-- ZODIAC RING (rotates by the ayanamsa in tropical mode) -->
+        <g transform="rotate({ringShift} {C} {C})">
+          {#each rashis as i (i)}
+            {@const isSun = i === sunRashi}
+            {@const isMoon = i === moonRashi}
+            {@const [ix, iy] = pt(i * 30 + 15, R_ICON)}
+            <path
+              d={sector(i * 30, (i + 1) * 30)}
+              class="rashi"
+              class:rashi--alt={i % 2 === 1}
+              class:rashi--sun={isSun}
+              class:rashi--moon={isMoon && !isSun}
+              class:rashi--selected={selected?.type === 'rashi' && selected.i === i}
+              role="button"
+              tabindex="0"
+              aria-label={signName(i)}
+              onclick={() => (selected = { type: 'rashi', i })}
+              onkeydown={(e) =>
+                (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'rashi', i })}
+            />
+            <defs><path id="rname-{i}" d={namePath(i)} fill="none" /></defs>
+            <text class="rashi-name" class:on={isSun || isMoon}
+              ><textPath href="#rname-{i}" startOffset="50%" text-anchor="middle"
+                >{signName(i)}</textPath
+              ></text
+            >
+            <text
+              class="rashi-glyph zsym"
+              class:on={isSun || isMoon}
+              x={ix}
+              y={iy}
+              text-anchor="middle"
+              dominant-baseline="central"
+              pointer-events="none">{SIGN_GLYPH[i]}</text
+            >
+          {/each}
+          {#each nakTicks as deg (deg)}
+            <line
+              x1={pt(deg, R_IN)[0]}
+              y1={pt(deg, R_IN)[1]}
+              x2={pt(deg, R_IN - 5)[0]}
+              y2={pt(deg, R_IN - 5)[1]}
+              class="nak-tick"
+            />
+          {/each}
+        </g>
+
+        <!-- Highlight the nakshatra the Moon sits in, so the 27 inner ticks read
            as the Moon's nakshatras; tap to learn. (Sidereal-framed like the
            bodies; in tropical mode the ticks themselves rotate with the ring.) -->
-      <path
-        d={nakBandPath}
-        class="nak-current"
-        role="button"
-        tabindex="0"
-        aria-label={hi('चन्द्र नक्षत्र', 'Moon nakshatra')}
-        onclick={() => (selected = { type: 'nakshatra' })}
-        onkeydown={(e) =>
-          (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'nakshatra' })}
-      />
+        <path
+          d={nakBandPath}
+          class="nak-current"
+          role="button"
+          tabindex="0"
+          aria-label={hi('चन्द्र नक्षत्र', 'Moon nakshatra')}
+          onclick={() => (selected = { type: 'nakshatra' })}
+          onkeydown={(e) =>
+            (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'nakshatra' })}
+        />
 
-      <!-- elongation arc + radii (bodies are fixed; only the ring rotates) -->
-      <path d={elongPath} class="elong-arc" fill="none" />
-      <line x1={C} y1={C} x2={sunPt[0]} y2={sunPt[1]} class="ray ray--sun" />
-      <line x1={C} y1={C} x2={moonPt[0]} y2={moonPt[1]} class="ray ray--moon" />
+        <!-- elongation arc + radii (bodies are fixed; only the ring rotates) -->
+        <path d={elongPath} class="elong-arc" fill="none" />
+        <line x1={C} y1={C} x2={sunPt[0]} y2={sunPt[1]} class="ray ray--sun" />
+        <line x1={C} y1={C} x2={moonPt[0]} y2={moonPt[1]} class="ray ray--moon" />
 
-      <!-- angle-measurement overlay (toggle): base line at 0° + arc to each body -->
-      {#if showAngles}
-        {@const b = pt(0, 48)}
-        <line x1={C} y1={C} x2={b[0]} y2={b[1]} class="angle-base" />
-        <path d={sunAnglePath} class="angle-arc angle-arc--sun" fill="none" />
-        <path d={moonAnglePath} class="angle-arc angle-arc--moon" fill="none" />
-      {/if}
+        <!-- angle-measurement overlay (toggle): base line at 0° + arc to each body -->
+        {#if showAngles}
+          {@const b = pt(0, 48)}
+          <line x1={C} y1={C} x2={b[0]} y2={b[1]} class="angle-base" />
+          <path d={sunAnglePath} class="angle-arc angle-arc--sun" fill="none" />
+          <path d={moonAnglePath} class="angle-arc angle-arc--moon" fill="none" />
+        {/if}
 
-      {#each grahaLayout as g (g.key)}
-        {@const [gx, gy] = pt(g.lon, g.r)}
-        {@const sel = selected?.type === 'graha' && selected.key === g.key}
+        {#each grahaLayout as g (g.key)}
+          {@const [gx, gy] = pt(g.lon, g.r)}
+          {@const sel = selected?.type === 'graha' && selected.key === g.key}
+          <g
+            class="body"
+            role="button"
+            tabindex="0"
+            aria-label={grahaLabel(g.key)}
+            onclick={() => (selected = { type: 'graha', key: g.key })}
+            onkeydown={(e) =>
+              (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}
+          >
+            {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
+            <circle cx={gx} cy={gy} r="12" class="hit" />
+            <BodyIcon
+              kind={g.key}
+              cx={gx}
+              cy={gy}
+              r={g.key === 'rahu' || g.key === 'ketu' ? 6 : 9}
+            />
+            <text x={gx} y={gy - 14} class="body-name" text-anchor="middle"
+              >{grahaLabel(g.key)}</text
+            >
+          </g>
+        {/each}
+
+        <!-- Earth (center reference) — tap to learn the geocentric view -->
         <g
           class="body"
           role="button"
           tabindex="0"
-          aria-label={grahaLabel(g.key)}
-          onclick={() => (selected = { type: 'graha', key: g.key })}
-          onkeydown={(e) =>
-            (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'graha', key: g.key })}
+          aria-label={earthLabel}
+          onclick={() => (selected = { type: 'earth' })}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'earth' })}
         >
-          {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
-          <circle cx={gx} cy={gy} r="12" class="hit" />
-          <BodyIcon kind={g.key} cx={gx} cy={gy} r={g.key === 'rahu' || g.key === 'ketu' ? 6 : 9} />
-          <text x={gx} y={gy - 14} class="body-name" text-anchor="middle">{grahaLabel(g.key)}</text>
+          {#if selected?.type === 'earth'}<circle cx={C} cy={C} r="17" class="sel-glow" />{/if}
+          <circle
+            cx={C}
+            cy={C}
+            r="13"
+            fill="url(#earth-grad)"
+            stroke="var(--paper)"
+            stroke-width="1.5"
+          />
+          <path
+            d="M{C - 9} {C - 4} q3 -3 7 -1 q2 2 0 4 q-3 2 -7 1 q-2 -2 0 -4Z M{C + 2} {C +
+              1} q4 -1 5 3 q0 3 -3 4 q-3 0 -3 -3 q-1 -3 1 -4Z M{C - 6} {C +
+              5} q3 -1 4 2 q0 2 -3 2 q-2 0 -1 -4Z"
+            class="earth-land"
+          />
+          <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
+          <text x={C} y={C - 19} class="body-name" text-anchor="middle">{earthLabel}</text>
         </g>
-      {/each}
 
-      <!-- Earth (center reference) — tap to learn the geocentric view -->
-      <g
-        class="body"
-        role="button"
-        tabindex="0"
-        aria-label={earthLabel}
-        onclick={() => (selected = { type: 'earth' })}
-        onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'earth' })}
-      >
-        {#if selected?.type === 'earth'}<circle cx={C} cy={C} r="17" class="sel-glow" />{/if}
-        <circle
-          cx={C}
-          cy={C}
-          r="13"
-          fill="url(#earth-grad)"
-          stroke="var(--paper)"
-          stroke-width="1.5"
-        />
-        <path
-          d="M{C - 9} {C - 4} q3 -3 7 -1 q2 2 0 4 q-3 2 -7 1 q-2 -2 0 -4Z M{C + 2} {C +
-            1} q4 -1 5 3 q0 3 -3 4 q-3 0 -3 -3 q-1 -3 1 -4Z M{C - 6} {C +
-            5} q3 -1 4 2 q0 2 -3 2 q-2 0 -1 -4Z"
-          class="earth-land"
-        />
-        <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
-        <text x={C} y={C - 19} class="body-name" text-anchor="middle">{earthLabel}</text>
-      </g>
-
-      <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
-      <g
-        class="body"
-        role="button"
-        tabindex="0"
-        aria-label={grahaLabel('moon')}
-        onclick={() => (selected = { type: 'moon' })}
-        onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })}
-      >
-        {#if selected?.type === 'moon'}<circle
+        <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
+        <g
+          class="body"
+          role="button"
+          tabindex="0"
+          aria-label={grahaLabel('moon')}
+          onclick={() => (selected = { type: 'moon' })}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'moon' })}
+        >
+          {#if selected?.type === 'moon'}<circle
+              cx={moonPt[0]}
+              cy={moonPt[1]}
+              r="15"
+              class="sel-glow"
+            />{/if}
+          <circle
             cx={moonPt[0]}
             cy={moonPt[1]}
-            r="15"
-            class="sel-glow"
-          />{/if}
-        <circle
-          cx={moonPt[0]}
-          cy={moonPt[1]}
-          r="12"
-          fill="url(#moon-grad)"
-          stroke="var(--ink-soft)"
-          stroke-width="1"
-        />
-        {#each craters as [dx, dy, r] (dx + '-' + dy)}
-          <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} {r} class="crater" />
-        {/each}
-        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle"
-          >{grahaLabel('moon')}</text
-        >
-      </g>
-
-      <!-- Sun: glow + straight rays + gradient disc -->
-      <g
-        class="body"
-        role="button"
-        tabindex="0"
-        aria-label={grahaLabel('sun')}
-        onclick={() => (selected = { type: 'sun' })}
-        onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })}
-      >
-        {#if selected?.type === 'sun'}<circle
-            cx={sunPt[0]}
-            cy={sunPt[1]}
-            r="17"
-            class="sel-glow"
-          />{/if}
-        <circle cx={sunPt[0]} cy={sunPt[1]} r="13" fill="url(#sun-glow)" />
-        {#each rayAngles as a (a)}
-          {@const cos = Math.cos((a * Math.PI) / 180)}
-          {@const sin = Math.sin((a * Math.PI) / 180)}
-          <line
-            x1={sunPt[0] + cos * 11}
-            y1={sunPt[1] - sin * 11}
-            x2={sunPt[0] + cos * 15}
-            y2={sunPt[1] - sin * 15}
-            class="sun-ray"
+            r="12"
+            fill="url(#moon-grad)"
+            stroke="var(--ink-soft)"
+            stroke-width="1"
           />
-        {/each}
-        <circle
-          cx={sunPt[0]}
-          cy={sunPt[1]}
-          r="10.5"
-          fill="url(#sun-grad)"
-          stroke="#e07b00"
-          stroke-width="0.75"
-        />
-        <text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
-          >{grahaLabel('sun')}</text
-        >
-      </g>
-
-      <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
-      {#each events as ev (ev.key)}
-        {@const [mx, my] = pt(ev.lon, R_IN - 5)}
-        {@const [lx, ly] = pt(ev.lon, R_IN - 14)}
-        <g class="body">
-          <circle cx={mx} cy={my} r="3.3" class="event-mark event-mark--{ev.key}" />
-          <text x={lx} y={ly} class="body-label" text-anchor="middle"
-            >{lang === 'hi' ? ev.hi : ev.en}</text
+          {#each craters as [dx, dy, r] (dx + '-' + dy)}
+            <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} {r} class="crater" />
+          {/each}
+          <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle"
+            >{grahaLabel('moon')}</text
           >
         </g>
-      {/each}
-    </svg>
+
+        <!-- Sun: glow + straight rays + gradient disc -->
+        <g
+          class="body"
+          role="button"
+          tabindex="0"
+          aria-label={grahaLabel('sun')}
+          onclick={() => (selected = { type: 'sun' })}
+          onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (selected = { type: 'sun' })}
+        >
+          {#if selected?.type === 'sun'}<circle
+              cx={sunPt[0]}
+              cy={sunPt[1]}
+              r="17"
+              class="sel-glow"
+            />{/if}
+          <circle cx={sunPt[0]} cy={sunPt[1]} r="13" fill="url(#sun-glow)" />
+          {#each rayAngles as a (a)}
+            {@const cos = Math.cos((a * Math.PI) / 180)}
+            {@const sin = Math.sin((a * Math.PI) / 180)}
+            <line
+              x1={sunPt[0] + cos * 11}
+              y1={sunPt[1] - sin * 11}
+              x2={sunPt[0] + cos * 15}
+              y2={sunPt[1] - sin * 15}
+              class="sun-ray"
+            />
+          {/each}
+          <circle
+            cx={sunPt[0]}
+            cy={sunPt[1]}
+            r="10.5"
+            fill="url(#sun-grad)"
+            stroke="#e07b00"
+            stroke-width="0.75"
+          />
+          <text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
+            >{grahaLabel('sun')}</text
+          >
+        </g>
+
+        <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
+        {#each events as ev (ev.key)}
+          {@const [mx, my] = pt(ev.lon, R_IN - 5)}
+          {@const [lx, ly] = pt(ev.lon, R_IN - 14)}
+          <g class="body">
+            <circle cx={mx} cy={my} r="3.3" class="event-mark event-mark--{ev.key}" />
+            <text x={lx} y={ly} class="body-label" text-anchor="middle"
+              >{lang === 'hi' ? ev.hi : ev.en}</text
+            >
+          </g>
+        {/each}
+      </svg>
+      {@render gear(wheelMenu, () => (wheelMenu = !wheelMenu), hi('चक्र विकल्प', 'Wheel options'))}
+      {#if wheelMenu}
+        <button
+          class="menu-backdrop"
+          type="button"
+          onclick={() => (wheelMenu = false)}
+          aria-label={hi('बंद करें', 'Close')}
+        ></button>
+        <div class="view-menu" role="group" aria-label={hi('चक्र विकल्प', 'Wheel options')}>
+          <p class="view-menu__title">{hi('चक्र', 'Wheel')}</p>
+          {@render ctrl(wheelGrahas, () => (wheelGrahas = !wheelGrahas), hi('ग्रह', 'Planets'))}
+          {@render ctrl(wheelLabels, () => (wheelLabels = !wheelLabels), hi('नाम', 'Labels'))}
+          {@render ctrl(tropical, () => (tropical = !tropical), hi('सायन', 'Tropical'))}
+          {@render ctrl(showAngles, () => (showAngles = !showAngles), hi('कोण', 'Angles'))}
+        </div>
+      {/if}
+    </div>
 
     <div class="readout">
       <dl class="vals">
@@ -1219,7 +1233,6 @@
     <figure class="orbital">
       <svg
         class="orb-svg"
-        class:labels-shown={showLabels}
         class:revealed={revealed === 'orbital'}
         viewBox="0 0 {OW} {OH}"
         role="img"
@@ -1308,8 +1321,33 @@
 
   {#if domeTracks && domeNow}
     <figure class="skydome">
+      {@render gear(domeMenu, () => (domeMenu = !domeMenu), hi('आकाश विकल्प', 'Sky options'))}
+      {#if domeMenu}
+        <button
+          class="menu-backdrop"
+          type="button"
+          onclick={() => (domeMenu = false)}
+          aria-label={hi('बंद करें', 'Close')}
+        ></button>
+        <div class="view-menu" role="group" aria-label={hi('आकाश विकल्प', 'Sky options')}>
+          <p class="view-menu__title">{hi('आकाश', 'Sky')}</p>
+          {@render ctrl(domeGrahas, () => (domeGrahas = !domeGrahas), hi('ग्रह', 'Planets'))}
+          {@render ctrl(domeLabels, () => (domeLabels = !domeLabels), hi('नाम', 'Labels'))}
+          {@render ctrl(
+            domeAtmosphere,
+            () => (domeAtmosphere = !domeAtmosphere),
+            hi('वायुमंडल', 'Atmosphere'),
+          )}
+          {@render ctrl(domePaths, () => (domePaths = !domePaths), hi('पथ', 'Paths'))}
+          {@render ctrl(
+            domeDirections,
+            () => (domeDirections = !domeDirections),
+            hi('दिशाएँ', 'Directions'),
+          )}
+        </div>
+      {/if}
       <svg
-        class:labels-shown={showLabels}
+        class:labels-shown={domeLabels}
         viewBox="12 12 {DOME - 24} {DOME - 24}"
         role="img"
         aria-label={hi(
@@ -1395,14 +1433,14 @@
               >
             </g>
           {/if}
-          {#if domeTracks.sun}
+          {#if domePaths && domeTracks.sun}
             <polyline points={domeTracks.sun} class="dome-path dome-path--sun" />
           {/if}
-          {#if domeTracks.moon}
+          {#if domePaths && domeTracks.moon}
             <polyline points={domeTracks.moon} class="dome-path dome-path--moon" />
           {/if}
           <!-- planets first → small and behind, hidden with the Grahas toggle -->
-          {#if showGrahas}
+          {#if domeGrahas}
             {#each domePlanets as b (b.body)}
               {#if b.altitude >= -14}
                 <g class="dome-body" class:revealed={revealed === b.body} opacity={dayFade}>
@@ -1516,14 +1554,16 @@
         </g>
         <!-- horizon rim + cardinals, drawn on top of the clipped sky -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
-        <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-        <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-        <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
-          >{hi('पू', 'E')}</text
-        >
-        <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
-          >{hi('प', 'W')}</text
-        >
+        {#if domeDirections}
+          <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+          <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+          <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
+            >{hi('पू', 'E')}</text
+          >
+          <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
+            >{hi('प', 'W')}</text
+          >
+        {/if}
       </svg>
       <figcaption>
         {hi(
@@ -1572,6 +1612,15 @@
     background: color-mix(in srgb, var(--paper) 92%, transparent);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--line);
+  }
+  /* backdrop blur is a known jank source on mobile GPUs (continuously re-sampled
+     while the wheel animates under the sticky bar) — drop it on touch / small
+     screens and make the bar fully opaque instead. */
+  @media (hover: none), (max-width: 600px) {
+    .timebar {
+      backdrop-filter: none;
+      background: var(--paper);
+    }
   }
   .clock {
     display: inline-block;
@@ -1637,6 +1686,80 @@
     gap: 0.4rem;
     margin-top: 0.55rem;
   }
+  /* a view (wheel / dome) and its in-corner gear + options popover */
+  .view-frame {
+    position: relative;
+    flex: 1 1 360px;
+    max-width: 460px;
+  }
+  .view-gear {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      transform 0.2s;
+  }
+  .view-gear svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+  }
+  .view-gear:hover,
+  .view-gear.on {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+  }
+  .view-gear.on {
+    transform: rotate(60deg);
+  }
+  .menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: default;
+  }
+  .view-menu {
+    position: absolute;
+    top: 38px;
+    right: 4px;
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .view-menu__title {
+    margin: 0 0 2px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .view-menu .chip {
+    width: 100%;
+    justify-content: flex-start;
+  }
   .chip {
     display: inline-flex;
     align-items: center;
@@ -1681,8 +1804,7 @@
     justify-content: center;
   }
   .wheel {
-    flex: 1 1 360px;
-    max-width: 460px;
+    width: 100%;
   }
   /* fixed-width readout so changing values never reflow the wheel */
   .readout {
@@ -1913,8 +2035,7 @@
     cursor: pointer;
   }
   .orb-svg:hover .orb-label,
-  .orb-svg.revealed .orb-label,
-  .orb-svg.labels-shown .orb-label {
+  .orb-svg.revealed .orb-label {
     opacity: 1;
   }
 
@@ -2080,6 +2201,7 @@
   }
   /* sky dome — a dark twilight all-sky view of the local sky */
   .skydome {
+    position: relative;
     margin: 1.5rem auto 0;
     max-width: 460px;
     text-align: center;

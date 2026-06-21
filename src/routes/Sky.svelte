@@ -508,6 +508,23 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
+  // Compass dial: tick marks every 22.5° (longer at the inter-cardinals N E/SE…);
+  // the four cardinals carry letters instead, in the band just outside the rim.
+  const DIAL_R = DR + 6.5; // radius of the cardinal letters
+  const BEZEL_R = DR + 12; // outer ring of the dial
+  const COMPASS_TICKS = [
+    22.5, 45, 67.5, 112.5, 135, 157.5, 202.5, 225, 247.5, 292.5, 315, 337.5,
+  ].map((deg) => {
+    const a = (deg * Math.PI) / 180;
+    const len = deg % 45 === 0 ? 7 : 4;
+    return {
+      deg,
+      x1: DC - DR * Math.sin(a),
+      y1: DC - DR * Math.cos(a),
+      x2: DC - (DR + len) * Math.sin(a),
+      y2: DC - (DR + len) * Math.cos(a),
+    };
+  });
   // The lit-portion path of the Moon at its current phase (mirrors
   // MoonPhase.svelte) so the dome shows the Moon's real crescent/gibbous shape.
   function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
@@ -626,26 +643,33 @@
     };
   });
   // A handful of the brightest stars (J2000 RA hours, Dec degrees, magnitude).
+  // Each star carries a 3-way name. Many are the yogatārā (junction star) of a
+  // nakshatra, so the Sanskrit name IS the nakshatra — meaningful in a panchanga.
   const BRIGHT_STARS = [
-    { ra: 6.752, dec: -16.72, mag: -1.46 },
-    { ra: 5.278, dec: 45.998, mag: 0.08 },
-    { ra: 5.242, dec: -8.2, mag: 0.13 },
-    { ra: 14.261, dec: 19.18, mag: -0.05 },
-    { ra: 18.616, dec: 38.78, mag: 0.03 },
-    { ra: 7.655, dec: 5.225, mag: 0.34 },
-    { ra: 5.919, dec: 7.407, mag: 0.5 },
-    { ra: 4.599, dec: 16.51, mag: 0.85 },
-    { ra: 19.846, dec: 8.868, mag: 0.76 },
-    { ra: 13.42, dec: -11.16, mag: 0.97 },
-    { ra: 16.49, dec: -26.43, mag: 0.96 },
-    { ra: 7.755, dec: 28.03, mag: 1.14 },
-    { ra: 10.139, dec: 11.97, mag: 1.35 },
-    { ra: 20.69, dec: 45.28, mag: 1.25 },
+    { ra: 6.752, dec: -16.72, mag: -1.46, n: { hi: 'लुब्धक', tr: 'Lubdhaka', en: 'Sirius' } },
+    {
+      ra: 5.278,
+      dec: 45.998,
+      mag: 0.08,
+      n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' },
+    },
+    { ra: 5.242, dec: -8.2, mag: 0.13, n: { hi: 'रिगेल', tr: 'Rigel', en: 'Rigel' } },
+    { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाति', tr: 'Svati', en: 'Arcturus' } },
+    { ra: 18.616, dec: 38.78, mag: 0.03, n: { hi: 'अभिजित्', tr: 'Abhijit', en: 'Vega' } },
+    { ra: 7.655, dec: 5.225, mag: 0.34, n: { hi: 'प्रोसायन', tr: 'Procyon', en: 'Procyon' } },
+    { ra: 5.919, dec: 7.407, mag: 0.5, n: { hi: 'आर्द्रा', tr: 'Ardra', en: 'Betelgeuse' } },
+    { ra: 4.599, dec: 16.51, mag: 0.85, n: { hi: 'रोहिणी', tr: 'Rohini', en: 'Aldebaran' } },
+    { ra: 19.846, dec: 8.868, mag: 0.76, n: { hi: 'श्रवण', tr: 'Shravana', en: 'Altair' } },
+    { ra: 13.42, dec: -11.16, mag: 0.97, n: { hi: 'चित्रा', tr: 'Chitra', en: 'Spica' } },
+    { ra: 16.49, dec: -26.43, mag: 0.96, n: { hi: 'ज्येष्ठा', tr: 'Jyeshtha', en: 'Antares' } },
+    { ra: 7.755, dec: 28.03, mag: 1.14, n: { hi: 'पुनर्वसु', tr: 'Punarvasu', en: 'Pollux' } },
+    { ra: 10.139, dec: 11.97, mag: 1.35, n: { hi: 'मघा', tr: 'Magha', en: 'Regulus' } },
+    { ra: 20.69, dec: 45.28, mag: 1.25, n: { hi: 'डेनेब', tr: 'Deneb', en: 'Deneb' } },
     // southern stars, to fill the southern sky
-    { ra: 22.96, dec: -29.62, mag: 1.16 }, // Fomalhaut
-    { ra: 6.399, dec: -52.7, mag: -0.74 }, // Canopus
-    { ra: 1.629, dec: -57.24, mag: 0.46 }, // Achernar
-    { ra: 22.137, dec: -46.96, mag: 1.74 }, // Peacock
+    { ra: 22.96, dec: -29.62, mag: 1.16, n: { hi: 'फ़ोमलहॉट', tr: 'Fomalhaut', en: 'Fomalhaut' } },
+    { ra: 6.399, dec: -52.7, mag: -0.74, n: { hi: 'अगस्त्य', tr: 'Agastya', en: 'Canopus' } },
+    { ra: 1.629, dec: -57.24, mag: 0.46, n: { hi: 'एकरनार', tr: 'Achernar', en: 'Achernar' } },
+    { ra: 22.137, dec: -46.96, mag: 1.74, n: { hi: 'मयूर', tr: 'Peacock', en: 'Peacock' } },
   ];
   // Bright stars above the horizon — only once the sky is dark. Per-frame for the
   // same reason as the planets (their alt/az rotates with the sky as time runs).
@@ -654,7 +678,7 @@
     if (!loc || !domeShowStars) return [];
     return BRIGHT_STARS.map((st) => {
       const { azimuth, altitude } = starAltAz(st.ra, st.dec, simDate, loc.latitude, loc.longitude);
-      return { ra: st.ra, mag: st.mag, altitude, pt: domePt(azimuth, altitude) };
+      return { ra: st.ra, mag: st.mag, n: st.n, altitude, pt: domePt(azimuth, altitude) };
     }).filter((s) => s.altitude >= 0);
   });
 
@@ -1408,12 +1432,30 @@
             </g>
           {/each}
           {#each domeStars as s (s.ra)}
-            <circle
-              cx={s.pt[0]}
-              cy={s.pt[1]}
-              r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
-              class="dome-star"
-            />
+            <g class="dome-con" class:revealed={revealed === 'star-' + s.ra}>
+              <circle
+                cx={s.pt[0]}
+                cy={s.pt[1]}
+                r="4.5"
+                class="dome-hit"
+                role="button"
+                tabindex="0"
+                aria-label={tn(s.n.hi, s.n.tr, s.n.en)}
+                use:revealable={'star-' + s.ra}
+              />
+              <circle
+                cx={s.pt[0]}
+                cy={s.pt[1]}
+                r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
+                class="dome-star"
+              />
+              <text
+                x={s.pt[0]}
+                y={s.pt[1] < DC ? s.pt[1] + 8 : s.pt[1] - 5}
+                class="dome-star-name"
+                text-anchor="middle">{tn(s.n.hi, s.n.tr, s.n.en)}</text
+              >
+            </g>
           {/each}
           {#if domePolaris}
             <g class="dome-con" class:revealed={revealed === 'polaris'}>
@@ -1546,17 +1588,42 @@
             </g>
           {/if}
         </g>
-        <!-- horizon rim + cardinals, placed just OUTSIDE the rim so they label
-             the horizon without ever overlapping the sky (e.g. Polaris due N) -->
+        <!-- horizon rim -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
         {#if domeDirections}
-          <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-          <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-          <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
-            >{hi('पू', 'E')}</text
+          <!-- compass dial: a bezel ring + tick marks every 22.5°, with the four
+               cardinals lettered in the band (so they never overlap the sky) -->
+          <circle cx={DC} cy={DC} r={BEZEL_R} class="dome-bezel" />
+          {#each COMPASS_TICKS as t (t.deg)}
+            <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} class="dome-tick" />
+          {/each}
+          <text
+            x={DC}
+            y={DC - DIAL_R}
+            class="dome-card"
+            text-anchor="middle"
+            dominant-baseline="central">{hi('उ', 'N')}</text
           >
-          <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle"
-            >{hi('प', 'W')}</text
+          <text
+            x={DC}
+            y={DC + DIAL_R}
+            class="dome-card"
+            text-anchor="middle"
+            dominant-baseline="central">{hi('द', 'S')}</text
+          >
+          <text
+            x={DC - DIAL_R}
+            y={DC}
+            class="dome-card"
+            text-anchor="middle"
+            dominant-baseline="central">{hi('पू', 'E')}</text
+          >
+          <text
+            x={DC + DIAL_R}
+            y={DC}
+            class="dome-card"
+            text-anchor="middle"
+            dominant-baseline="central">{hi('प', 'W')}</text
           >
         {/if}
       </svg>
@@ -2226,17 +2293,40 @@
     opacity: 0;
     transition: opacity 0.14s ease;
   }
+  /* star names: hover/tap reveal only (kept out of the Labels toggle so the 18
+     of them never flood the dome); dark stroke keeps them legible over the sky */
+  .dome-star-name {
+    font-size: 6px;
+    fill: rgba(205, 218, 248, 0.92);
+    letter-spacing: 0.2px;
+    pointer-events: none;
+    opacity: 0;
+    paint-order: stroke;
+    stroke: rgba(8, 12, 28, 0.6);
+    stroke-width: 0.6px;
+    transition: opacity 0.14s ease;
+  }
   .dome-polaris {
     fill: #ffffff;
   }
   .dome-polaris-halo {
     fill: rgba(255, 255, 255, 0.16);
   }
-  /* cardinals sit just outside the rim on the page, so they use the page ink */
+  /* compass dial in the band just outside the rim, on the page ink */
   .dome-card {
     font-size: 10.5px;
     font-weight: 700;
     fill: var(--ink-soft);
+  }
+  .dome-bezel {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 0.8;
+  }
+  .dome-tick {
+    stroke: var(--ink-faint);
+    stroke-width: 0.9;
+    stroke-linecap: round;
   }
   .dome-path {
     fill: none;
@@ -2269,8 +2359,10 @@
      .revealed class, set on click/keyboard), or show all with the Labels toggle. */
   .dome-body:hover .dome-label,
   .dome-con:hover .dome-con-name,
+  .dome-con:hover .dome-star-name,
   .dome-body.revealed .dome-label,
-  .dome-con.revealed .dome-con-name {
+  .dome-con.revealed .dome-con-name,
+  .dome-con.revealed .dome-star-name {
     opacity: 1;
   }
   .labels-shown .dome-label,

@@ -172,31 +172,45 @@
     if (!sun || !moon || sun.altitude < 0) return false;
     return Math.hypot(sun.pt[0] - moon.pt[0], sun.pt[1] - moon.pt[1]) < 13;
   });
-  // Daylight wash-out, applied as a whole-body opacity. Both are exactly 1 while
-  // the Sun is below the horizon, so at night every body is fully opaque (the
-  // Moon's dark limb stays solid — no see-through). The Moon is far brighter than
-  // the planets, so by day it fades only a little; the planets fade hard.
+  // Planets are tiny points that genuinely vanish in daylight, so they fade out
+  // via a whole-body opacity (1 while the Sun is down → fully opaque at night).
   const dayFade = $derived.by(() => {
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
     return !fAtmo || sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
   });
-  const moonFade = $derived.by(() => {
-    const sunAlt = domeSunMoon[0]?.altitude ?? -90;
-    return !fAtmo || sunAlt <= 0 ? 1 : Math.max(0.62, 1 - sunAlt / 28);
-  });
   const showStars = $derived(fStars && (!fAtmo || (domeSunMoon[0]?.altitude ?? -90) <= 0));
 
-  function lerpRGB(a: number[], b: number[], t: number): string {
+  function mixRGB(a: number[], b: number[], t: number): number[] {
     const k = Math.max(0, Math.min(1, t));
-    return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`;
+    return a.map((v, i) => Math.round(v + (b[i] - v) * k));
   }
-  const domeSky = $derived.by(() => {
+  const toRGB = (a: number[]) => `rgb(${a.join(',')})`;
+  const daySky = $derived.by(() => {
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
-    const day = fAtmo ? (sunAlt + 6) / 12 : 0;
+    const day = fAtmo ? Math.max(0, Math.min(1, (sunAlt + 6) / 12)) : 0;
     return {
-      zen: lerpRGB([22, 31, 68], [39, 82, 132], day),
-      mid: lerpRGB([39, 49, 92], [72, 122, 168], day),
-      rim: lerpRGB([106, 81, 96], [150, 182, 208], day),
+      sunAlt,
+      zen: mixRGB([22, 31, 68], [39, 82, 132], day),
+      mid: mixRGB([39, 49, 92], [72, 122, 168], day),
+      rim: mixRGB([106, 81, 96], [150, 182, 208], day),
+    };
+  });
+  const domeSky = $derived({
+    zen: toRGB(daySky.zen),
+    mid: toRGB(daySky.mid),
+    rim: toRGB(daySky.rim),
+  });
+  // The Moon never goes transparent — in daylight it stays fully OPAQUE (so it
+  // always occludes whatever is behind it; you never see sky or planets through
+  // it) and instead its colours wash toward the bright sky, reading as a pale
+  // daytime Moon. wash is 0 while the Sun is below the horizon → true night
+  // colours (dark limb solid #363842, lit limb cream).
+  const moonColors = $derived.by(() => {
+    const wash = !fAtmo || daySky.sunAlt <= 0 ? 0 : Math.min(0.42, daySky.sunAlt / 55);
+    return {
+      disc: toRGB(mixRGB([54, 56, 66], daySky.mid, wash)),
+      lit: toRGB(mixRGB([241, 231, 203], daySky.mid, wash)),
+      crater: toRGB(mixRGB([207, 199, 180], daySky.mid, wash)),
     };
   });
 
@@ -551,7 +565,7 @@
         {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
           {@const m = domeSunMoon[1]}
           {@const litD = moonLitPath(m.pt[0], m.pt[1], 8, illum, elong)}
-          <g class="dome-body" class:revealed={revealed === 'moon'} opacity={moonFade}>
+          <g class="dome-body" class:revealed={revealed === 'moon'}>
             <circle
               cx={m.pt[0]}
               cy={m.pt[1]}
@@ -566,11 +580,11 @@
               cx={m.pt[0]}
               cy={m.pt[1]}
               r="8"
-              fill="#363842"
+              fill={moonColors.disc}
               stroke="rgba(255,255,255,0.4)"
               stroke-width="0.6"
             />
-            <path d={litD} fill="#f1e7cb" />
+            <path d={litD} fill={moonColors.lit} />
             <clipPath id="{uid}-moonclip"><path d={litD} /></clipPath>
             <g clip-path="url(#{uid}-moonclip)">
               {#each craters as [dx, dy, cr] (`${dx},${dy}`)}
@@ -579,6 +593,7 @@
                   cy={m.pt[1] + dy * 0.67}
                   r={cr * 0.67}
                   class="crater"
+                  fill={moonColors.crater}
                 />
               {/each}
             </g>
@@ -746,7 +761,6 @@
     -webkit-tap-highlight-color: transparent;
   }
   .crater {
-    fill: #cfc7b4;
     opacity: 0.8;
   }
   .skydome figcaption {

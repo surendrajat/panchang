@@ -117,6 +117,7 @@
   let showAngles = $state(false);
   let domeGrahas = $state(true);
   let domeLabels = $state(false);
+  let domeStarsOn = $state(true);
   let domeAtmosphere = $state(true);
   let domePaths = $state(true);
   let domeDirections = $state(true);
@@ -602,9 +603,11 @@
     const sunAlt = domeSunMoon[0]?.altitude ?? -90;
     return !domeAtmosphere || sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
   });
-  // Stars/constellations are visible when it is dark — or always, if the
-  // atmosphere (the daylight wash) is switched off.
-  const domeShowStars = $derived(!domeAtmosphere || (domeSunMoon[0]?.altitude ?? -90) <= 0);
+  // Stars/constellations are visible when the Stars toggle is on AND it is dark
+  // (or the atmosphere/daylight wash is switched off).
+  const domeShowStars = $derived(
+    domeStarsOn && (!domeAtmosphere || (domeSunMoon[0]?.altitude ?? -90) <= 0),
+  );
 
   function lerpRGB(a: number[], b: number[], t: number): string {
     const k = Math.max(0, Math.min(1, t));
@@ -1331,6 +1334,7 @@
           <p class="view-menu__title">{hi('आकाश', 'Sky')}</p>
           {@render ctrl(domeGrahas, () => (domeGrahas = !domeGrahas), hi('ग्रह', 'Planets'))}
           {@render ctrl(domeLabels, () => (domeLabels = !domeLabels), hi('नाम', 'Labels'))}
+          {@render ctrl(domeStarsOn, () => (domeStarsOn = !domeStarsOn), hi('तारे', 'Stars'))}
           {@render ctrl(
             domeAtmosphere,
             () => (domeAtmosphere = !domeAtmosphere),
@@ -1346,7 +1350,7 @@
       {/if}
       <svg
         class:labels-shown={domeLabels}
-        viewBox="12 12 {DOME - 24} {DOME - 24}"
+        viewBox="2 2 {DOME - 4} {DOME - 4}"
         role="img"
         aria-label={hi(
           'आज आपके आकाश में सूर्य, चन्द्र व ग्रह',
@@ -1474,7 +1478,9 @@
           {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
             {@const m = domeSunMoon[1]}
             {@const litD = moonLitPath(m.pt[0], m.pt[1], 8, illum, elong)}
-            <g class="dome-body" class:revealed={revealed === 'moon'} opacity={dayFade}>
+            <!-- Moon stays fully opaque even by day (a daytime moon is pale but
+                 solid — it must not show planets/stars through it). -->
+            <g class="dome-body" class:revealed={revealed === 'moon'}>
               <circle
                 cx={m.pt[0]}
                 cy={m.pt[1]}
@@ -1540,23 +1546,24 @@
             </g>
           {/if}
         </g>
-        <!-- horizon rim + cardinals, drawn on top of the clipped sky -->
+        <!-- horizon rim + cardinals, placed just OUTSIDE the rim so they label
+             the horizon without ever overlapping the sky (e.g. Polaris due N) -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
         {#if domeDirections}
-          <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-          <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-          <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
+          <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+          <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+          <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
             >{hi('पू', 'E')}</text
           >
-          <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
+          <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle"
             >{hi('प', 'W')}</text
           >
         {/if}
       </svg>
       <figcaption>
         {hi(
-          `यदि आप ${domeLoc ? domeLoc + ' में ' : ''}खड़े होकर ऊपर देखें — केंद्र सिर के ऊपर, किनारा क्षितिज; पूर्व बाएँ, पश्चिम दाएँ (वास्तविक आकाश की तरह)।`,
-          `As if you stood${domeLoc ? ' in ' + domeLoc : ''} and looked up — the centre is overhead, the rim is the horizon, east on the left and west on the right, like the real sky.`,
+          `यदि आप ${domeLoc ? domeLoc + ' में ' : ''}दक्षिण की ओर मुख करके ऊपर देखें — केंद्र सिर के ऊपर, किनारा क्षितिज; पूर्व बाएँ, पश्चिम दाएँ (वास्तविक आकाश की तरह)।`,
+          `As if you stood${domeLoc ? ' in ' + domeLoc : ''} facing south and looked up — the centre is overhead, the rim is the horizon, east on the left and west on the right, like the real sky.`,
         )}
       </figcaption>
     </figure>
@@ -2183,7 +2190,7 @@
   .skydome {
     position: relative;
     margin: 1.5rem auto 0;
-    max-width: 460px;
+    max-width: 500px;
     text-align: center;
   }
   /* only the dome itself, NOT the gear's svg (which lives inside .skydome too) */
@@ -2225,10 +2232,11 @@
   .dome-polaris-halo {
     fill: rgba(255, 255, 255, 0.16);
   }
+  /* cardinals sit just outside the rim on the page, so they use the page ink */
   .dome-card {
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 700;
-    fill: rgba(255, 255, 255, 0.5);
+    fill: var(--ink-soft);
   }
   .dome-path {
     fill: none;

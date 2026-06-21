@@ -29,25 +29,36 @@ import { norm360 } from './angle';
 // instances around freely; astronomy-engine accepts FlexibleDateTime.
 export type Instant = Date;
 
-// Apparent geocentric ecliptic longitude of the Sun, true equinox and
-// ecliptic of date, in degrees [0, 360).
+// Same-instant memo: the engine queries the SAME jd (the sunrise anchor) ~20x per
+// day across tithi/nakshatra/yoga/karana. These pure jd→value results are cached
+// (bounded, cleared on overflow); values are immutable so it's transparent — the
+// fast-path parity test guards it.
+const EPHEM_CACHE_MAX = 4096;
+function memoByJd(cache: Map<number, number>, jd: number, compute: () => number): number {
+  const hit = cache.get(jd);
+  if (hit !== undefined) return hit;
+  const v = compute();
+  if (cache.size >= EPHEM_CACHE_MAX) cache.clear();
+  cache.set(jd, v);
+  return v;
+}
+const sunLonCache = new Map<number, number>();
+const moonLonCache = new Map<number, number>();
+const elongCache = new Map<number, number>();
+
+// Apparent geocentric ecliptic longitude of the Sun, true equinox/ecliptic of date, deg [0,360).
 export function sunLongitudeAtJD(jd: number): number {
-  const date = jdToDateForAstronomy(jd);
-  const ecl = SunPosition(date);
-  return norm360(ecl.elon);
+  return memoByJd(sunLonCache, jd, () => norm360(SunPosition(jdToDateForAstronomy(jd)).elon));
 }
 
-// Apparent geocentric ecliptic longitude of the Moon, true equinox and
-// ecliptic of date, in degrees [0, 360). Computed by rotating GeoMoon's
-// J2000 equatorial vector into the true-of-date ecliptic frame so it
-// stays in the same reference as SunPosition.
+// Apparent geocentric ecliptic longitude of the Moon — GeoMoon's J2000 equatorial
+// vector rotated into the true-of-date ecliptic (same frame as the Sun).
 export function moonLongitudeAtJD(jd: number): number {
-  const time = jdToAstroTime(jd);
-  const eqjMoon = GeoMoon(time);
-  const rot = Rotation_EQJ_ECT(time);
-  const ectMoon = RotateVector(rot, eqjMoon);
-  const sph = SphereFromVector(ectMoon);
-  return norm360(sph.lon);
+  return memoByJd(moonLonCache, jd, () => {
+    const time = jdToAstroTime(jd);
+    const ectMoon = RotateVector(Rotation_EQJ_ECT(time), GeoMoon(time));
+    return norm360(SphereFromVector(ectMoon).lon);
+  });
 }
 
 // Convenience for the simultaneous case (cheaper if called together —
@@ -114,10 +125,9 @@ export function moonIlluminationAtJD(jd: number): number {
   return Illumination(Body.Moon, jdToDateForAstronomy(jd)).phase_fraction;
 }
 
-// Sun-to-Moon elongation in degrees, 0..360, matching the tithi definition
-// directly. Faster than separate longitudes when only the difference matters.
+// Sun-to-Moon elongation, deg [0,360), matching the tithi definition. Memoized.
 export function sunMoonElongationAtJD(jd: number): number {
-  return norm360(AeMoonPhase(jdToDateForAstronomy(jd)));
+  return memoByJd(elongCache, jd, () => norm360(AeMoonPhase(jdToDateForAstronomy(jd))));
 }
 
 // astronomy-engine accepts native Date or its own AstroTime. We prefer

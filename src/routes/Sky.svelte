@@ -108,7 +108,7 @@
   let speed = $state(0);
   let live = $state(true);
   let showGrahas = $state(false);
-  let showLabels = $state(true);
+  let showLabels = $state(false);
   let tropical = $state(false);
   let showAngles = $state(false);
   // The sidereal/tropical + angle toggles only matter for the wheel, so they're
@@ -484,9 +484,6 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
-  // Bodies dim toward the horizon (atmospheric extinction) — fully bright above
-  // ~12°, fading to a dim ember at the rim, so they "go out" as they set/rise.
-  const domeFade = (alt: number): number => Math.min(1, Math.max(0.15, alt / 12));
   // The lit-portion path of the Moon at its current phase (mirrors
   // MoonPhase.svelte) so the dome shows the Moon's real crescent/gibbous shape.
   function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
@@ -612,6 +609,16 @@
     }).filter((s) => s.altitude >= 0);
   });
 
+  // Polaris (the pole star / Dhruva) — sits almost exactly due north at an
+  // altitude equal to your latitude. RA 2.53 h, Dec +89.26° (J2000).
+  const domePolaris = $derived.by(() => {
+    const loc = preferences.location;
+    if (!loc || (domeSunMoon[0]?.altitude ?? -90) > 0) return null;
+    const { azimuth, altitude } = starAltAz(2.53, 89.26, simDate, loc.latitude, loc.longitude);
+    if (altitude < 0) return null;
+    return { pt: domePt(azimuth, altitude) };
+  });
+
   // A few well-known constellations, spread around the sky so some are always up.
   // Each: stars as [RA hours, Dec degrees] (J2000) + line segments by star index.
   const CONSTELLATIONS = [
@@ -713,7 +720,6 @@
         .map(([a, b]) => `${pts[a].pt.join(',')} ${pts[b].pt.join(',')}`);
       const cx = up.reduce((s, p) => s + p.pt[0], 0) / up.length;
       const cy = up.reduce((s, p) => s + p.pt[1], 0) / up.length;
-      const meanAlt = up.reduce((s, p) => s + p.altitude, 0) / up.length;
       return {
         key: con.name.en,
         name: con.name,
@@ -721,7 +727,6 @@
         segs,
         cx,
         cy,
-        opacity: domeFade(meanAlt) * 0.85,
       };
     }).filter((c): c is NonNullable<typeof c> => c !== null);
   });
@@ -1260,33 +1265,118 @@
             <stop offset="62%" stop-color="rgba(0,0,0,0)" />
             <stop offset="100%" stop-color="rgba(0,0,0,0.22)" />
           </radialGradient>
+          <clipPath id="dome-clip"><circle cx={DC} cy={DC} r={DR} /></clipPath>
         </defs>
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
         <!-- soft highlight overhead → darker rim, so the flat disc reads as a curved sky -->
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-depth)" />
-        <!-- constellation stick-figures (faint), behind the bright stars -->
-        {#each domeConstellations as con (con.key)}
-          <g class="dome-con" opacity={con.opacity}>
-            {#each con.segs as seg (seg)}
-              <polyline points={seg} class="dome-con-line" />
+        <!-- the whole sky is clipped to the horizon, so bodies sink below the rim
+             and vanish like the real view (instead of fading out) -->
+        <g clip-path="url(#dome-clip)">
+          <!-- constellation stick-figures (faint), behind the bright stars -->
+          {#each domeConstellations as con (con.key)}
+            <g class="dome-con">
+              {#each con.segs as seg (seg)}
+                <polyline points={seg} class="dome-con-line" />
+              {/each}
+              {#each con.stars as st (`${st[0]},${st[1]}`)}
+                <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
+              {/each}
+              {#if showLabels}
+                <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
+                  >{lang === 'hi' ? con.name.hi : con.name.en}</text
+                >
+              {/if}
+            </g>
+          {/each}
+          {#each domeStars as s (s.ra)}
+            <circle
+              cx={s.pt[0]}
+              cy={s.pt[1]}
+              r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
+              class="dome-star"
+            />
+          {/each}
+          {#if domePolaris}
+            <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="3" class="dome-polaris-halo" />
+            <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="1.5" class="dome-polaris" />
+            {#if showLabels}
+              <text
+                x={domePolaris.pt[0]}
+                y={domePolaris.pt[1] - 6}
+                class="dome-con-name"
+                text-anchor="middle">{hi('ध्रुव', 'Polaris')}</text
+              >
+            {/if}
+          {/if}
+          {#if domeTracks.sun}
+            <polyline points={domeTracks.sun} class="dome-path dome-path--sun" />
+          {/if}
+          {#if domeTracks.moon}
+            <polyline points={domeTracks.moon} class="dome-path dome-path--moon" />
+          {/if}
+          <!-- planets first → small and behind, hidden with the Grahas toggle -->
+          {#if showGrahas}
+            {#each domePlanets as b (b.body)}
+              {#if b.altitude >= -14}
+                <g class="dome-body">
+                  <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
+                  {#if showLabels}
+                    <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
+                      >{grahaLabel(b.body)}</text
+                    >
+                  {/if}
+                </g>
+              {/if}
             {/each}
-            {#each con.stars as st (`${st[0]},${st[1]}`)}
-              <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
-            {/each}
-            <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
-              >{lang === 'hi' ? con.name.hi : con.name.en}</text
-            >
-          </g>
-        {/each}
-        {#each domeStars as s (s.ra)}
-          <circle
-            cx={s.pt[0]}
-            cy={s.pt[1]}
-            r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
-            class="dome-star"
-            opacity={domeFade(s.altitude)}
-          />
-        {/each}
+          {/if}
+          <!-- Sun & Moon last → drawn on top of the planets, and larger -->
+          {#each domeSunMoon as b (b.body)}
+            {#if b.altitude >= -14}
+              <g class="dome-body">
+                {#if b.body === 'sun'}
+                  <circle cx={b.pt[0]} cy={b.pt[1]} r="12" fill="url(#sun-glow)" />
+                  {#each rayAngles as a (a)}
+                    {@const c = Math.cos((a * Math.PI) / 180)}
+                    {@const s = Math.sin((a * Math.PI) / 180)}
+                    <line
+                      x1={b.pt[0] + c * 7.5}
+                      y1={b.pt[1] - s * 7.5}
+                      x2={b.pt[0] + c * 11}
+                      y2={b.pt[1] - s * 11}
+                      class="sun-ray"
+                    />
+                  {/each}
+                  <circle
+                    cx={b.pt[0]}
+                    cy={b.pt[1]}
+                    r="7"
+                    fill="url(#sun-grad)"
+                    stroke="#e07b00"
+                    stroke-width="0.7"
+                  />
+                {:else}
+                  <!-- Moon drawn at its real phase shape -->
+                  <circle
+                    cx={b.pt[0]}
+                    cy={b.pt[1]}
+                    r="7"
+                    fill="#363842"
+                    stroke="rgba(255,255,255,0.4)"
+                    stroke-width="0.6"
+                  />
+                  <path d={moonLitPath(b.pt[0], b.pt[1], 7, illum, elong)} fill="#f1e7cb" />
+                {/if}
+                {#if showLabels}
+                  <text x={b.pt[0]} y={b.pt[1] - 12.5} class="dome-label" text-anchor="middle"
+                    >{grahaLabel(b.body)}</text
+                  >
+                {/if}
+              </g>
+            {/if}
+          {/each}
+        </g>
+        <!-- horizon rim + cardinals, drawn on top of the clipped sky -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
         <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
         <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
@@ -1295,72 +1385,6 @@
         >
         <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
         >
-        {#if domeTracks.sun}
-          <polyline points={domeTracks.sun} class="dome-path dome-path--sun" />
-        {/if}
-        {#if domeTracks.moon}
-          <polyline points={domeTracks.moon} class="dome-path dome-path--moon" />
-        {/if}
-        <!-- planets first → small and behind, hidden with the Grahas toggle -->
-        {#if showGrahas}
-          {#each domePlanets as b (b.body)}
-            {#if b.altitude >= 0}
-              <g class="dome-body" opacity={domeFade(b.altitude)}>
-                <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
-                {#if showLabels}
-                  <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
-                    >{grahaLabel(b.body)}</text
-                  >
-                {/if}
-              </g>
-            {/if}
-          {/each}
-        {/if}
-        <!-- Sun & Moon last → drawn on top of the planets, and larger -->
-        {#each domeSunMoon as b (b.body)}
-          {#if b.altitude >= 0}
-            <g class="dome-body" opacity={domeFade(b.altitude)}>
-              {#if b.body === 'sun'}
-                <circle cx={b.pt[0]} cy={b.pt[1]} r="12" fill="url(#sun-glow)" />
-                {#each rayAngles as a (a)}
-                  {@const c = Math.cos((a * Math.PI) / 180)}
-                  {@const s = Math.sin((a * Math.PI) / 180)}
-                  <line
-                    x1={b.pt[0] + c * 7.5}
-                    y1={b.pt[1] - s * 7.5}
-                    x2={b.pt[0] + c * 11}
-                    y2={b.pt[1] - s * 11}
-                    class="sun-ray"
-                  />
-                {/each}
-                <circle
-                  cx={b.pt[0]}
-                  cy={b.pt[1]}
-                  r="7"
-                  fill="url(#sun-grad)"
-                  stroke="#e07b00"
-                  stroke-width="0.7"
-                />
-              {:else}
-                <!-- Moon drawn at its real phase shape -->
-                <circle
-                  cx={b.pt[0]}
-                  cy={b.pt[1]}
-                  r="7"
-                  fill="#363842"
-                  stroke="rgba(255,255,255,0.4)"
-                  stroke-width="0.6"
-                />
-                <path d={moonLitPath(b.pt[0], b.pt[1], 7, illum, elong)} fill="#f1e7cb" />
-              {/if}
-              {#if showLabels}
-                <text x={b.pt[0]} y={b.pt[1] - 12.5} class="dome-label" text-anchor="middle"
-                  >{grahaLabel(b.body)}</text
-                >
-              {/if}
-            </g>
-          {/if}
-        {/each}
       </svg>
       <figcaption>
         {hi(
@@ -1932,6 +1956,12 @@
     font-size: 6px;
     fill: rgba(180, 200, 240, 0.62);
     letter-spacing: 0.3px;
+  }
+  .dome-polaris {
+    fill: #ffffff;
+  }
+  .dome-polaris-halo {
+    fill: rgba(255, 255, 255, 0.16);
   }
   .dome-card {
     font-size: 10px;

@@ -162,7 +162,20 @@ function nadi(nak: number): number {
   return [0, 1, 2, 2, 1, 0][(nak - 1) % 6];
 }
 
+// Guard the table lookups below: an out-of-range rashi/nakshatra would index past
+// the koota tables and throw a cryptic TypeError or inject NaN into the score.
+function assertMatchPerson(p: MatchPerson, who: string): void {
+  if (!Number.isInteger(p.rashi) || p.rashi < 0 || p.rashi > 11) {
+    throw new RangeError(`computeMatch: ${who} rashi ${p.rashi} out of range (0-11)`);
+  }
+  if (!Number.isInteger(p.nakshatra) || p.nakshatra < 1 || p.nakshatra > 27) {
+    throw new RangeError(`computeMatch: ${who} nakshatra ${p.nakshatra} out of range (1-27)`);
+  }
+}
+
 export function computeMatch(groom: MatchPerson, bride: MatchPerson): MatchResult {
+  assertMatchPerson(groom, 'groom');
+  assertMatchPerson(bride, 'bride');
   const varna = VARNA_RANK[groom.rashi] >= VARNA_RANK[bride.rashi] ? 1 : 0;
 
   const vashya =

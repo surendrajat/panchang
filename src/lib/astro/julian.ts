@@ -65,18 +65,18 @@ export function civilTimeInZone(
     throw new RangeError(`Invalid civil date: ${year}-${month}-${day}`);
   }
 
-  const targetAsFakeUtc = Date.UTC(year, month - 1, day, hour, minute, second);
+  // setUTCFullYear (not Date.UTC) so years 0-99 aren't coerced to 1900-1999.
+  const targetDate = new Date(0);
+  targetDate.setUTCFullYear(year, month - 1, day);
+  targetDate.setUTCHours(hour, minute, second, 0);
+  const targetAsFakeUtc = targetDate.getTime();
   let guess = targetAsFakeUtc;
   for (let i = 0; i < 4; i++) {
     const here = civilYMDInZone(new Date(guess), timezone);
-    const localAsFakeUtc = Date.UTC(
-      here.year,
-      here.month - 1,
-      here.day,
-      here.hour,
-      here.minute,
-      here.second,
-    );
+    const localDate = new Date(0);
+    localDate.setUTCFullYear(here.year, here.month - 1, here.day);
+    localDate.setUTCHours(here.hour, here.minute, here.second, 0);
+    const localAsFakeUtc = localDate.getTime();
     const delta = targetAsFakeUtc - localAsFakeUtc;
     if (delta === 0) break;
     guess += delta;
@@ -100,7 +100,10 @@ export function civilTimeInZone(
 
 export function isValidCivilDate(year: number, month: number, day: number): boolean {
   if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
-  const d = new Date(Date.UTC(year, month - 1, day));
+  // Build via setUTCFullYear so years 0-99 are NOT coerced to 1900-1999 (the JS
+  // `new Date`/`Date.UTC` two-digit-year rule, which made year 1..99 throw).
+  const d = new Date(0);
+  d.setUTCFullYear(year, month - 1, day);
   return d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day;
 }
 
@@ -120,6 +123,7 @@ function intlFor(timezone: string): Intl.DateTimeFormat {
   if (!f) {
     f = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
+      era: 'short', // so a BCE (proleptic) date isn't silently read as the CE year
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -136,12 +140,20 @@ function intlFor(timezone: string): Intl.DateTimeFormat {
 export function civilYMDInZone(date: Date, timezone: string): CivilYMD {
   const parts = intlFor(timezone).formatToParts(date);
   const out: Record<string, number> = {};
+  let bce = false;
   for (const p of parts) {
     if (p.type === 'literal') continue;
+    if (p.type === 'era') {
+      bce = p.value === 'BC';
+      continue;
+    }
     out[p.type] = parseInt(p.value, 10);
   }
   // Intl returns hour=24 on the day boundary in some engines; normalize.
   if (out.hour === 24) out.hour = 0;
+  // Intl reports a positive year + a BC/AD era; map BC back to the astronomical
+  // year numbering JS Date uses (1 BC = year 0, 2 BC = -1, …).
+  if (bce) out.year = 1 - out.year;
   return {
     year: out.year,
     month: out.month,

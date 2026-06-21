@@ -209,7 +209,10 @@ export function computeMonth(
   location: Location,
   options?: Partial<PanchangaOptions>,
 ): Panchanga[] {
-  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  // setUTCFullYear (not Date.UTC) so years 0-99 aren't coerced to 1900-1999.
+  const dim = new Date(0);
+  dim.setUTCFullYear(year, month, 0);
+  const daysInMonth = dim.getUTCDate();
   const result: Panchanga[] = [];
   for (let d = 1; d <= daysInMonth; d++) {
     const guess = civilTimeInZone(year, month, d, location.timezone, 12);

@@ -1475,7 +1475,7 @@
           <!-- Moon first → behind the Sun; hidden when lost in the Sun's glare -->
           {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
             {@const m = domeSunMoon[1]}
-            {@const litD = moonLitPath(m.pt[0], m.pt[1], 9, illum, elong)}
+            {@const litD = moonLitPath(m.pt[0], m.pt[1], 8, illum, elong)}
             <g class="dome-body" class:revealed={revealed === 'moon'} opacity={dayFade}>
               <circle
                 cx={m.pt[0]}
@@ -1490,7 +1490,7 @@
               <circle
                 cx={m.pt[0]}
                 cy={m.pt[1]}
-                r="9"
+                r="8"
                 fill="#363842"
                 stroke="rgba(255,255,255,0.4)"
                 stroke-width="0.6"
@@ -1500,9 +1500,9 @@
               <g clip-path="url(#dome-moon-clip)">
                 {#each craters as [dx, dy, cr] (`${dx}-${dy}`)}
                   <circle
-                    cx={m.pt[0] + dx * 0.75}
-                    cy={m.pt[1] + dy * 0.75}
-                    r={cr * 0.75}
+                    cx={m.pt[0] + dx * 0.67}
+                    cy={m.pt[1] + dy * 0.67}
+                    r={cr * 0.67}
                     class="crater"
                   />
                 {/each}
@@ -1529,9 +1529,10 @@
                 aria-label={grahaLabel('sun')}
                 use:revealable={'sun'}
               />
-              <!-- a soft glowing orb (no rays) — gentler than the spiky version -->
+              <!-- a soft glowing orb (no rays) — gentler than the spiky version.
+                   Disc matches the Moon's size: the two look ~equal in the real sky. -->
               <circle cx={sn.pt[0]} cy={sn.pt[1]} r="19" fill="url(#dome-sun-glow)" />
-              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="6.5" fill="url(#sun-grad)" />
+              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="8" fill="url(#sun-grad)" />
               <text
                 x={sn.pt[0]}
                 y={sn.pt[1] < DC ? sn.pt[1] + 18 : sn.pt[1] - 14}
@@ -1688,8 +1689,8 @@
     z-index: 5;
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -1703,8 +1704,8 @@
       transform 0.2s;
   }
   .view-gear svg {
-    width: 20px;
-    height: 20px;
+    width: 23px;
+    height: 23px;
     fill: currentColor;
   }
   .view-gear:hover,
@@ -2196,7 +2197,8 @@
     max-width: 460px;
     text-align: center;
   }
-  .skydome svg {
+  /* only the dome itself, NOT the gear's svg (which lives inside .skydome too) */
+  .skydome > svg {
     width: 100%;
     height: auto;
     overflow: visible;

@@ -527,10 +527,9 @@
     flex: 1;
     min-width: 0;
   }
-  /* Kicker and tithi-name never wrap: a long month name like "Bhādrapada
-     · Purnimanta" with badges would otherwise wrap awkwardly inside the
-     narrow column. The hero clips any overflow at the card edge. */
-  .hero__text .kicker,
+  /* Only the big tithi-name stays single-line (the hero clips its horizontal
+     overflow). The kicker is allowed to wrap so the masa/system tail isn't lost in
+     Hindi, where it runs wider than the column. */
   .hero__text .tithi-name {
     white-space: nowrap;
     overflow: visible;

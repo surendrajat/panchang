@@ -1574,13 +1574,13 @@
         <!-- horizon rim -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
         {#if domeDirections}
-          <!-- small, thin cardinals just inside the rim (keeps the dome big) -->
-          <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-          <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-          <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
+          <!-- small, thin cardinals hugging just inside the rim (dome stays big) -->
+          <text x={DC} y={DC - DR + 9} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+          <text x={DC} y={DC + DR - 3} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+          <text x={DC - DR + 9} y={DC + 3} class="dome-card" text-anchor="middle"
             >{hi('पू', 'E')}</text
           >
-          <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
+          <text x={DC + DR - 9} y={DC + 3} class="dome-card" text-anchor="middle"
             >{hi('प', 'W')}</text
           >
         {/if}

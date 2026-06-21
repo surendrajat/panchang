@@ -221,9 +221,21 @@ export const MONTHLY_OBSERVANCE_KEYS: ReadonlySet<string> = new Set([
 export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
   // --- Major Phase 1 list (per docs/ARCHITECTURE.md §7) ---
 
-  // Solar / sun-sign transit
-  // Makara Sankranti = Sun enters Makara (sidereal sign 9).
-  // Pongal shares that day in the Tamil calendar.
+  // Solar / sun-sign transit. Makara Sankranti = Sun enters sidereal Makara (sign
+  // 9), assigned to a civil day by the sunset rule (transit after sunset → next
+  // day). Thai Pongal (Tamil month Thai begins) is the SAME astronomical event
+  // under the SAME sunset rule — verified: the Tamil rule is a plain sunset cutoff,
+  // NOT an aparahna/fraction rule (that fractional rule is Kerala's, per Sewell &
+  // Dikshit, The Indian Calendar 1896, Art. 28).
+  //
+  // KNOWN DIVERGENCE (time-source, not a cutoff bug): Tamil Nadu's traditional
+  // VAKYA (Surya-Siddhanta) panchangam computes the ingress instant differently
+  // from Lahiri/Drik and can place Pongal a day later in rare years — e.g. the TN
+  // Govt 2026 holiday list = Jan 15 while Lahiri/Drik (our engine + the national
+  // Rashtriya Panchang) put the ingress at 3:13 PM Jan 14 (before sunset → Jan 14).
+  // We follow the Lahiri ingress (the GoI national standard, consistent with the
+  // rest of the engine); reproducing the Vakya date would need a separate
+  // Surya-Siddhanta solar model. Documented, not faked.
   {
     key: 'makara_sankranti',
     displayName: 'Makara Sankranti',

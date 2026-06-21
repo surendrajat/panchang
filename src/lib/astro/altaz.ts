@@ -33,6 +33,19 @@ export interface AltAz {
   altitude: number;
 }
 
+// An Observer depends only on lat/lon/altitude (stable for a session), but the
+// sky-dome computes ~60 positions per animation frame — so memoise the most
+// recent one instead of allocating a fresh Observer on every single call.
+let _obs: Observer | null = null;
+let _obsKey = '';
+function observerAt(latitude: number, longitude: number, altitudeMeters: number): Observer {
+  const key = `${latitude},${longitude},${altitudeMeters}`;
+  if (_obs && key === _obsKey) return _obs;
+  _obs = new Observer(latitude, longitude, altitudeMeters);
+  _obsKey = key;
+  return _obs;
+}
+
 export function bodyAltAz(
   body: SkyBody,
   date: Date,
@@ -40,7 +53,7 @@ export function bodyAltAz(
   longitude: number,
   altitudeMeters = 0,
 ): AltAz {
-  const observer = new Observer(latitude, longitude, altitudeMeters);
+  const observer = observerAt(latitude, longitude, altitudeMeters);
   const eq = Equator(BODY[body], date, observer, true, true);
   const hor = Horizon(date, observer, eq.ra, eq.dec, 'normal');
   return { azimuth: hor.azimuth, altitude: hor.altitude };
@@ -59,7 +72,7 @@ export function bodyArc(
   longitude: number,
   altitudeMeters = 0,
 ): { riseMs: number; setMs: number } | null {
-  const observer = new Observer(latitude, longitude, altitudeMeters);
+  const observer = observerAt(latitude, longitude, altitudeMeters);
   const transit = SearchHourAngle(BODY[body], observer, 0, new Date(centerMs - 12 * 3_600_000));
   const rise = SearchRiseSet(BODY[body], observer, +1, transit.time.date, -1.5);
   const set = SearchRiseSet(BODY[body], observer, -1, transit.time.date, +1.5);
@@ -67,16 +80,16 @@ export function bodyArc(
   return { riseMs: rise.date.getTime(), setMs: set.date.getTime() };
 }
 
-/**
- * Alt/az of a fixed star from its catalogue right ascension (hours) and
- * declination (degrees). J2000 coordinates are fine here — precession over a few
- * decades is a fraction of a degree, invisible at the dome's scale.
- */
 /** Apparent visual magnitude (brightness; lower = brighter, e.g. Venus ≈ −4). */
 export function bodyMagnitude(body: SkyBody, date: Date): number {
   return Illumination(BODY[body], date).mag;
 }
 
+/**
+ * Alt/az of a fixed star from its catalogue right ascension (hours) and
+ * declination (degrees). J2000 coordinates are fine here — precession over a few
+ * decades is a fraction of a degree, invisible at the dome's scale.
+ */
 export function starAltAz(
   raHours: number,
   decDeg: number,
@@ -85,7 +98,7 @@ export function starAltAz(
   longitude: number,
   altitudeMeters = 0,
 ): AltAz {
-  const observer = new Observer(latitude, longitude, altitudeMeters);
+  const observer = observerAt(latitude, longitude, altitudeMeters);
   const hor = Horizon(date, observer, raHours, decDeg, 'normal');
   return { azimuth: hor.azimuth, altitude: hor.altitude };
 }

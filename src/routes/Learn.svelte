@@ -219,12 +219,8 @@
   <SkyClock bind:date={now} bind:speed bind:live>
     {#snippet extra()}
       <div class="watch">
-        <span class="watch__var watch__var--sun"
-          ><CelestialMark body="sun" size={14} /> λ<sub>☉</sub> {d1(sunSid)}</span
-        >
-        <span class="watch__var watch__var--moon"
-          ><CelestialMark body="moon" size={14} /> λ<sub>☽</sub> {d1(moonSid)}</span
-        >
+        <span class="watch__var watch__var--sun">λ<sub>☉</sub> {d1(sunSid)}</span>
+        <span class="watch__var watch__var--moon">λ<sub>☽</sub> {d1(moonSid)}</span>
       </div>
     {/snippet}
   </SkyClock>
@@ -794,11 +790,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
-    min-width: 6.3rem;
-    font-size: 0.82rem;
+    min-width: 4.8rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    padding: 0.1rem 0.5rem;
+    padding: 0.08rem 0.45rem;
     border-radius: var(--radius-pill);
     background: var(--paper-2);
   }
@@ -810,6 +805,16 @@
   }
   .watch__var--moon {
     color: #3f6da0;
+  }
+  /* on phones, shrink the λ chips so they sit beside the clock on one row */
+  @media (max-width: 460px) {
+    .watch {
+      gap: 0.25rem;
+    }
+    .watch__var {
+      min-width: 4.3rem;
+      font-size: 0.75rem;
+    }
   }
 
   /* ── cells ── */

@@ -165,6 +165,15 @@
       color 0.15s;
   }
   @media (max-width: 460px) {
+    /* shrink the clock so it + both λ chips fit on one line on phones
+       (tabular figures + fixed format keep it from wobbling without min-width) */
+    .topline {
+      gap: 0.1rem 0.2rem;
+    }
+    .clock {
+      min-width: 0;
+      font-size: 0.9rem;
+    }
     .speeds {
       gap: 1px;
       padding: 2px;

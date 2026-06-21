@@ -753,12 +753,24 @@
   .labels-shown .dome-star-name {
     opacity: 1;
   }
+  /* Only the invisible .dome-hit target should be interactive — not the Sun's
+     wide glow, the discs, the planet icons or the labels (otherwise the Sun's
+     ~19px glow becomes the hit/hover area instead of its ~9px disc). :where()
+     carries zero specificity so the .dome-hit rule below still wins. */
+  .dome-body :where(circle, path, text, g) {
+    pointer-events: none;
+  }
   .dome-hit {
     fill: transparent;
     pointer-events: all;
     cursor: pointer;
     outline: none;
     -webkit-tap-highlight-color: transparent;
+  }
+  /* keyboard focus ring for the tappable bodies/stars (mirrors EclipticWheel) */
+  .dome-hit:focus-visible {
+    stroke: var(--gold);
+    stroke-width: 2;
   }
   .crater {
     opacity: 0.8;

@@ -245,7 +245,8 @@
         <circle cx={sunPos[0]} cy={sunPos[1]} r="13" fill="url(#ci-glow)" />
         <BodyIcon kind="sun" cx={sunPos[0]} cy={sunPos[1]} r={8} />
         {#if showAngle}
-          {@const l = pt(sunDeg, R + 20)}
+          <!-- label the ANGLE (on the arc's bisector), not the Sun's position -->
+          {@const l = pt(sunDeg / 2, 44)}
           <text x={l[0]} y={l[1]} class="ci-lambda" text-anchor="middle"
             >λ {num(sunDeg.toFixed(0))}°</text
           >

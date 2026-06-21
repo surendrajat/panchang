@@ -77,8 +77,11 @@ describe('rituFromSunSiderealSign', () => {
     expect(seen.size).toBe(6);
   });
 
-  it('computePanchanga exposes ritu consistent with standalone call', () => {
+  it('computePanchanga exposes a known ritu (Vasanta), consistent with standalone call', () => {
+    // Independently known: 2026-05-20 → Sun in sidereal Vrishabha (sign 1) → Vasanta.
     const p = computePanchanga(new Date('2026-05-20T06:00:00+05:30'), DELHI);
+    expect(p.solar.sign).toBe(1);
+    expect(p.ritu).toBe('vasanta');
     expect(p.ritu).toBe(rituFromSunSiderealSign(p.solar.sign));
   });
 });

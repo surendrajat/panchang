@@ -38,13 +38,14 @@ describe('sunrise/sunset', () => {
     expect(hour).toBeLessThanOrEqual(5);
   });
 
-  it('Tromsø polar winter: sun may not rise', () => {
-    // Mid-December in Tromsø — polar night.
+  it('Tromsø polar winter: no sunrise (polar night), pipeline still computes', () => {
+    // Mid-December in Tromsø, above the Arctic Circle — the sun never clears the
+    // horizon, so sunrise/sunset are null. The pipeline must tolerate that and
+    // still produce a panchanga (vara falls back to the local-noon weekday).
     const p = computePanchanga(new Date('2025-12-21T12:00:00+01:00'), TROMSO);
-    // We accept either: sunrise is null (true polar night), or sunrise
-    // falls outside the civil day window. The point of the test is that
-    // the compute pipeline doesn't crash.
-    expect(p).toBeTruthy();
+    expect(p.sunrise).toBeNull();
+    expect(p.sunset).toBeNull();
+    expect(p.vara).toBeTruthy(); // weekday still derived (local-noon fallback)
     expect(p.muhurta.rahuKaal).toBeDefined();
   });
 });

@@ -22,8 +22,13 @@ describe('nakshatra computation', () => {
     expect(dt).toBeLessThan(28 * 3600_000);
   });
 
-  it('name matches NAKSHATRA_NAMES at index-1', () => {
+  it('identifies a known nakshatra (Ardra) and keeps name↔index consistent', () => {
+    // Independently known: at this sunrise the Moon sits in Ardra (6th nakshatra).
+    // A regression in the longitude→nakshatra mapping changes index/name and trips
+    // this — unlike a pure name===NAMES[index-1] check, which can never fail.
     const p = computePanchanga(new Date('2026-05-20T06:00:00+05:30'), BENGALURU);
+    expect(p.nakshatra.index).toBe(6);
+    expect(p.nakshatra.name).toBe('Ardra');
     expect(p.nakshatra.name).toBe(NAKSHATRA_NAMES[p.nakshatra.index - 1]);
   });
 

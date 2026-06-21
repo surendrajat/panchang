@@ -25,8 +25,11 @@ describe('yogaAtInstant', () => {
     }
   });
 
-  it('name matches YOGA_NAMES at index-1', () => {
+  it('identifies a known yoga (Shula) and keeps name↔index consistent', () => {
+    // Independently known: Sun+Moon longitude sum at this instant → Shula (9th yoga).
     const y = yogaAtInstant(new Date('2026-05-20T06:00:00+05:30'), 'lahiri');
+    expect(y.index).toBe(9);
+    expect(y.name).toBe('Shula');
     expect(y.name).toBe(YOGA_NAMES[y.index - 1]);
   });
 
@@ -60,10 +63,13 @@ describe('yogaAtInstant', () => {
     expect(seen.size).toBeGreaterThanOrEqual(25);
   });
 
-  it('computePanchanga exposes yoga consistent with standalone call', () => {
+  it('computePanchanga exposes a known yoga (Siddhi), consistent with the standalone call', () => {
     const anchor = new Date('2026-05-01T06:30:00+05:30');
     const p = computePanchanga(anchor, DELHI);
     const y = yogaAtInstant(anchor, 'lahiri');
+    // Independently known: this Delhi sunrise → Siddhi (16th yoga).
+    expect(p.yoga.index).toBe(16);
+    expect(p.yoga.name).toBe('Siddhi');
     expect(p.yoga.index).toBe(y.index);
     expect(p.yoga.name).toBe(y.name);
   });

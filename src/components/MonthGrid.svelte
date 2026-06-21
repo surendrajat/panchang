@@ -97,31 +97,31 @@
       .join(' ');
   }
 
-  // First word inside the "(Pitru Karya)" / "(Deva Karya)" parenthetical, localized.
+  // First word inside the "(Pitra Karya)" / "(Deva Karya)" parenthetical, localized.
   function amavasyaQualifier(key: string): string | undefined {
-    return displayName(key).match(/\(([^\s)]+)/)?.[1]; // Pitru / Deva / पितृ / देव
+    return displayName(key).match(/\(([^\s)]+)/)?.[1]; // Pitra / Deva / पितृ / देव
   }
 
   // "Amavasya" with the distinguishing qualifier — the only monthly observance we
-  // name on the grid. Pitru (aparahna) and Deva (udaya) karya fall on different days
+  // name on the grid. Pitra (aparahna) and Deva (udaya) karya fall on different days
   // when the tithi spans two; a single day that is BOTH shows the combined label.
-  function amavasyaLabel(which: 'pitru' | 'deva' | 'both'): string {
+  function amavasyaLabel(which: 'pitra' | 'deva' | 'both'): string {
     const base = displayName('amavasya').split(' ')[0];
-    const pitru = amavasyaQualifier('amavasya');
+    const pitra = amavasyaQualifier('amavasya');
     const deva = amavasyaQualifier('amavasya_devakarya');
     const q =
       which === 'both'
-        ? deva && pitru
-          ? `${deva}-${pitru}`
+        ? deva && pitra
+          ? `${deva}-${pitra}`
           : undefined
-        : which === 'pitru'
-          ? pitru
+        : which === 'pitra'
+          ? pitra
           : deva;
     return q ? `${base} (${q})` : base;
   }
 
   // The cell's named observances: ALL annual festivals on the day, PLUS the Amavasya
-  // (Pitru / Deva / combined) when present — so e.g. 2026-11-08 shows all three of
+  // (Pitra / Deva / combined) when present — so e.g. 2026-11-08 shows all three of
   // Naraka Chaturdashi + Diwali + Amavasya (the Amavasya is a distinct observance,
   // not merely the new-moon glyph). Other monthly observances stay glyph-only (●○◆).
   // `label` is the compact cell text; `name` is the full localized name for aria.
@@ -129,9 +129,9 @@
     const out = keys
       .filter((k) => !MONTHLY_OBSERVANCE_KEYS.has(k))
       .map((k) => ({ label: festivalShortName(k), name: displayName(k) }));
-    const pitru = keys.includes('amavasya');
+    const pitra = keys.includes('amavasya');
     const deva = keys.includes('amavasya_devakarya');
-    const which = pitru && deva ? 'both' : pitru ? 'pitru' : deva ? 'deva' : null;
+    const which = pitra && deva ? 'both' : pitra ? 'pitra' : deva ? 'deva' : null;
     if (which) {
       const label = amavasyaLabel(which);
       out.push({ label, name: label });

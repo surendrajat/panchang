@@ -648,13 +648,13 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: (p) => vyapiniWithSunriseFallback(p, 'chandrodaya', 19, 'earlier'),
   },
   // Amavasya is observed on TWO civil days when the tithi spans two (the digests
-  // bifurcate it): the PITRU-KARYA (ancestor / Darsha Shraddha) day vs the
+  // bifurcate it): the PITRA-KARYA (ancestor / Darsha Shraddha) day vs the
   // DEVA-KARYA (auspicious / deity) day. We surface both in the monthly calendar.
   {
     key: 'amavasya',
-    displayName: 'Amavasya (Pitru Karya)',
+    displayName: 'Amavasya (Pitra Karya)',
     displayNameHi: 'अमावस्या (पितृ कार्य)',
-    // PITRU-KARYA / Darsha (Shraddha) Amavasya = the day the Amavasya tithi (30)
+    // PITRA-KARYA / Darsha (Shraddha) Amavasya = the day the Amavasya tithi (30)
     // prevails at APARAHNA (afternoon), even when not present at sunrise — shraddha
     // is an aparahna rite (Dharmasindhu, Shraddha prakarana: "Parvana shraddha has
     // to be of aparahna-prapti"). On a two-day span this is the EARLIER day.
@@ -669,7 +669,7 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     // DEVA-KARYA Amavasya = the UDAYA (sunrise) day — the general/auspicious
     // observance follows the day the tithi prevails at sunrise (purva-viddha,
     // vriddhi-aware). On a two-day span this is the LATER day (e.g. 2026 Chaitra:
-    // pitru/aparahna Mar 18, deva/udaya Mar 19). Coincides with the Pitru day on
+    // pitra/aparahna Mar 18, deva/udaya Mar 19). Coincides with the Pitra day on
     // single-day and kshaya months.
     matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 30),
   },

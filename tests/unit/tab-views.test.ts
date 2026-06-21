@@ -66,7 +66,7 @@ describe('Month tab (calendar grid)', () => {
     const text = container.textContent ?? '';
     expect(text).toContain('Naraka');
     expect(text).toContain('Diwali');
-    expect(text).toContain('Amavasya'); // the Pitru Amavasya is no longer suppressed
+    expect(text).toContain('Amavasya'); // the Pitra Amavasya is no longer suppressed
   });
 
   it('uses full vara names in the weekday header (not abbreviations)', () => {

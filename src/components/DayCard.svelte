@@ -573,7 +573,10 @@
     font-optical-sizing: auto;
     font-size: clamp(34px, 8vw, 50px);
     font-weight: 600;
-    line-height: 1.02;
+    /* Devanagari headline (e.g. त्रयोदशी with the ्र subjoined, अमावस्या) needs room
+       for the shirorekha + above/below matras; 1.02 clipped them against the hero's
+       overflow:hidden. */
+    line-height: 1.3;
     letter-spacing: -0.015em;
     color: var(--ink);
     margin-top: 6px;
@@ -586,7 +589,8 @@
     color: var(--red);
     font-weight: 700;
     font-size: 1.12em;
-    line-height: 1;
+    /* No line-height override — it inherits the 1.3 above so the enlarged red
+       drop-cap's shirorekha isn't clipped (it was the worst-clipped glyph). */
   }
   .tithi-meta {
     margin-top: 8px;

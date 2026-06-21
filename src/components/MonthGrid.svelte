@@ -306,7 +306,9 @@
     color: var(--ink-soft);
     font-weight: 600;
     margin-top: auto;
-    line-height: 1.2;
+    /* 1.2 clipped Devanagari tithi-name matras against the overflow:hidden used for
+       the ellipsis; 1.3 clears them. */
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

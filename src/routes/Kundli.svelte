@@ -724,7 +724,9 @@
     font-size: clamp(22px, 6vw, 30px);
     font-weight: 600;
     color: var(--ink);
-    line-height: 1.1;
+    /* Devanagari nakshatra/rashi names (e.g. पूर्वाषाढ़ा with the नुक़्ता + ा) clip at
+       1.1; 1.3 clears the above/below matras. */
+    line-height: 1.3;
     margin-top: 4px;
   }
   .id-sub {

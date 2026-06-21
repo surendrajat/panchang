@@ -13,7 +13,6 @@
   import Festivals from './routes/Festivals.svelte';
   import Settings from './routes/Settings.svelte';
   import Loading from '$components/Loading.svelte';
-  import PetalArt from '$components/PetalArt.svelte';
   import { computePanchanga, type Panchanga } from '$lib/panchanga';
   import { t, type TranslationKey, samvatsaraNameByIndex } from '$lib/i18n';
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
@@ -305,11 +304,15 @@
       <span class="deva">{tr('masthead.kicker')}</span>
       <span class="title__english">{tr('masthead.title')}</span>
     </h1>
-    <!-- Lotus-and-leaves garland under the title, between thin gold rules —
-         a finishing ornament in the book-printing convention. -->
+    <!-- Petal garland under the title — book-printing convention for
+         frontispieces, three small fleurons spaced with thin dividers
+         instead of a single ornament. Reads as a finishing rule
+         beneath the title rather than a stray glyph. -->
     <div class="title-ornament" aria-hidden="true">
       <span class="title-ornament__rule"></span>
-      <PetalArt />
+      <span class="title-ornament__petal">❀</span>
+      <span class="title-ornament__petal">❦</span>
+      <span class="title-ornament__petal">❀</span>
       <span class="title-ornament__rule"></span>
     </div>
     {#if todayPanchanga}
@@ -434,10 +437,12 @@
     {/if}
   </main>
 
-  <!-- Mirror the masthead's garland to mark the end of the page -->
+  <!-- Mirror the masthead's petal garland to mark the end of the page -->
   <div class="title-ornament title-ornament--end" aria-hidden="true">
     <span class="title-ornament__rule"></span>
-    <PetalArt />
+    <span class="title-ornament__petal">❀</span>
+    <span class="title-ornament__petal">❦</span>
+    <span class="title-ornament__petal">❀</span>
     <span class="title-ornament__rule"></span>
   </div>
 
@@ -562,7 +567,9 @@
   .title__english {
     display: block;
   }
-  /* Garland: thin gold rules on either side of the lotus-and-leaves PetalArt. */
+  /* Petal garland: thin gold rules on either side of three fleurons.
+     Reads as a finishing ornament under the title rather than a
+     standalone glyph. */
   .title-ornament {
     margin-top: 14px;
     display: flex;
@@ -578,6 +585,12 @@
   .title-ornament--end {
     margin-top: 56px;
     margin-bottom: 16px;
+  }
+  .title-ornament__petal {
+    font-size: 14px;
+  }
+  .title-ornament__petal:nth-child(3) {
+    font-size: 16px;
   }
   .title-ornament__rule {
     flex: 0 0 36px;

@@ -23,7 +23,6 @@ export interface Preferences {
   monthSystem: MonthSystem;
   // Lunar-node convention for kundli Rahu/Ketu: 'mean' or 'true'.
   nodeType: 'mean' | 'true';
-  topocentric: boolean;
   theme: 'auto' | 'light' | 'dark';
   weekStart: 'sunday' | 'monday';
   numerals: 'latin' | 'devanagari';
@@ -113,7 +112,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // Vedic software show for Rahu/Ketu; matches our SE_TRUE_NODE regression to
   // ≤0.8′. 'mean' stays available as an opt-in.
   nodeType: 'true',
-  topocentric: false,
   theme: 'auto',
   // Sunday-first matches the canonical Vedic week — Ravi/Sunday is
   // the first vara. Users can flip to Monday-first via Settings.

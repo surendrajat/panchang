@@ -16,8 +16,6 @@ export type Paksha = 'shukla' | 'krishna';
 export interface PanchangaOptions {
   ayanamsa: AyanamsaSystem; // default 'lahiri'
   monthSystem: MonthSystem; // engine default 'amanta' (app default is purnimanta)
-  topocentric: boolean; // default false (geocentric, matches drik)
-  sunriseHorizon: 'standard' | 'civil'; // default 'standard'
 }
 
 export interface TithiInfo {
@@ -158,6 +156,4 @@ export const DEFAULT_OPTIONS: PanchangaOptions = {
   // North-Indian) and the UI always passes it explicitly — so these two
   // defaults differ intentionally; they are not meant to be kept in sync.
   monthSystem: 'amanta',
-  topocentric: false,
-  sunriseHorizon: 'standard',
 };

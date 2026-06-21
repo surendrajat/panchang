@@ -56,7 +56,7 @@ function locationKeyPart(location: Location): string {
 export function cacheKey(date: Date, location: Location, options: PanchangaOptions): string {
   const { year, month, day } = civilYMDInZone(date, location.timezone);
   const ymd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  const opts = `${options.ayanamsa}/${options.monthSystem}/${options.topocentric ? 't' : 'g'}/${options.sunriseHorizon}`;
+  const opts = `${options.ayanamsa}/${options.monthSystem}`;
   return `${KEY_PREFIX}|${ymd}|${locationKeyPart(location)}|${opts}`;
 }
 

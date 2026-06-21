@@ -263,8 +263,6 @@ describe('smartaJanmashtamiMatches', () => {
   const OPTS = {
     ayanamsa: 'lahiri' as const,
     monthSystem: 'amanta' as const,
-    topocentric: false,
-    sunriseHorizon: 'standard' as const,
   };
 
   it('fires on Aug 15 2025 in Delhi (Drik-verified)', () => {
@@ -296,8 +294,6 @@ describe('kartikaPratipadaBridgeDay', () => {
   const OPTS = {
     ayanamsa: 'lahiri' as const,
     monthSystem: 'amanta' as const,
-    topocentric: false,
-    sunriseHorizon: 'standard' as const,
   };
 
   // Kartika Pratipada bridge day: Diwali Amavasya when Pratipada also

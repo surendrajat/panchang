@@ -6,8 +6,6 @@ import { DELHI } from '../helpers';
 const OPTIONS: PanchangaOptions = {
   ayanamsa: 'lahiri',
   monthSystem: 'purnimanta',
-  topocentric: false,
-  sunriseHorizon: 'standard',
 };
 
 describe('panchanga cache keys', () => {
@@ -31,12 +29,10 @@ describe('panchanga cache keys', () => {
     const date = new Date('2026-03-04T00:00:00+05:30');
     const base = cacheKey(date, DELHI, OPTIONS);
     const amanta = cacheKey(date, DELHI, { ...OPTIONS, monthSystem: 'amanta' });
-    const topocentric = cacheKey(date, DELHI, { ...OPTIONS, topocentric: true });
-    const civilHorizon = cacheKey(date, DELHI, { ...OPTIONS, sunriseHorizon: 'civil' });
+    const raman = cacheKey(date, DELHI, { ...OPTIONS, ayanamsa: 'raman' });
 
     expect(amanta).not.toBe(base);
-    expect(topocentric).not.toBe(base);
-    expect(civilHorizon).not.toBe(base);
+    expect(raman).not.toBe(base);
   });
 
   it('changes when calculation-affecting location fields change', () => {

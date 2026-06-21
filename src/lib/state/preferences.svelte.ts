@@ -42,15 +42,12 @@ export const preferences = $state<PreferencesState>({
 });
 
 // The single mapping from preferences → engine PanchangaOptions, so the
-// masthead and every route compute with identical options. sunriseHorizon is
-// always 'standard' (not a user preference). Reads the reactive `preferences`
-// by default, so calling it inside a $derived/$effect tracks the dependencies.
+// masthead and every route compute with identical options. Reads the reactive
+// `preferences` by default, so calling it inside a $derived/$effect tracks deps.
 export function panchangaOptionsFrom(prefs: PreferencesState = preferences): PanchangaOptions {
   return {
     ayanamsa: prefs.ayanamsa,
     monthSystem: prefs.monthSystem,
-    topocentric: prefs.topocentric,
-    sunriseHorizon: 'standard',
   };
 }
 

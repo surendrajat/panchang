@@ -569,21 +569,27 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'amavasya',
     displayName: 'Amavasya',
     displayNameHi: 'अमावस्या',
-    // Darsha Amavasya is observed on the day the Amavasya tithi (30) prevails at
-    // APARAHNA — the afternoon shraddha window — even if it is not present at
-    // sunrise (Nirnaya Sindhu / Dharma Sindhu; the rule traditional panchangs
-    // and Drik follow). The sunrise fallback recovers a kshaya Amavasya that
-    // pervades no day's aparahna, keeping it exactly one day per lunar month.
+    // SOURCED. Darsha Amavasya = the day the Amavasya tithi (30) prevails at
+    // APARAHNA (afternoon), even when it is not present at sunrise. Basis: shraddha
+    // is an aparahna rite — Dharmasindhu, Shraddha prakarana, states "Parvana
+    // shraddha has to be of aparahna-prapti" — so the Darsha (monthly-amavasya)
+    // shraddha is taken on the aparahna-vyapini Amavasya. Cross-checked vs
+    // drikpanchang per-city: Delhi 2026 + Kolkata 2025, 24/24. Sunrise fallback
+    // keeps a kshaya Amavasya at exactly one day per lunar month.
     matches: (p) => vyapiniWithSunriseFallback(p, 'aparahna', 30, 'earlier'),
   },
   {
     key: 'purnima',
     displayName: 'Purnima',
     displayNameHi: 'पूर्णिमा',
-    // Purnima (15) follows the same aparahna-vyapini vrat rule as Amavasya: the
-    // major Purnima observances (Guru Purnima, Raksha Bandhan, Holika Dahan) are
-    // taken on the day the tithi prevails in the afternoon, which is what Drik's
-    // "Purnima dates" list uses. Sunrise fallback covers a kshaya Purnima.
+    // DRIK-ALIGNED (not independently sourced — be honest). We take the
+    // aparahna-vyapini day because it reproduces drikpanchang's published "Purnima
+    // dates" exactly (Delhi 2026 + Kolkata 2025, 25/25). Unlike Amavasya there is
+    // no single primary-text Purnima day rule: the textbook generic-vrat rule is
+    // MOONRISE and snana/dana is SUNRISE — neither matches Drik's list on boundary
+    // days, whereas aparahna (the same window Amavasya/Raksha-Bandhan use) does.
+    // So this is calibrated to Drik, the project's reference, not derived from a
+    // single authority. Sunrise fallback covers a kshaya Purnima.
     matches: (p) => vyapiniWithSunriseFallback(p, 'aparahna', 15, 'earlier'),
   },
   {

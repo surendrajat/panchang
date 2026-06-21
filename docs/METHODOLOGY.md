@@ -264,6 +264,24 @@ at Aparahna.
 | Diwali              | Pradosha-vyapini Amavasya, `earlier` pick. Festival fires on a day whose **sunrise tithi may be Krishna 14** (Chaturdashi) — Amavasya doesn't have to be at sunrise; it has to be at Pradosha. Drik's published convention. |
 | Makara Sankranti    | Bisection-found exact transit JD; observance is the transit civil day unless transit is after sunset, in which case the next civil day. |
 
+### Monthly observances (the recurring vrats, shown in Day view, excluded from the annual list)
+
+| Observance        | Rule                                                              | Provenance |
+|---                |---                                                                |---         |
+| Amavasya          | Aparahna-vyapini new-moon (30), `earlier`, sunrise fallback.      | **Sourced.** Shraddha is an aparahna rite (Dharmasindhu, Shraddha prakarana: *"Parvana shraddha has to be of aparahna-prapti"*); Darsha Amavasya is the aparahna-vyapini new moon. |
+| Purnima           | Aparahna-vyapini full-moon (15), `earlier`, sunrise fallback.    | **Drik-aligned, not independently sourced.** No single primary-text day rule (textbook vrat = moonrise, snana = sunrise); aparahna is used because it reproduces Drik's "Purnima dates" list, which neither alternative does. |
+| Sankashti Chaturthi | Chandrodaya-vyapini Krishna Chaturthi (moonrise), `earlier`.    | Sourced rule type (same as Karva Chauth). |
+| Pradosh Vrat      | Pradosha-vyapini Trayodashi (both pakshas), `earlier`.           | Sourced rule type (evening vrat). |
+| Masik Shivaratri  | Nishita-vyapini Krishna Chaturdashi (skips Magha = Maha Shivaratri). | Sourced rule type (same as Maha Shivaratri). |
+| Ekadashi          | Both-paksha Ekadashi at sunrise, vriddhi-aware (purvaviddha).    | Sourced (Smarta purvaviddha); Smarta/Vaishnava split on doubled Ekadashis is not offered (we follow Smarta). |
+
+Cross-checked date-by-date vs drikpanchang (per-city geoname-id) for **New Delhi
+2026 + Kolkata 2025**: amavasya, purnima, sankashti all 12-13/12-13 exact;
+pradosh 25/25 Delhi but 23/24 Kolkata (one pradosha-window-offset edge);
+ekadashi 23/24 Delhi (Padmini) and ~22/24 Kolkata (Devutthana) — the residual
+Ekadashi/pradosh boundary cases are tracked, not hidden, in
+`tests/regression/monthly-observances.test.ts`. See `panchang-accuracy-discipline`.
+
 ### Why festival date and sunrise tithi can differ
 
 A common reading is "Diwali is the Amavasya day, so sunrise tithi must

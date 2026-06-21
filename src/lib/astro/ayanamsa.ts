@@ -33,11 +33,21 @@ const JULIAN_CENTURY_DAYS = 36525;
 // Calendars and Epoch' section:
 //   2024-10-31 → 24.210700°  (JD 2460614.5)  ⟹ J2000 base 23.8633°
 //   2025-01-01 → 24.213073°  (JD 2460676.5)  ⟹ J2000 base 23.8636°
-// Mean: 23.8635°. These are the values Drik uses internally (Swiss
-// Ephemeris SE_SIDM_LAHIRI). The previous value (23.8267°) had been
-// back-derived from a *different* Drik page section (ayanamsa display
-// text) which is 2.2 arcminutes lower than their computational value,
-// causing nakshatra/yoga end times to be ~4–7 min early vs Drik.
+// Mean: 23.8635°. This reproduces Drik Panchang to ~0.02′.
+//
+// ⚠ ACCURACY NOTE (verified with pyswisseph): "Lahiri" has several slightly
+// different numerical realizations. Ours (= Drik's) is ~0.38′ (≈23″) HIGHER
+// than Swiss Ephemeris's SE_SIDM_LAHIRI (23.857° at J2000), which Swiss
+// Ephemeris documents as the official Indian Astronomical Ephemeris value
+// since 1985. (Drik − Swiss-Eph = +0.40′ at the cited dates; ours − Swiss-Eph
+// = +0.38′, constant across 1950–2050.) We deliberately follow DRIK here so
+// the panchanga's nakshatra/yoga end times match the reference most users
+// check — note this is the opposite trade-off from the kundli LAGNA, where we
+// match Swiss Ephemeris (see jyotish/lagna.ts). The 0.38′ shifts all sidereal
+// positions by ~0.38′ and nakshatra/yoga end times by ~45 s vs Swiss-Eph —
+// below practical significance, but it IS a small Drik bias, not "the" value.
+// (The earlier value 23.8267° was 2.2′ lower still — a transcription of Drik's
+// display text, not its computational value — and is wrong; do not revert.)
 // KP shifts Lahiri by 6′ (Krishnamurti); Raman and Yukteshwar use
 // independent reference values.
 interface AyanamsaCoeffs {

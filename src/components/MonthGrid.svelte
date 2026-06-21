@@ -20,20 +20,29 @@
   const todayYMD = $derived(localYMD(new Date(), preferences.location?.timezone ?? 'UTC'));
 
   const grid = $derived(buildGrid(days, weekStart, year, month));
-  // Tied to preferences.language via tr() — Hindi swaps to रवि/सोम/etc.
-  const WD_KEYS = ['wd.sun', 'wd.mon', 'wd.tue', 'wd.wed', 'wd.thu', 'wd.fri', 'wd.sat'] as const;
+  // Full vara names (Ravivara/Somavara… or रविवार/सोमवार) — the grid is wide enough
+  // (92px columns on phones, scrolling). Tied to preferences.language via tr().
+  const VARA_KEYS = [
+    'vara.sunday',
+    'vara.monday',
+    'vara.tuesday',
+    'vara.wednesday',
+    'vara.thursday',
+    'vara.friday',
+    'vara.saturday',
+  ] as const;
   const weekdayLabels = $derived(
     weekStart === 'monday'
       ? [
-          tr('wd.mon'),
-          tr('wd.tue'),
-          tr('wd.wed'),
-          tr('wd.thu'),
-          tr('wd.fri'),
-          tr('wd.sat'),
-          tr('wd.sun'),
+          tr('vara.monday'),
+          tr('vara.tuesday'),
+          tr('vara.wednesday'),
+          tr('vara.thursday'),
+          tr('vara.friday'),
+          tr('vara.saturday'),
+          tr('vara.sunday'),
         ]
-      : WD_KEYS.map((k) => tr(k)),
+      : VARA_KEYS.map((k) => tr(k)),
   );
 
   function buildGrid(
@@ -205,7 +214,10 @@
     align-items: center;
     justify-content: center;
     font-size: 10.5px;
-    letter-spacing: 0.1em;
+    /* Tighter than the old 0.1em so the full vara names (e.g. MANGALAVARA) fit one
+       line in a 92px column; nowrap keeps them on a single line. */
+    letter-spacing: 0.02em;
+    white-space: nowrap;
     text-transform: uppercase;
     color: var(--red);
     font-weight: 700;
@@ -326,7 +338,9 @@
     font-size: 9.5px;
     color: var(--red);
     font-weight: 700;
-    line-height: 1.1;
+    /* Devanagari matras (top bar + vowel signs above/below the baseline) need more
+       than a Latin-tight line-height or they get clipped by the line-clamp box. */
+    line-height: 1.4;
     margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 0.02em;

@@ -63,6 +63,14 @@ describe('Month tab (calendar grid)', () => {
     expect(text).toContain('Diwali');
     expect(text).toContain('Amavasya'); // the Pitru Amavasya is no longer suppressed
   });
+
+  it('uses full vara names in the weekday header (not abbreviations)', () => {
+    const { container } = render(Month, { props: { yyyymm: '2026-11' } });
+    const headers = Array.from(container.querySelectorAll('.dh')).map((e) => e.textContent?.trim());
+    expect(headers).toContain('Somavara'); // Monday, full vara
+    expect(headers).toContain('Ravivara'); // Sunday, full vara
+    expect(headers).not.toContain('Mon'); // old abbreviation gone
+  });
 });
 
 describe('Festivals tab (annual list data)', () => {

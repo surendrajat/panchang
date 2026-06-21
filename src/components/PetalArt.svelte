@@ -4,31 +4,28 @@
 </script>
 
 <span class="petal-art" aria-hidden="true">
-  <svg class="petal-art__leaf petal-art__leaf--left" viewBox="0 0 22 26">
-    <path class="stroke" d="M4 23 C4 13 9 4 18 2 C16 12 12 20 4 23 Z" />
-    <path class="stroke vein" d="M5.5 21 C9 14.5 12.5 8.5 16 4.5" />
+  <svg class="petal-art__leaf petal-art__leaf--left" viewBox="-7 -35 14 41">
+    <path class="stroke faint" d="M0 4 L0 0" />
+    <path class="stroke" d="M0 0 C-6 -9 -6 -24 0 -33 C6 -24 6 -9 0 0 Z" />
+    <path class="stroke faint" d="M0 -3 L0 -30" />
   </svg>
 
   <svg class="petal-art__lotus" viewBox="0 0 100 76">
-    <!-- base petals -->
-    <path class="stroke" d="M50 59 C38.1 51.7 25.6 50.4 12 55 C24.4 62.4 36.9 63.7 50 59 Z" />
-    <path class="stroke" d="M50 59 C61.9 51.7 74.4 50.4 88 55 C75.6 62.4 63.1 63.7 50 59 Z" />
-    <!-- centre-bottom V -->
-    <path class="stroke" d="M45 58 L50 65 L55 58" />
-    <!-- large side petals -->
-    <path class="stroke" d="M50 57 C42.1 42.2 29.9 32.9 13 29 C21.3 44.1 33.5 53.4 50 57 Z" />
-    <path class="stroke" d="M50 57 C57.9 42.2 70.1 32.9 87 29 C78.7 44.1 66.5 53.4 50 57 Z" />
-    <!-- short spikes peeking between -->
-    <path class="stroke" d="M44 41 C40 35 37 31 35 27 C38 32 41 37 44 41 Z" />
-    <path class="stroke" d="M56 41 C60 35 63 31 65 27 C62 32 59 37 56 41 Z" />
-    <!-- centre petal, double outline, pointed both ends -->
-    <path class="stroke" d="M50 8 C60 25 60 44 50 58 C40 44 40 25 50 8 Z" />
-    <path class="stroke" d="M50 15 C56 27 56 42 50 52 C44 42 44 27 50 15 Z" />
+    <path class="stroke" d="M50 61 C30 50.4 30 50.4 7.7 53.5 C27.6 64.2 27.6 64.2 50 61 Z" />
+    <path class="stroke" d="M50 61 C72.4 64.2 72.4 64.2 92.3 53.5 C70 50.4 70 50.4 50 61 Z" />
+    <path class="stroke" d="M50 60 C35.3 37.6 35.3 37.6 10.4 27.9 C25 50.3 25 50.3 50 60 Z" />
+    <path class="stroke" d="M50 60 C75 50.3 75 50.3 89.6 27.9 C64.7 37.6 64.7 37.6 50 60 Z" />
+    <path class="stroke" d="M49 55 C44.9 43.5 44.9 43.5 36.6 34.4 C40.8 46 40.8 46 49 55 Z" />
+    <path class="stroke" d="M49 55 C57.2 46 57.2 46 61.4 34.4 C53.1 43.5 53.1 43.5 49 55 Z" />
+    <path class="stroke" d="M50 60 C58 33.5 58 35.5 50 9 C42 35.5 42 33.5 50 60 Z" />
+    <path class="stroke" d="M50 53 C54.4 33.8 54.4 35.2 50 16 C45.6 35.2 45.6 33.8 50 53 Z" />
+    <path class="stroke" d="M46 59.5 L50 66 L54 59.5" />
   </svg>
 
-  <svg class="petal-art__leaf petal-art__leaf--right" viewBox="0 0 22 26">
-    <path class="stroke" d="M4 23 C4 13 9 4 18 2 C16 12 12 20 4 23 Z" />
-    <path class="stroke vein" d="M5.5 21 C9 14.5 12.5 8.5 16 4.5" />
+  <svg class="petal-art__leaf petal-art__leaf--right" viewBox="-7 -35 14 41">
+    <path class="stroke faint" d="M0 4 L0 0" />
+    <path class="stroke" d="M0 0 C-6 -9 -6 -24 0 -33 C6 -24 6 -9 0 0 Z" />
+    <path class="stroke faint" d="M0 -3 L0 -30" />
   </svg>
 </span>
 
@@ -40,17 +37,21 @@
     color: inherit; /* gold, from .title-ornament */
   }
   .petal-art__lotus {
-    width: 36px;
-    height: 27.4px;
+    width: 40px;
+    height: 30.4px;
   }
   .petal-art__leaf {
-    width: 13px;
-    height: 15.5px;
-    margin-bottom: 2px;
+    width: 9px;
+    height: 26px;
   }
-  /* Mirror the left leaf so the pair splays outward symmetrically. */
+  /* Splay the pair outward, pivoting from the petiole (bottom-centre). */
   .petal-art__leaf--left {
-    transform: scaleX(-1);
+    transform: rotate(-22deg);
+    transform-origin: bottom center;
+  }
+  .petal-art__leaf--right {
+    transform: rotate(22deg);
+    transform-origin: bottom center;
   }
 
   .stroke {
@@ -61,8 +62,7 @@
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke; /* constant 1px regardless of viewBox scale */
   }
-  .vein {
+  .faint {
     opacity: 0.6;
-    stroke-width: 0.9px;
   }
 </style>

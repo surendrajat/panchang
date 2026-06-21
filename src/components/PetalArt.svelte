@@ -1,6 +1,8 @@
-<!-- Masthead / colophon ornament: a lotus flanked by two leaves (the centre
-     fleuron + side petals, redrawn as line/fill art). Inherits the gold `color`
-     of the surrounding .title-ornament via `currentColor`. -->
+<script lang="ts">
+  // Masthead/colophon ornament: a lotus flanked by two leaves, inheriting the
+  // surrounding gold via currentColor.
+</script>
+
 <span class="petal-art" aria-hidden="true">
   <svg class="petal-art__leaf petal-art__leaf--left" viewBox="0 0 16 18">
     <path class="leaf-blade" d="M3 15.5 Q3.5 7 13.5 3 Q12 11 3 15.5 Z" />

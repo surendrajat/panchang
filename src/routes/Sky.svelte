@@ -24,9 +24,9 @@
     <h2>{hi('आकाश दृश्य', 'The Sky View')}</h2>
     <p class="desc">
       {hi(
-        'आपके स्थानीय आकाश में सूर्य, चन्द्र व ग्रह — और आज रात के उदय/अस्त समय। पूरा अंतःक्रियात्मक राशि-चक्र ',
-        'The Sun, Moon and planets in your local sky — and tonight’s rise/set times. The full interactive zodiac wheel lives in the ',
-      )}<a href="#/learn">{hi('सीखें मार्गदर्शिका', 'Learn guide')}</a>{hi(' में है।', '.')}
+        'आपके स्थानीय आकाश में सूर्य, चन्द्र व ग्रह — और आज रात के उदय व अस्त समय।',
+        'The Sun, Moon and planets in your local sky, with tonight’s rise and set times.',
+      )}
     </p>
   </header>
 
@@ -45,19 +45,17 @@
     margin: 0 auto;
     padding-bottom: 2rem;
   }
+  .sky__head {
+    text-align: center;
+  }
   .sky__head h2 {
     margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
   }
   .desc {
     color: var(--ink-soft);
-    margin: 0.4rem 0 0.9rem;
+    margin: 0.4rem auto 0.9rem;
+    max-width: 56ch;
     font-size: 0.95rem;
     line-height: 1.55;
-  }
-  .desc a {
-    color: var(--red);
   }
 </style>

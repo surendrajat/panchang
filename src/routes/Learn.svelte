@@ -178,17 +178,83 @@
     <h2>{hi('पंचांग कैसे बनता है', 'How the Panchanga Works')}</h2>
     <p class="nb__lede">
       {hi(
-        'आकाश के सिर्फ़ दो कोणों से पूरा हिन्दू पंचांग कैसे बनता है — वास्तविक खगोलीय गणना से, सजीव। नीचे समय बदलें या चलाएँ और हर मान को बदलते देखें।',
-        'How an entire Hindu calendar is built from just two angles in the sky — live, from a real astronomical engine. Move or play time below and watch every value follow.',
+        'सिर्फ़ दो आकाशीय कोणों से पूरा हिन्दू पंचांग कैसे बनता है — पहले यह कि वह सूर्य और चन्द्र दोनों को क्यों गिनता है, फिर हर अंग सजीव रूप में, वास्तविक खगोलीय गणना से।',
+        'How an entire Hindu calendar is built from just two angles in the sky — starting with why it follows both the Sun and the Moon, then every limb, live, from a real astronomical engine.',
       )}
     </p>
   </header>
 
-  <!-- Animated primer: grok the sky first (celestial sphere → ecliptic → λ → two hands) -->
-  <p class="nb__primer-kicker">{hi('पहले — मूल विचार', 'First — the core ideas')}</p>
-  <ConceptIntro />
+  <!-- ════ CHAPTER 1 — Why luni-solar (the justification, from docs/guide README §1:
+       two sky-clocks that don't divide evenly, so the calendar keeps both) ════ -->
+  <article class="cell">
+    <div class="cell__no">[1]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('समस्या', 'The problem')}</p>
+      <h3>{hi('दो आकाशीय घड़ियाँ, जो मेल नहीं खातीं', 'Two clocks in the sky that won’t divide evenly')}</h3>
+      <p class="prose">
+        {hi(
+          'हर पंचांग दो घड़ियों के बीच समझौता है। चन्द्र सरल घड़ी है — एक अमावस्या से अगली तक ~29.53 दिन, यानी एक “मास”। सूर्य महत्वपूर्ण घड़ी है — ऋतुओं का पूरा चक्र ~365.24 दिन, यानी एक “वर्ष”। पर वर्ष में पूरे चान्द्र मास नहीं अँटते: 365.24 ÷ 29.53 ≈ 12.37।',
+          'Every calendar is a compromise between two clocks. The Moon is the easy one — about 29.53 days from one new moon to the next, a natural “month.” The Sun is the important one — about 365.24 days for a full turn of the seasons, a “year.” But a year isn’t a whole number of lunar months: 365.24 ÷ 29.53 ≈ 12.37.',
+        )}
+      </p>
+      <div class="choice">
+        <div class="choice__row">
+          <span class="choice__icon"><CelestialMark body="moon" size={18} /></span>
+          <span>
+            <b>{hi('केवल चन्द्र', 'Moon only')}</b> — {hi(
+              'मास सटीक रहते हैं, पर ऋतुएँ हर साल ~11 दिन खिसक जाती हैं (जैसे इस्लामी पंचांग)।',
+              'months stay perfect, but the seasons drift ~11 days a year (the Islamic calendar).',
+            )}
+          </span>
+        </div>
+        <div class="choice__row">
+          <span class="choice__icon"><CelestialMark body="sun" size={18} /></span>
+          <span>
+            <b>{hi('केवल सूर्य', 'Sun only')}</b> — {hi(
+              'ऋतुएँ सटीक रहती हैं, पर मासों का चन्द्र से कोई नाता नहीं (जैसे ग्रेगोरियन)।',
+              'seasons stay perfect, but the months have nothing to do with the Moon (the Gregorian).',
+            )}
+          </span>
+        </div>
+        <div class="choice__row choice__row--both">
+          <span class="choice__icon"
+            ><CelestialMark body="moon" size={15} /><CelestialMark body="sun" size={15} /></span
+          >
+          <span>
+            <b>{hi('दोनों', 'Both')}</b> — {hi(
+              'हिन्दू पंचांग दोनों रखता है — चन्द्र मास, पर ~हर तीन साल एक अधिक मास जोड़कर सूर्य की ऋतुओं से जुड़े रहना।',
+              'the Hindu calendar keeps both — lunar months, held to the Sun’s seasons by slipping in a leap month (adhika masa) about every three years.',
+            )}
+          </span>
+        </div>
+      </div>
+      <p class="caption">
+        {hi(
+          'यही निर्णय — “दोनों घड़ियाँ रखो” — आगे की हर चीज़ की जड़ है।',
+          'That one decision — keep both clocks — is the root of everything that follows.',
+        )}
+      </p>
+    </div>
+  </article>
+
+  <!-- ════ CHAPTER 2 — The core idea: the ecliptic & the zodiac (animated primer) ════ -->
+  <article class="cell">
+    <div class="cell__no">[2]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('मूल विचार', 'The core idea')}</p>
+      <h3>{hi('क्रान्तिवृत्त और राशिचक्र', 'The ecliptic and the zodiac')}</h3>
+      <p class="prose">
+        {hi(
+          'दोनों घड़ियों को एक ही मापदंड से पढ़िए। सूर्य के वार्षिक पथ — क्रान्तिवृत्त — पर 0° से 360° तक एक कोण नापिए: वही देशांतर (λ)। उसी वृत्त को 30° के बारह भागों में बाँटिए तो राशिचक्र मिलता है। बस सूर्य और चन्द्र के दो λ चाहिए।',
+          'Read both clocks with one common measure. Along the Sun’s yearly path — the ecliptic — measure an angle from 0° to 360°: that is the longitude (λ). Cut the same circle into twelve 30° arcs and you have the zodiac. All you need are the Sun’s and the Moon’s two λ.',
+        )}
+      </p>
+      <ConceptIntro />
+    </div>
+  </article>
+
   <p class="nb__transition">
-    {hi('अब इसे गणना में बदलें ↓', 'Now let’s turn this into arithmetic ↓')}
+    {hi('अब इन दो कोणों को सजीव देखिए — कोई भी क्षण चुनें ↓', 'Now watch those two angles live — pick any moment ↓')}
   </p>
 
   <!-- The moment everything below is computed for — pick it with the shared
@@ -202,9 +268,9 @@
     {/snippet}
   </SkyClock>
 
-  <!-- ════ CELL 1 — Two numbers ════ -->
+  <!-- ════ CELL 3 — Two numbers ════ -->
   <article class="cell">
-    <div class="cell__no">[1]</div>
+    <div class="cell__no">[3]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('मूल विचार', 'The whole idea')}</p>
       <h3>{hi('सब कुछ दो संख्याओं से', 'Two numbers run everything')}</h3>
@@ -233,9 +299,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 2 — One circle, twelve signs ════ -->
+  <!-- ════ CELL 4 — One circle, twelve signs ════ -->
   <article class="cell">
-    <div class="cell__no">[2]</div>
+    <div class="cell__no">[4]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('रंगमंच', 'The stage')}</p>
       <h3>{hi('एक वृत्त, बारह राशियाँ', 'One circle, twelve signs')}</h3>
@@ -308,9 +374,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 3 — The Sun names the month ════ -->
+  <!-- ════ CELL 5 — The Sun names the month ════ -->
   <article class="cell">
-    <div class="cell__no">[3]</div>
+    <div class="cell__no">[5]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('धीमी सुई', 'The slow hand')}</p>
       <h3>{hi('सूर्य मास का नाम देता है', 'The Sun names the month')}</h3>
@@ -355,9 +421,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 4 — The gap is the tithi ════ -->
+  <!-- ════ CELL 6 — The gap is the tithi ════ -->
   <article class="cell">
-    <div class="cell__no">[4]</div>
+    <div class="cell__no">[6]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('हृदय', 'The heart')}</p>
       <h3>{hi('दोनों का अंतर ही तिथि है', 'The gap between them is the tithi')}</h3>
@@ -417,9 +483,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 5 — The phase you see (paksha) ════ -->
+  <!-- ════ CELL 7 — The phase you see (paksha) ════ -->
   <article class="cell">
-    <div class="cell__no">[5]</div>
+    <div class="cell__no">[7]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('जो आप देखते हैं', 'What you see')}</p>
       <h3>{hi('वही अंतर — चन्द्र की कला', 'That same gap is the phase you see')}</h3>
@@ -453,9 +519,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 6 — The Moon among the stars (nakshatra) ════ -->
+  <!-- ════ CELL 8 — The Moon among the stars (nakshatra) ════ -->
   <article class="cell">
-    <div class="cell__no">[6]</div>
+    <div class="cell__no">[8]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('सूक्ष्म मापक', 'The fine ruler')}</p>
       <h3>{hi('तारों के बीच चन्द्र — नक्षत्र', 'The Moon among the stars — nakshatra')}</h3>
@@ -502,9 +568,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 7 — Two zodiacs (ayanamsa) ════ -->
+  <!-- ════ CELL 9 — Two zodiacs (ayanamsa) ════ -->
   <article class="cell">
-    <div class="cell__no">[7]</div>
+    <div class="cell__no">[9]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('तारे बनाम ऋतुएँ', 'Stars vs seasons')}</p>
       <h3>{hi('दो राशिचक्र, धीरे-धीरे अलग होते', 'Two zodiacs, drifting apart')}</h3>
@@ -567,9 +633,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 8 — Sum, half, and the weekday ════ -->
+  <!-- ════ CELL 10 — Sum, half, and the weekday ════ -->
   <article class="cell">
-    <div class="cell__no">[8]</div>
+    <div class="cell__no">[10]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('शेष तीन अंग', 'The rest of the five')}</p>
       <h3>{hi('जोड़, आधा, और वार', 'Sum, half, and the weekday')}</h3>
@@ -635,9 +701,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 9 — Everything together: the live interactive sky ════ -->
+  <!-- ════ CELL 11 — Everything together: the live interactive sky ════ -->
   <article class="cell">
-    <div class="cell__no">[9]</div>
+    <div class="cell__no">[11]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('सब एक साथ', 'Putting it all together')}</p>
       <h3>{hi('इस क्षण का पूरा आकाश', 'The whole sky, this moment')}</h3>
@@ -657,9 +723,9 @@
     </div>
   </article>
 
-  <!-- ════ CELL 10 — At a glance: the simplified panchanga ════ -->
+  <!-- ════ CELL 12 — At a glance: the simplified panchanga ════ -->
   <article class="cell cell--sum">
-    <div class="cell__no">[10]</div>
+    <div class="cell__no">[12]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('एक नज़र में', 'At a glance')}</p>
       <h3>{hi('इस क्षण का पंचांग', 'This moment’s panchanga')}</h3>
@@ -739,14 +805,36 @@
     line-height: 1.55;
     font-size: 0.95rem;
   }
-  .nb__primer-kicker {
-    margin: 1.8rem 0 0.5rem;
-    text-align: center;
-    font-size: 0.66rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    color: var(--ink-faint);
+  /* chapter 1 — the luni-solar "keep both clocks" comparison */
+  .choice {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+  }
+  .choice__row {
+    display: grid;
+    grid-template-columns: 1.9rem 1fr;
+    gap: 0.65rem;
+    align-items: center;
+    padding: 0.55rem 0.75rem;
+    background: var(--paper-2);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .choice__row b {
+    color: var(--ink);
+  }
+  .choice__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+  }
+  .choice__row--both {
+    background: color-mix(in srgb, var(--gold) 12%, var(--paper-2));
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
   }
   .nb__transition {
     margin: 1rem 0 1.5rem;

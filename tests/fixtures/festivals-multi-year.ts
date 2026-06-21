@@ -17,7 +17,9 @@
 //
 // Sources: drikpanchang.com year-list pages and per-festival archive
 // entries unless a fixture note says otherwise. Dates are YYYY-MM-DD
-// in Asia/Kolkata civil time.
+// in Asia/Kolkata civil time. The RULE behind each date is verified against
+// the primary digests (Dharmasindhu / Nirnaya Sindhu) + the Govt Rashtriya
+// Panchang — see docs/METHODOLOGY.md "Authoritative-rule audit".
 
 export interface FestivalFixture {
   key: string;
@@ -215,7 +217,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'nag_panchami',
     auditTier: 'tiebreaker',
     ruleNote:
-      'Rule note: Drik uses Madhyahna-vyapini Panchami of Shravana; pinned years currently match.',
+      'Shravana Shukla Panchami at SUNRISE/udaya (the puja is a ~6-ghatika morning rite per Dharmasindhu, but the day-selection is the sunrise Panchami — NOT madhyahna). Verified vs Drik New Delhi 2024-2028.',
     expected: {
       2016: '2016-08-07',
       2018: '2018-08-15',
@@ -397,7 +399,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'krishna_janmashtami',
     auditTier: 'tiebreaker',
     ruleNote:
-      'Default: Smarta Ashtami-at-Nishita with sunrise fallback — a legitimate convention (used by e.g. the Samvat panchang and the Bangladesh govt holiday). GENUINELY CONTESTED ~1 year in 3 (when Ashtami & Rohini do not coincide): Drik adds the Rohini/Jayanti shift, giving a different date (2027 Aug 25, 2029 Sep 1 vs our Aug 24, Aug 31). We intentionally keep the simpler Ashtami-Nishita rule, not Rohini; verified multi-source 2026-06. Further Vaishnava/ISKCON dates also not pinned here.',
+      'Smarta Ashtami-at-Nishita with sunrise fallback. This is the AUTHORITATIVE rule, not a simplification: Nirnaya Sindhu — "निशीथवेध एव ग्राह्यः … तस्यैव मुख्यकालः" (only the Nishita-vedha is the principal time); Rohini nakshatra upgrades the LABEL to Jayanti but does NOT move the day (= the Samvat panchang + Bangladesh govt holiday). Drik adds the Rohini/Jayanti shift in ~1 year/3 (2027 Aug 25, 2029 Sep 1 vs our Aug 24, Aug 31); the Vaishnava/ISKCON date can also differ — neither is pinned here.',
     expected: {
       2015: '2015-09-05',
       // Split year: Smarta references publish Aug 24; Vaishnava/ISKCON

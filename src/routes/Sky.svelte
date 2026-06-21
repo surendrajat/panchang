@@ -565,6 +565,14 @@
   // Sun & Moon first (drawn on top, and domeNow[0] is the Sun for the sky colour).
   const domeNow = $derived(preferences.location ? [...domeSunMoon, ...domePlanets] : null);
   const domeLoc = $derived(preferences.location?.name?.split(',')[0] ?? '');
+  // Hide the Moon when it sits inside the Sun's glare (new-moon territory): you
+  // couldn't see it then, and it keeps the Moon from ever overlapping the Sun.
+  const domeMoonHidden = $derived.by(() => {
+    const sun = domeSunMoon[0];
+    const moon = domeSunMoon[1];
+    if (!sun || !moon || sun.altitude < 0) return false;
+    return Math.hypot(sun.pt[0] - moon.pt[0], sun.pt[1] - moon.pt[1]) < 13;
+  });
 
   function lerpRGB(a: number[], b: number[], t: number): string {
     const k = Math.max(0, Math.min(1, t));
@@ -597,6 +605,11 @@
     { ra: 7.755, dec: 28.03, mag: 1.14 },
     { ra: 10.139, dec: 11.97, mag: 1.35 },
     { ra: 20.69, dec: 45.28, mag: 1.25 },
+    // southern stars, to fill the southern sky
+    { ra: 22.96, dec: -29.62, mag: 1.16 }, // Fomalhaut
+    { ra: 6.399, dec: -52.7, mag: -0.74 }, // Canopus
+    { ra: 1.629, dec: -57.24, mag: 0.46 }, // Achernar
+    { ra: 22.137, dec: -46.96, mag: 1.74 }, // Peacock
   ];
   // Bright stars above the horizon — only once the sky is dark. Per-frame for the
   // same reason as the planets (their alt/az rotates with the sky as time runs).
@@ -701,6 +714,28 @@
         [1, 2],
         [2, 3],
         [3, 4],
+      ],
+    },
+    {
+      name: { en: 'Sagittarius', hi: 'धनु' }, // Dhanu — the "teapot", low in the south
+      stars: [
+        [18.47, -25.42], // Kaus Borealis
+        [18.35, -29.83], // Kaus Media
+        [18.4, -34.38], // Kaus Australis
+        [18.76, -26.99], // Phi Sgr
+        [18.92, -26.3], // Nunki
+        [19.04, -29.88], // Ascella
+        [19.12, -27.67], // Tau Sgr
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 5],
+        [5, 4],
+        [4, 3],
+        [3, 0],
+        [4, 6],
+        [6, 5],
       ],
     },
   ];
@@ -1330,51 +1365,57 @@
               {/if}
             {/each}
           {/if}
-          <!-- Sun & Moon last → drawn on top of the planets, and larger -->
-          {#each domeSunMoon as b (b.body)}
-            {#if b.altitude >= -14}
-              <g class="dome-body">
-                {#if b.body === 'sun'}
-                  <circle cx={b.pt[0]} cy={b.pt[1]} r="12" fill="url(#sun-glow)" />
-                  {#each rayAngles as a (a)}
-                    {@const c = Math.cos((a * Math.PI) / 180)}
-                    {@const s = Math.sin((a * Math.PI) / 180)}
-                    <line
-                      x1={b.pt[0] + c * 7.5}
-                      y1={b.pt[1] - s * 7.5}
-                      x2={b.pt[0] + c * 11}
-                      y2={b.pt[1] - s * 11}
-                      class="sun-ray"
-                    />
-                  {/each}
-                  <circle
-                    cx={b.pt[0]}
-                    cy={b.pt[1]}
-                    r="7"
-                    fill="url(#sun-grad)"
-                    stroke="#e07b00"
-                    stroke-width="0.7"
-                  />
-                {:else}
-                  <!-- Moon drawn at its real phase shape -->
-                  <circle
-                    cx={b.pt[0]}
-                    cy={b.pt[1]}
-                    r="7"
-                    fill="#363842"
-                    stroke="rgba(255,255,255,0.4)"
-                    stroke-width="0.6"
-                  />
-                  <path d={moonLitPath(b.pt[0], b.pt[1], 7, illum, elong)} fill="#f1e7cb" />
-                {/if}
-                {#if showLabels}
-                  <text x={b.pt[0]} y={b.pt[1] - 12.5} class="dome-label" text-anchor="middle"
-                    >{grahaLabel(b.body)}</text
-                  >
-                {/if}
-              </g>
-            {/if}
-          {/each}
+          <!-- Moon first → behind the Sun; hidden when lost in the Sun's glare -->
+          {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
+            {@const m = domeSunMoon[1]}
+            <g class="dome-body">
+              <circle
+                cx={m.pt[0]}
+                cy={m.pt[1]}
+                r="7"
+                fill="#363842"
+                stroke="rgba(255,255,255,0.4)"
+                stroke-width="0.6"
+              />
+              <path d={moonLitPath(m.pt[0], m.pt[1], 7, illum, elong)} fill="#f1e7cb" />
+              {#if showLabels}
+                <text x={m.pt[0]} y={m.pt[1] - 12.5} class="dome-label" text-anchor="middle"
+                  >{grahaLabel('moon')}</text
+                >
+              {/if}
+            </g>
+          {/if}
+          <!-- Sun last → always on top, so the Moon never covers it -->
+          {#if domeSunMoon[0] && domeSunMoon[0].altitude >= -14}
+            {@const sn = domeSunMoon[0]}
+            <g class="dome-body">
+              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="12" fill="url(#sun-glow)" />
+              {#each rayAngles as a (a)}
+                {@const c = Math.cos((a * Math.PI) / 180)}
+                {@const s = Math.sin((a * Math.PI) / 180)}
+                <line
+                  x1={sn.pt[0] + c * 7.5}
+                  y1={sn.pt[1] - s * 7.5}
+                  x2={sn.pt[0] + c * 11}
+                  y2={sn.pt[1] - s * 11}
+                  class="sun-ray"
+                />
+              {/each}
+              <circle
+                cx={sn.pt[0]}
+                cy={sn.pt[1]}
+                r="7"
+                fill="url(#sun-grad)"
+                stroke="#e07b00"
+                stroke-width="0.7"
+              />
+              {#if showLabels}
+                <text x={sn.pt[0]} y={sn.pt[1] - 14} class="dome-label" text-anchor="middle"
+                  >{grahaLabel('sun')}</text
+                >
+              {/if}
+            </g>
+          {/if}
         </g>
         <!-- horizon rim + cardinals, drawn on top of the clipped sky -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
@@ -1388,7 +1429,7 @@
       </svg>
       <figcaption>
         {hi(
-          `यदि आप ${domeLoc ? domeLoc + ' में ' : ''}खड़े होकर ऊपर देखें — केंद्र सिर के ऊपर, किनारा क्षितिज; पूर्व बाएँ, पश्चिम दाएँ (असली आकाश की तरह)।`,
+          `यदि आप ${domeLoc ? domeLoc + ' में ' : ''}खड़े होकर ऊपर देखें — केंद्र सिर के ऊपर, किनारा क्षितिज; पूर्व बाएँ, पश्चिम दाएँ (वास्तविक आकाश की तरह)।`,
           `As if you stood${domeLoc ? ' in ' + domeLoc : ''} and looked up — the centre is overhead, the rim is the horizon, east on the left and west on the right, like the real sky.`,
         )}
       </figcaption>
@@ -1970,20 +2011,21 @@
   }
   .dome-path {
     fill: none;
-    stroke-width: 1.1;
+    stroke-width: 0.8;
     stroke-linecap: round;
     stroke-linejoin: round;
     opacity: 0.9;
   }
   .dome-path--sun {
     stroke: #ffcb52;
+    stroke-dasharray: 0.5 2.5;
   }
   .dome-path--moon {
     stroke: #aeb9d8;
     stroke-dasharray: 2.5 2.5;
   }
   .dome-label {
-    font-size: 7px;
+    font-size: 5.75px;
     font-weight: 600;
     fill: rgba(255, 255, 255, 0.82);
     paint-order: stroke;

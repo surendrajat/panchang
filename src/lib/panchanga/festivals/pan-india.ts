@@ -198,6 +198,19 @@ function isLohri(p: Panchanga): boolean {
   return month === 1 && day === 13;
 }
 
+// The monthly recurrences — these fire ~12-24× a year, so the annual Festivals
+// list excludes them (they'd swamp it); they surface in the Day view instead.
+// Used by the annual-walk fast path to skip their (vyapini-heavy) evaluation,
+// and by the festival loader to filter the year list. Single source of truth.
+export const MONTHLY_OBSERVANCE_KEYS: ReadonlySet<string> = new Set([
+  'ekadashi',
+  'pradosh',
+  'sankashti_chaturthi',
+  'amavasya',
+  'purnima',
+  'masik_shivaratri',
+]);
+
 export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
   // --- Major Phase 1 list (per docs/ARCHITECTURE.md §7) ---
 

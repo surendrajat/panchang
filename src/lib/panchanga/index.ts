@@ -36,5 +36,5 @@ export {
   SAMVATSARA_NAMES,
 } from './names';
 
-export { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
+export { PAN_INDIA_FESTIVALS, MONTHLY_OBSERVANCE_KEYS } from './festivals/pan-india';
 export type { FestivalRule } from './festivals/rules';

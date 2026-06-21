@@ -5,19 +5,10 @@
 // the ~365-day computePanchanga walk would otherwise spin for a while.
 import { civilTimeInZone } from '$lib/astro';
 import type { Location, AyanamsaSystem, MonthSystem, FestivalOccurrence } from '$lib/panchanga';
+import { MONTHLY_OBSERVANCE_KEYS } from '$lib/panchanga';
 import { festivalCacheKey, getFestivalsCached, putFestivalsCached } from '$lib/storage';
 
 type FestivalOpts = { ayanamsa: AyanamsaSystem; monthSystem: MonthSystem };
-
-// Monthly recurrences are dropped from the year view (they'd swamp it).
-const MONTHLY_KEYS = new Set([
-  'ekadashi',
-  'pradosh',
-  'sankashti_chaturthi',
-  'amavasya',
-  'purnima',
-  'masik_shivaratri',
-]);
 
 let worker: Worker | null = null;
 let reqId = 0;
@@ -69,7 +60,9 @@ export async function loadFestivals(
   const from = civilTimeInZone(year, 1, 1, loc.timezone, 12);
   const to = civilTimeInZone(year, 12, 31, loc.timezone, 12);
   const all = await computeInWorker(from.getTime(), to.getTime(), loc, opts);
-  const results = all.filter((o) => !MONTHLY_KEYS.has(o.key));
+  // The worker already excludes monthly recurrences (annualOnly); this filter is
+  // a cheap defensive no-op against the shared key set.
+  const results = all.filter((o) => !MONTHLY_OBSERVANCE_KEYS.has(o.key));
   await putFestivalsCached(key, results);
   return results;
 }

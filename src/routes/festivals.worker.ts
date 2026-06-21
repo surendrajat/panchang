@@ -17,7 +17,12 @@ interface Req {
 self.onmessage = (e: MessageEvent<Req>) => {
   const { id, fromMs, toMs, loc, opts } = e.data;
   try {
-    const results = findFestivals(new Date(fromMs), new Date(toMs), loc, opts);
+    // annualOnly: this worker only ever feeds the annual Festivals list, which
+    // drops the monthly recurrences — so skip computing them (saves ~half the
+    // per-day festival-evaluation cost).
+    const results = findFestivals(new Date(fromMs), new Date(toMs), loc, opts, {
+      annualOnly: true,
+    });
     (self as unknown as Worker).postMessage({ id, results });
   } catch (err) {
     (self as unknown as Worker).postMessage({

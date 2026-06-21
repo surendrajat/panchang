@@ -19,7 +19,7 @@ import {
   MS_PER_DAY,
 } from '$lib/astro';
 import { evaluateFestivals } from './festivals/rules';
-import { PAN_INDIA_FESTIVALS } from './festivals/pan-india';
+import { PAN_INDIA_FESTIVALS, MONTHLY_OBSERVANCE_KEYS } from './festivals/pan-india';
 import { tithiAtInstant } from './tithi';
 import { nakshatraAtInstant } from './nakshatra';
 import { yogaAtInstant } from './yoga';
@@ -52,6 +52,30 @@ function resolveOptions(o?: Partial<PanchangaOptions>): PanchangaOptions {
   return { ...DEFAULT_OPTIONS, ...(o ?? {}) };
 }
 
+// Annual festivals = all festivals minus the monthly recurrences. The annual
+// list excludes the monthly ones anyway, and they are ~half the festival-
+// evaluation cost (their vyapini rules do extra sunrise/moonrise searches), so
+// the annual walk skips them entirely.
+const ANNUAL_FESTIVALS = PAN_INDIA_FESTIVALS.filter((r) => !MONTHLY_OBSERVANCE_KEYS.has(r.key));
+
+// Internal toggles used only by findFestivals' annual walk — NOT part of the
+// public options (no effect on the cache key, never set by Day/Month/Today).
+//
+// `fast`: skip the fields no festival rule reads — yoga, karana(s),
+//   moonrise/moonset — the heaviest unused work (karanaSequenceForDay alone is
+//   ~0.8 ms/day). Everything the rules DO read (tithi, nakshatra, masa, solar
+//   sign, sunrise/sunset) is computed identically, so `festivals` is byte-for-
+//   byte the same as the full path.
+// `annualOnly`: evaluate only annual festivals, skipping the monthly recurrences
+//   the year view discards (saves ~0.4 ms/day — about half the eval cost).
+//
+// Both are verified output-identical (after the year view's monthly filter) by a
+// multi-year, multi-city diff. Default off; Day/Month/Today get the full result.
+interface ComputeInternal {
+  fast?: boolean;
+  annualOnly?: boolean;
+}
+
 // Compute the panchanga for a civil date at a location.
 //
 // `date` is interpreted as "midnight in the location's IANA time zone".
@@ -62,15 +86,9 @@ export function computePanchanga(
   date: Date,
   location: Location,
   options?: Partial<PanchangaOptions>,
-  // Festival fast-path (findFestivals' annual walk only): skip the fields no
-  // festival rule reads — yoga, karana(s), moonrise/moonset — which are the
-  // heaviest unused work (karanaSequenceForDay alone is ~0.8 ms/day). Everything
-  // the rules DO read (tithi, nakshatra, masa, solar sign, sunrise/sunset) is
-  // computed identically, so `festivals` is byte-for-byte the same as the full
-  // path — verified by a multi-year, multi-city diff. Default off; Day/Month/
-  // Today always get the complete panchanga.
-  fast = false,
+  internal: ComputeInternal = {},
 ): Panchanga {
+  const { fast = false, annualOnly = false } = internal;
   const opts = resolveOptions(options);
   const dayStart = civilMidnightInZone(date, location.timezone);
 
@@ -171,7 +189,10 @@ export function computePanchanga(
     festivals: [],
   };
 
-  partial.festivals = evaluateFestivals(PAN_INDIA_FESTIVALS, partial);
+  partial.festivals = evaluateFestivals(
+    annualOnly ? ANNUAL_FESTIVALS : PAN_INDIA_FESTIVALS,
+    partial,
+  );
   return partial;
 }
 
@@ -195,9 +216,14 @@ export function findFestivals(
   toDate: Date,
   location: Location,
   options?: Partial<PanchangaOptions>,
+  // `annualOnly` (the annual Festivals view) skips the monthly recurrences the
+  // view filters out anyway — about half the per-day festival-evaluation cost.
+  // Default off, so this stays a faithful "all festivals in range" API.
+  walkOptions: { annualOnly?: boolean } = {},
 ): FestivalOccurrence[] {
   const out: FestivalOccurrence[] = [];
   const opts = resolveOptions(options);
+  const annualOnly = walkOptions.annualOnly ?? false;
 
   // Walking by MS_PER_DAY breaks across DST transitions (spring-forward
   // and fall-back make local "days" 23h or 25h). India has no DST so
@@ -225,7 +251,7 @@ export function findFestivals(
   let cursor = startMs;
   const safetyLimit = Math.ceil((endMs - startMs) / MS_PER_DAY) + 7;
   for (let i = 0; i < safetyLimit && cursor <= endMs; i++) {
-    const p = computePanchanga(new Date(cursor), location, opts, true); // fast path
+    const p = computePanchanga(new Date(cursor), location, opts, { fast: true, annualOnly });
     for (const key of p.festivals) {
       out.push({ date: p.date, key, displayName: getDisplay(key) });
     }

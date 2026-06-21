@@ -1,10 +1,10 @@
 // Sidereal positions of the nine grahas.
 //
 // Sun/Moon reuse the panchanga ephemeris verbatim; the five true planets
-// use the generic `bodyLongitudeAtJD` (same EQJ→ECT frame); Rahu/Ketu use
-// the mean lunar node. Every longitude is then made sidereal by one
-// ayanamsa, so all nine grahas share a single reference — exactly as the
-// nakshatra/tithi math already does for the Moon.
+// use the generic `bodyLongitudeAtJD` (same EQJ→ECT frame); Rahu/Ketu use the
+// lunar node, mean or true per `nodeType`. Every longitude is then made
+// sidereal by one ayanamsa, so all nine grahas share a single reference —
+// exactly as the nakshatra/tithi math already does for the Moon.
 
 import {
   Body,
@@ -38,9 +38,9 @@ const PLANET_BODY: Partial<Record<GrahaKey, Body>> = {
 
 // Mean longitude of the Moon's ascending node, referred to the mean
 // equinox of date, in degrees (Meeus, Astronomical Algorithms, 47.7).
-// This is the tropical longitude of Rahu (mean); subtract the ayanamsa
-// for sidereal. The true node oscillates ±~1.5° around this and is a
-// Phase-2 toggle.
+// This is the tropical longitude of mean Rahu; subtract the ayanamsa for
+// sidereal. The true (osculating) node — `trueNodeLongitudeAtJD`, selected
+// by nodeType:'true' — oscillates ±~1.5° around this.
 function meanNodeTropical(jd: number): number {
   const T = (jd - JD_J2000) / JULIAN_CENTURY_DAYS;
   const omega =

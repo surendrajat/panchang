@@ -511,22 +511,10 @@ export function vyapiniWithSunriseFallback(
   return true;
 }
 
-// Sun sankranti with the Drik "Punya Kaal" convention: if the sun
-// enters the target sidereal sign *after* sunset on day N, observance
-// shifts to day N+1.
-//
-// `p.solar.signAtDayStart !== p.solar.signAtDayEnd` (already on the
-// panchanga) tells us the transit occurs on day N — but to decide if
-// it's before or after sunset we have to locate the transit JD by
-// linear interpolation (Sun moves ~1° in 24h, so a single-step linear
-// estimate is accurate to seconds for our purposes).
-//
-// We don't have the precise transit JD on the panchanga, so we fall
-// back to a structural test: if today's signAtDayEnd matches target
-// AND today's sign at sunset is still the OLD sign, the transit
-// hasn't happened by sunset → Sankranti = tomorrow. Otherwise today.
-// (ayanamsa, sunLongitudeAtJD, julianToDate, civilMidnightInZone are
-//  imported at the top of this file alongside the other astro deps.)
+// Sun sankranti with the Drik "Punya Kaal" convention: if the sun enters the
+// target sidereal sign *after* sunset on day N, observance shifts to day N+1.
+// We find the exact transit JD by bisection (below), then compare it against
+// the transit day's sunset — see `sankrantiInto` for the full rule.
 
 // Bisect-find the JD at which the Sun's sidereal longitude crosses
 // `targetDeg`. Bracket spans 4 days centered ~2 days before the

@@ -1,9 +1,10 @@
 // Karana — half a tithi.
 //
-// One tithi = 12° of elongation = 2 karanas. There are 60 karanas in a
-// synodic month, but only 11 distinct names: 7 "movable" karanas repeat
-// 8 times each (positions 1..56), and 4 "fixed" karanas occupy positions
-// 57..60 (the half-tithis before the next Shukla Pratipada).
+// One tithi = 12° of elongation = 2 karanas, so there are 60 karanas in a
+// synodic month — but only 11 distinct names. The very first half-tithi is the
+// fixed karana Kimstughna; then 7 "movable" karanas repeat 8 times each (56 in
+// all); then 3 fixed karanas (Shakuni, Chatushpada, Naga) fill the last three
+// half-tithis before the next Shukla Pratipada. (4 fixed + 56 movable = 60.)
 //
 // Naming reference: standard Hindu calendrical literature. See
 // Wikipedia: "Karana (Panchanga)".

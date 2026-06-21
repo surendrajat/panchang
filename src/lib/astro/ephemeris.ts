@@ -1,7 +1,8 @@
-// Ephemeris adapter. Wraps astronomy-engine to expose only what the
-// panchanga layer needs: geocentric ecliptic-of-date longitudes for the
-// Sun and Moon. Swap this file (and ayanamsa.ts) to change the ephemeris
-// backend without touching the rest of the code.
+// Ephemeris adapter. Wraps astronomy-engine to expose apparent geocentric
+// ecliptic-of-date longitudes for the Sun and Moon (panchanga) plus the
+// planets, true node, true obliquity, and sidereal time (jyotish/kundli).
+// Swap this file (and ayanamsa.ts) to change the ephemeris backend without
+// touching the rest of the code.
 
 import {
   Body,
@@ -27,11 +28,11 @@ import { dateToJulian, JD_UNIX_EPOCH, MS_PER_DAY } from './julian';
 // instances around freely; astronomy-engine accepts FlexibleDateTime.
 export type Instant = Date;
 
-const TWO_PI = 360;
+const DEG_PER_CIRCLE = 360;
 
 function normalize(deg: number): number {
-  const m = deg % TWO_PI;
-  return m < 0 ? m + TWO_PI : m;
+  const m = deg % DEG_PER_CIRCLE;
+  return m < 0 ? m + DEG_PER_CIRCLE : m;
 }
 
 // Apparent geocentric ecliptic longitude of the Sun, true equinox and

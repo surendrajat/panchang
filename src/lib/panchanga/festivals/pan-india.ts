@@ -55,13 +55,12 @@ const KRISHNA = (n: number) => 15 + n; // krishna 1..15 → 16..30
 // `pick` chooses earlier-vs-later when two consecutive days both have
 // the tithi at the window (see `vyapiniMatches`).
 //
-// `fallback`:
-//   'strict'   — only the named-window check (default).
-//   'sunrise'  — adds a tithi-at-sunrise fallback for kshaya tithis
-//                where the window-strict rule produces NO match in
-//                this paksha. Used by festivals like Vijayadashami /
-//                Janmashtami / Karva Chauth where Drik defers to
-//                sunrise observance in tithi-kshaya years.
+// `fallback` (default 'sunrise'):
+//   'sunrise'  — when the window-strict rule finds NO day in this paksha (a
+//                kshaya / short tithi that pervades no window), fall back to the
+//                day the tithi is observed at sunrise, so the festival never
+//                vanishes. This is the default for every vyapini festival.
+//   'strict'   — the named-window check only, no fallback.
 function vyapiniShukla(
   tithi: number,
   masa: string,
@@ -112,11 +111,8 @@ function vyapiniShuklaBhadra(
   cutoff: 'sunset' | 'prahar1' | 'prahar4' | 'brahmaMuhurta' = 'brahmaMuhurta',
 ) {
   return (p: Panchanga): boolean => {
-    // For the "shifted" day (Case B in bhadraAwareVyapiniMatches),
-    // today's masa might already have ticked over to the next krishna
-    // half — but in Amanta convention Phalguna/Shravana still own
-    // their Krishna 1 day. Allow either Purnima-of-target-masa or
-    // Krishna-1-of-target-masa under amantaName.
+    // Gate on the target Amanta month (system-invariant); the Bhadra-aware
+    // helper handles any shift to the next day itself.
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
     return bhadraAwareVyapiniWithSunriseFallback(p, window, SHUKLA(tithi), cutoff);
   };

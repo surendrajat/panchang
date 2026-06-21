@@ -30,8 +30,9 @@ const JULIAN_CENTURY_DAYS = 36525;
 //
 // The Lahiri J2000 anchor (23.85709°) is Swiss Ephemeris's SE_SIDM_LAHIRI —
 // the value Swiss Ephemeris documents as the official Indian Astronomical
-// Ephemeris realization (in use since 1985), and what astro.com, Jagannatha
-// Hora, and ProKerala compute. Verified directly with pyswisseph across
+// Ephemeris realization (in use since 1985), and what astro.com and Jagannatha
+// Hora compute. (ProKerala matches our LAGNA but uses Drik's higher ayanamsa
+// value for positions — see lagna.ts.) Verified directly with pyswisseph across
 // 1950–2050 (our IAU-2006 precession rate matches Swiss-Eph's to <0.01′, so a
 // single base anchor reproduces it everywhere). This is the SAME accuracy-first
 // choice we make for the kundli LAGNA (see jyotish/lagna.ts): match the
@@ -86,12 +87,12 @@ const COEFFS: Record<AyanamsaSystem, AyanamsaCoeffs> = {
     precessionArcsecPerCenturyTSq: 0,
   },
   true_chitra: {
-    // True Chitra-paksha: ayanamsa such that ecliptic longitude of
-    // Spica (Chitra) is exactly 180° sidereal. We approximate by
-    // Lahiri with a small offset for now; a future revision can
-    // compute Spica's tropical longitude directly via the star
-    // catalog.
-    baseDegreesAtJ2000: 23.8625,
+    // True Chitra-paksha: ayanamsa such that the ecliptic longitude of Spica
+    // (Chitra) is exactly 180° sidereal. Anchored to Swiss Ephemeris's
+    // SE_SIDM_TRUE_CITRA at J2000 (23.84002°, ~1′ below Lahiri) and carried
+    // forward by the same IAU precession — accurate to ~1″ over 1900–2100,
+    // since Spica's proper motion is negligible at that scale.
+    baseDegreesAtJ2000: 23.84002,
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },

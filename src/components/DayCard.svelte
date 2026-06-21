@@ -856,11 +856,43 @@
   }
 
   @media (max-width: 460px) {
+    /* On phones, keep the moon on the right rather than dropping it under the
+       text. The tithi-name (top line) is allowed to overflow horizontally
+       across/behind the moon area; the meta + greg + rashi-line beneath it wrap
+       within the remaining text column. The moon is absolutely positioned so the
+       overflowing title doesn't push it down. */
     .hero {
-      grid-template-columns: 1fr;
+      display: block;
+      position: relative;
+      padding-right: 92px;
+      min-height: 96px;
+      /* clip the overflowing tithi-name at the card edge (so it never causes a
+         page-level horizontal scroll); the moon sits on top of the overflow */
+      overflow: hidden;
+    }
+    .hero__text {
+      min-width: 0;
+    }
+    .tithi-name {
+      /* let the big tithi title bleed past the right-hand moon column rather
+         than wrapping early — fine because the moon hugs the top right corner */
+      white-space: nowrap;
+      overflow: visible;
     }
     .hero__moon {
-      justify-self: start;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 84px;
+      text-align: center;
+    }
+    .hero__moon :global(.moon-svg) {
+      width: 80px;
+      height: 80px;
+    }
+    .moon-pct {
+      font-size: 13px;
+      margin-top: 4px;
     }
     .timings {
       grid-template-columns: repeat(2, 1fr);

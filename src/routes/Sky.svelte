@@ -1867,9 +1867,12 @@
     font-weight: 600;
     letter-spacing: 0.02em;
   }
+  /* The Sun/Moon's sign is already shown by the sector tint AND by the bright
+     body icon sitting in that sector — flipping the name colour on top of that
+     just made the labels look like they were "flickering" as bodies crossed
+     signs while time scrubbed. Keep the colour stable; weight stays unchanged. */
   .rashi-name.on {
-    fill: var(--ink);
-    font-weight: 700;
+    fill: var(--ink-soft);
   }
   /* Real Unicode astrological / planet glyphs, forced to the line (text) form —
      a Nerd Font if the device has one, else the system symbol fonts. */
@@ -1881,8 +1884,9 @@
     font-size: 15px;
     fill: var(--ink-soft);
   }
+  /* same reason as .rashi-name.on — kept stable to avoid the moving highlight */
   .rashi-glyph.on {
-    fill: var(--ink);
+    fill: var(--ink-soft);
   }
   /* body hover label — name appears on hover/focus, not always */
   .body[role='button'] {

@@ -156,16 +156,13 @@
 </div>
 
 <style>
-  /* Transposed (vertical) month: weekday labels run down the LEFT column and
-     each week is a column. Column-flow fills the 7 labels down column 1, then
-     each subsequent 7 cells down its own week column. Fewer columns than the
-     old 7-wide layout, so it fits a phone better and reads top-to-bottom. */
+  /* Standard month grid: weekday labels across the top row, then each week is a
+     row below (the markup lists the 7 headers first, so they fill row 1). On a
+     phone the 7 columns are wider than the viewport, so the grid scrolls
+     horizontally inside .calendar-scroll (see the media query below). */
   .cal {
     display: grid;
-    grid-template-rows: repeat(7, minmax(74px, auto));
-    grid-template-columns: max-content; /* the weekday-label column */
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(72px, 1fr); /* one column per week */
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px;
     background: var(--line);
     border: 1px solid var(--line);
@@ -177,13 +174,13 @@
     background: var(--paper);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     font-size: 10.5px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--red);
     font-weight: 700;
-    padding: 0 9px;
+    padding: 7px 4px;
   }
   .cell {
     background: var(--cell-bg, var(--paper));
@@ -355,8 +352,6 @@
     margin-inline: -18px;
     padding-inline: 18px;
   }
-  /* The transposed grid is ~label + (5–6 week × 58px) ≈ 350–400px, so it fits
-     most phones without scrolling; .calendar-scroll is the fallback below that. */
   .dot {
     font-size: 13px;
   }
@@ -370,12 +365,12 @@
     color: var(--indigo);
   }
   @media (max-width: 460px) {
-    /* Wider fixed-width week columns so festival/tithi names show in full.
-       width: max-content sizes the grid to its real width (otherwise it's
-       clamped to the viewport and overflow:hidden clips the right columns) so it
-       overflows and .calendar-scroll scrolls horizontally instead. */
+    /* Fixed-width columns so festival/tithi names show in full. width: max-content
+       sizes the grid to its real width (otherwise it's clamped to the viewport and
+       overflow:hidden clips the right columns), so it overflows and
+       .calendar-scroll scrolls horizontally instead. */
     .cal {
-      grid-auto-columns: 92px;
+      grid-template-columns: repeat(7, 92px);
       width: max-content;
     }
     .gd {

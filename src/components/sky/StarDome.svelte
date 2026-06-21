@@ -89,6 +89,7 @@
   const DOME = 200;
   const DC = DOME / 2;
   const DR = 82;
+  const CARD_GAP = 3; // gap from the rim to each N/S/E/W label (edge-anchored, equal all round)
   const craters = [
     [-3, -2, 2.4],
     [3, 1.5, 1.7],
@@ -493,12 +494,36 @@
       </g>
       <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
       {#if fDirs}
-        <text x={DC} y={DC - DR + 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-        <text x={DC} y={DC + DR - 1} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-        <text x={DC - DR + 5} y={DC + 3} class="dome-card" text-anchor="middle"
-          >{hi('पू', 'E')}</text
+        <!-- each cardinal is anchored to its near edge (text-anchor + dominant-
+             baseline) so all four keep an equal gap from the rim regardless of
+             glyph width/height — and equally in English and Hindi -->
+        <text
+          x={DC}
+          y={DC - DR + CARD_GAP}
+          class="dome-card"
+          text-anchor="middle"
+          dominant-baseline="text-before-edge">{hi('उ', 'N')}</text
         >
-        <text x={DC + DR - 5} y={DC + 3} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
+        <text
+          x={DC}
+          y={DC + DR - CARD_GAP}
+          class="dome-card"
+          text-anchor="middle"
+          dominant-baseline="text-after-edge">{hi('द', 'S')}</text
+        >
+        <text
+          x={DC - DR + CARD_GAP}
+          y={DC}
+          class="dome-card"
+          text-anchor="start"
+          dominant-baseline="central">{hi('पू', 'E')}</text
+        >
+        <text
+          x={DC + DR - CARD_GAP}
+          y={DC}
+          class="dome-card"
+          text-anchor="end"
+          dominant-baseline="central">{hi('प', 'W')}</text
         >
       {/if}
     </svg>

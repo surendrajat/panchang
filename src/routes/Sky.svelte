@@ -508,23 +508,6 @@
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
   }
-  // Compass dial: tick marks every 22.5° (longer at the inter-cardinals N E/SE…);
-  // the four cardinals carry letters instead, in the band just outside the rim.
-  const DIAL_R = DR + 6.5; // radius of the cardinal letters
-  const BEZEL_R = DR + 12; // outer ring of the dial
-  const COMPASS_TICKS = [
-    22.5, 45, 67.5, 112.5, 135, 157.5, 202.5, 225, 247.5, 292.5, 315, 337.5,
-  ].map((deg) => {
-    const a = (deg * Math.PI) / 180;
-    const len = deg % 45 === 0 ? 7 : 4;
-    return {
-      deg,
-      x1: DC - DR * Math.sin(a),
-      y1: DC - DR * Math.cos(a),
-      x2: DC - (DR + len) * Math.sin(a),
-      y2: DC - (DR + len) * Math.cos(a),
-    };
-  });
   // The lit-portion path of the Moon at its current phase (mirrors
   // MoonPhase.svelte) so the dome shows the Moon's real crescent/gibbous shape.
   function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
@@ -1374,7 +1357,7 @@
       {/if}
       <svg
         class:labels-shown={domeLabels}
-        viewBox="2 2 {DOME - 4} {DOME - 4}"
+        viewBox="12 12 {DOME - 24} {DOME - 24}"
         role="img"
         aria-label={hi(
           'आज आपके आकाश में सूर्य, चन्द्र व ग्रह',
@@ -1591,39 +1574,14 @@
         <!-- horizon rim -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
         {#if domeDirections}
-          <!-- compass dial: a bezel ring + tick marks every 22.5°, with the four
-               cardinals lettered in the band (so they never overlap the sky) -->
-          <circle cx={DC} cy={DC} r={BEZEL_R} class="dome-bezel" />
-          {#each COMPASS_TICKS as t (t.deg)}
-            <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} class="dome-tick" />
-          {/each}
-          <text
-            x={DC}
-            y={DC - DIAL_R}
-            class="dome-card"
-            text-anchor="middle"
-            dominant-baseline="central">{hi('उ', 'N')}</text
+          <!-- small, thin cardinals just inside the rim (keeps the dome big) -->
+          <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+          <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+          <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
+            >{hi('पू', 'E')}</text
           >
-          <text
-            x={DC}
-            y={DC + DIAL_R}
-            class="dome-card"
-            text-anchor="middle"
-            dominant-baseline="central">{hi('द', 'S')}</text
-          >
-          <text
-            x={DC - DIAL_R}
-            y={DC}
-            class="dome-card"
-            text-anchor="middle"
-            dominant-baseline="central">{hi('पू', 'E')}</text
-          >
-          <text
-            x={DC + DIAL_R}
-            y={DC}
-            class="dome-card"
-            text-anchor="middle"
-            dominant-baseline="central">{hi('प', 'W')}</text
+          <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
+            >{hi('प', 'W')}</text
           >
         {/if}
       </svg>
@@ -2257,7 +2215,7 @@
   .skydome {
     position: relative;
     margin: 1.5rem auto 0;
-    max-width: 500px;
+    max-width: 460px;
     text-align: center;
   }
   /* only the dome itself, NOT the gear's svg (which lives inside .skydome too) */
@@ -2312,21 +2270,11 @@
   .dome-polaris-halo {
     fill: rgba(255, 255, 255, 0.16);
   }
-  /* compass dial in the band just outside the rim, on the page ink */
+  /* small, thin cardinals just inside the rim, on the dark sky */
   .dome-card {
-    font-size: 10.5px;
-    font-weight: 700;
-    fill: var(--ink-soft);
-  }
-  .dome-bezel {
-    fill: none;
-    stroke: var(--line);
-    stroke-width: 0.8;
-  }
-  .dome-tick {
-    stroke: var(--ink-faint);
-    stroke-width: 0.9;
-    stroke-linecap: round;
+    font-size: 8px;
+    font-weight: 400;
+    fill: rgba(255, 255, 255, 0.5);
   }
   .dome-path {
     fill: none;

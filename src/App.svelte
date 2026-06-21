@@ -12,12 +12,14 @@
   import Month from './routes/Month.svelte';
   import Festivals from './routes/Festivals.svelte';
   import Settings from './routes/Settings.svelte';
+  import Loading from '$components/Loading.svelte';
   import { computePanchanga, type Panchanga } from '$lib/panchanga';
   import { t, type TranslationKey, samvatsaraNameByIndex } from '$lib/i18n';
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
   import { applyNumerals } from '$lib/format/numerals';
   import { localYMD } from '$lib/format/time';
   import { evictStale } from '$lib/storage';
+  import { prefetchFestivals } from '$lib/festival-loader';
 
   // Component-local translator that picks up the user's active language
   // reactively (preferences is $state). Pass through to the pure t().
@@ -31,25 +33,19 @@
   // Settings lives behind a dedicated icon button.
 
   let hash = $state(typeof location !== 'undefined' ? location.hash : '');
-  // Remember scroll position per top-level SECTION (not per route name) so
-  // switching tabs and coming back doesn't jump to the top — and so navigating
-  // within the same section (today↔day, day↔day) keeps the scroll where it is.
-  // Plain Map (not reactive state); read only in the restore effect below.
-  // eslint-disable-next-line svelte/prefer-svelte-reactivity
-  const scrollBySection = new Map<string, number>();
-  // Today and Day are the same logical section (Day is just "any" day); the
-  // muhurta/festival info is laid out identically, so the user expects scroll
-  // continuity when paging next/prev or jumping to today from a scrolled day.
-  function sectionOf(name: string): string {
-    return name === 'today' || name === 'day' ? 'day' : name;
-  }
+  // ONE scroll position shared across every tab — the position carries over from
+  // whatever tab you were last on, so switching tabs is seamless (no per-tab jump
+  // to a separately-remembered spot). Scroll within a tab (e.g. paging days) is
+  // preserved while you stay there, but is dropped once you switch away. Saved on
+  // leave, restored on arrive; plain `let` (read imperatively in the effect).
+  let sharedScrollY = 0;
 
   onMount(() => {
     hydratePreferences();
     void evictStale();
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     const handler = () => {
-      scrollBySection.set(sectionOf(parseHash(hash).name), window.scrollY);
+      sharedScrollY = window.scrollY; // capture where we're leaving from
       hash = location.hash;
     };
     window.addEventListener('hashchange', handler);
@@ -67,18 +63,14 @@
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
 
-  // Restore scroll position only on CROSS-SECTION transitions. Same-section
-  // navigation (day↔today, day→day next/prev) leaves the scroll where it is —
-  // the user's reading position is preserved as they page through dates. The
-  // initial mount also leaves the browser's scrollY alone.
-  let lastSection: string | null = null;
+  // On every route change, re-apply the shared scroll position. Within a tab
+  // (day↔day, today↔day) the handler just saved the current Y, so this is a
+  // no-op and the position is preserved; across tabs it carries the position
+  // over (clamped if the new view is shorter). Two rAFs so the new view paints
+  // first; a shorter view that clamped scrollY won't be over-restored.
   $effect(() => {
-    const cur = sectionOf(route.name);
-    const prev = lastSection;
-    lastSection = cur;
-    if (prev === null || prev === cur) return;
-    const y = scrollBySection.get(cur) ?? 0;
-    // Two rAFs so the new view has painted before we restore scroll.
+    void route; // re-run on any route change
+    const y = sharedScrollY;
     let r2 = 0;
     const r1 = requestAnimationFrame(() => {
       r2 = requestAnimationFrame(() => window.scrollTo(0, y));
@@ -115,6 +107,21 @@
     } catch {
       return null;
     }
+  });
+
+  // Warm the festival cache for the current year in the background once prefs +
+  // location are loaded, so the first Festivals open is instant even on a slow
+  // phone (the ~year-long off-thread compute runs before the user navigates).
+  // Fires once; deferred to idle so it never competes with first paint.
+  let festivalsPrefetched = false;
+  $effect(() => {
+    if (festivalsPrefetched || !preferences.hydrated || !preferences.location) return;
+    festivalsPrefetched = true;
+    const loc = $state.snapshot(preferences.location);
+    const opts = { ayanamsa: preferences.ayanamsa, monthSystem: preferences.monthSystem };
+    const run = () => prefetchFestivals(new Date().getUTCFullYear(), loc, opts);
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 4000 });
+    else setTimeout(run, 1500);
   });
 
   function currentYear(): number {
@@ -382,7 +389,7 @@
       <!-- Lazy-loaded: panchang-only users never download the jyotish
            engine or the planet-position code paths. -->
       {#await import('./routes/Kundli.svelte')}
-        <p class="muted">{tr('kundli.loading')}</p>
+        <Loading label={tr('kundli.loading')} />
       {:then m}
         <m.default />
       {:catch}
@@ -396,7 +403,7 @@
     {:else if route.name === 'sky'}
       <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
       {#await import('./routes/Sky.svelte')}
-        <p class="muted">{tr('sky.loading')}</p>
+        <Loading label={tr('sky.loading')} />
       {:then m}
         <m.default />
       {:catch}

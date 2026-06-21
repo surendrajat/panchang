@@ -11,6 +11,10 @@ html {
   text-size-adjust: 100%;
   font-family: var(--font-sans);
   line-height: var(--line-height-normal);
+  /* Suppress the grey/blue flash box mobile WebKit draws over a tapped
+     link/button. It's inherited, so this covers every tap target; our own
+     :active / :focus-visible styles provide the intentional feedback. */
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   min-height: 100vh;

@@ -1,18 +1,12 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-  import {
-    PAN_INDIA_FESTIVALS,
-    type FestivalOccurrence,
-    type Location,
-    type AyanamsaSystem,
-    type MonthSystem,
-  } from '$lib/panchanga';
-  import { civilTimeInZone, MS_PER_DAY } from '$lib/astro';
+  import { PAN_INDIA_FESTIVALS, type FestivalOccurrence } from '$lib/panchanga';
+  import { MS_PER_DAY } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import { formatDate, localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
   import { t, type TranslationKey, localeMetaOf } from '$lib/i18n';
-  import { festivalCacheKey, getFestivalsCached, putFestivalsCached } from '$lib/storage';
+  import { loadFestivals } from '$lib/festival-loader';
+  import Loading from '$components/Loading.svelte';
 
   // Pick the language-appropriate display name for a festival.
   function festivalDisplay(o: FestivalOccurrence): string {
@@ -36,71 +30,10 @@
     return n;
   });
 
-  // Filter out monthly recurrences from the year view.
-  const MONTHLY_KEYS = new Set([
-    'ekadashi',
-    'pradosh',
-    'sankashti_chaturthi',
-    'amavasya',
-    'purnima',
-    'masik_shivaratri',
-  ]);
-
-  // Festival computation runs in a Web Worker so a first visit (cache miss)
-  // doesn't freeze the UI while ~a year of dates is computed — the spinner keeps
-  // animating. Repeat visits hit the IndexedDB cache and never reach the worker.
-  let worker: Worker | null = null;
-  let reqId = 0;
-  // Plain bookkeeping for in-flight worker requests — not reactive state, so a
-  // SvelteMap isn't needed here.
-  // eslint-disable-next-line svelte/prefer-svelte-reactivity
-  const pending = new Map<
-    number,
-    { resolve: (r: FestivalOccurrence[]) => void; reject: (e: Error) => void }
-  >();
-
-  function computeInWorker(
-    fromMs: number,
-    toMs: number,
-    loc: Location,
-    opts: { ayanamsa: AyanamsaSystem; monthSystem: MonthSystem },
-  ): Promise<FestivalOccurrence[]> {
-    if (!worker) {
-      worker = new Worker(new URL('./festivals.worker.ts', import.meta.url), { type: 'module' });
-      worker.onmessage = (
-        e: MessageEvent<{ id: number; results?: FestivalOccurrence[]; error?: string }>,
-      ) => {
-        const p = pending.get(e.data.id);
-        if (!p) return;
-        pending.delete(e.data.id);
-        if (e.data.error) p.reject(new Error(e.data.error));
-        else p.resolve(e.data.results ?? []);
-      };
-    }
-    const id = ++reqId;
-    return new Promise((resolve, reject) => {
-      pending.set(id, { resolve, reject });
-      worker!.postMessage({ id, fromMs, toMs, loc, opts });
-    });
-  }
-  onDestroy(() => worker?.terminate());
-
-  // Cache hit → instant; miss → compute off-thread (with a spinner).
-  async function loadFestivals(
-    year: number,
-    loc: Location,
-    opts: { ayanamsa: AyanamsaSystem; monthSystem: MonthSystem },
-  ): Promise<FestivalOccurrence[]> {
-    const key = festivalCacheKey(year, loc, opts);
-    const cached = await getFestivalsCached(key);
-    if (cached) return cached;
-    const from = civilTimeInZone(year, 1, 1, loc.timezone, 12);
-    const to = civilTimeInZone(year, 12, 31, loc.timezone, 12);
-    const all = await computeInWorker(from.getTime(), to.getTime(), loc, opts);
-    const results = all.filter((o) => !MONTHLY_KEYS.has(o.key));
-    await putFestivalsCached(key, results);
-    return results;
-  }
+  // Festival compute (cache-first; a miss runs ~a year of dates off the main
+  // thread in a shared worker) lives in $lib/festival-loader — the same module
+  // the app uses to prefetch the current year on load, so a first visit here is
+  // usually already a cache hit.
 
   let occurrences = $state<FestivalOccurrence[]>([]);
   let loading = $state(false);
@@ -201,10 +134,7 @@
       </div>
     </header>
     {#if loading}
-      <div class="loading" role="status" aria-live="polite">
-        <span class="spinner" aria-hidden="true"></span>
-        <span class="muted">{tr('fest.computing')}</span>
-      </div>
+      <Loading label={tr('fest.computing')} />
     {:else if occurrences.length > 0}
       <ol class="festival-year">
         {#each occurrences as occ (occ.date.toISOString() + occ.key)}
@@ -241,31 +171,6 @@
   }
   .icon-btn--link {
     text-decoration: none;
-  }
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 44px 0;
-  }
-  .spinner {
-    width: 22px;
-    height: 22px;
-    border: 2.5px solid var(--line);
-    border-top-color: var(--red);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .spinner {
-      animation-duration: 2s;
-    }
   }
   .festival-year {
     list-style: none;

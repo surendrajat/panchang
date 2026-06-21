@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Panchanga } from '$lib/panchanga';
-  import { PAN_INDIA_FESTIVALS } from '$lib/panchanga';
+  import { PAN_INDIA_FESTIVALS, MONTHLY_OBSERVANCE_KEYS } from '$lib/panchanga';
   import { formatTime } from '$lib/format/time';
   import { applyNumerals, renderNumber } from '$lib/format/numerals';
   import { preferences } from '$lib/state/preferences.svelte';
@@ -85,17 +85,7 @@
   // Festival ribbon shows named festivals first, falling back to
   // observances (Purnima, Amavasya, Ekadashi) if there's nothing else.
   const ribbonFestival = $derived.by(() => {
-    const named = panchanga.festivals.filter(
-      (k) =>
-        ![
-          'ekadashi',
-          'pradosh',
-          'sankashti_chaturthi',
-          'purnima',
-          'amavasya',
-          'masik_shivaratri',
-        ].includes(k),
-    );
+    const named = panchanga.festivals.filter((k) => !MONTHLY_OBSERVANCE_KEYS.has(k));
     const key = named[0] ?? panchanga.festivals[0];
     if (!key) return null;
     const r = PAN_INDIA_FESTIVALS.find((f) => f.key === key);

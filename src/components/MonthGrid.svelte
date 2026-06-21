@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Panchanga } from '$lib/panchanga';
-  import { PAN_INDIA_FESTIVALS } from '$lib/panchanga';
+  import { PAN_INDIA_FESTIVALS, MONTHLY_OBSERVANCE_KEYS } from '$lib/panchanga';
   import { renderNumber } from '$lib/format/numerals';
   import { localYMD } from '$lib/format/time';
   import { preferences } from '$lib/state/preferences.svelte';
@@ -68,37 +68,49 @@
           : 'Krishna';
     const tithi = tithiNameByIndex(cell.tithi.index, lang);
     let label = `${gregYmd}, ${masa} ${paksha} ${tithi}`;
-    if (fest) {
-      const r = PAN_INDIA_FESTIVALS.find((f) => f.key === fest);
-      label += `, ${r ? (lang === 'hi' && r.displayNameHi ? r.displayNameHi : r.displayName) : fest}`;
-    }
+    if (fest) label += `, ${displayName(fest)}`;
     return label;
   }
 
-  function festivalShortName(key: string): string {
+  function displayName(key: string): string {
     const r = PAN_INDIA_FESTIVALS.find((f) => f.key === key);
     if (!r) return key;
-    const full = preferences.language === 'hi' && r.displayNameHi ? r.displayNameHi : r.displayName;
-    // Trim to a short label for the cell — first 2-3 words typically,
-    // and strip any parenthetical alternative name.
-    return full
+    return preferences.language === 'hi' && r.displayNameHi ? r.displayNameHi : r.displayName;
+  }
+
+  // Short cell label for an annual festival: drop any parenthetical alternative
+  // name and trim to the first two words.
+  function festivalShortName(key: string): string {
+    return displayName(key)
       .replace(/\s\(.*?\)/, '')
       .split(' ')
       .slice(0, 2)
       .join(' ');
   }
 
-  function namedFestival(keys: string[]): string | null {
-    const MONTHLY = new Set([
-      'ekadashi',
-      'pradosh',
-      'sankashti_chaturthi',
-      'masik_shivaratri',
-      'purnima',
-      'amavasya',
-    ]);
-    const named = keys.find((k) => !MONTHLY.has(k));
-    return named ?? null;
+  // "Amavasya", with the distinguishing Pitru/Deva qualifier kept (the only
+  // monthly observance we name on the grid — Pitru and Deva karya fall on
+  // different days when the tithi spans two, and a single day can be both).
+  function amavasyaLabel(which: 'pitru' | 'deva' | 'both'): string {
+    const base = displayName('amavasya').split(' ')[0];
+    if (which === 'both') return base;
+    const qualifier = displayName(which === 'pitru' ? 'amavasya' : 'amavasya_devakarya').match(
+      /\(([^\s)]+)/,
+    )?.[1];
+    return qualifier ? `${base} (${qualifier})` : base;
+  }
+
+  // The cell's headline observance: an annual festival if any, else the Amavasya
+  // (Pitru/Deva/both). Other monthly observances stay glyph-only (●○◆).
+  function cellFestival(keys: string[]): { key: string; label: string } | null {
+    const annual = keys.find((k) => !MONTHLY_OBSERVANCE_KEYS.has(k));
+    if (annual) return { key: annual, label: festivalShortName(annual) };
+    const pitru = keys.includes('amavasya');
+    const deva = keys.includes('amavasya_devakarya');
+    if (pitru && deva) return { key: 'amavasya', label: amavasyaLabel('both') };
+    if (pitru) return { key: 'amavasya', label: amavasyaLabel('pitru') };
+    if (deva) return { key: 'amavasya_devakarya', label: amavasyaLabel('deva') };
+    return null;
   }
 
   function tithiGlyph(
@@ -120,7 +132,7 @@
       {#if cell}
         {@const gregYmd = localYMD(cell.date, cell.location.timezone)}
         {@const gregDay = Number(gregYmd.slice(-2))}
-        {@const fest = namedFestival(cell.festivals)}
+        {@const fest = cellFestival(cell.festivals)}
         {@const glyph = tithiGlyph(cell)}
         {@const isToday = gregYmd === todayYMD}
         <button
@@ -128,11 +140,11 @@
           role="gridcell"
           type="button"
           onclick={() => onSelectDay?.(cell.date)}
-          aria-label={cellAria(cell, gregYmd, fest)}
+          aria-label={cellAria(cell, gregYmd, fest?.key ?? null)}
         >
           {#if fest}<span class="fdot" aria-hidden="true"></span>{/if}
           <div class="gd num">{renderNumber(gregDay, preferences.numerals)}</div>
-          {#if fest}<div class="fname">{festivalShortName(fest)}</div>{/if}
+          {#if fest}<div class="fname">{fest.label}</div>{/if}
           <div class="tt">
             {#if glyph}<span class="glyph glyph--{glyph.type}">{glyph.char}</span>
             {/if}{tithiNameByIndex(cell.tithi.index, preferences.language)}

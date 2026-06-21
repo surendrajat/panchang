@@ -10,9 +10,9 @@ provenance see [`METHODOLOGY.md`](./METHODOLOGY.md) (panchanga) and
 
 A static, installable **PWA** — Svelte 5 (runes) + Vite + TypeScript. It computes
 a daily **panchanga**, a lunar **month** calendar, a **festival** list, a birth
-chart (**Kundli**) with guna-milan matching, and an experimental **Sky** view —
-entirely **on-device**, for any bundled city or GPS point, in English/हिन्दी with
-Latin or Devanagari numerals.
+chart (**Kundli**) with guna-milan matching, a local **Sky** view, and an
+interactive **Learn** guide — entirely **on-device**, for any bundled city or GPS
+point, in English/हिन्दी with Latin or Devanagari numerals.
 
 Two runtime dependencies only: **`astronomy-engine`** (ephemeris) and **`dexie`**
 (IndexedDB). No backend, no telemetry, no remote fonts. AGPL-3.0.
@@ -47,7 +47,7 @@ lib/panchanga/                    lib/jyotish/
   muhurta moon-phase tiebreakers    matching (ashtakoota) · sky-math · names
   festivals/
   ↓                                   ↓
-routes/ + components/   Day Month Festivals Kundli Match Sky Settings
+routes/ + components/   Day Month Festivals Kundli Match Sky Learn Settings
 lib/state/  (runes)     preferences · clock · jyotish-draft · sw-update
 lib/storage/ (Dexie)    db · cache · birth-profiles · saved-locations · preferences
 lib/i18n/ + lib/format/ en/hi + names + transliteration · numerals · time
@@ -60,7 +60,8 @@ lib/location/           cities (curated metros + diaspora) · GPS
 planets, true node, obliquity, sidereal time — EQJ vectors rotated to
 ecliptic-of-date), `ayanamsa.ts` (IAU-2006 precession; Lahiri/KP/Raman/
 Yukteshwar/True-Chitra, anchored to Drik's *computational* values), `sunrise.ts`,
-`altaz.ts` (horizontal coords + rise/set arcs for the Sky dome), `angle.ts`,
+`altaz.ts` (horizontal coords, rise/set arcs and magnitudes for the Sky dome +
+the tonight observation table), `angle.ts`,
 `bisect.ts` (angular-crossing root-finder for anga end-times).
 
 ### `lib/panchanga` — the almanac
@@ -75,14 +76,18 @@ Pure arithmetic on top of the same astro backend: `grahas.ts` (sidereal graha
 longitudes), `lagna.ts` (ascendant from sidereal time), `chart.ts` (whole-sign
 houses), `dasha.ts` (Vimshottari from Moon nakshatra), `divisional.ts` (navamsa),
 `matching.ts` (ashtakoota guna-milan from two charts), `names.ts`, `glyphs.ts`,
-`rashi-art.ts`. `sky-math.ts` backs the Sky view.
+`rashi-art.ts`. `sky-math.ts` (+ the `lib/sky/` data & geometry module) back the
+Sky and Learn views.
 
 ### Presentation
 Hash-routed pages in `routes/` (no router dependency) render components in
 `components/` (`DayCard`, `MonthGrid`, `KundliChart`, `MoonPhase`, `BodyIcon`,
-`LocationPicker`, …). Kundli/Match/Sky are lazy-loaded. `festivals.worker.ts`
-computes the year's festival list off the main thread (postMessage requires
-`$state.snapshot()` of the location — `$state` proxies don't structured-clone).
+`LocationPicker`, …). Kundli/Match/Sky/Learn are lazy-loaded. The Sky and Learn
+views share `components/sky/` (the all-sky dome, ecliptic wheel, time clock,
+observation table, concept primer) and `lib/sky/` (their bilingual data tables +
+SVG geometry). `festivals.worker.ts` computes the year's festival list off the
+main thread (postMessage requires `$state.snapshot()` of the location — `$state`
+proxies don't structured-clone).
 
 ### State & storage
 `lib/state/*.svelte.ts` are runes stores — `preferences` (language, numerals,
@@ -108,7 +113,8 @@ Sanskrit in both. `lib/format` handles numerals (Devanagari/Latin) and time.
 | `#/festivals/YYYY` | Festival list |
 | `#/kundli` | Birth chart |
 | `#/match` | Legacy alias → redirects to `#/kundli` (Milan is a section inside Kundli) |
-| `#/sky` | Sky view (experimental) |
+| `#/sky` | Sky view (local-sky dome + tonight's rise/set table) |
+| `#/learn` | Learn guide (how the panchanga works, interactive) |
 | `#/settings` | Settings |
 
 ## Data flow
@@ -116,8 +122,9 @@ Sanskrit in both. `lib/format` handles numerals (Devanagari/Latin) and time.
 `preferences` (runes) → a route reads the instant + location + options → calls a
 pure `compute*()` → the storage layer memoizes the result → the component renders.
 Changing a preference re-runs the affected deriveds; nothing writes preferences
-during render. The Sky view runs a self-throttled rAF (idle 1 Hz at rest, ~30 fps
-while scrubbing time) and tears it down on unmount.
+during render. The Sky and Learn views share a time widget (`SkyClock`) that runs
+a self-throttled rAF (idle 1 Hz at rest, ~30 fps while playing) and tears it down
+on unmount.
 
 ## Conventions
 

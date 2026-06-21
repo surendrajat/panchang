@@ -1,5 +1,5 @@
 <script lang="ts">
-  // EXPERIMENTAL — "How the Panchanga Works" (#/learn). A guided, interactive
+  // "How the Panchanga Works" (#/learn). A guided, interactive
   // tour of how a Hindu calendar is built from just two angles (λ☉, λ☽). Each
   // numbered step pairs a short why, a LIVE formula with the real numbers, and a
   // focused animation; the shared <SkyClock> picks the moment every step reads

@@ -99,7 +99,10 @@ describe('offline asset contract', () => {
     }
 
     const sw = read('dist/sw.js');
-    const MAX_ENTRIES = 25;
+    // Budget guard for the offline precache — raise it deliberately, never let it
+    // creep silently. Bumped 25 → 34 when the interactive Learn guide and the
+    // shared Sky/Learn chunks (SkyClock + sky CSS) shipped as precached routes.
+    const MAX_ENTRIES = 34;
     const MAX_KIB = 1000;
 
     // Extract unique precache URLs from the workbox precacheAndRoute call.

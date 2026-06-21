@@ -1,8 +1,8 @@
 <script lang="ts">
-  // EXPERIMENTAL — "The Sky Right Now": the Sun, Moon and planets in YOUR local
-  // sky (the all-sky dome) plus a practical observing table for tonight (rise,
-  // set, where each body is now, brightness). The interactive ecliptic wheel +
-  // live readout live in the #/learn guide. (More observation/planning to come.)
+  // "The Sky Right Now": the Sun, Moon and planets in YOUR local sky (the all-sky
+  // dome) plus a practical observing table for tonight (rise, set, where each body
+  // is now, brightness). The interactive ecliptic wheel + live readout live in the
+  // #/learn guide.
   import { dateToJulian, sunMoonElongationAtJD, moonIlluminationAtJD } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import StarDome from '../components/sky/StarDome.svelte';

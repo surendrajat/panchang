@@ -191,13 +191,15 @@
       color 0.15s;
   }
   @media (max-width: 460px) {
-    /* the clock + the two angle chips share one line on phones; drop the clock's
-       min-width floor so it sizes to content (tabular + fixed format = no wobble) */
+    /* clock + the two angle chips share one line on phones; a smaller fixed
+       min-width still HOLDS the widest date, so the proportional month name
+       (e.g. "Jun" vs "Sep") can't make the bar wobble, while leaving room for
+       the chips. (tabular figures fix the digits; letters need the floor.) */
     .topline {
       gap: 0.1rem 0.35rem;
     }
     .clock {
-      min-width: 0;
+      min-width: 11rem;
       font-size: 0.9rem;
     }
     /* the date is smaller on phones, so keep the speed bar a touch lighter than it */

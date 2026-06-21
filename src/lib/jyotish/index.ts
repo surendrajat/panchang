@@ -12,6 +12,7 @@ export type {
 export { GRAHA_ORDER, DEFAULT_CHART_OPTIONS } from './types';
 
 export { computeBirthChart, birthInstant } from './chart';
+export { navamsaSign } from './divisional';
 export { computeGrahas, computeGraha, grahaSiderealLongitude, nakshatraOf } from './grahas';
 export { computeLagna } from './lagna';
 export { vimshottariMahadashas, antardashasOf, activeDashaIndex } from './dasha';
@@ -26,4 +27,6 @@ export {
   RASHI_LORDS,
   grahaName,
   grahaAbbr,
+  nameSyllable,
+  nakshatraSyllables,
 } from './names';

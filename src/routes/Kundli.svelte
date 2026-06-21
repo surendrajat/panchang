@@ -11,6 +11,7 @@
     antardashasOf,
     activeDashaIndex,
     grahaName,
+    nameSyllable,
     type BirthChart,
     type GrahaKey,
   } from '$lib/jyotish';
@@ -38,6 +39,7 @@
   let chart = $state<BirthChart | null>(kundliDraft.chart);
   let editing = $state(kundliDraft.editing); // form open vs. result shown
   let error = $state<string | null>(null);
+  let vargaView = $state<1 | 9>(1); // Rashi (D1) or Navamsa (D9)
 
   // ── saved profiles ──
   let profiles = $state<BirthProfile[]>([]);
@@ -305,8 +307,28 @@
       </div>
     </div>
 
-    <!-- the chart -->
-    <KundliChart {chart} {lang} {numerals} />
+    <!-- Naamakshar: the traditional name-starting syllable, from the Moon's
+         nakshatra + pada. -->
+    <div class="naamakshar" role="note">
+      <span class="naam-lab">{lang === 'hi' ? 'नामाक्षर' : 'Name syllable'}</span>
+      <span class="naam-val">{nameSyllable(chart.moonNakshatra.index, chart.moonNakshatra.pada)}</span>
+      <span class="naam-hint"
+        >{lang === 'hi'
+          ? 'परंपरा से नाम इसी ध्वनि से आरम्भ होता है'
+          : 'by tradition the name begins with this sound'}</span
+      >
+    </div>
+
+    <!-- the chart, with a Rashi (D1) / Navamsa (D9) toggle -->
+    <div class="varga-toggle" role="group" aria-label={lang === 'hi' ? 'कुण्डली प्रकार' : 'Chart type'}>
+      <button class="vt" class:vt--on={vargaView === 1} type="button" onclick={() => (vargaView = 1)}>
+        {lang === 'hi' ? 'राशि (D1)' : 'Rashi (D1)'}
+      </button>
+      <button class="vt" class:vt--on={vargaView === 9} type="button" onclick={() => (vargaView = 9)}>
+        {lang === 'hi' ? 'नवांश (D9)' : 'Navamsa (D9)'}
+      </button>
+    </div>
+    <KundliChart {chart} {lang} {numerals} varga={vargaView} />
 
     <!-- graha table -->
     <div>
@@ -561,6 +583,67 @@
     font-size: 12px;
     color: var(--ink-soft);
     margin-top: 3px;
+  }
+
+  /* varga (D1/D9) toggle */
+  .varga-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .vt {
+    font-family: var(--font-serif);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--paper-2);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .vt--on {
+    background: color-mix(in srgb, var(--red) 12%, var(--paper-2));
+    color: var(--red);
+    border-color: color-mix(in srgb, var(--red) 35%, var(--line));
+    font-weight: 600;
+  }
+
+  /* Naamakshar callout */
+  .naamakshar {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    text-align: center;
+    padding: 12px 16px;
+    margin-top: -4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--gold) 8%, var(--paper-2));
+  }
+  .naam-lab {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .naam-val {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .naam-val::first-letter {
+    color: var(--red);
+  }
+  .naam-hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
   }
 
   /* graha table */

@@ -9,7 +9,7 @@
   // chart on the Moon's sign (a traditional Chandra kundli) and say so.
 
   import type { BirthChart, GrahaKey } from '$lib/jyotish';
-  import { grahaAbbr } from '$lib/jyotish';
+  import { grahaAbbr, navamsaSign } from '$lib/jyotish';
   import { rashiNameByIndex } from '$lib/i18n';
   import { applyNumerals, type NumeralSystem } from '$lib/format/numerals';
 
@@ -17,8 +17,12 @@
     chart: BirthChart;
     lang: 'en' | 'hi';
     numerals: NumeralSystem;
+    varga?: number; // 1 = rashi (D1, default), 9 = navamsa (D9)
   }
-  let { chart, lang, numerals }: Props = $props();
+  let { chart, lang, numerals, varga = 1 }: Props = $props();
+
+  // Sign a graha occupies in this varga: its rashi for D1, its navamsa for D9.
+  const signOf = (long: number, rashi: number) => (varga === 9 ? navamsaSign(long) : rashi);
 
   // House geometry on a 0..400 square. `num` = where the rashi number
   // sits (nudged toward the house's outer corner); `planets` = anchor for
@@ -52,9 +56,15 @@
 
   const num = (s: string | number) => applyNumerals(String(s), numerals);
 
-  // Anchor sign for the chart: lagna when we have a birth time, else Moon.
-  const anchorRashi = $derived(chart.lagna ? chart.lagna.rashi : chart.moonRashi);
   const isChandra = $derived(chart.lagna === null);
+
+  // Anchor sign (house 1): lagna when we have a birth time, else Moon — in the
+  // chosen varga.
+  const anchorRashi = $derived.by(() => {
+    if (chart.lagna) return signOf(chart.lagna.longitude, chart.lagna.rashi);
+    const moon = chart.grahas.find((g) => g.key === 'moon');
+    return moon ? signOf(moon.longitude, moon.rashi) : chart.moonRashi;
+  });
 
   // For each fixed house 1..12, which sign sits there and which grahas.
   interface Cell {
@@ -67,7 +77,7 @@
       const house = i + 1;
       const rashi = (anchorRashi + i) % 12;
       const grahas = chart.grahas
-        .filter((g) => g.rashi === rashi)
+        .filter((g) => signOf(g.longitude, g.rashi) === rashi)
         .map((g) => ({ key: g.key, retro: g.retrograde }));
       return { house, rashi, grahas };
     }),
@@ -114,10 +124,11 @@
     {/each}
   </svg>
   <figcaption>
-    {isChandra
+    {#if varga === 9}{lang === 'hi' ? 'नवांश (D9)' : 'Navamsa (D9)'} ·
+    {/if}{isChandra
       ? lang === 'hi'
         ? 'चन्द्र कुण्डली — जन्म समय अज्ञात'
-        : 'Chandra (Moon) chart — birth time unknown'
+        : 'Chandra (Moon) — birth time unknown'
       : lang === 'hi'
         ? `लग्न — ${rashiNameByIndex(anchorRashi, lang)}`
         : `Lagna — ${rashiNameByIndex(anchorRashi, lang)}`}

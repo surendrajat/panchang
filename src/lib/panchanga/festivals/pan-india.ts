@@ -7,8 +7,9 @@
 // would fire twice for a Purnimanta user (once under each system's
 // month label).
 //
-// The 11 monthly observances (Ekadashi, Pradosh, Sankashti, etc.) appear
-// at the bottom.
+// The 6 monthly recurrences (Ekadashi, Pradosh, Sankashti Chaturthi, Amavasya,
+// Purnima, Masik Shivaratri) appear at the bottom; their keys are listed in
+// MONTHLY_OBSERVANCE_KEYS, which the annual Festivals walk uses to skip them.
 //
 // Naming choices per docs/ARCHITECTURE.md §14: Smarta defaults. docs/guide/
 // documents the tie-breakers we apply for Janmashtami, Diwali, and a

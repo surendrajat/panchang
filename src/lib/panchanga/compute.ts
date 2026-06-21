@@ -106,12 +106,16 @@ export function computePanchanga(
   const nakshatra = nakshatraAtInstant(anchor, opts.ayanamsa);
   // No festival rule reads yoga or karana(s) — stub them on the fast path. These
   // are the priciest unused computations (each does its own end-time bisection;
-  // karanaSequenceForDay does ~3).
+  // karanaSequenceForDay does ~3). The stubs use OUT-OF-RANGE sentinels (a real
+  // yoga index is 1..27, karana 1..11) so that if a future festival rule ever
+  // reads these on the fast path, its result diverges from the full path and the
+  // perf-optimizations regression test (full vs fast festival parity) trips —
+  // rather than silently matching a plausible value.
   const yoga = fast
-    ? { index: 1, name: '', endTime: anchor, fraction: 0 }
+    ? { index: 0, name: '', endTime: anchor, fraction: 0 }
     : yogaAtInstant(anchor, opts.ayanamsa);
   const karana = fast
-    ? { index: 1, positionInCycle: 0, name: '', endTime: anchor, fraction: 0 }
+    ? { index: 0, positionInCycle: -1, name: '', endTime: anchor, fraction: 0 }
     : karanaAtInstant(anchor);
   // A panchanga day spans 24h from the anchor (sunrise) and typically
   // contains 2–3 karanas, since each karana is ~12h (half a tithi).

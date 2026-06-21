@@ -32,6 +32,7 @@ import {
   kartikaPratipadaBridgeDay,
   sunriseTithiObservedForDate,
   sunriseTithiIndex,
+  isThiruvonamOnam,
 } from '../tiebreakers';
 
 // Amanta month order, for the kshaya-Pratipada boundary rule in `inShukla`.
@@ -441,14 +442,15 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: vyapiniShukla(4, 'Bhadrapada', 'madhyahna'),
   },
 
-  // Thiruvonam (Onam) — Shravana nakshatra falling in the Amanta
-  // Bhadrapada window (Aug-Sep). Solar-Malayalam Chingam-tied, so we
-  // approximate by the lunar bracket.
+  // Thiruvonam (Onam) — SOLAR-calendar festival: the Thiruvonam (Shravana) nakshatra
+  // prevailing at MADHYAHNA in the Malayalam month Chingam (Sun in Simha), taking the
+  // LATER one when two fall in Chingam. See isThiruvonamOnam. The old lunar-Bhadrapada
+  // approximation was a full month off in adhika-maas years (2026).
   {
     key: 'thiruvonam',
     displayName: 'Thiruvonam (Onam)',
     displayNameHi: 'थिरुओणम (ओणम)',
-    matches: (p) => p.nakshatra.name === 'Shravana' && p.masa.amantaName === 'Bhadrapada',
+    matches: (p) => isThiruvonamOnam(p.location, p.date, p.options.ayanamsa),
   },
 
   // Sharad Navaratri / Ghatasthapana — Ashvina Shukla 1 (Pratipada). The puja is

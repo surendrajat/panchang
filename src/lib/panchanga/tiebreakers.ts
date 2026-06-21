@@ -67,6 +67,42 @@ export function nakshatraIndexAtJD(jd: number, ayanamsaSys: AyanamsaSystem): num
   return Math.floor(moonSid / NAKSHATRA_DEGREES) + 1;
 }
 
+// Sidereal solar sign (0 = Mesha .. 4 = Simha .. 8 = Dhanu .. 9 = Makara) at a JD.
+function solarSignAtJD(jd: number, ayanamsaSys: AyanamsaSystem): number {
+  return Math.floor(siderealFromTropical(sunLongitudeAtJD(jd), jd, ayanamsaSys) / 30);
+}
+
+// True when, at this civil day's MIDDAY, the Thiruvonam nakshatra (= Shravana,
+// index 22) prevails AND the Sun is in sidereal Simha/Leo (sign 4 = Malayalam month
+// Chingam). The building block for Onam.
+function thiruvonamMadhyahnaInSimha(
+  loc: Location,
+  date: Date,
+  ayanamsaSys: AyanamsaSystem,
+): boolean {
+  const ev = sunRiseSet(loc, date);
+  if (!ev.rise || !ev.set) return false;
+  const middayJD = dateToJulian(new Date((ev.rise.getTime() + ev.set.getTime()) / 2));
+  return (
+    solarSignAtJD(middayJD, ayanamsaSys) === 4 && nakshatraIndexAtJD(middayJD, ayanamsaSys) === 22
+  );
+}
+
+// Onam / Thiru Onam: the Thiruvonam nakshatra prevailing at midday in the solar
+// month Chingam (Sun in Simha). When TWO Thiruvonams fall in Chingam (the nakshatra
+// recurs every ~27.3 days, shorter than the ~30-day solar month — e.g. 2024), Onam
+// is the LATER one, so we require that no further qualifying day exists within the
+// next nakshatra return (~5 weeks).
+export function isThiruvonamOnam(loc: Location, date: Date, ayanamsaSys: AyanamsaSystem): boolean {
+  if (!thiruvonamMadhyahnaInSimha(loc, date, ayanamsaSys)) return false;
+  for (let k = 20; k <= 34; k++) {
+    if (thiruvonamMadhyahnaInSimha(loc, new Date(date.getTime() + k * MS_PER_DAY), ayanamsaSys)) {
+      return false; // a later Thiruvonam is still in Chingam → today is not Onam
+    }
+  }
+  return true;
+}
+
 // Vishti (Bhadra) is the 7th of the 7 movable karanas. In the 60-karana
 // half-tithi cycle: position 0 is the fixed Kintughna, positions 1..56
 // are the 7 movables repeating 8 times, and positions 57..59 are the

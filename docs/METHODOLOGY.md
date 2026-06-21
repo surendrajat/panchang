@@ -224,10 +224,43 @@ was landing on the Vaishnava day. Worse, 5 "Drik-verified" fixtures had been
 circularly pinned to our *own* sunrise/Vaishnava output (2013/2017/2019/2026/2028),
 never independently checked. Both fixed (see `festivals/pan-india.ts`,
 `fixtures/festivals-multi-year.ts`). **Lesson: cross-validate against an
-independent authority, not our own prior output.** The remaining sunrise-rule
-"easy case" festivals (Hanuman Jayanti, Guru/Kartik Purnima, Ugadi, Bhai Dooj,
-Tulsi Vivaha, Vaikuntha Ekadashi, Navaratri start, Akshaya Tritiya, Nag Panchami)
-are candidates for the same boundary-year re-verification — a tracked follow-up.
+independent authority, not our own prior output.** Every remaining festival was
+then re-verified against the primary digests — see the next section.
+
+### Authoritative-rule audit (primary dharmashastra, 2026-06)
+
+Every festival was then re-verified against the **primary digests** — Dharmasindhu
+(Kashinath Upadhyay), Nirnaya Sindhu (Kamalakara Bhatta), Purushartha Chintamani —
+and the Govt **Rashtriya Panchang**, not just drikpanchang. The standard: follow the
+*authoritative* rule, and where reputable sources differ, the principled one. **~25
+festivals were confirmed SOLID** against a primary citation. Notable outcomes:
+
+- **Janmashtami — validated as authoritative, not just Drik-aligned.** Nirnaya
+  Sindhu: *"अत्र निशीथवेध एव ग्राह्यः … तस्यैव मुख्यकालः"* — only the Nishita-vedha is the
+  principal time (mukhya-kala). Rohini nakshatra **upgrades the label** to "Jayanti"
+  but does **not** move the day. So the app's Ashtami-at-Nishita rule (ignore Rohini,
+  later-pick) is the genuine rule; the Vaishnava/ISKCON date can differ by a day.
+- Five rules were **wrong or mislabelled and fixed**:
+
+  | Festival | Was | Authoritative rule (now) |
+  |---|---|---|
+  | Lohri | hard-coded Jan 13 | eve of Makara Sankranti (Sankranti − 1) |
+  | Akshaya Tritiya | sunrise | **purvahna-vyapini** — Tritiya pervades the forenoon (Nirnaya Sindhu *"पूर्वाह्णव्यापिनी ग्राह्या"*), forenoon span-overlap with a 6-ghatika later-day tie-break |
+  | Onam / Thiruvonam | lunar Bhadrapada | **solar** — Thiruvonam nakshatra at midday in Chingam (Sun in Simha) |
+  | Vaikuntha Ekadashi | lunar Margashirsha (= Mokshada) | **solar Dhanurmasa** Shukla Ekadashi (Sun in Dhanu; 0/1/2 per Gregorian year) |
+  | Amavasya | one observance | **split**: Pitru-karya (Darsha Shraddha, aparahna) + Deva-karya (auspicious, udaya), both monthly |
+
+- **Pongal — a Vakya/Lahiri time-source split, not a cutoff bug.** The Tamil
+  month-start rule is the *same* sunset cutoff we use (the fractional/aparahna cutoff
+  is Kerala's, per Sewell & Dikshit 1896). But Tamil Nadu's traditional **Vakya
+  (Surya-Siddhanta)** panchangam computes the Makara ingress ~a day later than
+  Lahiri/Drik, so the TN-Govt 2026 date is Jan 15 while our Lahiri ingress (the
+  national Rashtriya Panchang standard) gives Jan 14. We keep Lahiri and **document**
+  the Vakya divergence rather than build a separate Surya-Siddhanta solar model.
+
+The helpers added this round (`purvahnaVyapiniMatches`, `isThiruvonamOnam`,
+`sankrantiObservanceMidnight`) live in `tiebreakers.ts`; the solar Dhanurmasa /
+Amavasya-split rules are inline in `festivals/pan-india.ts`.
 
 ### Known limitations
 

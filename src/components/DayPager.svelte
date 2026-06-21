@@ -251,6 +251,10 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     min-width: 0;
+    /* A long Hindi weekday+month can exceed the 1fr track — ellipsize instead of
+       spilling under the arrows. */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .pager__date--compact {
     display: none;
@@ -259,6 +263,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    /* 44px min hit area (icon stays centered) — was ~20px, below the touch min. */
+    min-width: 44px;
+    min-height: 44px;
     color: var(--ink-soft);
     background: none;
     border: none;

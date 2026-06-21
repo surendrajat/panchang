@@ -96,7 +96,12 @@ export interface BrightStar {
 }
 export const BRIGHT_STARS: readonly BrightStar[] = [
   { ra: 6.752, dec: -16.72, mag: -1.46, n: { hi: 'लुब्धक', tr: 'Lubdhaka', en: 'Sirius' } },
-  { ra: 5.278, dec: 45.998, mag: 0.08, n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' } },
+  {
+    ra: 5.278,
+    dec: 45.998,
+    mag: 0.08,
+    n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' },
+  },
   { ra: 5.242, dec: -8.2, mag: 0.13, n: { hi: 'रिगेल', tr: 'Rigel', en: 'Rigel' } },
   { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाती', tr: 'Svati', en: 'Arcturus' } },
   { ra: 18.616, dec: 38.78, mag: 0.03, n: { hi: 'अभिजित्', tr: 'Abhijit', en: 'Vega' } },

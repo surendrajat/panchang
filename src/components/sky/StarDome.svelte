@@ -219,7 +219,13 @@
   const domePolaris = $derived.by(() => {
     const loc = preferences.location;
     if (!loc || !showStars) return null;
-    const { azimuth, altitude } = starAltAz(POLARIS.ra, POLARIS.dec, date, loc.latitude, loc.longitude);
+    const { azimuth, altitude } = starAltAz(
+      POLARIS.ra,
+      POLARIS.dec,
+      date,
+      loc.latitude,
+      loc.longitude,
+    );
     if (altitude < 0) return null;
     return { pt: domePt(azimuth, altitude) };
   });

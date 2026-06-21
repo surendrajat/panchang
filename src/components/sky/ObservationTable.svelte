@@ -151,7 +151,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 700;
-    color: var(--ink-faint);
+    color: var(--ink-soft);
     text-align: center;
     padding: 0 0.3rem 0.35rem;
   }
@@ -196,7 +196,7 @@
   .obs__note {
     margin: 0.6rem 0 0;
     font-size: 0.76rem;
-    color: var(--ink-faint);
+    color: var(--ink-soft);
     line-height: 1.45;
   }
 </style>

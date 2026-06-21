@@ -107,10 +107,16 @@
   ];
 
   // ── motion (the Sun crawls, the Moon races; real ~13:1 ratio) ────────────────
-  let t = $state(0); // elapsed "days"
-  let step = $state(0);
-  let auto = $state(true);
   const DAYS_PER_SEC = 3;
+  // honour the OS "reduce motion" setting: start on the final, fullest frame and
+  // skip the animation loop entirely (the reader can still step through by hand)
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    !!window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let t = $state(prefersReduced ? 38 : 0); // elapsed "days"
+  let step = $state(prefersReduced ? STEPS.length - 1 : 0);
+  let auto = $state(!prefersReduced);
 
   // pause the animation loop whenever the panel is scrolled off-screen, so it
   // costs nothing once the reader has moved past it (cleaned up on unmount)
@@ -138,7 +144,7 @@
   const showMoon = $derived(step >= 4);
 
   $effect(() => {
-    if (!visible) return; // idle while off-screen
+    if (!visible || prefersReduced) return; // idle off-screen or when motion is reduced
     let raf = 0;
     let last = performance.now();
     let acc = 0;
@@ -260,7 +266,7 @@
   </div>
 
   <div class="ci-text">
-    <h4>{hi(STEPS[step].t.hi, STEPS[step].t.en)}</h4>
+    <h3>{hi(STEPS[step].t.hi, STEPS[step].t.en)}</h3>
     <p>{hi(STEPS[step].b.hi, STEPS[step].b.en)}</p>
   </div>
 
@@ -432,10 +438,11 @@
     max-width: 50ch;
     margin: 0.6rem auto 0.1rem;
   }
-  .ci-text h4 {
+  .ci-text h3 {
     margin: 0 0 0.2rem;
     font-family: var(--font-serif);
     font-size: 1.1rem;
+    font-weight: 600;
     color: var(--ink);
   }
   .ci-text p {

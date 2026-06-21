@@ -219,8 +219,8 @@
   <SkyClock bind:date={now} bind:speed bind:live>
     {#snippet extra()}
       <div class="watch">
-        <span class="watch__var watch__var--sun"><span class="watch__g">☉</span>{d1(sunSid)}</span>
-        <span class="watch__var watch__var--moon"><span class="watch__g">☽</span>{d1(moonSid)}</span>
+        <span class="watch__var watch__var--sun">λ<sub>☉</sub> {d1(sunSid)}</span>
+        <span class="watch__var watch__var--moon">λ<sub>☽</sub> {d1(moonSid)}</span>
       </div>
     {/snippet}
   </SkyClock>
@@ -299,8 +299,11 @@
       </div>
       {#if pickedCard}
         <aside class="explore">
-          <button class="explore__x" type="button" onclick={() => (picked = null)} aria-label="×"
-            >×</button
+          <button
+            class="explore__x"
+            type="button"
+            onclick={() => (picked = null)}
+            aria-label={hi('बंद करें', 'Close')}>×</button
           >
           <h4>{pickedCard.title}</h4>
           <p>{pickedCard.body}</p>
@@ -663,8 +666,8 @@
       <h3>{hi('इस क्षण का पूरा आकाश', 'The whole sky, this moment')}</h3>
       <p class="prose">
         {hi(
-          'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। किसी पिंड पर टैप करें, ⚙ से ग्रह जोड़ें या राशिचक्र बदलें, और ऊपर समय खिसकाकर हर मान को बदलते देखें। यही पूरे पंचांग की जड़ है।',
-          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and scrub time above to watch every value move. This is the root the whole pañcāṅga grows from.',
+          'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। किसी पिंड पर टैप करें, ⚙ से ग्रह जोड़ें या राशिचक्र बदलें, और ऊपर समय चलाकर हर मान को बदलते देखें। यही पूरे पंचांग की जड़ है।',
+          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and play time above to watch every value move. This is the root the whole pañcāṅga grows from.',
         )}
       </p>
       <SkyPanel date={simDate} />
@@ -787,21 +790,18 @@
     font-variant-numeric: tabular-nums;
   }
   .watch__var {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.22em;
-    min-width: 4.5rem;
+    display: inline-block;
+    min-width: 4.6rem;
     font-size: 0.8rem;
     font-weight: 600;
     padding: 0.08rem 0.45rem;
     border-radius: var(--radius-pill);
     background: var(--paper-2);
+    text-align: center;
+    white-space: nowrap;
   }
-  /* the Sun/Moon symbol — a full-size glyph (not a subscript), so it reads clearly */
-  .watch__g {
-    font-size: 1.15em;
-    line-height: 1;
+  .watch__var sub {
+    font-size: 0.7em;
   }
   .watch__var--sun {
     color: #b06a08;
@@ -812,11 +812,12 @@
   /* on phones, shrink the chips a touch so they sit beside the clock on one row */
   @media (max-width: 460px) {
     .watch {
-      gap: 0.25rem;
+      gap: 0.22rem;
     }
     .watch__var {
-      min-width: 4.1rem;
-      font-size: 0.76rem;
+      min-width: 3.8rem;
+      font-size: 0.74rem;
+      padding: 0.08rem 0.4rem;
     }
   }
 

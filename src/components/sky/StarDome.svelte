@@ -224,7 +224,7 @@
       n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' },
     },
     { ra: 5.242, dec: -8.2, mag: 0.13, n: { hi: 'रिगेल', tr: 'Rigel', en: 'Rigel' } },
-    { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाति', tr: 'Svati', en: 'Arcturus' } },
+    { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाती', tr: 'Svati', en: 'Arcturus' } },
     { ra: 18.616, dec: 38.78, mag: 0.03, n: { hi: 'अभिजित्', tr: 'Abhijit', en: 'Vega' } },
     { ra: 7.655, dec: 5.225, mag: 0.34, n: { hi: 'प्रोसायन', tr: 'Procyon', en: 'Procyon' } },
     { ra: 5.919, dec: 7.407, mag: 0.5, n: { hi: 'आर्द्रा', tr: 'Ardra', en: 'Betelgeuse' } },
@@ -710,8 +710,13 @@
   }
   .dome-card {
     font-size: 8px;
-    font-weight: 400;
-    fill: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    fill: rgba(255, 255, 255, 0.92);
+    /* dark halo so N/S/E/W stay legible on the bright daytime sky too */
+    paint-order: stroke;
+    stroke: rgba(10, 20, 45, 0.55);
+    stroke-width: 1.4px;
+    stroke-linejoin: round;
   }
   .dome-path {
     fill: none;

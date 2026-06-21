@@ -173,10 +173,15 @@
     }
     .clock {
       min-width: 0;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
   }
   .speeds button:hover {
+    color: var(--ink);
+  }
+  .speeds button:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
     color: var(--ink);
   }
   .speeds button.on {

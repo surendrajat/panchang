@@ -8,8 +8,8 @@
 // most common rule is "tithi present at sunrise of this civil date", which
 // the standard panchanga already encodes — the tithi at sunrise IS the
 // tithi for the day. Tie-breakers (e.g., which day Janmashtami falls on
-// when Krishna Ashtami spans two sunrises) are documented in METHODOLOGY.md
-// and implemented as Smarta-default per ARCHITECTURE.md §14.
+// when Krishna Ashtami spans two sunrises) are documented in docs/methodology/
+// and implemented as Smarta-default per docs/ARCHITECTURE.md §14.
 
 import type { Panchanga } from '../types';
 

@@ -10,7 +10,7 @@
 // The 11 monthly observances (Ekadashi, Pradosh, Sankashti, etc.) appear
 // at the bottom.
 //
-// Naming choices per ARCHITECTURE.md §14: Smarta defaults. METHODOLOGY.md
+// Naming choices per docs/ARCHITECTURE.md §14: Smarta defaults. docs/methodology/
 // documents the tie-breakers we apply for Janmashtami, Diwali, and a
 // few others.
 
@@ -189,7 +189,7 @@ function isLohri(p: Panchanga): boolean {
 }
 
 export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
-  // --- Major Phase 1 list (per ARCHITECTURE.md §7) ---
+  // --- Major Phase 1 list (per docs/ARCHITECTURE.md §7) ---
 
   // Solar / sun-sign transit
   // Makara Sankranti = Sun enters Makara (sidereal sign 9).

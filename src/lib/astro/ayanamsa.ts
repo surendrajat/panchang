@@ -9,7 +9,7 @@
 // LAHIRI). The linear term carries the ~50.29"/year rate; the
 // quadratic term contributes ~1″ at ±100 years from J2000 (well
 // inside the ±2-minute tithi end-time tolerance from
-// ARCHITECTURE.md §12, but worth including so we don't compound
+// docs/ARCHITECTURE.md §12, but worth including so we don't compound
 // drift across long-range queries).
 //
 // References:

@@ -111,20 +111,23 @@
     return q ? `${base} (${q})` : base;
   }
 
-  // The cell's named observances: ALL annual festivals that fall on the day (a few
-  // dates carry two, e.g. Naraka Chaturdashi + Diwali), else the Amavasya
-  // (Pitru / Deva / combined). Other monthly observances stay glyph-only (●○◆).
+  // The cell's named observances: ALL annual festivals on the day, PLUS the Amavasya
+  // (Pitru / Deva / combined) when present — so e.g. 2026-11-08 shows all three of
+  // Naraka Chaturdashi + Diwali + Amavasya (the Amavasya is a distinct observance,
+  // not merely the new-moon glyph). Other monthly observances stay glyph-only (●○◆).
   // `label` is the compact cell text; `name` is the full localized name for aria.
   function cellFestivals(keys: string[]): { label: string; name: string }[] {
-    const annual = keys.filter((k) => !MONTHLY_OBSERVANCE_KEYS.has(k));
-    if (annual.length)
-      return annual.map((k) => ({ label: festivalShortName(k), name: displayName(k) }));
+    const out = keys
+      .filter((k) => !MONTHLY_OBSERVANCE_KEYS.has(k))
+      .map((k) => ({ label: festivalShortName(k), name: displayName(k) }));
     const pitru = keys.includes('amavasya');
     const deva = keys.includes('amavasya_devakarya');
     const which = pitru && deva ? 'both' : pitru ? 'pitru' : deva ? 'deva' : null;
-    if (!which) return [];
-    const label = amavasyaLabel(which);
-    return [{ label, name: label }];
+    if (which) {
+      const label = amavasyaLabel(which);
+      out.push({ label, name: label });
+    }
+    return out;
   }
 
   function tithiGlyph(

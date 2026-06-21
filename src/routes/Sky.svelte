@@ -95,13 +95,14 @@
   const lang = $derived(preferences.language);
   const num = (s: string | number) => applyNumerals(String(s), preferences.numerals);
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
+  // 3-way name: Devanagari in Hindi; otherwise the Sanskrit transliteration or
+  // plain English per the transliteration preference (like grahaLabel/rashiLabel).
+  const tn = (dev: string, tr: string, en: string) =>
+    lang === 'hi' ? dev : preferences.transliteration ? tr : en;
   // Respects the transliteration preference (Mesha vs Aries) — see lib/labels.
   const signName = (i: number) => rashiLabel(i);
-  // Earth isn't a graha, so it has no grahaLabel — mirror the transliteration
-  // setting by hand so its label matches the Sun/Moon/planets.
-  const earthLabel = $derived(
-    lang === 'hi' ? 'पृथ्वी' : preferences.transliteration ? 'Prithvi' : 'Earth',
-  );
+  // Earth isn't a graha, so it has no grahaLabel — mirror the transliteration by hand.
+  const earthLabel = $derived(tn('पृथ्वी', 'Prithvi', 'Earth'));
 
   // ── Time model (capped ~30 fps; idle when paused; torn down on unmount) ─────
   let simMs = $state(Date.now());
@@ -144,9 +145,6 @@
     };
   }
 
-  // On touch / low-power devices, scrub at a lower framerate — roughly halves the
-  // per-frame SVG re-render + GC cost while staying perfectly legible.
-  const coarsePointer = typeof matchMedia !== 'undefined' && matchMedia('(hover: none)').matches;
   $effect(() => {
     if (!live && speed === 0) return;
     let raf = 0;
@@ -156,7 +154,9 @@
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick);
       const dt = t - last;
-      if (dt < (coarsePointer && !live ? 64 : 30)) return;
+      // Cap at ~30fps everywhere; the 1 Hz live gate below keeps the at-rest
+      // view idle, and scrubbing stays smooth (lower caps read as jitter).
+      if (dt < 30) return;
       last = t;
       if (live) {
         // Real time barely moves between frames and nothing on the wheel shifts
@@ -390,7 +390,8 @@
     }
     const i = s.i!;
     const lord = grahaLabel(RASHI_LORDS[i]);
-    const el = ELEMENT_LABEL[RASHI_ELEMENT[i]][lang === 'hi' ? 'hi' : 'en'];
+    const elName = ELEMENT_LABEL[RASHI_ELEMENT[i]];
+    const el = tn(elName.hi, elName.tr, elName.en);
     const m = SIGN_MONTH[i];
     return {
       title: signName(i),
@@ -668,7 +669,7 @@
   // Each: stars as [RA hours, Dec degrees] (J2000) + line segments by star index.
   const CONSTELLATIONS = [
     {
-      name: { en: 'Saptarishi', hi: 'सप्तर्षि' }, // Ursa Major / the Big Dipper
+      name: { hi: 'सप्तर्षि', tr: 'Saptarishi', en: 'Big Dipper' }, // Ursa Major
       stars: [
         [11.06, 61.75],
         [11.03, 56.38],
@@ -689,7 +690,7 @@
       ],
     },
     {
-      name: { en: 'Orion', hi: 'मृग' }, // Mriga
+      name: { hi: 'मृग', tr: 'Mriga', en: 'Orion' },
       stars: [
         [5.92, 7.41],
         [5.42, 6.35],
@@ -711,7 +712,7 @@
       ],
     },
     {
-      name: { en: 'Scorpius', hi: 'वृश्चिक' }, // Vrishchika
+      name: { hi: 'वृश्चिक', tr: 'Vrishchika', en: 'Scorpius' },
       stars: [
         [16.09, -19.8],
         [16.0, -22.62],
@@ -733,7 +734,7 @@
       ],
     },
     {
-      name: { en: 'Cassiopeia', hi: 'कैसिओपिया' },
+      name: { hi: 'कैसिओपिया', tr: 'Cassiopeia', en: 'Cassiopeia' }, // no standard Sanskrit name
       stars: [
         [0.15, 59.15],
         [0.68, 56.54],
@@ -749,7 +750,7 @@
       ],
     },
     {
-      name: { en: 'Sagittarius', hi: 'धनु' }, // Dhanu — the "teapot", low in the south
+      name: { hi: 'धनु', tr: 'Dhanu', en: 'Sagittarius' }, // the "teapot", low in the south
       stars: [
         [18.47, -25.42], // Kaus Borealis
         [18.35, -29.83], // Kaus Media
@@ -831,10 +832,7 @@
 
 <section class="sky">
   <header class="sky__head">
-    <h2>
-      {hi('आकाश — अभी', 'The Sky — Right Now')}
-      <span class="exp">{hi('प्रयोग', 'experimental')}</span>
-    </h2>
+    <h2>{hi('आकाश दृश्य', 'The Sky View')}</h2>
     <p class="desc">
       {hi(
         'पूरा पंचांग सिर्फ़ दो कोणों से बनता है — सूर्य और चन्द्र की राशि-स्थिति। उनके बीच का अंतर ही तिथि है।',
@@ -1391,7 +1389,7 @@
                 class="dome-hit"
                 role="button"
                 tabindex="0"
-                aria-label={lang === 'hi' ? con.name.hi : con.name.en}
+                aria-label={tn(con.name.hi, con.name.tr, con.name.en)}
                 use:revealable={con.key}
               />
               {#each con.segs as seg (seg)}
@@ -1401,7 +1399,7 @@
                 <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
               {/each}
               <text x={con.cx} y={con.labelY} class="dome-con-name" text-anchor="middle"
-                >{lang === 'hi' ? con.name.hi : con.name.en}</text
+                >{tn(con.name.hi, con.name.tr, con.name.en)}</text
               >
             </g>
           {/each}
@@ -1422,7 +1420,7 @@
                 class="dome-hit"
                 role="button"
                 tabindex="0"
-                aria-label={hi('ध्रुव', 'Polaris')}
+                aria-label={tn('ध्रुव', 'Dhruva', 'Pole Star')}
                 use:revealable={'polaris'}
               />
               <circle
@@ -1436,7 +1434,7 @@
                 x={domePolaris.pt[0]}
                 y={domePolaris.pt[1] < DC ? domePolaris.pt[1] + 9 : domePolaris.pt[1] - 6}
                 class="dome-con-name"
-                text-anchor="middle">{hi('ध्रुव', 'Polaris')}</text
+                text-anchor="middle">{tn('ध्रुव', 'Dhruva', 'Pole Star')}</text
               >
             </g>
           {/if}
@@ -1575,15 +1573,6 @@
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-  }
-  .exp {
-    font-size: 0.62rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--paper);
-    background: var(--gold, #b8860b);
-    padding: 0.1rem 0.4rem;
-    border-radius: var(--radius-pill, 999px);
   }
   .desc {
     color: var(--ink-soft);

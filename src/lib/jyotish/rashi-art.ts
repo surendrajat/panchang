@@ -20,11 +20,13 @@ export const RASHI_ELEMENT: readonly Element[] = [
   'water',
 ];
 
-export const ELEMENT_LABEL: Record<Element, { en: string; hi: string }> = {
-  fire: { en: 'Fire', hi: 'अग्नि' },
-  earth: { en: 'Earth', hi: 'पृथ्वी' },
-  air: { en: 'Air', hi: 'वायु' },
-  water: { en: 'Water', hi: 'जल' },
+// en = plain English, tr = Sanskrit transliteration (shown when the
+// transliteration preference is on), hi = Devanagari.
+export const ELEMENT_LABEL: Record<Element, { en: string; tr: string; hi: string }> = {
+  fire: { en: 'Fire', tr: 'Agni', hi: 'अग्नि' },
+  earth: { en: 'Earth', tr: 'Prithvi', hi: 'पृथ्वी' },
+  air: { en: 'Air', tr: 'Vayu', hi: 'वायु' },
+  water: { en: 'Water', tr: 'Jala', hi: 'जल' },
 };
 
 // The Western sign each rashi corresponds to (for a learner's bridge).

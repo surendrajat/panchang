@@ -85,8 +85,8 @@ export const hi: Record<TranslationKey, string> = {
   // Pada (quarter of a nakshatra) is पद in Hindi, not पाद.
   'anga.pada': 'पद',
 
-  // ── section headings
-  'section.panchanga': 'पंचांग',
+  // ── section headings (literary पञ्चाङ्ग, matching the masthead)
+  'section.panchanga': 'पञ्चाङ्ग',
   'section.muhurta': 'मुहूर्त',
   // "Year" was the literal English; user prefers the Sanskrit-Hindi
   // "सम्वत" (era/year-count) here with Latin "year" as the kicker.

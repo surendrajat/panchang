@@ -76,7 +76,7 @@
     { dev: 'शनिवार', tr: 'Shanivara', en: 'Saturday', lord: 'saturn' },
   ];
 
-  // ── Time kernel ─────────────────────────────────────────────────────────────
+  // ── Time model ─────────────────────────────────────────────────────────────
   // The shared <SkyClock> owns the rAF time model; we bind to its `date` (the
   // moment every cell reads) plus `speed`/`live` so per-cell "Run" buttons can
   // drive it too. Every cell's astronomy is derived from `now`.
@@ -94,7 +94,7 @@
     }
   }
 
-  // ── Derived astronomy (THE kernel outputs) ──────────────────────────────────
+  // ── Derived astronomy (the time-model outputs) ──────────────────────────────────
   const simDate = $derived(now);
   const jd = $derived(dateToJulian(simDate));
   const ayan = $derived(ayanamsa(jd, preferences.ayanamsa));
@@ -192,7 +192,7 @@
   });
 </script>
 
-<!-- a small inline "▷ Run / ⏸ pause" control that plays the shared kernel -->
+<!-- a small inline "▷ Run / ⏸ pause" control that plays the shared clock -->
 {#snippet run(s: number, labelHi: string, labelEn: string)}
   <button type="button" class="run" class:on={!live && speed === s} onclick={() => toggleSpeed(s)}>
     <span class="run__i" aria-hidden="true">{!live && speed === s ? '⏸' : '▶'}</span>
@@ -784,7 +784,7 @@
     color: var(--ink-soft);
   }
 
-  /* ── kernel (sticky) ── */
+  /* ── time model (sticky) ── */
   /* the two watched angles (λ☉, λ☽), sat beside the clock in the time widget;
      fixed min-width + tabular figures so the values never wobble while playing */
   .watch {
@@ -833,7 +833,7 @@
     gap: 0.4rem;
     padding: 1.2rem 0;
     border-top: 1px solid var(--line-2);
-    /* so a cell scrolled to (anchors, run buttons) clears the sticky kernel */
+    /* so a cell scrolled to (anchors, run buttons) clears the sticky time model */
     scroll-margin-top: 7rem;
   }
   .cell__no {
@@ -849,7 +849,7 @@
     min-width: 0;
   }
   /* phones: drop the left number gutter (it wastes ~10% width); the cell number
-     sits on its own compact line, notebook-prompt style, and content goes full-width */
+     sits on its own compact line, step-number style, and content goes full-width */
   @media (max-width: 560px) {
     .cell {
       grid-template-columns: 1fr;

@@ -8,13 +8,13 @@
     key?: GrahaKey;
   };
   // module-level id counter so each instance's gradient ids never collide when
-  // several wheels share one page (the notebook renders many).
+  // several wheels share one page (the guide renders many).
   let _uid = 0;
 </script>
 
 <script lang="ts">
   // A configurable geocentric ecliptic wheel, extracted from routes/Sky.svelte so
-  // the learning notebook can show progressively-richer versions of the same
+  // the learning guide can show progressively-richer versions of the same
   // picture (signs only → +Moon → +nakshatra ring → +grahas). Earth at the
   // centre; angle around the ring = sidereal ecliptic longitude. Every position
   // is passed in from the real engine — this component only draws.

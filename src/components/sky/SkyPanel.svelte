@@ -2,7 +2,7 @@
   // The interactive ecliptic wheel + live readout + tap-to-learn + upcoming
   // events — the heart of the old Sky page, packaged as one self-contained unit
   // that computes everything from a `date` prop (no time controls of its own).
-  // Used as the finale of the #/learn notebook, driven by the notebook's kernel.
+  // Used as the finale of the #/learn guide, driven by the guide's time model.
   import { preferences } from '$lib/state/preferences.svelte';
   import {
     dateToJulian,

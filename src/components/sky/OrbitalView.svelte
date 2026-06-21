@@ -10,7 +10,7 @@
   let {
     elong, // Sun→Moon elongation in degrees (0..360)
     earthLabel = 'Earth',
-    labelMode = 'always', // 'always' (notebook) | 'hover' (Sky: reveal on hover/tap)
+    labelMode = 'always', // 'always' (guide) | 'hover' (Sky: reveal on hover/tap)
   }: { elong: number; earthLabel?: string; labelMode?: 'always' | 'hover' } = $props();
 
   const OW = 360;
@@ -128,7 +128,7 @@
     fill: var(--ink-soft);
     opacity: 0.85;
   }
-  /* Sky uses hover/tap-to-reveal labels; the notebook keeps them always on */
+  /* Sky uses hover/tap-to-reveal labels; the guide keeps them always on */
   .orb.hoverlabels {
     cursor: pointer;
   }

@@ -1,10 +1,10 @@
 <script lang="ts">
-  // A short ANIMATED primer that builds the one idea the notebook rests on, before
+  // A short ANIMATED primer that builds the one idea the guide rests on, before
   // any formulas: celestial sphere → the ecliptic → ecliptic longitude (λ) → the
   // twelve rashi → the two "hands" (Sun & Moon). One evolving canvas; the Sun
   // really crawls and the Moon really races (~13× faster), so the gap that becomes
   // the tithi is felt, not just told. The dark "sky" sits inside a paper card so
-  // it belongs to the page. Self-paced — independent of the notebook's kernel.
+  // it belongs to the page. Self-paced — independent of the guide's time model.
   import { preferences } from '$lib/state/preferences.svelte';
   import { applyNumerals } from '$lib/format/numerals';
   import { SIGN_GLYPH } from '$lib/jyotish/glyphs';

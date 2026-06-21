@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Shared time + speed widget used by both the Sky tab and the #/learn notebook.
+  // Shared time + speed widget used by both the Sky tab and the #/learn guide.
   // Owns the time model (a capped rAF loop) and exposes the current moment via a
   // bindable `date` (and `speed`/`live` so a parent's per-cell "Run" buttons can
   // drive it). The clock is fixed-width with tabular figures so the date never

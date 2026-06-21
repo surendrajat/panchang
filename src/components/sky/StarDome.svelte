@@ -5,7 +5,7 @@
 <script lang="ts">
   // The local sky as an all-sky dome (zenith at the centre, horizon at the rim;
   // N up, E left, S down, W right) — extracted from routes/Sky.svelte so the
-  // #/learn notebook can reuse it. Bright stars carry their Sanskrit names, many
+  // #/learn guide can reuse it. Bright stars carry their Sanskrit names, many
   // of which ARE nakshatras (Rohini = Aldebaran, Chitra = Spica…), so the dome
   // doubles as a nakshatra map. Pass atmosphere={false} for a planetarium look
   // (always-dark sky → stars visible regardless of the local time of day).

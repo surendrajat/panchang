@@ -62,12 +62,20 @@ export function computePanchanga(
   date: Date,
   location: Location,
   options?: Partial<PanchangaOptions>,
+  // Festival fast-path (findFestivals' annual walk only): skip the fields no
+  // festival rule reads — yoga, karana(s), moonrise/moonset — which are the
+  // heaviest unused work (karanaSequenceForDay alone is ~0.8 ms/day). Everything
+  // the rules DO read (tithi, nakshatra, masa, solar sign, sunrise/sunset) is
+  // computed identically, so `festivals` is byte-for-byte the same as the full
+  // path — verified by a multi-year, multi-city diff. Default off; Day/Month/
+  // Today always get the complete panchanga.
+  fast = false,
 ): Panchanga {
   const opts = resolveOptions(options);
   const dayStart = civilMidnightInZone(date, location.timezone);
 
   const sunEvents = sunRiseSet(location, dayStart);
-  const moonEvents = moonRiseSet(location, dayStart);
+  const moonEvents = fast ? { rise: null, set: null } : moonRiseSet(location, dayStart);
   const sunrise = sunEvents.rise;
   const sunset = sunEvents.set;
 
@@ -78,11 +86,18 @@ export function computePanchanga(
 
   const tithi = tithiAtInstant(anchor);
   const nakshatra = nakshatraAtInstant(anchor, opts.ayanamsa);
-  const yoga = yogaAtInstant(anchor, opts.ayanamsa);
-  const karana = karanaAtInstant(anchor);
+  // No festival rule reads yoga or karana(s) — stub them on the fast path. These
+  // are the priciest unused computations (each does its own end-time bisection;
+  // karanaSequenceForDay does ~3).
+  const yoga = fast
+    ? { index: 1, name: '', endTime: anchor, fraction: 0 }
+    : yogaAtInstant(anchor, opts.ayanamsa);
+  const karana = fast
+    ? { index: 1, positionInCycle: 0, name: '', endTime: anchor, fraction: 0 }
+    : karanaAtInstant(anchor);
   // A panchanga day spans 24h from the anchor (sunrise) and typically
   // contains 2–3 karanas, since each karana is ~12h (half a tithi).
-  const karanas = karanaSequenceForDay(anchor);
+  const karanas = fast ? [] : karanaSequenceForDay(anchor);
   const vara = varaAtSunrise(sunrise, anchor, location);
   const moonPhase = moonPhaseAtInstant(anchor);
 
@@ -210,7 +225,7 @@ export function findFestivals(
   let cursor = startMs;
   const safetyLimit = Math.ceil((endMs - startMs) / MS_PER_DAY) + 7;
   for (let i = 0; i < safetyLimit && cursor <= endMs; i++) {
-    const p = computePanchanga(new Date(cursor), location, opts);
+    const p = computePanchanga(new Date(cursor), location, opts, true); // fast path
     for (const key of p.festivals) {
       out.push({ date: p.date, key, displayName: getDisplay(key) });
     }

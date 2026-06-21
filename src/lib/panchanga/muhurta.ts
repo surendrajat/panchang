@@ -72,9 +72,8 @@ export function computeMuhurta(vara: Vara, sunrise: Date, sunset: Date): Muhurta
     end: new Date(sunriseMs),
   };
 
-  // Abhijit — 11th muhurta if you count from sunrise; classically taken
-  // as the muhurta centred on solar noon. Skipped on Wednesday per
-  // Smarta tradition.
+  // Abhijit — the 8th of the 15 daytime muhurtas (the midday one), centred on
+  // solar noon. Skipped on Wednesday per Smarta tradition.
   const noonMs = (sunriseMs + sunsetMs) / 2;
   const abhijit =
     vara === 'wednesday'

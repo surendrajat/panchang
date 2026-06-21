@@ -65,7 +65,15 @@
   // Two rAFs so the new view has painted before we scroll.
   $effect(() => {
     const y = scrollByRoute.get(route.name) ?? 0;
-    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
+    let r2 = 0;
+    const r1 = requestAnimationFrame(() => {
+      r2 = requestAnimationFrame(() => window.scrollTo(0, y));
+    });
+    // Cancel on route change so a stale scroll can't land on the new view.
+    return () => {
+      cancelAnimationFrame(r1);
+      cancelAnimationFrame(r2);
+    };
   });
 
   function parseHash(h: string): ResolvedRoute {

@@ -100,8 +100,11 @@ export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: 
   const kaalEnd = new Date(events.set.getTime() + (8 * nightMs) / 15);
   const startTithi = tithiAtJD(dateToJulian(kaalStart)).index;
   const endTithi = tithiAtJD(dateToJulian(kaalEnd)).index;
-  // Tithi is monotonic in elongation → check the [start, end] range.
-  return tithiIndex >= startTithi && tithiIndex <= endTithi;
+  // Tithi index rises with elongation but wraps 30→1 at the new moon, so the
+  // window can straddle that seam (start > end) — handle both cases.
+  return startTithi <= endTithi
+    ? tithiIndex >= startTithi && tithiIndex <= endTithi
+    : tithiIndex >= startTithi || tithiIndex <= endTithi;
 }
 
 // Smarta Janmashtami rule (app default):

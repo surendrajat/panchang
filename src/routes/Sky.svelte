@@ -1053,7 +1053,7 @@
             stroke="var(--ink-soft)"
             stroke-width="1"
           />
-          {#each craters as [dx, dy, r] (dx + '-' + dy)}
+          {#each craters as [dx, dy, r] (`${dx},${dy}`)}
             <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} {r} class="crater" />
           {/each}
           <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle"
@@ -1527,7 +1527,7 @@
               <path d={litD} fill="#f1e7cb" />
               <clipPath id="dome-moon-clip"><path d={litD} /></clipPath>
               <g clip-path="url(#dome-moon-clip)">
-                {#each craters as [dx, dy, cr] (`${dx}-${dy}`)}
+                {#each craters as [dx, dy, cr] (`${dx},${dy}`)}
                   <circle
                     cx={m.pt[0] + dx * 0.67}
                     cy={m.pt[1] + dy * 0.67}

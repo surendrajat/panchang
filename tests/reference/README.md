@@ -5,9 +5,9 @@ to **Swiss Ephemeris** — the gold-standard astronomy library that astro.com,
 Jagannatha Hora and ProKerala all build on. This is the project's _independent_
 reference: the app computes everything with a different ephemeris
 (`astronomy-engine`), and the tests assert the two converge. It is deliberately
-**not** drikpanchang.com — see `EVALUATION.md` and the header of
-`kundli-vs-drik.test.ts` for why we treat Drik as a comparison point, not a
-source of truth.
+**not** drikpanchang.com — see `docs/METHODOLOGY_JYOTISH.md` §3.3 and the
+header of `kundli-vs-drik.test.ts` for why we treat Drik as a comparison point,
+not a source of truth.
 
 ## Why a generator script
 

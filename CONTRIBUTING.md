@@ -37,7 +37,7 @@ pnpm exec svelte-check         # Svelte type-check
    reliable source (drikpanchang.com or the official panchanga of your
    tradition) gives for the next 1–2 years. One fixture per ambiguous
    tie-breaker.
-3. Document any tie-breaker choice in `METHODOLOGY.md`.
+3. Document any tie-breaker choice in `docs/METHODOLOGY.md`.
 
 ## Adding a fixture
 
@@ -71,7 +71,7 @@ sunrise computation:
 
 1. Bench it against every existing fixture. Time deltas should be
    smaller, not larger.
-2. Update `METHODOLOGY.md` with the new derivation if applicable.
+2. Update `docs/METHODOLOGY.md` with the new derivation if applicable.
 3. Note the change in a `CHANGELOG.md` entry (create the file if it
    doesn't exist yet).
 

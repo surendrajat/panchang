@@ -114,14 +114,21 @@ export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: 
 //   3. If neither qualifies, fall back to the day with Ashtami at
 //      sunrise (= the day after Ashtami enters the night).
 //
-// Verified against drikpanchang.com Indian-calendar pages for
-// Delhi 2025 (Aug 15) and Kolkata 2025 (Aug 15) — both pick the
-// same civil day even though local Nishita differs by ~45 min.
+// Verified against drikpanchang.com for Delhi 2025 (Aug 15) and Kolkata 2025
+// (Aug 15) — both pick the same civil day even though local Nishita differs.
 //
-// Split years: some public calendars publish a later Vaishnava/ISKCON
-// date (e.g. Aug 25 in 2016). The app's single default remains Smarta;
-// Vaishnava should be added as an explicit variant, not folded into
-// this predicate.
+// GENUINELY CONTESTED — verified across multiple sources (2026-06). About 1 year
+// in 3, Ashtami and Rohini nakshatra do NOT coincide, and the Smarta tradition
+// itself splits:
+//   - This rule (Ashtami prevailing at Nishita) is one valid convention — the
+//     date used by e.g. the Samvat panchang and the Bangladesh govt holiday
+//     (2027 -> Aug 24, 2029 -> Aug 31).
+//   - Drik (and some others) add the Rohini/"Jayanti" consideration and shift to
+//     the day the Ashtami+Rohini conjunction falls on (2027 -> Aug 25, 2029 ->
+//     Sep 1). Verified Drik New Delhi: 2027 Aug 25, 2029 Sep 1.
+// Both are legitimate Smarta sub-conventions; we keep the simpler Ashtami-Nishita
+// one (matches a government source) rather than fold in Rohini. The further
+// Vaishnava/ISKCON date can differ again and is also not folded in here.
 export function smartaJanmashtamiMatches(p: Panchanga, masa: string): boolean {
   if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
   const target = 23; // Krishna Ashtami

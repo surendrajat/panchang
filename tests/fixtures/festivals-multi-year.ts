@@ -396,7 +396,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
     key: 'krishna_janmashtami',
     auditTier: 'tiebreaker',
     ruleNote:
-      'Default convention: Smarta Nishita-interval Ashtami with sunrise fallback. Split-year Vaishnava/ISKCON dates are intentionally not pinned to this default fixture.',
+      'Default: Smarta Ashtami-at-Nishita with sunrise fallback — a legitimate convention (used by e.g. the Samvat panchang and the Bangladesh govt holiday). GENUINELY CONTESTED ~1 year in 3 (when Ashtami & Rohini do not coincide): Drik adds the Rohini/Jayanti shift, giving a different date (2027 Aug 25, 2029 Sep 1 vs our Aug 24, Aug 31). We intentionally keep the simpler Ashtami-Nishita rule, not Rohini; verified multi-source 2026-06. Further Vaishnava/ISKCON dates also not pinned here.',
     expected: {
       2015: '2015-09-05',
       // Split year: Smarta references publish Aug 24; Vaishnava/ISKCON

@@ -114,10 +114,8 @@
     typeof window !== 'undefined' &&
     !!window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let t = $state(prefersReduced ? 38 : 25); // elapsed "days" (nonzero so the bodies show a gap even while paused)
+  let t = $state(prefersReduced ? 38 : 0); // elapsed "days"
   let step = $state(prefersReduced ? STEPS.length - 1 : 0);
-  // The animation does NOT auto-start — the reader presses ▶ Play (or steps by hand).
-  let playing = $state(false);
 
   // pause the animation loop whenever the panel is scrolled off-screen, so it
   // costs nothing once the reader has moved past it (cleaned up on unmount)
@@ -145,22 +143,18 @@
   const showMoon = $derived(step >= 4);
 
   $effect(() => {
-    // run only while actively playing, on-screen, and motion isn't reduced
-    if (!playing || !visible || prefersReduced) return;
+    // the orbital motion auto-plays whenever on-screen (paused off-screen, and
+    // skipped for reduced-motion). Steps do NOT auto-advance — the reader steps
+    // through them by hand.
+    if (!visible || prefersReduced) return;
     let raf = 0;
     let last = performance.now();
-    let acc = 0;
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = now - last;
       if (dt < 33) return; // ~30fps
       last = now;
       t += (dt / 1000) * DAYS_PER_SEC;
-      acc += dt;
-      if (acc > 9000) {
-        acc = 0;
-        step = (step + 1) % STEPS.length;
-      }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
@@ -168,7 +162,6 @@
 
   function go(s: number) {
     step = (s + STEPS.length) % STEPS.length;
-    playing = false; // manual stepping pauses the animation
   }
 </script>
 
@@ -296,18 +289,6 @@
       onclick={() => go(step + 1)}
       aria-label={hi('अगला', 'Next')}>›</button
     >
-    {#if !prefersReduced}
-      <button
-        type="button"
-        class="ci-play"
-        class:on={playing}
-        onclick={() => (playing = !playing)}
-        aria-pressed={playing}
-      >
-        <span aria-hidden="true">{playing ? '⏸' : '▶'}</span>
-        {playing ? hi('रोकें', 'Pause') : hi('चलाएँ', 'Play')}
-      </button>
-    {/if}
   </div>
 </figure>
 
@@ -488,32 +469,6 @@
   .ci-arrow:hover {
     background: var(--paper);
     color: var(--ink);
-  }
-  .ci-play {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.26rem 0.7rem;
-    border: 1px solid var(--line);
-    background: var(--paper-3);
-    color: var(--ink-soft);
-    border-radius: var(--radius-pill, 999px);
-    font: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition:
-      background 0.15s,
-      color 0.15s,
-      border-color 0.15s;
-  }
-  .ci-play:hover {
-    background: var(--paper);
-    color: var(--ink);
-  }
-  .ci-play.on {
-    background: var(--red);
-    border-color: var(--red);
-    color: var(--paper);
   }
   .ci-dots {
     display: flex;

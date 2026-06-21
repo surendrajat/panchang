@@ -36,22 +36,28 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   //  STRICT — sunrise rule matches Drik across the window.
   // ──────────────────────────────────────────────────────────────────
 
+  // Rama Navami is MADHYAHNA-vyapini (Rama born at midday), not the plain sunrise
+  // rule — see pan-india.ts. On boundary years the sunrise output coincides with
+  // the VAISHNAVA date; these are the Smarta dates (= Drik primary + Govt-of-India
+  // gazetted list). 2013/2017/2019/2026/2028 were previously pinned to the wrong
+  // (sunrise/Vaishnava) day — verified vs Drik New Delhi: 2013-04-19, 2017-04-04,
+  // 2026-03-26 (and Govt 2026 = Mar 26).
   {
     key: 'rama_navami',
     expected: {
       2015: '2015-03-28',
       2016: '2016-04-15',
-      2017: '2017-04-05',
-      2019: '2019-04-14',
+      2017: '2017-04-04',
+      2019: '2019-04-13',
       2020: '2020-04-02',
       2021: '2021-04-21',
       2022: '2022-04-10',
       2023: '2023-03-30',
       2024: '2024-04-17',
       2025: '2025-04-06',
-      2026: '2026-03-27',
+      2026: '2026-03-26',
       2027: '2027-04-15',
-      2028: '2028-04-04',
+      2028: '2028-04-03',
     },
   },
   {

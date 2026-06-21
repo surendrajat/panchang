@@ -316,7 +316,13 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'rama_navami',
     displayName: 'Rama Navami',
     displayNameHi: 'राम नवमी',
-    matches: inShukla(9, 'Chaitra'),
+    // Chaitra Shukla Navami at MADHYAHNA. Rama was born at midday, so the day
+    // Navami prevails at noon is observed (madhyahna-vyapini — the same rule type
+    // as Ganesh Chaturthi). The plain-sunrise simplification used before diverged
+    // in boundary years: e.g. 2026, Navami is at madhyahna on Mar 26 but only
+    // reaches sunrise on Mar 27 — the Government of India gazetted-holiday list
+    // (and Drik) give Mar 26, which madhyahna reproduces. Sunrise fallback for kshaya.
+    matches: vyapiniShukla(9, 'Chaitra', 'madhyahna'),
   },
 
   // Hanuman Jayanti — Chaitra Shukla 15 (Purnima)

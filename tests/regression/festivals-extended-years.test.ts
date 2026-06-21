@@ -52,7 +52,7 @@ const EXTENDED: YearFixture[] = [
       maha_shivaratri: '2013-03-10',
       holika_dahan: '2013-03-26',
       holi: '2013-03-27',
-      rama_navami: '2013-04-20',
+      rama_navami: '2013-04-19', // madhyahna (Smarta) per Drik New Delhi; was wrongly pinned to the sunrise/Vaishnava 04-20
       buddha_purnima: '2013-05-25',
       guru_purnima: '2013-07-22',
       raksha_bandhan: '2013-08-20',

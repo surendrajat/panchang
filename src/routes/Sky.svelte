@@ -139,9 +139,13 @@
   $effect(() => {
     const el = wheelEl;
     if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => (wheelInView = e.isIntersecting), {
-      rootMargin: '-90px 0px 0px 0px',
-    });
+    // Show the wheel-only chips while the wheel is in view OR still below (not yet
+    // scrolled to, e.g. at the top of a narrow screen); hide them only once it has
+    // scrolled up out of view past the sticky bar.
+    const io = new IntersectionObserver(
+      ([e]) => (wheelInView = e.isIntersecting || e.boundingClientRect.top > 0),
+      { rootMargin: '-90px 0px 0px 0px' },
+    );
     io.observe(el);
     return () => io.disconnect();
   });
@@ -782,6 +786,10 @@
         .map(([a, b]) => `${pts[a].pt.join(',')} ${pts[b].pt.join(',')}`);
       const cx = up.reduce((s, p) => s + p.pt[0], 0) / up.length;
       const cy = up.reduce((s, p) => s + p.pt[1], 0) / up.length;
+      const ys = up.map((p) => p.pt[1]);
+      // Put the name clear of the figure (below it, or above it for low
+      // constellations) instead of on top of the stars/lines.
+      const labelY = cy < DC ? Math.max(...ys) + 8 : Math.min(...ys) - 5;
       return {
         key: con.name.en,
         name: con.name,
@@ -789,6 +797,7 @@
         segs,
         cx,
         cy,
+        labelY,
       };
     }).filter((c): c is NonNullable<typeof c> => c !== null);
   });
@@ -1333,7 +1342,7 @@
               <circle
                 cx={con.cx}
                 cy={con.cy}
-                r="16"
+                r="10"
                 class="dome-hit"
                 role="button"
                 tabindex="0"
@@ -1346,7 +1355,7 @@
               {#each con.stars as st (`${st[0]},${st[1]}`)}
                 <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
               {/each}
-              <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
+              <text x={con.cx} y={con.labelY} class="dome-con-name" text-anchor="middle"
                 >{lang === 'hi' ? con.name.hi : con.name.en}</text
               >
             </g>
@@ -1364,7 +1373,7 @@
               <circle
                 cx={domePolaris.pt[0]}
                 cy={domePolaris.pt[1]}
-                r="7"
+                r="4.5"
                 class="dome-hit"
                 role="button"
                 tabindex="0"
@@ -1380,7 +1389,7 @@
               <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="1.5" class="dome-polaris" />
               <text
                 x={domePolaris.pt[0]}
-                y={domePolaris.pt[1] - 6}
+                y={domePolaris.pt[1] < DC ? domePolaris.pt[1] + 9 : domePolaris.pt[1] - 6}
                 class="dome-con-name"
                 text-anchor="middle">{hi('ध्रुव', 'Polaris')}</text
               >
@@ -1400,7 +1409,7 @@
                   <circle
                     cx={b.pt[0]}
                     cy={b.pt[1]}
-                    r="8"
+                    r="6"
                     class="dome-hit"
                     role="button"
                     tabindex="0"
@@ -1408,8 +1417,11 @@
                     use:revealable={b.body}
                   />
                   <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
-                  <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
-                    >{grahaLabel(b.body)}</text
+                  <text
+                    x={b.pt[0]}
+                    y={b.pt[1] < DC ? b.pt[1] + 11 : b.pt[1] - 7.5}
+                    class="dome-label"
+                    text-anchor="middle">{grahaLabel(b.body)}</text
                   >
                 </g>
               {/if}
@@ -1423,7 +1435,7 @@
               <circle
                 cx={m.pt[0]}
                 cy={m.pt[1]}
-                r="11"
+                r="9"
                 class="dome-hit"
                 role="button"
                 tabindex="0"
@@ -1450,8 +1462,11 @@
                   />
                 {/each}
               </g>
-              <text x={m.pt[0]} y={m.pt[1] - 15} class="dome-label" text-anchor="middle"
-                >{grahaLabel('moon')}</text
+              <text
+                x={m.pt[0]}
+                y={m.pt[1] < DC ? m.pt[1] + 17 : m.pt[1] - 15}
+                class="dome-label"
+                text-anchor="middle">{grahaLabel('moon')}</text
               >
             </g>
           {/if}
@@ -1462,35 +1477,39 @@
               <circle
                 cx={sn.pt[0]}
                 cy={sn.pt[1]}
-                r="12"
+                r="9"
                 class="dome-hit"
                 role="button"
                 tabindex="0"
                 aria-label={grahaLabel('sun')}
                 use:revealable={'sun'}
               />
-              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="12" fill="url(#sun-glow)" />
+              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="11" fill="url(#sun-glow)" />
               {#each rayAngles as a (a)}
                 {@const c = Math.cos((a * Math.PI) / 180)}
                 {@const s = Math.sin((a * Math.PI) / 180)}
                 <line
-                  x1={sn.pt[0] + c * 7.5}
-                  y1={sn.pt[1] - s * 7.5}
-                  x2={sn.pt[0] + c * 11}
-                  y2={sn.pt[1] - s * 11}
+                  x1={sn.pt[0] + c * 8}
+                  y1={sn.pt[1] - s * 8}
+                  x2={sn.pt[0] + c * 13}
+                  y2={sn.pt[1] - s * 13}
                   class="sun-ray"
+                  stroke-width="0.7"
                 />
               {/each}
               <circle
                 cx={sn.pt[0]}
                 cy={sn.pt[1]}
-                r="7"
+                r="6.5"
                 fill="url(#sun-grad)"
                 stroke="#e07b00"
-                stroke-width="0.7"
+                stroke-width="0.6"
               />
-              <text x={sn.pt[0]} y={sn.pt[1] - 14} class="dome-label" text-anchor="middle"
-                >{grahaLabel('sun')}</text
+              <text
+                x={sn.pt[0]}
+                y={sn.pt[1] < DC ? sn.pt[1] + 18 : sn.pt[1] - 14}
+                class="dome-label"
+                text-anchor="middle">{grahaLabel('sun')}</text
               >
             </g>
           {/if}

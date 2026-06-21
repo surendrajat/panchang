@@ -166,14 +166,22 @@
   }
   @media (max-width: 460px) {
     /* the clock + the two angle chips share one line on phones; drop the clock's
-       min-width floor so it sizes to content (tabular + fixed format = no wobble).
-       The speed bar keeps its own full-size line below — it is NOT shrunk. */
+       min-width floor so it sizes to content (tabular + fixed format = no wobble) */
     .topline {
       gap: 0.1rem 0.35rem;
     }
     .clock {
       min-width: 0;
       font-size: 0.9rem;
+    }
+    /* the date is smaller on phones, so keep the speed bar a touch lighter than it */
+    .speeds {
+      gap: 1px;
+      margin-top: 0.35rem;
+    }
+    .speeds button {
+      padding: 0.26rem 0.56rem;
+      font-size: 0.74rem;
     }
   }
   .speeds button:hover {

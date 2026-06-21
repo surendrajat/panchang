@@ -6,3 +6,4 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - tinyexec@1.2.2
+  - svelte@5.56.4

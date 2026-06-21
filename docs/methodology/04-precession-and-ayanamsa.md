@@ -36,9 +36,10 @@ at about **50.3 arc-seconds per year** ≈ 1° every 72 years. This is **precess
 - **Sidereal** longitude is tied to the **stars**. The nakṣatras and rāśis are
   star patterns, so Hindu astronomy fixes the zodiac to them.
 
-Two thousand years ago the two zeros coincided (which is why the Western tropical
-sign "Aries" and the constellation Aries once matched). Since then the equinox
-has crept ~24° away — and that 24°-and-growing gap is the ayanāṁśa.
+Around **300 CE** the two zeros coincided (24° ÷ 50.3″/yr ≈ 1,700 years ago) —
+which is why the Western tropical sign "Aries" and the constellation Aries once
+matched. Since then the equinox has crept ~24° away, and that 24°-and-growing gap
+is the ayanāṁśa.
 
 ---
 

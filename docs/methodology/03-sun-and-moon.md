@@ -91,9 +91,10 @@ A feel for the speeds explains everything downstream:
 
 Two immediate payoffs:
 
-- **The Moon gains on the Sun at ~12.2°/day.** A tithi is 12° of that gain
-  ([Lesson 6](./06-tithi.md)), so a tithi averages ~24.8 h — and because both
-  speeds *vary* (elliptical orbits), it ranges 20–26 h. That variability is the
+- **The Moon gains on the Sun at ~12.2°/day on average.** A tithi is 12° of that
+  gain ([Lesson 6](./06-tithi.md)), so a tithi averages ~23.6 h (= the 29.53-day
+  synodic month ÷ 30) — and because both speeds *vary* (elliptical orbits), an
+  individual tithi ranges from about 20 to 26 h. That variability is the
   kṣaya/vṛddhi story.
 - **The Moon crosses one nakṣatra (13°20′) in about a day** — which is exactly
   why the 27 nakṣatras exist: they're "where the Moon sleeps each night"

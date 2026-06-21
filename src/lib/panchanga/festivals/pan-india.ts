@@ -569,13 +569,22 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'amavasya',
     displayName: 'Amavasya',
     displayNameHi: 'अमावस्या',
-    matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 30),
+    // Darsha Amavasya is observed on the day the Amavasya tithi (30) prevails at
+    // APARAHNA — the afternoon shraddha window — even if it is not present at
+    // sunrise (Nirnaya Sindhu / Dharma Sindhu; the rule traditional panchangs
+    // and Drik follow). The sunrise fallback recovers a kshaya Amavasya that
+    // pervades no day's aparahna, keeping it exactly one day per lunar month.
+    matches: (p) => vyapiniWithSunriseFallback(p, 'aparahna', 30, 'earlier'),
   },
   {
     key: 'purnima',
     displayName: 'Purnima',
     displayNameHi: 'पूर्णिमा',
-    matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 15),
+    // Purnima (15) follows the same aparahna-vyapini vrat rule as Amavasya: the
+    // major Purnima observances (Guru Purnima, Raksha Bandhan, Holika Dahan) are
+    // taken on the day the tithi prevails in the afternoon, which is what Drik's
+    // "Purnima dates" list uses. Sunrise fallback covers a kshaya Purnima.
+    matches: (p) => vyapiniWithSunriseFallback(p, 'aparahna', 15, 'earlier'),
   },
   {
     key: 'masik_shivaratri',

@@ -1310,7 +1310,7 @@
     <figure class="skydome">
       <svg
         class:labels-shown={showLabels}
-        viewBox="-14 -14 {DOME + 28} {DOME + 28}"
+        viewBox="12 12 {DOME - 24} {DOME - 24}"
         role="img"
         aria-label={hi(
           'आज आपके आकाश में सूर्य, चन्द्र व ग्रह',
@@ -1506,12 +1506,13 @@
         </g>
         <!-- horizon rim + cardinals, drawn on top of the clipped sky -->
         <circle cx={DC} cy={DC} r={DR} class="dome-horizon" />
-        <text x={DC} y={DC - DR - 5} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
-        <text x={DC} y={DC + DR + 13} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-        <text x={DC - DR - 8} y={DC + 4} class="dome-card" text-anchor="middle"
+        <text x={DC} y={DC - DR + 13} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
+        <text x={DC} y={DC + DR - 6} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
+        <text x={DC - DR + 13} y={DC + 3} class="dome-card" text-anchor="middle"
           >{hi('पू', 'E')}</text
         >
-        <text x={DC + DR + 8} y={DC + 4} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
+        <text x={DC + DR - 13} y={DC + 3} class="dome-card" text-anchor="middle"
+          >{hi('प', 'W')}</text
         >
       </svg>
       <figcaption>
@@ -2095,9 +2096,9 @@
     fill: rgba(255, 255, 255, 0.16);
   }
   .dome-card {
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 700;
-    fill: var(--ink-soft);
+    fill: rgba(255, 255, 255, 0.5);
   }
   .dome-path {
     fill: none;
@@ -2142,6 +2143,8 @@
     fill: transparent;
     pointer-events: all;
     cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
   .skydome figcaption {
     font-size: 12.5px;

@@ -336,7 +336,10 @@
         </div>
         <div class="val">
           <dt class="dt-body">
-            <span class="ic--moon"><CelestialMark body="moon" size={15} /></span>{hi('चन्द्र', 'Moon')}
+            <span class="ic--moon"><CelestialMark body="moon" size={15} /></span>{hi(
+              'चन्द्र',
+              'Moon',
+            )}
           </dt>
           <dd>{signName(moonRashi)} <span class="muted">{num(moonSid.toFixed(1))}°</span></dd>
         </div>

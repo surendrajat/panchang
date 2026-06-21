@@ -1,13 +1,12 @@
 <script lang="ts">
-  // EXPERIMENTAL — "The Pañcāṅga Notebook" (#/learn). A guided, notebook-style
-  // tour of how a Hindu calendar is built. One shared kernel (a moment in time)
-  // and two watched variables (λ☉, λ☽); each "cell" pairs a short why, a LIVE
-  // formula with the real numbers plugged in, and a focused animation. Every
-  // value comes from the real engine — scrub or play time and watch them follow.
+  // EXPERIMENTAL — "How the Pañcāṅga Works" (#/learn). A guided, interactive
+  // tour of how a Hindu calendar is built from just two angles (λ☉, λ☽). Each
+  // numbered step pairs a short why, a LIVE formula with the real numbers, and a
+  // focused animation; the shared <SkyClock> picks the moment every step reads
+  // from `now`. Every value comes from the real astronomy engine.
   //
-  // This is a richer, sequenced companion to routes/Sky.svelte (which shows the
-  // same machinery all at once). Heavy visuals are shared components under
-  // components/sky/ so both pages draw the identical wheel.
+  // A richer, sequenced companion to routes/Sky.svelte. Heavy visuals are shared
+  // components under components/sky/ so both pages draw the identical wheel.
 
   import { preferences } from '$lib/state/preferences.svelte';
   import {
@@ -37,6 +36,7 @@
   import CelestialMark from '../components/CelestialMark.svelte';
   import BodyIcon from '../components/BodyIcon.svelte';
   import ConceptIntro from '../components/sky/ConceptIntro.svelte';
+  import SkyClock from '../components/sky/SkyClock.svelte';
 
   // ── display helpers ─────────────────────────────────────────────────────────
   const lang = $derived(preferences.language);
@@ -77,34 +77,15 @@
   ];
 
   // ── Time kernel ─────────────────────────────────────────────────────────────
-  // simMs is the single source of truth (the "kernel state"); every cell reads
-  // the astronomy derived from it. `live` tracks the real clock; `speed` plays
-  // simulated time; the scrubber sets an absolute offset from the anchor.
-  const DAY = 86_400_000;
-  let anchorMs = $state(Date.now());
-  let simMs = $state(Date.now());
+  // The shared <SkyClock> owns the rAF time model; we bind to its `date` (the
+  // moment every cell reads) plus `speed`/`live` so per-cell "Run" buttons can
+  // drive it too. Every cell's astronomy is derived from `now`.
+  let now = $state(new Date());
   let speed = $state(0); // simulated seconds per real second
   let live = $state(true);
   let showGrahas = $state(false); // optional planets on the wheels
   let tropical = $state(false); // ayanāṁśa cell: flip the sign ring
 
-  const dayOffset = $derived((simMs - anchorMs) / DAY);
-  const SCRUB_MIN = -20;
-  const SCRUB_MAX = 50;
-  const scrubVal = $derived(Math.max(SCRUB_MIN, Math.min(SCRUB_MAX, dayOffset)));
-
-  function scrub(e: Event) {
-    const v = Number((e.target as HTMLInputElement).value);
-    live = false;
-    speed = 0;
-    simMs = anchorMs + v * DAY;
-  }
-  function goNow() {
-    live = true;
-    speed = 0;
-    anchorMs = Date.now();
-    simMs = anchorMs;
-  }
   function toggleSpeed(s: number) {
     if (!live && speed === s) speed = 0;
     else {
@@ -112,32 +93,9 @@
       speed = s;
     }
   }
-  const playing = $derived(!live && speed !== 0);
-
-  $effect(() => {
-    if (!live && speed === 0) return;
-    let raf = 0;
-    let last = performance.now();
-    let liveAcc = 0;
-    const tick = (t: number) => {
-      raf = requestAnimationFrame(tick);
-      const dt = t - last;
-      if (dt < 30) return; // ~30fps cap
-      last = t;
-      if (live) {
-        liveAcc += dt;
-        if (liveAcc >= 1000) {
-          simMs = Date.now();
-          liveAcc = 0;
-        }
-      } else simMs += speed * dt;
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  });
 
   // ── Derived astronomy (THE kernel outputs) ──────────────────────────────────
-  const simDate = $derived(new Date(simMs));
+  const simDate = $derived(now);
   const jd = $derived(dateToJulian(simDate));
   const ayan = $derived(ayanamsa(jd, preferences.ayanamsa));
   const sunTrop = $derived(sunLongitudeAtJD(jd));
@@ -178,22 +136,7 @@
       : [],
   );
 
-  // moment label (location-aware), rebuilt only when locale/tz/format change
-  const fmt = $derived(
-    new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: preferences.timeFormat === '12h',
-      numberingSystem: 'latn',
-      timeZone: preferences.location?.timezone,
-    }),
-  );
-  const momentLabel = $derived(num(fmt.format(simDate)));
-  // weekday index 0..6 for the vāra cell
+  // weekday index 0..6 (for the Vāra step + the summary)
   const varaIdx = $derived.by(() => {
     const wd = new Intl.DateTimeFormat('en-US', {
       weekday: 'short',
@@ -242,12 +185,6 @@
       ),
     };
   });
-
-  const SPEEDS = [
-    { s: 3600, hi: '1 घं/से', en: '1 hr/s' },
-    { s: 86400, hi: '1 दिन/से', en: '1 day/s' },
-    { s: 604800, hi: '1 सप्ताह/से', en: '1 wk/s' },
-  ];
 </script>
 
 <!-- a small inline "▷ Run / ⏸ pause" control that plays the shared kernel -->
@@ -260,12 +197,12 @@
 
 <section class="nb">
   <header class="nb__head">
-    <p class="nb__kicker">{hi('सजीव नोटबुक', 'A live notebook')}</p>
-    <h2>{hi('पंचांग नोटबुक', 'The Pañcāṅga Notebook')}</h2>
+    <p class="nb__kicker">{hi('सजीव मार्गदर्शिका', 'An interactive guide')}</p>
+    <h2>{hi('पंचांग कैसे बनता है', 'How the Pañcāṅga Works')}</h2>
     <p class="nb__lede">
       {hi(
-        'आकाश के सिर्फ़ दो कोणों से पूरा हिन्दू पंचांग कैसे बनता है — वास्तविक इंजन से, सजीव। समय खिसकाएँ या चलाएँ और नीचे हर मान को बदलते देखें।',
-        'How an entire Hindu calendar is built from just two angles in the sky — live, from the real engine. Scrub or play time below and watch every value follow.',
+        'आकाश के सिर्फ़ दो कोणों से पूरा हिन्दू पंचांग कैसे बनता है — वास्तविक खगोलीय गणना से, सजीव। नीचे समय बदलें या चलाएँ और हर मान को बदलते देखें।',
+        'How an entire Hindu calendar is built from just two angles in the sky — live, from a real astronomical engine. Move or play time below and watch every value follow.',
       )}
     </p>
   </header>
@@ -277,10 +214,10 @@
     {hi('अब इसे गणना में बदलें ↓', 'Now let’s turn this into arithmetic ↓')}
   </p>
 
-  <!-- ── The kernel: the moment + the two watched variables + controls ── -->
-  <div class="kernel">
-    <div class="kernel__top">
-      <div class="moment">{momentLabel}</div>
+  <!-- The moment everything below is computed for — pick it with the shared
+       time/speed widget; the two angles (λ☉, λ☽) are the only inputs. -->
+  <SkyClock bind:date={now} bind:speed bind:live>
+    {#snippet extra()}
       <div class="watch">
         <span class="watch__var watch__var--sun"
           ><CelestialMark body="sun" size={14} /> λ<sub>☉</sub> {d1(sunSid)}</span
@@ -289,33 +226,8 @@
           ><CelestialMark body="moon" size={14} /> λ<sub>☽</sub> {d1(moonSid)}</span
         >
       </div>
-    </div>
-    <div class="kernel__controls">
-      <div class="speeds" role="group" aria-label={hi('समय', 'Time')}>
-        <button type="button" class:on={live} onclick={goNow}>● {hi('अभी', 'Now')}</button>
-        {#each SPEEDS as sp (sp.s)}
-          <button type="button" class:on={!live && speed === sp.s} onclick={() => toggleSpeed(sp.s)}
-            >{hi(sp.hi, sp.en)}</button
-          >
-        {/each}
-      </div>
-      <input
-        class="scrub"
-        type="range"
-        min={SCRUB_MIN}
-        max={SCRUB_MAX}
-        step="0.04"
-        value={scrubVal}
-        oninput={scrub}
-        aria-label={hi('समय खिसकाएँ', 'Scrub time')}
-      />
-    </div>
-    <p class="kernel__hint">
-      {playing
-        ? hi('चल रहा है — किसी मान पर ध्यान दें', 'Running — watch a value below')
-        : hi('▶ दबाएँ या स्लाइडर खींचें', 'Press ▶ or drag the slider')}
-    </p>
-  </div>
+    {/snippet}
+  </SkyClock>
 
   <!-- ════ CELL 1 — Two numbers ════ -->
   <article class="cell">
@@ -325,8 +237,8 @@
       <h3>{hi('सब कुछ दो संख्याओं से', 'Two numbers run everything')}</h3>
       <p class="prose">
         {hi(
-          'पंचांग जटिल दिखता है, पर टिका है बस दो मापों पर: राशिचक्र पर सूर्य कहाँ है (λ☉) और चन्द्र कहाँ है (λ☽)। ऊपर एक क्षण चुनिए — वही इस नोटबुक का “कर्नेल” है — और ये दो कोण तय हो जाते हैं। नीचे का हर अंग बस इन्हीं का गणित है।',
-          'A pañcāṅga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ☉), and how far the Moon is (λ☽). Pick a moment above — that is this notebook’s “kernel” — and these two angles are fixed. Every limb below is just arithmetic on them.',
+          'पंचांग जटिल दिखता है, पर टिका है बस दो मापों पर: राशिचक्र पर सूर्य कहाँ है (λ☉) और चन्द्र कहाँ है (λ☽)। ऊपर कोई भी क्षण चुनिए — ये दो कोण तय हो जाते हैं, और नीचे का हर अंग बस इन्हीं का गणित है।',
+          'A pañcāṅga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ☉), and how far the Moon is (λ☽). Pick any moment above and these two angles are fixed — every limb below is just arithmetic on them.',
         )}
       </p>
       <div class="viz">
@@ -475,7 +387,7 @@
       <h3>{hi('दोनों का अंतर ही तिथि है', 'The gap between them is the tithi')}</h3>
       <p class="prose">
         {hi(
-          'चन्द्र तेज़ सुई है — सूर्य के ~1° के मुक़ाबले ~13°/दिन। यह सूर्य से जितना आगे है (अंतर), उसे 12° के 30 भागों में बाँटिए — वही तिथि है, चान्द्र दिन और पूरे कैलेंडर की सबसे महत्वपूर्ण संख्या। अमावस्या 0° पर, पूर्णिमा 180° पर।',
+          'चन्द्र तेज़ सुई है — सूर्य के ~1° के मुक़ाबले ~13°/दिन। यह सूर्य से जितना आगे है (अंतर), उसे 12° के 30 भागों में बाँटिए — वही तिथि है, चान्द्र दिन और पूरे पंचांग की सबसे महत्वपूर्ण संख्या। अमावस्या 0° पर, पूर्णिमा 180° पर।',
           'The Moon is the fast hand — ~13°/day against the Sun’s ~1°. The angle by which it leads the Sun (the gap), cut into 30 steps of 12°, is the tithi — the lunar day, and the single most important number in the calendar. New moon at 0°, full moon at 180°.',
         )}
       </p>
@@ -483,8 +395,8 @@
         <span class="code__tag">{hi('सूत्र', 'formula')}</span>
         <div class="code__body">
           <div>
-            <span class="muted">{hi('अंतर', 'gap')}</span> = λ<sub>☽</sub> − λ<sub>☉</sub> =
-            <span class="in">{d1(moonSid)}</span> − <span class="in">{d1(sunSid)}</span> =
+            <span class="muted">{hi('अंतर', 'gap')}</span> = (λ<sub>☽</sub> − λ<sub>☉</sub>) mod
+            360° =
             <span class="out">{d1(elong)}</span>
           </div>
           <div>
@@ -622,7 +534,7 @@
       <h3>{hi('दो राशिचक्र, धीरे-धीरे अलग होते', 'Two zodiacs, drifting apart')}</h3>
       <p class="prose">
         {hi(
-          'नक्षत्र को तारों से नापा देशांतर चाहिए (निरयन)। पर विषुव — सायन शून्य — हर साल ~50″ खिसकता है (अयन-चलन), सो तारा-राशिचक्र और ऋतु-राशिचक्र ~24° दूर हो चुके हैं। यही अंतर अयनांश है; निरयन के लिए इसे घटाइए।',
+          'नक्षत्र के लिए देशांतर तारों से नापना होता है (निरयन)। पर विषुव — सायन शून्य-बिंदु — हर साल ~50″ खिसकता है (अयन-चलन), सो तारा-राशिचक्र और ऋतु-राशिचक्र ~24° दूर हो चुके हैं। यही अंतर अयनांश है; निरयन के लिए इसे घटाइए।',
           'Nakṣatra needs longitude measured from the stars (nirayana). But the equinox — the tropical zero — slips ~50″ a year (precession), so the star-zodiac and the season-zodiac have drifted ~24° apart. That gap is the ayanāṁśa; subtract it to go sidereal.',
         )}
       </p>
@@ -760,15 +672,53 @@
         )}
       </p>
       <SkyPanel date={simDate} />
-      <p class="alsoline">
-        {hi('और (कोण-रहित अंग):', 'Plus (the non-angle limbs):')}
-        <b>{hi('वार', 'Vāra')}</b>
-        {varaIdx >= 0 ? tn(VARA[varaIdx].dev, VARA[varaIdx].tr, VARA[varaIdx].en) : '—'} ·
-        <b>{hi('करण', 'Karaṇa')}</b>
-        {karanaNameByPosition(karanaPos, lang)} ·
-        <b>{hi('मास', 'Māsa')}</b>
-        {hi(SIGN_MONTH[sunRashi].mon.hi, SIGN_MONTH[sunRashi].mon.en)}
+      <p class="caption">
+        {hi(
+          '⚙ से ग्रह जोड़ें या राशिचक्र बदलें · किसी पिंड पर टैप करके जानें · ऊपर समय चलाकर सब बदलते देखें।',
+          'Use ⚙ to add planets or flip the zodiac · tap a body to learn · play time above to watch it all move.',
+        )}
       </p>
+    </div>
+  </article>
+
+  <!-- ════ CELL 10 — At a glance: the simplified pañcāṅga ════ -->
+  <article class="cell cell--sum">
+    <div class="cell__no">[10]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('एक नज़र में', 'At a glance')}</p>
+      <h3>{hi('इस क्षण का पंचांग', 'This moment’s pañcāṅga')}</h3>
+      <p class="prose">
+        {hi(
+          'और यही सब एक पंक्ति में — ठीक वैसा जैसा छपा पंचांग छापता है, सब इसी क्षण के λ☉ और λ☽ से निकला।',
+          'And the same thing in one line — exactly what a printed pañcāṅga prints, all of it from λ☉ and λ☽ at this moment.',
+        )}
+      </p>
+      <dl class="summary">
+        <div>
+          <dt>{hi('तिथि', 'Tithi')}</dt>
+          <dd>{paksha} {tithiNameByIndex(tithiNum, lang)}</dd>
+        </div>
+        <div>
+          <dt>{hi('वार', 'Vāra')}</dt>
+          <dd>{varaIdx >= 0 ? tn(VARA[varaIdx].dev, VARA[varaIdx].tr, VARA[varaIdx].en) : '—'}</dd>
+        </div>
+        <div>
+          <dt>{hi('नक्षत्र', 'Nakṣatra')}</dt>
+          <dd>{nakshatraNameByIndex(nakNum, lang)}</dd>
+        </div>
+        <div>
+          <dt>{hi('योग', 'Yoga')}</dt>
+          <dd>{yogaNameByIndex(yogaNum, lang)}</dd>
+        </div>
+        <div>
+          <dt>{hi('करण', 'Karaṇa')}</dt>
+          <dd>{karanaNameByPosition(karanaPos, lang)}</dd>
+        </div>
+        <div>
+          <dt>{hi('मास', 'Māsa')}</dt>
+          <dd>{hi(SIGN_MONTH[sunRashi].mon.hi, SIGN_MONTH[sunRashi].mon.en)}</dd>
+        </div>
+      </dl>
       <p class="seedoc">
         {hi('इसके पीछे का पूरा गणित:', 'The full math behind this:')}
         <a
@@ -832,49 +782,24 @@
   }
 
   /* ── kernel (sticky) ── */
-  .kernel {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    margin-bottom: 1.5rem;
-    padding: 0.55rem 0.7rem 0.5rem;
-    background: color-mix(in srgb, var(--paper) 94%, transparent);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(6px);
-  }
-  @media (hover: none), (max-width: 600px) {
-    .kernel {
-      backdrop-filter: none;
-      background: var(--paper);
-    }
-  }
-  .kernel__top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.4rem 0.8rem;
-  }
-  .moment {
-    font-size: 1rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink);
-  }
+  /* the two watched angles (λ☉, λ☽), shown in the time widget's extra slot;
+     fixed min-width + tabular figures so the values never wobble while playing */
   .watch {
     display: flex;
-    gap: 0.7rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
     font-variant-numeric: tabular-nums;
   }
   .watch__var {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+    gap: 0.3rem;
+    min-width: 7.5rem;
     font-size: 0.92rem;
     font-weight: 600;
-    padding: 0.1rem 0.5rem;
+    padding: 0.12rem 0.6rem;
     border-radius: var(--radius-pill);
     background: var(--paper-2);
   }
@@ -886,56 +811,6 @@
   }
   .watch__var--moon {
     color: #3f6da0;
-  }
-  .kernel__controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 0.8rem;
-    margin-top: 0.5rem;
-  }
-  .speeds {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    padding: 3px;
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-pill);
-  }
-  .speeds button {
-    padding: 0.28rem 0.62rem;
-    border: none;
-    border-radius: var(--radius-pill);
-    background: none;
-    color: var(--ink-soft);
-    font: inherit;
-    font-size: 0.78rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition:
-      background 0.15s,
-      color 0.15s;
-  }
-  .speeds button:hover {
-    color: var(--ink);
-  }
-  .speeds button.on {
-    background: var(--red);
-    color: var(--paper);
-    font-weight: 600;
-  }
-  .scrub {
-    flex: 1 1 140px;
-    min-width: 120px;
-    accent-color: var(--red);
-    cursor: pointer;
-  }
-  .kernel__hint {
-    margin: 0.4rem 0 0;
-    font-size: 0.7rem;
-    color: var(--ink-faint);
-    font-style: italic;
   }
 
   /* ── cells ── */
@@ -1273,16 +1148,33 @@
     line-height: 1.1;
   }
 
-  /* summary (cell 9) */
-  .alsoline {
-    margin: 0.9rem 0 0;
-    font-size: 0.9rem;
-    color: var(--ink-soft);
-    line-height: 1.6;
+  /* the simplified "at a glance" summary (cell 10) */
+  .cell--sum .cell__body {
+    background: var(--paper-2);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1rem;
   }
-  .alsoline b {
-    color: var(--ink);
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.5rem 0.9rem;
+    margin: 0.8rem 0 0;
+  }
+  .summary div {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0.35rem;
+  }
+  .summary dt {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+  .summary dd {
+    margin: 0.1rem 0 0;
+    font-size: 1.02rem;
     font-weight: 600;
+    color: var(--ink);
   }
   .seedoc {
     margin: 0.9rem 0 0;

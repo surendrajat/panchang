@@ -862,6 +862,7 @@
     <svg
       bind:this={wheelEl}
       class="wheel"
+      class:labels-shown={showLabels}
       viewBox="0 0 {SIZE} {SIZE}"
       role="img"
       aria-label={hi('आकाश चक्र', 'Ecliptic wheel')}
@@ -983,9 +984,7 @@
           {#if sel}<circle cx={gx} cy={gy} r="13" class="sel-glow" />{/if}
           <circle cx={gx} cy={gy} r="12" class="hit" />
           <BodyIcon kind={g.key} cx={gx} cy={gy} r={g.key === 'rahu' || g.key === 'ketu' ? 6 : 9} />
-          {#if showLabels}<text x={gx} y={gy - 14} class="body-name" text-anchor="middle"
-              >{grahaLabel(g.key)}</text
-            >{/if}
+          <text x={gx} y={gy - 14} class="body-name" text-anchor="middle">{grahaLabel(g.key)}</text>
         </g>
       {/each}
 
@@ -1014,9 +1013,7 @@
           class="earth-land"
         />
         <ellipse cx={C - 4} cy={C - 5} rx="4" ry="2.6" class="earth-shine" />
-        {#if showLabels}<text x={C} y={C - 19} class="body-name" text-anchor="middle"
-            >{earthLabel}</text
-          >{/if}
+        <text x={C} y={C - 19} class="body-name" text-anchor="middle">{earthLabel}</text>
       </g>
 
       <!-- Moon: realistic cratered disc (the PHASE is shown in the side view) -->
@@ -1045,12 +1042,9 @@
         {#each craters as [dx, dy, r] (dx + '-' + dy)}
           <circle cx={moonPt[0] + dx} cy={moonPt[1] + dy} {r} class="crater" />
         {/each}
-        {#if showLabels}<text
-            x={moonPt[0]}
-            y={moonPt[1] - 16}
-            class="body-name"
-            text-anchor="middle">{grahaLabel('moon')}</text
-          >{/if}
+        <text x={moonPt[0]} y={moonPt[1] - 16} class="body-name" text-anchor="middle"
+          >{grahaLabel('moon')}</text
+        >
       </g>
 
       <!-- Sun: glow + straight rays + gradient disc -->
@@ -1088,9 +1082,9 @@
           stroke="#e07b00"
           stroke-width="0.75"
         />
-        {#if showLabels}<text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
-            >{grahaLabel('sun')}</text
-          >{/if}
+        <text x={sunPt[0]} y={sunPt[1] - 17} class="body-name" text-anchor="middle"
+          >{grahaLabel('sun')}</text
+        >
       </g>
 
       <!-- upcoming events, marked where they land on the zodiac (hover for name) -->
@@ -1215,9 +1209,13 @@
   <div class="what-we-see">
     <figure class="orbital">
       <svg
+        class="orb-svg"
+        class:labels-shown={showLabels}
+        class:revealed={revealed === 'orbital'}
         viewBox="0 0 {OW} {OH}"
         role="img"
         aria-label={hi('सूर्य–पृथ्वी–चन्द्र', 'Sun, Earth and Moon')}
+        use:revealable={'orbital'}
       >
         <!-- Parallel sunlight: the Sun is effectively at infinity, so its rays
            reach the Earth–Moon system parallel (that's why the Moon's sunward
@@ -1252,11 +1250,9 @@
           stroke="#e07b00"
           stroke-width="0.75"
         />
-        {#if showLabels}
-          <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle"
-            >{grahaLabel('sun')}</text
-          >
-        {/if}
+        <text x={SUNX} y={EARTH.y + 40} class="orb-label" text-anchor="middle"
+          >{grahaLabel('sun')}</text
+        >
         <circle cx={EARTH.x} cy={EARTH.y} r={ORB} class="orbit" />
         <line x1={EARTH.x} y1={EARTH.y} x2={moonOrb.x} y2={moonOrb.y} class="sight" />
         <!-- Earth: same icon as the wheel -->
@@ -1274,19 +1270,14 @@
           class="earth-land"
         />
         <ellipse cx={EARTH.x - 3} cy={EARTH.y - 4} rx="3.5" ry="2.3" class="earth-shine" />
-        {#if showLabels}
-          <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle"
-            >{earthLabel}</text
-          >
-        {/if}
+        <text x={EARTH.x} y={EARTH.y + 28} class="orb-label" text-anchor="middle">{earthLabel}</text
+        >
         <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-dark" />
         <path d={litHalf(moonOrb.x, moonOrb.y, 9)} class="orb-moon-lit" />
         <circle cx={moonOrb.x} cy={moonOrb.y} r="9" class="orb-moon-ring" />
-        {#if showLabels}
-          <text x={moonOrb.x} y={moonOrb.y + 21} class="orb-label" text-anchor="middle"
-            >{grahaLabel('moon')}</text
-          >
-        {/if}
+        <text x={moonOrb.x} y={moonOrb.y + 21} class="orb-label" text-anchor="middle"
+          >{grahaLabel('moon')}</text
+        >
       </svg>
       <figcaption>
         {hi(
@@ -1771,8 +1762,14 @@
     stroke-width: 2.5px;
     stroke-linejoin: round;
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0;
+    transition: opacity 0.14s ease;
   }
+  /* show all when the Labels toggle is on */
+  .wheel.labels-shown .body-name {
+    opacity: 0.92;
+  }
+  /* reveal (and highlight) the one being hovered/focused */
   .body:hover .body-name,
   .body:focus-visible .body-name {
     opacity: 1;
@@ -1889,6 +1886,17 @@
   .orb-label {
     font-size: 9.5px;
     fill: var(--ink-faint, #999);
+    opacity: 0;
+    transition: opacity 0.14s ease;
+  }
+  /* reveal on hover or tap (the whole little diagram), or with the Labels toggle */
+  .orb-svg {
+    cursor: pointer;
+  }
+  .orb-svg:hover .orb-label,
+  .orb-svg.revealed .orb-label,
+  .orb-svg.labels-shown .orb-label {
+    opacity: 1;
   }
 
   .vals {

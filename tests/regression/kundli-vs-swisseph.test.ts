@@ -82,3 +82,26 @@ describe('Vimshottari dasha — derived correctly from the verified Moon', () =>
     });
   }
 });
+
+// True (osculating) Rahu vs Swiss Ephemeris SE_TRUE_NODE. The true node is
+// the instantaneous orbital node (what Drik's kundli + most modern Vedic
+// software use); it differs from the mean node by up to ±1.5°. Our osculating
+// node (from the Moon's state vector) matches Swiss Ephemeris to ≤1.2′.
+describe('true Rahu (osculating node) vs Swiss Ephemeris SE_TRUE_NODE', () => {
+  const SWE_TRUE: [string, number][] = [
+    ['1925-03-10T08:15:00Z', 110.5885],
+    ['1947-08-14T18:30:00Z', 35.7426],
+    ['1965-11-20T14:30:00Z', 41.2988],
+    ['1980-01-01T12:00:00Z', 126.8094],
+    ['1990-08-15T05:00:00Z', 283.5023],
+    ['2000-01-01T00:00:00Z', 100.1256],
+    ['2020-12-21T18:00:00Z', 55.7231],
+    ['2040-06-15T06:00:00Z', 39.1757],
+  ];
+  for (const [iso, trueRahu] of SWE_TRUE) {
+    it(`${iso} within 1.5′`, () => {
+      const mine = grahaSiderealLongitude('rahu', dateToJulian(new Date(iso)), 'lahiri', 'true');
+      expect(sep(mine, trueRahu) * 60).toBeLessThan(1.5);
+    });
+  }
+});

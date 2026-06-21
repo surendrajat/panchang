@@ -186,6 +186,8 @@ export const en = {
     'Changes the computed astronomy. Defaults match published Indian panchangas.',
   'settings.ayanamsa': 'Ayanamsa',
   'settings.monthSystem': 'Month system',
+  'settings.node': 'Rahu / Ketu',
+  'settings.nodeHint': 'kundli only',
   'settings.display': 'Display',
   'settings.numerals': 'Numerals',
   // "Hindu" because both 1,2,3 and १,२,३ are Hindu-origin numerals;
@@ -230,6 +232,8 @@ export const en = {
   // ── month system options
   'monthSystem.amanta': 'Amanta (new-moon to new-moon — South India)',
   'monthSystem.purnimanta': 'Purnimanta (full-moon to full-moon — North India)',
+  'node.mean': 'Mean node (smoothed)',
+  'node.true': 'True node (osculating)',
 
   // ── footer
   'footer.method': 'Drik Ganita · Lahiri ayanamsa · Geocentric · Sunrise-anchored',

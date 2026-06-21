@@ -17,6 +17,11 @@
     { value: 'amanta', key: 'monthSystem.amanta' },
     { value: 'purnimanta', key: 'monthSystem.purnimanta' },
   ];
+
+  const nodeOptions: { value: 'mean' | 'true'; key: TranslationKey }[] = [
+    { value: 'mean', key: 'node.mean' },
+    { value: 'true', key: 'node.true' },
+  ];
 </script>
 
 <div class="stack">
@@ -47,6 +52,22 @@
         })}
     >
       {#each monthOptions as o (o.value)}
+        <option value={o.value}>{tr(o.key)}</option>
+      {/each}
+    </select>
+  </label>
+
+  <label class="label">
+    <span class="lab"
+      >{tr('settings.node')} <span class="hint">{tr('settings.nodeHint')}</span></span
+    >
+    <select
+      class="select"
+      value={preferences.nodeType}
+      onchange={(e) =>
+        updatePreferences({ nodeType: (e.currentTarget as HTMLSelectElement).value as 'mean' | 'true' })}
+    >
+      {#each nodeOptions as o (o.value)}
         <option value={o.value}>{tr(o.key)}</option>
       {/each}
     </select>

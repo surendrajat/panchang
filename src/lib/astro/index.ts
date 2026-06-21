@@ -22,6 +22,7 @@ export {
   moonIlluminationAtJD,
   bodyLongitudeAtJD,
   gastHoursAtJD,
+  trueNodeLongitudeAtJD,
   Body,
 } from './ephemeris';
 

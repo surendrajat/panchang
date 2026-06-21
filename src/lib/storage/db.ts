@@ -20,6 +20,8 @@ export interface Preferences {
   location: Location | null;
   ayanamsa: AyanamsaSystem;
   monthSystem: MonthSystem;
+  // Lunar-node convention for kundli Rahu/Ketu: 'mean' or 'true'.
+  nodeType: 'mean' | 'true';
   topocentric: boolean;
   theme: 'auto' | 'light' | 'dark';
   weekStart: 'sunday' | 'monday';
@@ -100,6 +102,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   // most published Hindi/Sanskrit panchangas (and Drik Panchang's
   // default for non-southern locations).
   monthSystem: 'purnimanta',
+  nodeType: 'mean',
   topocentric: false,
   theme: 'auto',
   // Sunday-first matches the canonical Vedic week — Ravi/Sunday is

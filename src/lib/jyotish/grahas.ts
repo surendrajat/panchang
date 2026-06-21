@@ -11,6 +11,7 @@ import {
   bodyLongitudeAtJD,
   sunLongitudeAtJD,
   moonLongitudeAtJD,
+  trueNodeLongitudeAtJD,
   ayanamsa,
   dateToJulian,
   JD_J2000,
@@ -55,18 +56,19 @@ function meanNodeTropical(jd: number): number {
 function grahaTropicalLongitude(key: GrahaKey, jd: number, nodeType: NodeType): number {
   if (key === 'sun') return sunLongitudeAtJD(jd);
   if (key === 'moon') return moonLongitudeAtJD(jd);
-  if (key === 'rahu') return meanNode(jd, nodeType);
-  if (key === 'ketu') return norm360(meanNode(jd, nodeType) + 180);
+  if (key === 'rahu') return nodeTropical(jd, nodeType);
+  if (key === 'ketu') return norm360(nodeTropical(jd, nodeType) + 180);
   const body = PLANET_BODY[key];
   if (!body) throw new Error(`Unknown graha: ${key}`);
   return bodyLongitudeAtJD(body, jd);
 }
 
-// Node longitude by convention. Only 'mean' is implemented in Phase 1;
-// 'true' falls back to mean with the same signature so the UI toggle and
-// engine are already plumbed for the Phase-2 upgrade.
-function meanNode(jd: number, _nodeType: NodeType): number {
-  return meanNodeTropical(jd);
+// Tropical longitude of Rahu by convention: 'mean' (smoothed average node)
+// or 'true' (the instantaneous osculating node — what Drik's kundli and
+// most modern Vedic software use). The true node differs from the mean by
+// up to ±1.5°.
+function nodeTropical(jd: number, nodeType: NodeType): number {
+  return nodeType === 'true' ? trueNodeLongitudeAtJD(jd) : meanNodeTropical(jd);
 }
 
 export function grahaSiderealLongitude(

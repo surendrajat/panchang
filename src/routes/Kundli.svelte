@@ -111,7 +111,7 @@
       const instant = birthInstant(date, t, place.timezone);
       chart = computeBirthChart(instant, place, timeKnown, {
         ayanamsa: preferences.ayanamsa,
-        nodeType: 'mean',
+        nodeType: preferences.nodeType,
       });
       saved = false;
       editing = false;

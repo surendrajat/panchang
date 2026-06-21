@@ -85,7 +85,7 @@
     const instant = birthInstant(p.date, p.time, p.place!.timezone);
     const chart = computeBirthChart(instant, p.place!, true, {
       ayanamsa: preferences.ayanamsa,
-      nodeType: 'mean',
+      nodeType: preferences.nodeType,
     });
     const moon = chart.grahas.find((g) => g.key === 'moon')!;
     return { nakshatra: moon.nakshatra, rashi: moon.rashi, rashiDeg: moon.degInRashi };

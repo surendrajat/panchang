@@ -197,7 +197,8 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
   {
     key: 'akshaya_tritiya',
     auditTier: 'tiebreaker',
-    ruleNote: 'Rule note: Drik uses Madhyahna-vyapini Tritiya; pinned years currently match.',
+    ruleNote:
+      'Rule: PURVAHNA-vyapini Tritiya (Nirnaya Sindhu "पूर्वाह्णव्यापिनी ग्राह्या"), forenoon span-overlap with the later-day-wins-iff-its-forenoon->6-ghatika tie-break — NOT madhyahna, NOT sunrise. Now implemented; 2026 corrected 04-20 (old sunrise) -> 04-19 (authoritative/Drik).',
     expected: {
       2015: '2015-04-21',
       2016: '2016-05-09',
@@ -207,7 +208,7 @@ export const FESTIVAL_FIXTURES: FestivalFixture[] = [
       2022: '2022-05-03',
       2024: '2024-05-10',
       2025: '2025-04-30',
-      2026: '2026-04-20',
+      2026: '2026-04-19', // purvahna/authoritative (was the sunrise approximation 04-20)
     },
   },
   {

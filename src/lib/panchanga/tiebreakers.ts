@@ -107,6 +107,48 @@ export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: 
     : tithiIndex >= startTithi || tithiIndex <= endTithi;
 }
 
+// Coverage, in ms, of `tithiIndex` within the PURVAHNA (forenoon = sunrise→midday)
+// of a civil day. Sampled at 5-min steps (precision << the 6-ghatika threshold).
+function tithiForenoonCoverageMs(loc: Location, date: Date, tithiIndex: number): number {
+  const ev = sunRiseSet(loc, date);
+  if (!ev.rise || !ev.set) return 0;
+  const sunrise = ev.rise.getTime();
+  const midday = sunrise + (ev.set.getTime() - sunrise) / 2;
+  const STEP = 5 * 60_000;
+  let covered = 0;
+  for (let t = sunrise; t < midday; t += STEP) {
+    if (tithiAtJD(dateToJulian(new Date(t))).index === tithiIndex) covered += STEP;
+  }
+  return covered;
+}
+
+const SIX_GHATIKA_MS = 6 * 24 * 60_000; // 6 ghatika = 2h24m
+
+// Purvahna-vyapini selection (Nirnaya Sindhu / Dharmasindhu rule for Akshaya
+// Tritiya): the festival is the day on which the tithi PERVADES the forenoon
+// (overlaps [sunrise, midday]) — a span-overlap, NOT a midday-instant test (an
+// instant test mis-picks years like 2027 where the tithi only touches the early
+// forenoon). When two consecutive days both carry the tithi in their forenoon, the
+// LATER day is taken only if it pervades the forenoon for more than 6 ghatikas
+// (~2h24m); otherwise the EARLIER day ("दिनद्वयेऽपि तद्व्याप्तौ परैव" with Dharmasindhu's
+// 6-ghatika quantifier). 2026: later day (Apr 20) has <6gh → earlier Apr 19 wins;
+// 2027: later day (May 9) has >6gh → May 9 wins.
+export function purvahnaVyapiniMatches(loc: Location, date: Date, tithiIndex: number): boolean {
+  const today = tithiForenoonCoverageMs(loc, date, tithiIndex);
+  if (today <= 0) return false;
+  const yesterday = tithiForenoonCoverageMs(loc, new Date(date.getTime() - MS_PER_DAY), tithiIndex);
+  if (yesterday > 0) {
+    // today is the LATER of two qualifying days → wins iff it pervades > 6 ghatika
+    return today > SIX_GHATIKA_MS;
+  }
+  const tomorrow = tithiForenoonCoverageMs(loc, new Date(date.getTime() + MS_PER_DAY), tithiIndex);
+  if (tomorrow > 0) {
+    // today is the EARLIER day → wins unless the LATER day pervades > 6 ghatika
+    return tomorrow <= SIX_GHATIKA_MS;
+  }
+  return true; // only today carries the tithi in its forenoon
+}
+
 // Smarta Janmashtami rule (app default):
 //   1. Ashtami (Krishna 8 = tithi index 23) must prevail during the
 //      Nishita Kaal of the night following the candidate day.
@@ -624,8 +666,29 @@ export function kartikaPratipadaBridgeDay(p: Panchanga): boolean {
   return vyapiniMatchesForDate(p.location, p.date, 'madhyahna', 1, 'later');
 }
 
+// Civil midnight (location tz) of the day on which the Sun's transit into
+// `targetSign` is OBSERVED, for the transit nearest after `refDate - 2 days`.
+// Drik "Punya Kaal" day-assignment: if the transit happens after sunset, the
+// observance is the next civil day. Date+location based so a neighbouring day's
+// rule can be evaluated (e.g. Lohri = the eve of Makara Sankranti). Returns null
+// if sunset can't be computed.
+export function sankrantiObservanceMidnight(
+  targetSign: number,
+  loc: Location,
+  ayanamsa: AyanamsaSystem,
+  refDate: Date,
+): Date | null {
+  const transitJD = findSankrantiTransitJD(dateToJulian(refDate) - 2, targetSign * 30, ayanamsa);
+  const transitDate = julianToDate(transitJD);
+  const transitCivilMidnight = civilMidnightInZone(transitDate, loc.timezone);
+  const evToday = sunRiseSet(loc, transitCivilMidnight);
+  if (!evToday.set) return null;
+  return transitDate.getTime() < evToday.set.getTime()
+    ? transitCivilMidnight
+    : new Date(transitCivilMidnight.getTime() + MS_PER_DAY);
+}
+
 export function sankrantiInto(targetSign: number): (p: Panchanga) => boolean {
-  const targetDeg = targetSign * 30;
   return (p) => {
     if (!p.sunrise || !p.sunset) return false;
     // Pre-filter: the transit happens once per year. If today's solar
@@ -633,21 +696,7 @@ export function sankrantiInto(targetSign: number): (p: Panchanga) => boolean {
     if (p.solar.signAtDayStart !== targetSign && p.solar.signAtDayEnd !== targetSign) {
       return false;
     }
-    const transitJD = findSankrantiTransitJD(
-      dateToJulian(p.date) - 2,
-      targetDeg,
-      p.options.ayanamsa,
-    );
-    const transitDate = julianToDate(transitJD);
-    // Civil midnight of the transit's civil day in location tz.
-    const transitCivilMidnight = civilMidnightInZone(transitDate, p.location.timezone);
-    // Sunset of the transit civil day.
-    const evToday = sunRiseSet(p.location, transitCivilMidnight);
-    if (!evToday.set) return false;
-    const observanceMidnight =
-      transitDate.getTime() < evToday.set.getTime()
-        ? transitCivilMidnight
-        : new Date(transitCivilMidnight.getTime() + MS_PER_DAY);
-    return observanceMidnight.getTime() === p.date.getTime();
+    const obs = sankrantiObservanceMidnight(targetSign, p.location, p.options.ayanamsa, p.date);
+    return obs !== null && obs.getTime() === p.date.getTime();
   };
 }

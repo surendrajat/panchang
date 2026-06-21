@@ -17,7 +17,7 @@
 
 import type { Panchanga } from '../types';
 import type { FestivalRule } from './rules';
-import { civilYMDInZone, dateToJulian, MS_PER_DAY } from '$lib/astro';
+import { dateToJulian, MS_PER_DAY } from '$lib/astro';
 import { masaContext } from '../masa';
 import {
   vyapiniMatches,
@@ -27,6 +27,8 @@ import {
   vyapiniWithNakshatraPreference,
   smartaJanmashtamiMatches,
   sankrantiInto,
+  sankrantiObservanceMidnight,
+  purvahnaVyapiniMatches,
   kartikaPratipadaBridgeDay,
   sunriseTithiObservedForDate,
   sunriseTithiIndex,
@@ -187,17 +189,18 @@ function inShukla(tithiNumber: number, amantaMasa: string) {
 // shifts to day N+1. See `sankrantiInto` in tiebreakers.ts.
 const isSankrantiInto = sankrantiInto;
 
-// Lohri is the day before Makara Sankranti. Detect it the same way
-// but one sign earlier: today both starts and ends in Dhanu (8), AND
-// tomorrow's sankranti would be into Makara. The latter can't be
-// derived from `p` alone without looking ahead, so we fall back to a
-// gated Gregorian heuristic: Dhanu (sun.sign === 8) AND Jan 13 in the
-// location's tz. This is correct for every year 1900–2100 since the
-// Gregorian/sidereal drift only changes Lohri's calendar date by ±1.
+// Lohri = the eve of Makara Sankranti (the last day of solar Paush, Sun in Dhanu),
+// the bonfire night before the Sun's Makara transit. AUTHORITATIVE rule = Makara
+// Sankranti − 1, NOT a fixed Gregorian date: the festival drifts, so a hard Jan-13
+// is wrong whenever Makara Sankranti lands on Jan 15 (leap years) — Lohri
+// 2024/2027/2028 = Jan 14, not Jan 13. We compute it by asking whether TOMORROW is
+// the Makara Sankranti observance day. Pre-filter: Sun in Dhanu (8) at the start of
+// today. Verified vs Drik/Wikipedia (2024 is a genuine drik(Jan13)/Wiki(Jan14)
+// source split; we take the principled Sankranti−1 = Jan 14).
 function isLohri(p: Panchanga): boolean {
-  if (p.solar.signAtDayEnd !== 8) return false; // must still be in Dhanu at end of day
-  const { month, day } = civilYMDInZone(p.date, p.location.timezone);
-  return month === 1 && day === 13;
+  if (p.solar.signAtDayStart !== 8) return false;
+  const makaraObs = sankrantiObservanceMidnight(9, p.location, p.options.ayanamsa, p.date);
+  return makaraObs !== null && makaraObs.getTime() === p.date.getTime() + MS_PER_DAY;
 }
 
 // The monthly recurrences — these fire ~12-24× a year, so the annual Festivals
@@ -353,16 +356,18 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'akshaya_tritiya',
     displayName: 'Akshaya Tritiya',
     displayNameHi: 'अक्षय तृतीया',
-    // Akshaya Tritiya — Vaishakha Shukla Tritiya. KNOWN LIMITATION: the true rule
-    // is "Tritiya overlaps the forenoon [sunrise..midday] puja window" — a tithi-
-    // INTERVAL-vs-period overlap that this instant-vyapini engine can't express,
-    // and the day-pick when both days qualify depends on which holds more of the
-    // forenoon (Drik prose not published). No single window matches every year:
-    // sunrise is off in 2026 (ours Apr 20 vs Drik Apr 19), a midday instant is off
-    // in 2027 (May 8 vs Drik May 9). Kept on the udaya/sunrise default; the rare
-    // boundary-year (~once/decade) ±1 divergence is documented, not silently
-    // hidden. Matches Drik New Delhi for 2024, 2025, 2027, 2028; off by 1 in 2026.
-    matches: inShukla(3, 'Vaishakha'),
+    // Akshaya Tritiya — Vaishakha Shukla Tritiya, PURVAHNA-vyapini. Nirnaya Sindhu:
+    // "पूर्वाह्णव्यापिनी ग्राह्या। दिनद्वयेऽपि तद्व्याप्तौ परैव" — take the day Tritiya pervades the
+    // forenoon; if both days do, the later (with Dharmasindhu's 6-ghatika quantifier).
+    // Sunrise was WRONG in 2026: Tritiya begins 10:49am Apr 19, so it is present at
+    // sunrise on Apr 20 but pervades only Apr 19's forenoon → authoritative/Drik =
+    // Apr 19; our old udaya rule gave Apr 20. A midday-INSTANT test mis-picks 2027,
+    // so this is a forenoon SPAN-overlap (see purvahnaVyapiniMatches). Verified vs
+    // Drik New Delhi 2024-2028 (2026 = Apr 19).
+    matches: (p) =>
+      p.masa.amantaName === 'Vaishakha' &&
+      !p.masa.isAdhika &&
+      purvahnaVyapiniMatches(p.location, p.date, 3),
   },
 
   // Buddha Purnima — Vaishakha Shukla 15 (Purnima) at sunrise/udaya. Verified

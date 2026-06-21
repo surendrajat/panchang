@@ -111,6 +111,27 @@
   let showLabels = $state(false);
   let tropical = $state(false);
   let showAngles = $state(false);
+  // Hover (desktop) or tap (phones, where there's no hover) a body to reveal its
+  // label even when labels are off — one body at a time. Action attaches the
+  // tap/keyboard toggle so the template stays free of inline handlers.
+  let revealed = $state<string | null>(null);
+  function revealable(node: SVGElement, key: string) {
+    const toggle = () => (revealed = revealed === key ? null : key);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    };
+    node.addEventListener('click', toggle);
+    node.addEventListener('keydown', onKey);
+    return {
+      destroy() {
+        node.removeEventListener('click', toggle);
+        node.removeEventListener('keydown', onKey);
+      },
+    };
+  }
   // The sidereal/tropical + angle toggles only matter for the wheel, so they're
   // shown only while the wheel is on screen (hidden once you scroll past it).
   let wheelEl = $state<SVGSVGElement | null>(null);
@@ -1288,6 +1309,7 @@
   {#if domeTracks && domeNow}
     <figure class="skydome">
       <svg
+        class:labels-shown={showLabels}
         viewBox="-14 -14 {DOME + 28} {DOME + 28}"
         role="img"
         aria-label={hi(
@@ -1316,18 +1338,26 @@
         <g clip-path="url(#dome-clip)">
           <!-- constellation stick-figures (faint), behind the bright stars -->
           {#each domeConstellations as con (con.key)}
-            <g class="dome-con">
+            <g class="dome-con" class:revealed={revealed === con.key}>
+              <circle
+                cx={con.cx}
+                cy={con.cy}
+                r="16"
+                class="dome-hit"
+                role="button"
+                tabindex="0"
+                aria-label={lang === 'hi' ? con.name.hi : con.name.en}
+                use:revealable={con.key}
+              />
               {#each con.segs as seg (seg)}
                 <polyline points={seg} class="dome-con-line" />
               {/each}
               {#each con.stars as st (`${st[0]},${st[1]}`)}
                 <circle cx={st[0]} cy={st[1]} r="1" class="dome-con-star" />
               {/each}
-              {#if showLabels}
-                <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
-                  >{lang === 'hi' ? con.name.hi : con.name.en}</text
-                >
-              {/if}
+              <text x={con.cx} y={con.cy} class="dome-con-name" text-anchor="middle"
+                >{lang === 'hi' ? con.name.hi : con.name.en}</text
+              >
             </g>
           {/each}
           {#each domeStars as s (s.ra)}
@@ -1339,16 +1369,31 @@
             />
           {/each}
           {#if domePolaris}
-            <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="3" class="dome-polaris-halo" />
-            <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="1.5" class="dome-polaris" />
-            {#if showLabels}
+            <g class="dome-con" class:revealed={revealed === 'polaris'}>
+              <circle
+                cx={domePolaris.pt[0]}
+                cy={domePolaris.pt[1]}
+                r="7"
+                class="dome-hit"
+                role="button"
+                tabindex="0"
+                aria-label={hi('ध्रुव', 'Polaris')}
+                use:revealable={'polaris'}
+              />
+              <circle
+                cx={domePolaris.pt[0]}
+                cy={domePolaris.pt[1]}
+                r="3"
+                class="dome-polaris-halo"
+              />
+              <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="1.5" class="dome-polaris" />
               <text
                 x={domePolaris.pt[0]}
                 y={domePolaris.pt[1] - 6}
                 class="dome-con-name"
                 text-anchor="middle">{hi('ध्रुव', 'Polaris')}</text
               >
-            {/if}
+            </g>
           {/if}
           {#if domeTracks.sun}
             <polyline points={domeTracks.sun} class="dome-path dome-path--sun" />
@@ -1360,13 +1405,21 @@
           {#if showGrahas}
             {#each domePlanets as b (b.body)}
               {#if b.altitude >= -14}
-                <g class="dome-body" opacity={dayFade}>
+                <g class="dome-body" class:revealed={revealed === b.body} opacity={dayFade}>
+                  <circle
+                    cx={b.pt[0]}
+                    cy={b.pt[1]}
+                    r="8"
+                    class="dome-hit"
+                    role="button"
+                    tabindex="0"
+                    aria-label={grahaLabel(b.body)}
+                    use:revealable={b.body}
+                  />
                   <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
-                  {#if showLabels}
-                    <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
-                      >{grahaLabel(b.body)}</text
-                    >
-                  {/if}
+                  <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
+                    >{grahaLabel(b.body)}</text
+                  >
                 </g>
               {/if}
             {/each}
@@ -1374,27 +1427,57 @@
           <!-- Moon first → behind the Sun; hidden when lost in the Sun's glare -->
           {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
             {@const m = domeSunMoon[1]}
-            <g class="dome-body" opacity={dayFade}>
+            {@const litD = moonLitPath(m.pt[0], m.pt[1], 9, illum, elong)}
+            <g class="dome-body" class:revealed={revealed === 'moon'} opacity={dayFade}>
               <circle
                 cx={m.pt[0]}
                 cy={m.pt[1]}
-                r="7"
+                r="11"
+                class="dome-hit"
+                role="button"
+                tabindex="0"
+                aria-label={grahaLabel('moon')}
+                use:revealable={'moon'}
+              />
+              <circle
+                cx={m.pt[0]}
+                cy={m.pt[1]}
+                r="9"
                 fill="#363842"
                 stroke="rgba(255,255,255,0.4)"
                 stroke-width="0.6"
               />
-              <path d={moonLitPath(m.pt[0], m.pt[1], 7, illum, elong)} fill="#f1e7cb" />
-              {#if showLabels}
-                <text x={m.pt[0]} y={m.pt[1] - 12.5} class="dome-label" text-anchor="middle"
-                  >{grahaLabel('moon')}</text
-                >
-              {/if}
+              <path d={litD} fill="#f1e7cb" />
+              <clipPath id="dome-moon-clip"><path d={litD} /></clipPath>
+              <g clip-path="url(#dome-moon-clip)">
+                {#each craters as [dx, dy, cr] (`${dx}-${dy}`)}
+                  <circle
+                    cx={m.pt[0] + dx * 0.75}
+                    cy={m.pt[1] + dy * 0.75}
+                    r={cr * 0.75}
+                    class="crater"
+                  />
+                {/each}
+              </g>
+              <text x={m.pt[0]} y={m.pt[1] - 15} class="dome-label" text-anchor="middle"
+                >{grahaLabel('moon')}</text
+              >
             </g>
           {/if}
           <!-- Sun last → always on top, so the Moon never covers it -->
           {#if domeSunMoon[0] && domeSunMoon[0].altitude >= -14}
             {@const sn = domeSunMoon[0]}
-            <g class="dome-body">
+            <g class="dome-body" class:revealed={revealed === 'sun'}>
+              <circle
+                cx={sn.pt[0]}
+                cy={sn.pt[1]}
+                r="12"
+                class="dome-hit"
+                role="button"
+                tabindex="0"
+                aria-label={grahaLabel('sun')}
+                use:revealable={'sun'}
+              />
               <circle cx={sn.pt[0]} cy={sn.pt[1]} r="12" fill="url(#sun-glow)" />
               {#each rayAngles as a (a)}
                 {@const c = Math.cos((a * Math.PI) / 180)}
@@ -1415,11 +1498,9 @@
                 stroke="#e07b00"
                 stroke-width="0.7"
               />
-              {#if showLabels}
-                <text x={sn.pt[0]} y={sn.pt[1] - 14} class="dome-label" text-anchor="middle"
-                  >{grahaLabel('sun')}</text
-                >
-              {/if}
+              <text x={sn.pt[0]} y={sn.pt[1] - 14} class="dome-label" text-anchor="middle"
+                >{grahaLabel('sun')}</text
+              >
             </g>
           {/if}
         </g>
@@ -2003,6 +2084,9 @@
     font-size: 6px;
     fill: rgba(180, 200, 240, 0.62);
     letter-spacing: 0.3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.14s ease;
   }
   .dome-polaris {
     fill: #ffffff;
@@ -2039,6 +2123,25 @@
     stroke-width: 1.5px;
     stroke-linejoin: round;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.14s ease;
+  }
+  /* Labels are hidden by default; reveal one on hover (desktop) or tap (the
+     .revealed class, set on click/keyboard), or show all with the Labels toggle. */
+  .dome-body:hover .dome-label,
+  .dome-con:hover .dome-con-name,
+  .dome-body.revealed .dome-label,
+  .dome-con.revealed .dome-con-name {
+    opacity: 1;
+  }
+  .labels-shown .dome-label,
+  .labels-shown .dome-con-name {
+    opacity: 1;
+  }
+  .dome-hit {
+    fill: transparent;
+    pointer-events: all;
+    cursor: pointer;
   }
   .skydome figcaption {
     font-size: 12.5px;

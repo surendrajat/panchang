@@ -404,7 +404,7 @@
         </p>
       {/await}
     {:else if route.name === 'sky'}
-      <!-- Experimental live ecliptic wheel; lazy-loaded (runs an animation loop). -->
+      <!-- The Sky view (local-sky dome + tonight's observation table); lazy-loaded (runs an animation loop). -->
       {#await import('./routes/Sky.svelte')}
         <Loading label={tr('sky.loading')} />
       {:then m}
@@ -418,7 +418,7 @@
         </p>
       {/await}
     {:else if route.name === 'learn'}
-      <!-- Experimental notebook-style explainer; lazy-loaded (animation loop). -->
+      <!-- The Learn guide (how the panchanga works); lazy-loaded (runs an animation loop). -->
       {#await import('./routes/Learn.svelte')}
         <Loading label={tr('learn.loading')} />
       {:then m}

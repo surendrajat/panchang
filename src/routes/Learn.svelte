@@ -119,10 +119,14 @@
   const moonRashi = $derived(Math.floor(moonSid / 30));
 
   // Live tithi length: a tithi is a fixed 12° of elongation, but the elongation
-  // rate varies, so its real duration swings ~20–26 h. Sample the rate locally.
+  // rate varies, so its real duration swings ~20–26 h. Sample the rate on an
+  // hour-quantized jd so it doesn't add two engine calls every animation frame —
+  // the shown value (0.1 h) doesn't change meaningfully faster than hourly.
+  const jdHour = $derived(Math.floor(jd * 24) / 24);
   const tithiHours = $derived.by(() => {
-    const e2 = sunMoonElongationAtJD(jd + 0.02);
-    const rate = (((e2 - elong + 540) % 360) - 180) / 0.02; // °/day
+    const e1 = sunMoonElongationAtJD(jdHour);
+    const e2 = sunMoonElongationAtJD(jdHour + 0.02);
+    const rate = (((e2 - e1 + 540) % 360) - 180) / 0.02; // °/day
     return 12 / rate / (1 / 24);
   });
 
@@ -137,12 +141,13 @@
   );
 
   // weekday index 0..6 (for the Vāra step + the summary)
+  const WEEKDAY_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const varaIdx = $derived.by(() => {
     const wd = new Intl.DateTimeFormat('en-US', {
       weekday: 'short',
       timeZone: preferences.location?.timezone,
     }).format(simDate);
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(wd);
+    return WEEKDAY_KEYS.indexOf(wd);
   });
 
   // ── Tap-to-explore (the zodiac cell) ────────────────────────────────────────

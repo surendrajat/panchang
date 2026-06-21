@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let _uid = 0;
+</script>
+
 <script lang="ts">
   // SVG moon-phase render — letterpress-style with a radial-gradient lit
   // limb. Construction matches design/panchanga-ui-mockup.html:
@@ -31,10 +35,13 @@
     return `M ${top} A ${R} ${R} 0 0 ${limbSweep} ${bot} A ${rx} ${R} 0 0 ${termSweep} ${top} Z`;
   });
 
-  const gradientId = `moon-lit-${Math.random().toString(36).slice(2, 8)}`;
-  const darkSheenId = `moon-dark-${Math.random().toString(36).slice(2, 8)}`;
-  const litClipId = `moon-clip-${Math.random().toString(36).slice(2, 8)}`;
-  const fullClipId = `moon-full-${Math.random().toString(36).slice(2, 8)}`;
+  // stable, deterministic ids (module counter) — same pattern as BodyIcon/StarDome
+  _uid += 1;
+  const ids = `mp${_uid}`;
+  const gradientId = `${ids}-lit`;
+  const darkSheenId = `${ids}-dark`;
+  const litClipId = `${ids}-clip`;
+  const fullClipId = `${ids}-full`;
 
   // A few maria/craters (offset x, offset y, radius — all as fractions of R) so
   // the lit face reads as the real Moon rather than a blank disc.

@@ -281,8 +281,6 @@
     {/if}
   </header>
 
-  <hr class="rule-double" />
-
   {#if route.name === 'settings'}
     <!-- Settings is not a sibling section; show a back link instead of
          the primary tab strip, returning to whatever the user was last
@@ -546,7 +544,7 @@
     /* `safe center` centres when the row fits but falls back to start-aligned
        (instead of clipping the first tab) once it overflows and scrolls */
     justify-content: safe center;
-    margin: 6px 0 24px;
+    margin: 14px 0 24px;
     padding: 0 8px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -557,8 +555,8 @@
   }
   :global(.tab) {
     font-family: var(--font-serif);
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
     letter-spacing: 0.01em;
     padding: 8px 17px 9px;
     margin-bottom: -1px; /* overlap the baseline rule */
@@ -584,7 +582,7 @@
   /* Active tab — lifted panel + red underline meeting the baseline. */
   :global(.tab[aria-current='page']) {
     color: var(--red);
-    font-weight: 600;
+    font-weight: 700;
     background: var(--paper-2);
     border-bottom-color: var(--red);
   }

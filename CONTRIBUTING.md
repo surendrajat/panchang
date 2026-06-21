@@ -17,7 +17,7 @@ mechanics.
 
 ## Setup
 
-Requires Node 24 (pinned via `.nvmrc`) and pnpm 11.
+Requires Node 24 (pinned via `.nvmrc` / `engines`) and pnpm 11 (pinned via `packageManager` in `package.json`).
 
 ```bash
 pnpm install

@@ -49,16 +49,21 @@ position (light-time + aberration corrected), rotated EQJ→ECT into the **true
 ecliptic of date** — the same frame the panchanga uses. The nine grahas: Surya,
 Chandra, Mangala, Budha, Guru, Shukra, Shani, and the lunar nodes Rahu / Ketu.
 
-### 3.2 Rahu / Ketu — mean node
+### 3.2 Rahu / Ketu — the lunar nodes
+
+The **default is the true (osculating) node** (matching Drik and most modern Vedic
+software); a **mean** node is an opt-in toggle (Settings → Rahu/Ketu). Rahu is the
+node longitude, Ketu = Rahu + 180°, both always retrograde by convention.
+
+- **True node** — from the Moon's instantaneous orbital state; oscillates ±~1.5°
+  around the mean. Matches Swiss Ephemeris `SE_TRUE_NODE` to ≤ 0.8′.
+- **Mean node** — the smoothed long-term position (Meeus, *Astronomical
+  Algorithms* 47.7), matching Swiss Ephemeris's mean node to < 0.01′:
 
 ```
 Ω = 125.0445479 − 1934.1362891·T + 0.0020754·T² + T³/467441 − T⁴/60616000   (deg)
     T = Julian centuries since J2000
 ```
-
-Rahu = Ω, Ketu = Ω + 180°, both always retrograde by convention. Matches Swiss
-Ephemeris mean node to < 0.01′. (True-node toggle is a planned option; the true
-node oscillates ±~1.5° around the mean.)
 
 ### 3.3 Ayanamsa
 
@@ -151,11 +156,11 @@ not yet applied — that part is labelled "preview."
 
 ## 7. Conventions
 
-| Choice | Used | Possible future toggles |
-|--------|------|-------------------------|
-| Ayanamsa | Lahiri (Chitrapaksha) | KP, Raman, Yukteshwar, True Chitra |
-| Lunar node | Mean | True |
-| Houses | Whole-sign (bhava = rashi) | Bhava-chalit/Sripati, equal |
+| Choice | Default | Alternatives |
+|--------|---------|--------------|
+| Ayanamsa | Lahiri (Chitrapaksha) | KP, Raman, Yukteshwar, True Chitra *(selectable)* |
+| Lunar node | **True** (osculating) | Mean *(selectable)* |
+| Houses | Whole-sign (bhava = rashi) | Bhava-chalit/Sripati, equal *(future)* |
 | Ascendant LST | `GST + longitude` (standard) | — *(we don't replicate Drik's variant)* |
 | Chart style | North-Indian (diamond) | South-Indian (square) |
 | Dasha | Vimshottari | other dashas |

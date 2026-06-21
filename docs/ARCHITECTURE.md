@@ -39,12 +39,12 @@ lib/astro/        julian · ephemeris (Sun/Moon/planets/nodes) · ayanamsa ·
                   sunrise · altaz · angle · bisect            ← swappable backend
   ↓                                   ↓
 lib/panchanga/                    lib/jyotish/
-  tithi nakshatra yoga karana       grahas · lagna · chart · bhava ·
+  tithi nakshatra yoga karana       grahas · lagna · chart (+ houses) ·
   vara masa samvat ritu ayana       dasha (Vimshottari) · divisional (navamsa) ·
-  muhurta moon-phase festivals/     matching (ashtakoota) · sky-math · names
-  tiebreakers
+  muhurta moon-phase tiebreakers    matching (ashtakoota) · sky-math · names
+  festivals/
   ↓                                   ↓
-routes/ + components/   Today Day Month Festivals Kundli Match Sky Settings
+routes/ + components/   Day Month Festivals Kundli Match Sky Settings
 lib/state/  (runes)     preferences · clock · jyotish-draft · sw-update
 lib/storage/ (Dexie)    db · cache · birth-profiles · saved-locations · preferences
 lib/i18n/ + lib/format/ en/hi + names + transliteration · numerals · time
@@ -63,13 +63,14 @@ Yukteshwar/True-Chitra, anchored to Drik's *computational* values), `sunrise.ts`
 ### `lib/panchanga` — the almanac
 `compute.ts` exposes the pure `computePanchanga()`; one file per anga, plus masa
 (with adhik-maas), samvat, ritu, ayana, muhurta, moon-phase. `festivals/` holds
-the rule set (`pan-india.ts`) and `tiebreakers.ts` — the vyapini-window / tie-break
-engine, the single place complexity concentrates and the highest-risk file.
+the rule set (`pan-india.ts` + `rules.ts`); `tiebreakers.ts` (one level up, in
+`panchanga/`) is the vyapini-window / tie-break engine — the single place
+complexity concentrates and the highest-risk file.
 
 ### `lib/jyotish` — the birth chart
 Pure arithmetic on top of the same astro backend: `grahas.ts` (sidereal graha
-longitudes), `lagna.ts` (ascendant from sidereal time), `chart.ts`, `bhava.ts`
-houses, `dasha.ts` (Vimshottari from Moon nakshatra), `divisional.ts` (navamsa),
+longitudes), `lagna.ts` (ascendant from sidereal time), `chart.ts` (whole-sign
+houses), `dasha.ts` (Vimshottari from Moon nakshatra), `divisional.ts` (navamsa),
 `matching.ts` (ashtakoota guna-milan from two charts), `names.ts`, `glyphs.ts`,
 `rashi-art.ts`. `sky-math.ts` backs the Sky view.
 
@@ -98,12 +99,12 @@ Sanskrit in both. `lib/format` handles numerals (Devanagari/Latin) and time.
 
 | Hash | Page |
 |---|---|
-| `#/` or `#/today` | Today |
-| `#/day/YYYY-MM-DD` | Day detail |
+| `#/` or `#/today` | Today (rendered by `Day.svelte` with today's date) |
+| `#/day/YYYY-MM-DD` | Day detail (same component) |
 | `#/month/YYYY-MM` | Month calendar |
 | `#/festivals/YYYY` | Festival list |
 | `#/kundli` | Birth chart |
-| `#/match` | Guna milan (also reachable inside Kundli) |
+| `#/match` | Legacy alias → redirects to `#/kundli` (Milan is a section inside Kundli) |
 | `#/sky` | Sky view (experimental) |
 | `#/settings` | Settings |
 

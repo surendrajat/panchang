@@ -88,9 +88,9 @@ into a few helpers:
 
 ```ts
 // src/lib/astro/julian.ts
-civilMidnightInZone(date, 'Asia/Kolkata')  // the local 00:00 of that civil day, as an instant
-civilTimeInZone(date, 'Asia/Kolkata')      // the wall-clock {hour, minute} at an instant
-civilYMDInZone(date, 'America/New_York')   // the local calendar {year, month, day}
+civilMidnightInZone(date, 'Asia/Kolkata')              // local 00:00 of that civil day → an instant
+civilTimeInZone(2026, 6, 23, 'Asia/Kolkata', 12, 0)    // a local wall-clock time → the UTC instant
+civilYMDInZone(date, 'America/New_York')               // an instant → the local {year, month, day}
 ```
 
 These use the platform's IANA time-zone database (via `Intl`), so they're

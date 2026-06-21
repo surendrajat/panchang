@@ -51,7 +51,7 @@ pnpm test       # unit + regression suite
 pnpm build      # static output → ./dist
 ```
 
-Requires Node 24 and pnpm 11 (pinned in `.nvmrc`).
+Requires Node 24 (pinned in `.nvmrc` / `engines`) and pnpm 11 (pinned via `packageManager` in `package.json`).
 
 ## Contributing
 

@@ -156,6 +156,6 @@ src/lib/
 ```
 
 When a lesson says *"see `panchanga/tithi.ts`"*, open it — the functions are
-small and named after the concept (`tithiAtJD`, `nextTithiEnd`). The goal is
+small and named after the concept (`tithiAtJD`, `tithiAtInstant`). The goal is
 that after this course you could delete a file and rewrite it from the lesson.
 </content>

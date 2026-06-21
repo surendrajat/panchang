@@ -86,11 +86,11 @@ kind of thing the course promised to be straight about.
 depending on the exact precession model and epoch a given implementation uses.
 Three you'll meet:
 
-| Source | Value at J2000 |
+| Source | Lahiri realisation |
 | --- | --- |
-| Swiss Ephemeris `SE_SIDM_LAHIRI` (the official IAE realisation) | **23.857°** |
-| drikpanchang.com (computational) | 23.8635° (+0.40′) |
-| some "true Citrā" tables | ~23.853° |
+| Swiss Ephemeris `SE_SIDM_LAHIRI` (the official IAE realisation) | **23.857° at J2000** — what we use |
+| drikpanchang.com (computational) | runs **≈ +0.40′ higher** than ours (≈ 24.213° in 2025) |
+| some "true Citrā" tables | ~23.853° at J2000 |
 
 This project anchors to **23.85709° = Swiss Ephemeris's value** — the one
 astro.com, Jagannatha Hora, and ProKerala compute, verified directly with

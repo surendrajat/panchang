@@ -219,8 +219,8 @@
   <SkyClock bind:date={now} bind:speed bind:live>
     {#snippet extra()}
       <div class="watch">
-        <span class="watch__var watch__var--sun">λ<sub>☉</sub> {d1(sunSid)}</span>
-        <span class="watch__var watch__var--moon">λ<sub>☽</sub> {d1(moonSid)}</span>
+        <span class="watch__var watch__var--sun"><span class="watch__g">☉</span>{d1(sunSid)}</span>
+        <span class="watch__var watch__var--moon"><span class="watch__g">☽</span>{d1(moonSid)}</span>
       </div>
     {/snippet}
   </SkyClock>
@@ -790,15 +790,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 4.8rem;
+    gap: 0.22em;
+    min-width: 4.5rem;
     font-size: 0.8rem;
     font-weight: 600;
     padding: 0.08rem 0.45rem;
     border-radius: var(--radius-pill);
     background: var(--paper-2);
   }
-  .watch__var sub {
-    font-size: 0.7em;
+  /* the Sun/Moon symbol — a full-size glyph (not a subscript), so it reads clearly */
+  .watch__g {
+    font-size: 1.15em;
+    line-height: 1;
   }
   .watch__var--sun {
     color: #b06a08;
@@ -806,14 +809,14 @@
   .watch__var--moon {
     color: #3f6da0;
   }
-  /* on phones, shrink the λ chips so they sit beside the clock on one row */
+  /* on phones, shrink the chips a touch so they sit beside the clock on one row */
   @media (max-width: 460px) {
     .watch {
       gap: 0.25rem;
     }
     .watch__var {
-      min-width: 4.3rem;
-      font-size: 0.75rem;
+      min-width: 4.1rem;
+      font-size: 0.76rem;
     }
   }
 

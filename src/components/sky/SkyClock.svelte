@@ -165,22 +165,15 @@
       color 0.15s;
   }
   @media (max-width: 460px) {
-    /* shrink the clock so it + both λ chips fit on one line on phones
-       (tabular figures + fixed format keep it from wobbling without min-width) */
+    /* the clock + the two angle chips share one line on phones; drop the clock's
+       min-width floor so it sizes to content (tabular + fixed format = no wobble).
+       The speed bar keeps its own full-size line below — it is NOT shrunk. */
     .topline {
-      gap: 0.1rem 0.2rem;
+      gap: 0.1rem 0.35rem;
     }
     .clock {
       min-width: 0;
-      font-size: 0.9rem;
-    }
-    .speeds {
-      gap: 1px;
-      padding: 2px;
-    }
-    .speeds button {
-      padding: 0.3rem 0.5rem;
-      font-size: 0.72rem;
+      font-size: 0.92rem;
     }
   }
   .speeds button:hover {

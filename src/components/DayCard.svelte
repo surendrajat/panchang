@@ -245,50 +245,29 @@
 </script>
 
 <article class="day-card stagger">
-  <!-- HERO: kicker + tithi name on the left, moon on the right (bottoms aligned);
-       meta + greg + rashi line beneath them in a full-width details block. -->
+  <!-- HERO: text column (kicker → rashi line) on the left, moon block on the
+       right, both bottom-aligned. The moon's caption ends on the same baseline
+       as the rashi line. The kicker + tithi name can overflow horizontally
+       (clipped at the card edge) so a long month name never wraps awkwardly. -->
   <div class="hero">
-    <div class="hero__top">
-      <div class="hero__head">
-        <div class="kicker">
-          {panchanga.paksha === 'shukla' ? tr('paksha.shukla') : tr('paksha.krishna')} · {masaName}
-          {#if panchanga.masa.isAdhika}<span class="badge">{tr('masa.adhika')}</span>{/if}
-          {#if panchanga.masa.isKshaya}<span class="badge">{tr('masa.kshaya')}</span>{/if}
-          <span class="kicker__system" title="Lunar-month convention"
-            >· {panchanga.masa.system === 'purnimanta'
-              ? tr('system.purnimanta')
-              : tr('system.amanta')}</span
-          >
-        </div>
-        <div class="tithi-name">
-          {tithiName}
-          <!-- Tiny number-in-brackets after the hero tithi name — gives
-               readers a quick handle on "where am I in the lunar
-               month" (1..15 within a paksha). -->
-          <span class="tithi-name__num num">({num(String(panchanga.tithi.number))})</span>
-        </div>
+    <div class="hero__text">
+      <div class="kicker">
+        {panchanga.paksha === 'shukla' ? tr('paksha.shukla') : tr('paksha.krishna')} · {masaName}
+        {#if panchanga.masa.isAdhika}<span class="badge">{tr('masa.adhika')}</span>{/if}
+        {#if panchanga.masa.isKshaya}<span class="badge">{tr('masa.kshaya')}</span>{/if}
+        <span class="kicker__system" title="Lunar-month convention"
+          >· {panchanga.masa.system === 'purnimanta'
+            ? tr('system.purnimanta')
+            : tr('system.amanta')}</span
+        >
       </div>
-      <div class="hero__moon">
-        <MoonPhase
-          illumination={panchanga.moonPhase.illumination}
-          phaseAngle={panchanga.moonPhase.phaseAngle}
-          phaseName={panchanga.moonPhase.phaseName}
-          size={104}
-        />
-        <div class="moon-pct num">
-          {tr('moon.lit', {
-            percent: renderNumber(
-              Math.round(panchanga.moonPhase.illumination * 100),
-              preferences.numerals,
-            ),
-          })}
-        </div>
-        <div class="moon-phase-name">
-          {tr(MOON_PHASE_KEYS[panchanga.moonPhase.phaseName] ?? 'moonPhase.new')}
-        </div>
+      <div class="tithi-name">
+        {tithiName}
+        <!-- Tiny number-in-brackets after the hero tithi name — gives
+             readers a quick handle on "where am I in the lunar
+             month" (1..15 within a paksha). -->
+        <span class="tithi-name__num num">({num(String(panchanga.tithi.number))})</span>
       </div>
-    </div>
-    <div class="hero__details">
       {#if sunrise}
         <div class="tithi-meta">
           {tr('tithi.endsBefore')}<b class="num">{tithiEndsAtLabel()}</b>{tr('tithi.endsAfter')} ·
@@ -346,6 +325,25 @@
             />
           </svg>{rashiLabel(moonRashiIndex)}
         </span>
+      </div>
+    </div>
+    <div class="hero__moon">
+      <MoonPhase
+        illumination={panchanga.moonPhase.illumination}
+        phaseAngle={panchanga.moonPhase.phaseAngle}
+        phaseName={panchanga.moonPhase.phaseName}
+        size={104}
+      />
+      <div class="moon-pct num">
+        {tr('moon.lit', {
+          percent: renderNumber(
+            Math.round(panchanga.moonPhase.illumination * 100),
+            preferences.numerals,
+          ),
+        })}
+      </div>
+      <div class="moon-phase-name">
+        {tr(MOON_PHASE_KEYS[panchanga.moonPhase.phaseName] ?? 'moonPhase.new')}
       </div>
     </div>
   </div>
@@ -523,27 +521,29 @@
   }
 
   /* ── hero ──
-     Top row: kicker+tithi name (left) and the moon block (right), aligned at
-     their bottoms — so the moon-phase image + caption end on the same baseline
-     as the big tithi title. Details (meta + greg + rashi line) sit beneath. */
+     Two columns, bottom-aligned: a left text column running kicker → rashi
+     line, and the moon block on the right. The moon's phase-name caption
+     ends on the same baseline as the rashi line, so both sides finish flush
+     at the bottom. Long kicker / tithi-name lines are allowed to overflow
+     horizontally rather than wrap; the card edge clips them. */
   .hero {
-    display: block;
-    margin-bottom: 8px;
-  }
-  .hero__top {
     display: flex;
     align-items: flex-end;
     gap: 22px;
-    /* clip a very long tithi-name's overflow at the card edge without ever
-       causing page-level horizontal scroll */
+    margin-bottom: 8px;
     overflow: hidden;
   }
-  .hero__head {
+  .hero__text {
     flex: 1;
     min-width: 0;
   }
-  .hero__details {
-    margin-top: 10px;
+  /* Kicker and tithi-name never wrap: a long month name like "Bhādrapada
+     · Purnimanta" with badges would otherwise wrap awkwardly inside the
+     narrow column. The hero clips any overflow at the card edge. */
+  .hero__text .kicker,
+  .hero__text .tithi-name {
+    white-space: nowrap;
+    overflow: visible;
   }
   .tithi-name__num {
     font-family: var(--font-serif);
@@ -873,16 +873,11 @@
   }
 
   @media (max-width: 460px) {
-    /* The flex hero__top already bottom-aligns the head text + moon; on phones
-       we just keep the moon a touch smaller so its block isn't taller than
-       (kicker + tithi-name), and let the tithi name overflow horizontally
-       behind it rather than wrap. */
-    .hero__top {
+    /* On phones, tighten the column gap and shrink the moon a touch so its
+       block height matches the text column (kicker → rashi line). The
+       bottom-alignment from the .hero flex is already in effect. */
+    .hero {
       gap: 14px;
-    }
-    .tithi-name {
-      white-space: nowrap;
-      overflow: visible;
     }
     .hero__moon :global(.moon-svg) {
       width: 76px;

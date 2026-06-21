@@ -197,6 +197,11 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     background: var(--paper-2);
+    /* keep the day navigator visible while reading the long Day card below */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 6px var(--shadow);
   }
   .pager__arrow {
     display: inline-flex;

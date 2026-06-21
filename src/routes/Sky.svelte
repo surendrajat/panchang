@@ -863,6 +863,12 @@
         >
       {/each}
     </div>
+    <p class="speed-hint">
+      {hi(
+        'समय की गति बदलने के लिए ऊपर टैप करें — आकाश घूमता हुआ देखें',
+        'Tap a chip above to scrub time and watch the sky move',
+      )}
+    </p>
   </div>
 
   <div class="sky__grid">
@@ -1655,6 +1661,15 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-pill, 999px);
   }
+  /* small italic affordance under the speed control — the segmented buttons
+     don't immediately read as "time controls," so this names them */
+  .speed-hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    line-height: 1.2;
+    font-style: italic;
+  }
   .speeds button {
     padding: 0.32rem 0.78rem;
     border: none;
@@ -1866,6 +1881,10 @@
     fill: var(--ink-soft);
     font-weight: 600;
     letter-spacing: 0.02em;
+    /* the curved name sits on top of the sign's sector path — without this,
+       clicks on the name get eaten by the text (no handler) instead of the
+       rashi path underneath */
+    pointer-events: none;
   }
   /* The Sun/Moon's sign is already shown by the sector tint AND by the bright
      body icon sitting in that sector — flipping the name colour on top of that
@@ -1970,6 +1989,7 @@
     stroke: var(--line);
     stroke-width: 1;
     opacity: 0.5;
+    pointer-events: none;
   }
   /* invisible tap target for a graha (the BodyIcon itself is pointer-events:none) */
   .hit {
@@ -1990,15 +2010,18 @@
     fill: color-mix(in srgb, var(--indigo) 34%, transparent);
     outline: none;
   }
+  /* Decorative — none of these should steal clicks from the rashi sectors */
   .elong-arc {
     stroke: var(--red);
     stroke-width: 4;
     stroke-linecap: round;
     opacity: 0.9;
+    pointer-events: none;
   }
   .ray {
     stroke-width: 1;
     opacity: 0.22;
+    pointer-events: none;
   }
   .ray--sun {
     stroke: #f0a000;
@@ -2011,11 +2034,13 @@
     stroke: var(--ink-faint, #aaa);
     stroke-width: 1;
     stroke-dasharray: 1.5 3;
+    pointer-events: none;
   }
   .angle-arc {
     stroke-width: 1.5;
     stroke-dasharray: 1.5 3;
     stroke-linecap: round;
+    pointer-events: none;
   }
   .angle-arc--sun {
     stroke: #e0951a;

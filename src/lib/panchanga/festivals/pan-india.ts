@@ -16,7 +16,8 @@
 
 import type { Panchanga } from '../types';
 import type { FestivalRule } from './rules';
-import { civilYMDInZone, MS_PER_DAY } from '$lib/astro';
+import { civilYMDInZone, dateToJulian, MS_PER_DAY } from '$lib/astro';
+import { masaContext } from '../masa';
 import {
   vyapiniMatches,
   bhadraAwareVyapiniWithSunriseFallback,
@@ -70,6 +71,10 @@ function vyapiniShukla(
 ) {
   return (p: Panchanga): boolean => {
     if (p.masa.amantaName !== masa || p.masa.isAdhika) return false;
+    // Shukla 1 (Pratipada): month M's OWN Amavasya is not a Pratipada day — the
+    // Pratipada that begins there belongs to M+1 — so the kshaya fallback must
+    // not fire a month late on it. (Genuine M Shukla 1 has sunrise = 1, not 30.)
+    if (tithi === 1 && sunriseTithiIndex(p.location, p.date) === 30) return false;
     if (fallback === 'sunrise') {
       return vyapiniWithSunriseFallback(p, window, SHUKLA(tithi), pick);
     }
@@ -123,16 +128,32 @@ function vyapiniShuklaBhadra(
 function inShukla(tithiNumber: number, amantaMasa: string) {
   return (p: Panchanga): boolean => {
     if (p.masa.isAdhika) return false;
-    if (!sunriseTithiObservedForDate(p.location, p.date, tithiNumber)) return false;
-    if (p.masa.amantaName === amantaMasa) return true;
-    // A kshaya Pratipada (Shukla 1) is observed on the prior month's Amavasya
-    // day, which is labelled M-1; the Amavasya-sunrise guard stops this from
-    // firing on the prior month's own Shukla 1.
-    return (
-      tithiNumber === 1 &&
-      p.masa.amantaName === prevAmanta(amantaMasa) &&
-      sunriseTithiIndex(p.location, p.date) === 30
-    );
+    const today = sunriseTithiIndex(p.location, p.date);
+    if (today === null) return false;
+    if (today === tithiNumber) {
+      // Genuine sunrise tithi, this month — fire on the FIRST day of a vriddhi
+      // (doubled tithi), i.e. only when yesterday's sunrise wasn't it already.
+      if (p.masa.amantaName !== amantaMasa) return false;
+      return sunriseTithiIndex(p.location, new Date(p.date.getTime() - MS_PER_DAY)) !== tithiNumber;
+    }
+    // Kshaya: the tithi is skipped — observed on the day it falls within (sunrise
+    // = tithi-1, next sunrise = tithi+1, modular at the month boundary).
+    const prev = tithiNumber === 1 ? 30 : tithiNumber - 1;
+    const next = tithiNumber === 30 ? 1 : tithiNumber + 1;
+    if (today !== prev) return false;
+    if (sunriseTithiIndex(p.location, new Date(p.date.getTime() + MS_PER_DAY)) !== next) return false;
+    if (tithiNumber !== 1) {
+      // A non-Pratipada kshaya tithi falls mid-month (labelled M).
+      return p.masa.amantaName === amantaMasa;
+    }
+    // A kshaya Pratipada begins on the PRIOR month's Amavasya (labelled M-1) —
+    // which stops it from firing on month M's own Amavasya.
+    if (p.masa.amantaName !== prevAmanta(amantaMasa)) return false;
+    // ...and the new month beginning here must be NIJA, not the leap (Adhika)
+    // month: festivals skip Adhika maas. (Edge: Adhika + kshaya Pratipada, e.g.
+    // Chaitra 1964.) Adhika ⇔ the Sun crosses no sign during the lunar month.
+    const ctx = masaContext(dateToJulian(new Date(p.date.getTime() + MS_PER_DAY)), p.options.ayanamsa);
+    return (ctx.signAtEnd - ctx.signAtStart + 12) % 12 !== 0;
   };
 }
 

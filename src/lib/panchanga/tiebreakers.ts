@@ -207,17 +207,23 @@ export function sunriseTithiIndex(loc: Location, date: Date): number | null {
 }
 
 // The general (documented, Smarta) rule for which civil day a tithi belongs to:
-// the day at whose SUNRISE it prevails. A KSHAYA tithi — one that begins after
-// a sunrise and ends before the next, touching no sunrise — belongs to the day
-// it falls within (sunrise = index-1, next sunrise = index+1). This is a fact,
-// not a convention: a festival's tithi occurs every year, so it must resolve to
-// a day. Adjacency is modular so a skipped Pratipada / Amavasya at the month
-// boundary is handled too.
+// the day at whose SUNRISE it prevails. Two edge cases, both resolved so a
+// festival's tithi maps to EXACTLY ONE day every year (a fact, not a
+// convention):
+//   • KSHAYA (skipped) — the tithi begins after a sunrise and ends before the
+//     next, touching no sunrise; it belongs to the day it falls within (sunrise
+//     = index-1, next sunrise = index+1). Modular, so a skipped Pratipada /
+//     Amavasya at the month boundary is handled.
+//   • VRIDDHI (doubled) — the tithi spans two sunrises; we observe the FIRST
+//     (purvaviddha, the common default), i.e. only when yesterday's sunrise was
+//     NOT already this tithi. Without this it would fire on both days.
 export function sunriseTithiObservedForDate(loc: Location, date: Date, index: number): boolean {
   const today = sunriseTithiIndex(loc, date);
-  if (today === index) return true;
   const prev = index === 1 ? 30 : index - 1;
   const next = index === 30 ? 1 : index + 1;
+  if (today === index) {
+    return sunriseTithiIndex(loc, new Date(date.getTime() - MS_PER_DAY)) !== index;
+  }
   if (today === prev) {
     return sunriseTithiIndex(loc, new Date(date.getTime() + MS_PER_DAY)) === next;
   }

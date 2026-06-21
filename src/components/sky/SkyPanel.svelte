@@ -247,6 +247,7 @@
         {selected}
         onpick={(p) => (selected = p)}
         label={hi('आकाश चक्र', 'Ecliptic wheel')}
+        {earthLabel}
       />
       <button
         type="button"

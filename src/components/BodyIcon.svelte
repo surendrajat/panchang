@@ -61,6 +61,22 @@
     />
   {/if}
 
+  <!-- Sun: eight spokes so it reads as the star, not a yellow planet -->
+  {#if kind === 'sun'}
+    {#each [0, 1, 2, 3, 4, 5, 6, 7] as i (i)}
+      {@const a = (i * Math.PI) / 4}
+      <line
+        x1={cx + Math.cos(a) * r * 1.25}
+        y1={cy + Math.sin(a) * r * 1.25}
+        x2={cx + Math.cos(a) * r * 1.45}
+        y2={cy + Math.sin(a) * r * 1.45}
+        stroke={g[1]}
+        stroke-width={r * 0.05}
+        stroke-linecap="round"
+      />
+    {/each}
+  {/if}
+
   <circle {cx} {cy} {r} fill="url(#{id}g)" />
 
   <g clip-path="url(#{id}c)">

@@ -49,6 +49,7 @@
     selected = null,
     onpick,
     label = 'Ecliptic wheel',
+    earthLabel = 'Earth', // localized name shown on hover/focus of the centre Earth
     labelsShown = false, // show all body names at once (Sky's "Labels" toggle)
     events = [], // markers on the ring: { key, lon (sidereal °), label }
   }: {
@@ -62,6 +63,7 @@
     selected?: WheelPick | null;
     onpick?: (pick: WheelPick) => void;
     label?: string;
+    earthLabel?: string;
     labelsShown?: boolean;
     events?: { key: string; lon: number; label: string }[];
   } = $props();
@@ -333,12 +335,16 @@
       class:interactive
       role={interactive ? 'button' : undefined}
       tabindex={interactive ? 0 : undefined}
-      aria-label={interactive ? 'Earth' : undefined}
+      aria-label={interactive ? earthLabel : undefined}
       onclick={interactive ? () => pick({ type: 'earth' }) : undefined}
       onkeydown={interactive ? (e) => keyPick(e, { type: 'earth' }) : undefined}
     >
       {#if selected?.type === 'earth'}<circle cx={C} cy={C} r={17 * k} class="sel-glow" />{/if}
       <EarthIcon cx={C} cy={C} r={13 * k} />
+      <!-- transparent target: EarthIcon is pointer-events:none, so without this
+           the centre Earth can't be hovered/clicked -->
+      <circle cx={C} cy={C} r={14 * k} class="hit" />
+      <text x={C} y={C - 18 * k} class="body-name" text-anchor="middle">{earthLabel}</text>
     </g>
   {/if}
 

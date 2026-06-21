@@ -109,14 +109,6 @@
       >
     {/each}
   </div>
-  {#if !stuck}
-    <p class="speed-hint">
-      {hi(
-        '💡 गति बढ़ाएँ — सूर्य, चन्द्र व ग्रहों को तेज़ चलते देखें।',
-        '💡 Tap a speed to fast-forward — watch the Sun, Moon and planets move.',
-      )}
-    </p>
-  {/if}
 </div>
 
 <style>
@@ -130,9 +122,11 @@
     background: color-mix(in srgb, var(--paper) 92%, transparent);
     backdrop-filter: blur(6px);
   }
-  /* the divider appears only while pinned; at rest there's no line under the bar */
+  /* the divider appears only while pinned; at rest there's no line under the bar.
+     A box-shadow (not a border) so toggling it never changes the bar's box height
+     — that avoids any layout shift / sticky feedback loop on slow scroll. */
   .timebar.stuck {
-    border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 0 0 var(--line);
   }
   .timebar-sentinel {
     height: 0;
@@ -225,12 +219,5 @@
     color: var(--paper);
     font-weight: 600;
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
-  }
-  /* a one-line tip shown only at rest (in the lesson), hidden once the bar sticks */
-  .speed-hint {
-    margin: 0.45rem 0 0;
-    font-size: 0.74rem;
-    line-height: 1.35;
-    color: var(--ink-soft);
   }
 </style>

@@ -286,6 +286,15 @@
     {/snippet}
   </SkyClock>
 
+  <!-- A speed tip that lives in the lesson flow (NOT inside the sticky bar), so it
+       simply scrolls away once the clock pins — no height toggle, no jitter. -->
+  <p class="speed-tip">
+    {hi(
+      '💡 गति बढ़ाएँ — सूर्य, चन्द्र व ग्रहों को तेज़ चलते देखें।',
+      '💡 Tap a speed to fast-forward — watch the Sun, Moon and planets move.',
+    )}
+  </p>
+
   <!-- chapter 3's wheel — the two angles plotted on the zodiac (continuation of [3]) -->
   <article class="cell cell--cont">
     <div class="cell__no" aria-hidden="true"></div>
@@ -348,6 +357,7 @@
           selected={picked}
           onpick={(p) => (picked = p)}
           label={hi('राशि चक्र', 'Zodiac wheel')}
+          {earthLabel}
         />
       </div>
       {#if pickedCard}
@@ -466,6 +476,7 @@
           size={360}
           show={{ earth: true, elong: true }}
           label={hi('अंतर चाप', 'The gap arc')}
+          {earthLabel}
         />
       </div>
       <p class="caption">
@@ -723,7 +734,7 @@
           'And here it all is at once — the live, interactive wheel and readout. This is the root the whole panchanga grows from.',
         )}
       </p>
-      <SkyPanel date={simDate} />
+      <div class="finale-viz"><SkyPanel date={simDate} /></div>
     </div>
   </article>
 
@@ -785,7 +796,7 @@
   }
   .nb__head {
     text-align: center;
-    margin-bottom: 1.1rem;
+    margin-bottom: 2rem;
   }
   .nb__kicker {
     margin: 0;
@@ -842,6 +853,15 @@
      divider (the .cell + .cell--cont specificity beats the base .cell border) */
   .cell.cell--cont {
     border-top: none;
+    padding-top: 0;
+  }
+  /* the speed tip between the clock and ch3's wheel (lesson flow, scrolls away) */
+  .speed-tip {
+    margin: 0 0 0.6rem;
+    text-align: center;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
   }
 
   /* ── time model (sticky) ── */
@@ -996,6 +1016,10 @@
   .viz {
     margin: 0.9rem auto 0.3rem;
     max-width: 360px;
+  }
+  /* the finale's SkyPanel gets the same top breathing room as a .viz wheel */
+  .finale-viz {
+    margin-top: 0.9rem;
   }
   .caption {
     margin: 0.4rem 0 0;
@@ -1211,8 +1235,8 @@
     background: color-mix(in srgb, var(--gold) 10%, transparent);
   }
   .vara__icon {
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
   }
   .vara__name {
     font-size: 0.62rem;

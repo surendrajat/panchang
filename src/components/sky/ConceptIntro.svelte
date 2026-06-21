@@ -112,6 +112,15 @@
   let auto = $state(true);
   const DAYS_PER_SEC = 3;
 
+  // pause the animation loop whenever the panel is scrolled off-screen, so it
+  // costs nothing once the reader has moved past it (cleaned up on unmount)
+  let visible = $state(true);
+  function onscreen(node: HTMLElement) {
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.01 });
+    io.observe(node);
+    return { destroy: () => io.disconnect() };
+  }
+
   const sunDeg = $derived((t * 0.9856) % 360); // ~1°/day
   const moonDeg = $derived((t * 13.176) % 360); // ~13°/day
   const sunPos = $derived(pt(sunDeg));
@@ -129,6 +138,7 @@
   const showMoon = $derived(step >= 4);
 
   $effect(() => {
+    if (!visible) return; // idle while off-screen
     let raf = 0;
     let last = performance.now();
     let acc = 0;
@@ -156,7 +166,7 @@
   }
 </script>
 
-<figure class="ci">
+<figure class="ci" use:onscreen>
   <div class="ci-sky">
     <svg viewBox="0 0 {VW} {VH}" role="img" aria-label={hi(STEPS[step].t.hi, STEPS[step].t.en)}>
       <defs>

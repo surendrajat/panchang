@@ -2,7 +2,15 @@
 // from a place on Earth at an instant — for the "what you'd see if you stood and
 // watched the sky" dome on the Sky page. Same astronomy-engine source as the
 // rest of the engine; includes standard atmospheric refraction.
-import { Body, Observer, Equator, Horizon, SearchHourAngle, SearchRiseSet } from 'astronomy-engine';
+import {
+  Body,
+  Observer,
+  Equator,
+  Horizon,
+  SearchHourAngle,
+  SearchRiseSet,
+  Illumination,
+} from 'astronomy-engine';
 
 /** The bodies you can actually see with the naked eye (no Rahu/Ketu — those are
  *  the invisible lunar nodes, not objects in the sky). */
@@ -64,6 +72,11 @@ export function bodyArc(
  * declination (degrees). J2000 coordinates are fine here — precession over a few
  * decades is a fraction of a degree, invisible at the dome's scale.
  */
+/** Apparent visual magnitude (brightness; lower = brighter, e.g. Venus ≈ −4). */
+export function bodyMagnitude(body: SkyBody, date: Date): number {
+  return Illumination(BODY[body], date).mag;
+}
+
 export function starAltAz(
   raHours: number,
   decDeg: number,

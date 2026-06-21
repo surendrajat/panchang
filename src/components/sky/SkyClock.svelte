@@ -61,9 +61,8 @@
     date = new Date();
   }
 
-  // "WED 24 Jun 2026, 16:01" — the weekday (vāra), uppercased, leads the date;
-  // the day is 2-digit and figures are tabular so nothing shifts sideways as the
-  // time ticks or plays — digits change in place.
+  // "Wed 24 Jun 2026, 16:01" — the weekday (vāra) leads the date; the day is
+  // 2-digit and figures are tabular so nothing shifts sideways as time ticks/plays.
   const wdFmt = $derived(
     new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {
       weekday: 'short',
@@ -82,11 +81,14 @@
       timeZone: preferences.location?.timezone,
     }),
   );
-  const clockLabel = $derived(`${wdFmt.format(date).toUpperCase()} ${num(fmt.format(date))}`);
+  const clockLabel = $derived(`${wdFmt.format(date)} ${num(fmt.format(date))}`);
 </script>
 
 <div class="timebar">
-  <div class="clock">{clockLabel}</div>
+  <div class="topline">
+    <span class="clock">{clockLabel}</span>
+    {#if extra}{@render extra()}{/if}
+  </div>
   <div class="speeds" role="group" aria-label={hi('समय गति', 'Time speed')}>
     <button type="button" class:on={live} onclick={goNow}>● {hi('अभी', 'Now')}</button>
     {#each SPEEDS as s (s.key)}
@@ -95,10 +97,6 @@
       >
     {/each}
   </div>
-  {#if extra}<div class="extra">{@render extra()}</div>{/if}
-  <p class="speed-hint">
-    {hi('💡 समय की गति यहाँ टैप करके बढ़ाई जा सकती है', '💡 Tap a speed to fast-forward time')}
-  </p>
 </div>
 
 <style>
@@ -108,7 +106,7 @@
     z-index: 20;
     text-align: center;
     margin-bottom: 1rem;
-    padding: 0.5rem 0 0.6rem;
+    padding: 0.4rem 0 0.45rem;
     background: color-mix(in srgb, var(--paper) 92%, transparent);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--line);
@@ -121,24 +119,32 @@
       background: var(--paper);
     }
   }
+  /* clock + the two λ angles share one line (wraps on narrow screens) */
+  .topline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.2rem 0.7rem;
+  }
   /* fixed min-width + tabular figures so the date never wobbles as it ticks or
      plays — the digits change in place, nothing shifts sideways */
   .clock {
     display: inline-block;
-    min-width: 15rem;
-    font-size: 1.2rem;
+    min-width: 13rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--ink);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    line-height: 1.5;
+    line-height: 1.4;
   }
   .speeds {
     display: inline-flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 2px;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
     padding: 3px;
     background: var(--paper-2);
     border: 1px solid var(--line);
@@ -176,15 +182,5 @@
     color: var(--paper);
     font-weight: 600;
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
-  }
-  .extra {
-    margin-top: 0.5rem;
-  }
-  .speed-hint {
-    margin: 0.55rem 0 0;
-    font-size: 0.72rem;
-    color: var(--ink-faint);
-    line-height: 1.2;
-    font-style: italic;
   }
 </style>

@@ -737,8 +737,7 @@
   .nb {
     max-width: 760px;
     margin: 0 auto;
-    /* room to scroll the final cell clear of the sticky kernel */
-    padding-bottom: 16vh;
+    padding-bottom: 2rem;
   }
   .nb__head {
     text-align: center;
@@ -765,7 +764,7 @@
     font-size: 0.95rem;
   }
   .nb__primer-kicker {
-    margin: 0 0 0.4rem;
+    margin: 1.8rem 0 0.5rem;
     text-align: center;
     font-size: 0.66rem;
     text-transform: uppercase;
@@ -774,7 +773,7 @@
     color: var(--ink-faint);
   }
   .nb__transition {
-    margin: 0.7rem 0 0;
+    margin: 1rem 0 1.5rem;
     text-align: center;
     font-size: 0.86rem;
     font-style: italic;
@@ -782,24 +781,24 @@
   }
 
   /* ── kernel (sticky) ── */
-  /* the two watched angles (λ☉, λ☽), shown in the time widget's extra slot;
+  /* the two watched angles (λ☉, λ☽), sat beside the clock in the time widget;
      fixed min-width + tabular figures so the values never wobble while playing */
   .watch {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
     font-variant-numeric: tabular-nums;
   }
   .watch__var {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
-    min-width: 7.5rem;
-    font-size: 0.92rem;
+    gap: 0.25rem;
+    min-width: 6.3rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    padding: 0.12rem 0.6rem;
+    padding: 0.1rem 0.5rem;
     border-radius: var(--radius-pill);
     background: var(--paper-2);
   }

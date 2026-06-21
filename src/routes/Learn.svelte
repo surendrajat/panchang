@@ -1,5 +1,5 @@
 <script lang="ts">
-  // EXPERIMENTAL — "How the Pañcāṅga Works" (#/learn). A guided, interactive
+  // EXPERIMENTAL — "How the Panchanga Works" (#/learn). A guided, interactive
   // tour of how a Hindu calendar is built from just two angles (λ☉, λ☽). Each
   // numbered step pairs a short why, a LIVE formula with the real numbers, and a
   // focused animation; the shared <SkyClock> picks the moment every step reads
@@ -45,35 +45,35 @@
   const tn = (dev: string, tr: string, en: string) =>
     lang === 'hi' ? dev : preferences.transliteration ? tr : en;
   const d1 = (x: number) => num(x.toFixed(1)) + '°';
-  const earthLabel = $derived(tn('पृथ्वी', 'Pṛthvī', 'Earth'));
+  const earthLabel = $derived(tn('पृथ्वी', 'Prithvi', 'Earth'));
 
   // The lunar month + Gregorian span while the Sun sits in each sign (index 0 =
-  // Meṣa) — for the māsa cell. Same table as routes/Sky.svelte.
+  // Mesha) — for the masa cell. Same table as routes/Sky.svelte.
   type MonInfo = { mon: { en: string; hi: string }; greg: { en: string; hi: string } };
   const SIGN_MONTH: readonly MonInfo[] = [
-    { mon: { en: 'Vaiśākha', hi: 'वैशाख' }, greg: { en: 'Apr–May', hi: 'अप्रैल–मई' } },
-    { mon: { en: 'Jyeṣṭha', hi: 'ज्येष्ठ' }, greg: { en: 'May–Jun', hi: 'मई–जून' } },
-    { mon: { en: 'Āṣāḍha', hi: 'आषाढ़' }, greg: { en: 'Jun–Jul', hi: 'जून–जुलाई' } },
-    { mon: { en: 'Śrāvaṇa', hi: 'श्रावण' }, greg: { en: 'Jul–Aug', hi: 'जुलाई–अगस्त' } },
-    { mon: { en: 'Bhādrapada', hi: 'भाद्रपद' }, greg: { en: 'Aug–Sep', hi: 'अगस्त–सितंबर' } },
-    { mon: { en: 'Āśvina', hi: 'आश्विन' }, greg: { en: 'Sep–Oct', hi: 'सितंबर–अक्तूबर' } },
-    { mon: { en: 'Kārtika', hi: 'कार्तिक' }, greg: { en: 'Oct–Nov', hi: 'अक्तूबर–नवंबर' } },
-    { mon: { en: 'Mārgaśīrṣa', hi: 'मार्गशीर्ष' }, greg: { en: 'Nov–Dec', hi: 'नवंबर–दिसंबर' } },
-    { mon: { en: 'Pauṣa', hi: 'पौष' }, greg: { en: 'Dec–Jan', hi: 'दिसंबर–जनवरी' } },
-    { mon: { en: 'Māgha', hi: 'माघ' }, greg: { en: 'Jan–Feb', hi: 'जनवरी–फरवरी' } },
-    { mon: { en: 'Phālguna', hi: 'फाल्गुन' }, greg: { en: 'Feb–Mar', hi: 'फरवरी–मार्च' } },
+    { mon: { en: 'Vaishakha', hi: 'वैशाख' }, greg: { en: 'Apr–May', hi: 'अप्रैल–मई' } },
+    { mon: { en: 'Jyeshtha', hi: 'ज्येष्ठ' }, greg: { en: 'May–Jun', hi: 'मई–जून' } },
+    { mon: { en: 'Ashadha', hi: 'आषाढ़' }, greg: { en: 'Jun–Jul', hi: 'जून–जुलाई' } },
+    { mon: { en: 'Shravana', hi: 'श्रावण' }, greg: { en: 'Jul–Aug', hi: 'जुलाई–अगस्त' } },
+    { mon: { en: 'Bhadrapada', hi: 'भाद्रपद' }, greg: { en: 'Aug–Sep', hi: 'अगस्त–सितंबर' } },
+    { mon: { en: 'Ashvina', hi: 'आश्विन' }, greg: { en: 'Sep–Oct', hi: 'सितंबर–अक्तूबर' } },
+    { mon: { en: 'Kartika', hi: 'कार्तिक' }, greg: { en: 'Oct–Nov', hi: 'अक्तूबर–नवंबर' } },
+    { mon: { en: 'Margashirsha', hi: 'मार्गशीर्ष' }, greg: { en: 'Nov–Dec', hi: 'नवंबर–दिसंबर' } },
+    { mon: { en: 'Pausha', hi: 'पौष' }, greg: { en: 'Dec–Jan', hi: 'दिसंबर–जनवरी' } },
+    { mon: { en: 'Magha', hi: 'माघ' }, greg: { en: 'Jan–Feb', hi: 'जनवरी–फरवरी' } },
+    { mon: { en: 'Phalguna', hi: 'फाल्गुन' }, greg: { en: 'Feb–Mar', hi: 'फरवरी–मार्च' } },
     { mon: { en: 'Chaitra', hi: 'चैत्र' }, greg: { en: 'Mar–Apr', hi: 'मार्च–अप्रैल' } },
   ];
 
-  // The seven vāra, in weekday order (0 = Sunday), each ruled by one graha.
+  // The seven vara, in weekday order (0 = Sunday), each ruled by one graha.
   const VARA: { dev: string; tr: string; en: string; lord: GrahaKey }[] = [
-    { dev: 'रविवार', tr: 'Ravivāra', en: 'Sunday', lord: 'sun' },
-    { dev: 'सोमवार', tr: 'Somavāra', en: 'Monday', lord: 'moon' },
-    { dev: 'मंगलवार', tr: 'Maṅgalavāra', en: 'Tuesday', lord: 'mars' },
-    { dev: 'बुधवार', tr: 'Budhavāra', en: 'Wednesday', lord: 'mercury' },
-    { dev: 'गुरुवार', tr: 'Guruvāra', en: 'Thursday', lord: 'jupiter' },
-    { dev: 'शुक्रवार', tr: 'Śukravāra', en: 'Friday', lord: 'venus' },
-    { dev: 'शनिवार', tr: 'Śanivāra', en: 'Saturday', lord: 'saturn' },
+    { dev: 'रविवार', tr: 'Ravivara', en: 'Sunday', lord: 'sun' },
+    { dev: 'सोमवार', tr: 'Somavara', en: 'Monday', lord: 'moon' },
+    { dev: 'मंगलवार', tr: 'Mangalavara', en: 'Tuesday', lord: 'mars' },
+    { dev: 'बुधवार', tr: 'Budhavara', en: 'Wednesday', lord: 'mercury' },
+    { dev: 'गुरुवार', tr: 'Guruvara', en: 'Thursday', lord: 'jupiter' },
+    { dev: 'शुक्रवार', tr: 'Shukravara', en: 'Friday', lord: 'venus' },
+    { dev: 'शनिवार', tr: 'Shanivara', en: 'Saturday', lord: 'saturn' },
   ];
 
   // ── Time kernel ─────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@
   let speed = $state(0); // simulated seconds per real second
   let live = $state(true);
   let showGrahas = $state(false); // optional planets on the wheels
-  let tropical = $state(false); // ayanāṁśa cell: flip the sign ring
+  let tropical = $state(false); // ayanamsa cell: flip the sign ring
 
   function toggleSpeed(s: number) {
     if (!live && speed === s) speed = 0;
@@ -109,7 +109,7 @@
   const PADA_ARC = NAK_ARC / 4; // 3°20′
   const tithiNum = $derived(Math.floor(elong / 12) + 1); // 1..30
   const waxing = $derived(elong < 180);
-  const paksha = $derived(hi(waxing ? 'शुक्ल' : 'कृष्ण', waxing ? 'Śukla' : 'Kṛṣṇa'));
+  const paksha = $derived(hi(waxing ? 'शुक्ल' : 'कृष्ण', waxing ? 'Shukla' : 'Krishna'));
   const nakNum = $derived(Math.floor(moonSid / NAK_ARC) + 1); // 1..27
   const pada = $derived(Math.floor((moonSid % NAK_ARC) / PADA_ARC) + 1); // 1..4
   const yogaSum = $derived(norm360(sunSid + moonSid));
@@ -140,7 +140,7 @@
       : [],
   );
 
-  // weekday index 0..6 (for the Vāra step + the summary)
+  // weekday index 0..6 (for the Vara step + the summary)
   const WEEKDAY_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const varaIdx = $derived.by(() => {
     const wd = new Intl.DateTimeFormat('en-US', {
@@ -168,7 +168,7 @@
         title: grahaLabel('sun'),
         body: hi(
           `अभी ${rashiLabel(sunRashi)} में। सूर्य हर ~30 दिन में एक राशि बदलता है — हर बार संक्रान्ति — और इसी से मास व ऋतु बनते हैं।`,
-          `In ${rashiLabel(sunRashi)} now. The Sun changes sign every ~30 days — each a sankrānti — and that sets the month and the season.`,
+          `In ${rashiLabel(sunRashi)} now. The Sun changes sign every ~30 days — each a sankranti — and that sets the month and the season.`,
         ),
       };
     if (s.type === 'moon')
@@ -203,7 +203,7 @@
 <section class="nb">
   <header class="nb__head">
     <p class="nb__kicker">{hi('सजीव मार्गदर्शिका', 'An interactive guide')}</p>
-    <h2>{hi('पंचांग कैसे बनता है', 'How the Pañcāṅga Works')}</h2>
+    <h2>{hi('पंचांग कैसे बनता है', 'How the Panchanga Works')}</h2>
     <p class="nb__lede">
       {hi(
         'आकाश के सिर्फ़ दो कोणों से पूरा हिन्दू पंचांग कैसे बनता है — वास्तविक खगोलीय गणना से, सजीव। नीचे समय बदलें या चलाएँ और हर मान को बदलते देखें।',
@@ -239,7 +239,7 @@
       <p class="prose">
         {hi(
           'पंचांग जटिल दिखता है, पर टिका है बस दो मापों पर: राशिचक्र पर सूर्य कहाँ है (λ☉) और चन्द्र कहाँ है (λ☽)। ऊपर कोई भी क्षण चुनिए — ये दो कोण तय हो जाते हैं, और नीचे का हर अंग बस इन्हीं का गणित है।',
-          'A pañcāṅga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ☉), and how far the Moon is (λ☽). Pick any moment above and these two angles are fixed — every limb below is just arithmetic on them.',
+          'A panchanga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ☉), and how far the Moon is (λ☽). Pick any moment above and these two angles are fixed — every limb below is just arithmetic on them.',
         )}
       </p>
       <div class="viz">
@@ -255,7 +255,7 @@
       <p class="caption">
         {hi(
           'भीतर की दो किरणें = दो कोण, 0° (मेष आरंभ) से नापे गए।',
-          'The two inner rays are the two angles, measured from 0° (the start of Meṣa).',
+          'The two inner rays are the two angles, measured from 0° (the start of Mesha).',
         )}
       </p>
     </div>
@@ -270,13 +270,13 @@
       <p class="prose">
         {hi(
           'दोनों ज्योतिर्पिंड एक ही मार्ग पर चलते हैं — क्रान्तिवृत्त, सूर्य का वार्षिक पथ। इस वृत्त को 30° के बारह भागों में बाँटिए और मिलती हैं राशियाँ। किसी पिंड की राशि बस उसके देशांतर को 30° से विभाजित करने पर मिलती है।',
-          'Both lights ride one highway — the ecliptic, the Sun’s yearly path. Cut that circle into twelve 30° arcs and you have the rāśi, the zodiac signs. A body’s sign is simply its longitude divided by 30°.',
+          'Both lights ride one highway — the ecliptic, the Sun’s yearly path. Cut that circle into twelve 30° arcs and you have the rashi, the zodiac signs. A body’s sign is simply its longitude divided by 30°.',
         )}
       </p>
       <div class="code">
         <span class="code__tag">{hi('सूत्र', 'formula')}</span>
         <div class="code__body">
-          <div>rāśi = ⌊ λ / 30° ⌋</div>
+          <div>rashi = ⌊ λ / 30° ⌋</div>
           <div>
             <span class="cm"><CelestialMark body="sun" size={13} /></span> ⌊
             <span class="in">{d1(sunSid)}</span>
@@ -345,7 +345,7 @@
       <p class="prose">
         {hi(
           'सूर्य लगभग 30 दिनों में एक राशि पार करता है; हर संक्रमण एक संक्रान्ति है। जिस राशि में वह बैठा है वही सौर मास का नाम और ऋतु तय करती है — पंचांग की धीमी सुई।',
-          'The Sun crosses one sign in about 30 days; each crossing is a sankrānti. The sign it sits in names the solar month and sets the season — the calendar’s slow hand.',
+          'The Sun crosses one sign in about 30 days; each crossing is a sankranti. The sign it sits in names the solar month and sets the season — the calendar’s slow hand.',
         )}
       </p>
       <div class="code">
@@ -439,7 +439,7 @@
         <strong>{hi('एक तिथि 24 घंटे की नहीं होती।', 'A tithi isn’t 24 hours.')}</strong>
         {hi(
           `दोनों पिंड घटते-बढ़ते वेग से चलते हैं, सो अंतर 11–14°/दिन बढ़ता है और 12° की तिथि ~20 से ~26 घंटे तक चलती है (अभी ≈ ${num(tithiHours.toFixed(1))} घं)। छोटी तिथि किसी सूर्योदय को छोड़ सकती है (क्षय, लुप्त); लंबी दो सूर्योदय पकड़ सकती है (वृद्धि, द्विगुणित)। यही त्योहारों के नियमों का कारण है।`,
-          `Both bodies speed up and slow down, so the gap grows at 11–14°/day and a 12° tithi runs from ~20 to ~26 hours (right now ≈ ${num(tithiHours.toFixed(1))} h). A short one can skip a sunrise entirely (kṣaya, dropped); a long one can catch two (vṛddhi, repeated). That one fact is why festival dates need rules.`,
+          `Both bodies speed up and slow down, so the gap grows at 11–14°/day and a 12° tithi runs from ~20 to ~26 hours (right now ≈ ${num(tithiHours.toFixed(1))} h). A short one can skip a sunrise entirely (kshaya, dropped); a long one can catch two (vriddhi, repeated). That one fact is why festival dates need rules.`,
         )}
       </aside>
     </div>
@@ -454,7 +454,7 @@
       <p class="prose">
         {hi(
           'यह अंतर अमूर्त नहीं — यही आप आकाश में देखते हैं। चन्द्र का सूर्य-मुखी आधा भाग सदा प्रकाशित रहता है; पृथ्वी से हम उसे ठीक इसी अंतर के कोण पर देखते हैं। 0→180° बढ़ता है (शुक्ल पक्ष); 180→360° घटता है (कृष्ण पक्ष)।',
-          'The gap isn’t abstract — it’s what you see in the sky. The Moon’s sunward half is always lit; from Earth we catch it at exactly the angle of the gap. From 0→180° it waxes (śukla pakṣa, the bright fortnight); 180→360° it wanes (kṛṣṇa pakṣa, the dark).',
+          'The gap isn’t abstract — it’s what you see in the sky. The Moon’s sunward half is always lit; from Earth we catch it at exactly the angle of the gap. From 0→180° it waxes (shukla paksha, the bright fortnight); 180→360° it wanes (krishna paksha, the dark).',
         )}
       </p>
       <div class="viz-pair">
@@ -472,8 +472,8 @@
           <span class="phasebar__dot" style="left:{(elong / 360) * 100}%"></span>
         </div>
         <div class="phasebar__ends">
-          <span>{hi('अमावस्या 0°', 'new 0°')}</span><span>{hi('शुक्ल', 'śukla')}</span><span
-            >{hi('कृष्ण', 'kṛṣṇa')}</span
+          <span>{hi('अमावस्या 0°', 'new 0°')}</span><span>{hi('शुक्ल', 'shukla')}</span><span
+            >{hi('कृष्ण', 'krishna')}</span
           ><span>360°</span>
         </div>
       </div>
@@ -486,22 +486,22 @@
     <div class="cell__no">[6]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('सूक्ष्म मापक', 'The fine ruler')}</p>
-      <h3>{hi('तारों के बीच चन्द्र — नक्षत्र', 'The Moon among the stars — nakṣatra')}</h3>
+      <h3>{hi('तारों के बीच चन्द्र — नक्षत्र', 'The Moon among the stars — nakshatra')}</h3>
       <p class="prose">
         {hi(
           'चन्द्र पूरा वृत्त ~27.3 दिनों में पार करता है, सो इसे 27 में बाँटिए और चन्द्र हर रात एक भाग चलता है — नक्षत्र, उसके रात्रि-विश्राम, हर एक वास्तविक तारासमूह। हर नक्षत्र को चार पाद में बाँटिए तो 108 — माला के मनके।',
-          'The Moon crosses the whole circle in ~27.3 days, so divide it into 27 and the Moon moves one division a night — the nakṣatra, its nightly lodgings, each a real star-group. Quarter each into four pāda and you get 108 — the beads on a mālā.',
+          'The Moon crosses the whole circle in ~27.3 days, so divide it into 27 and the Moon moves one division a night — the nakshatra, its nightly lodgings, each a real star-group. Quarter each into four pada and you get 108 — the beads on a mala.',
         )}
       </p>
       <div class="code">
         <span class="code__tag">{hi('सूत्र', 'formula')}</span>
         <div class="code__body">
-          <div>nakṣatra = ⌊ λ<sub>☽</sub> / 13°20′ ⌋ + 1</div>
+          <div>nakshatra = ⌊ λ<sub>☽</sub> / 13°20′ ⌋ + 1</div>
           <div>
             = ⌊ <span class="in">{d1(moonSid)}</span> / 13.33° ⌋ + 1 =
             <span class="out">{num(nakNum)}</span>
             → <span class="out">{nakshatraNameByIndex(nakNum, lang)}</span>
-            <span class="muted">· {hi('पाद', 'pāda')} {num(pada)}</span>
+            <span class="muted">· {hi('पाद', 'pada')} {num(pada)}</span>
           </div>
         </div>
       </div>
@@ -512,19 +512,19 @@
           {ayan}
           size={360}
           show={{ nakRing: true, nakBand: true, sun: false }}
-          label={hi('नक्षत्र वलय', 'Nakṣatra ring')}
+          label={hi('नक्षत्र वलय', 'Nakshatra ring')}
         />
       </div>
       <p class="caption">
         {hi(
           'भीतरी वलय की 27 लकीरें = 27 नक्षत्र; चन्द्र अभी जिस में है वह उभरा हुआ है।',
-          'The 27 ticks on the inner ring are the 27 nakṣatras; the Moon’s current one is highlighted.',
+          'The 27 ticks on the inner ring are the 27 nakshatras; the Moon’s current one is highlighted.',
         )}
       </p>
       <div class="actions">
         {@render run(86400, 'एक मास देखें', 'Watch a month')}
         <span class="actions__hint"
-          >{hi('लगभग हर रात एक नक्षत्र', 'about one nakṣatra a night')}</span
+          >{hi('लगभग हर रात एक नक्षत्र', 'about one nakshatra a night')}</span
         >
       </div>
     </div>
@@ -539,14 +539,14 @@
       <p class="prose">
         {hi(
           'नक्षत्र के लिए देशांतर तारों से नापना होता है (निरयन)। पर विषुव — सायन शून्य-बिंदु — हर साल ~50″ खिसकता है (अयन-चलन), सो तारा-राशिचक्र और ऋतु-राशिचक्र ~24° दूर हो चुके हैं। यही अंतर अयनांश है; निरयन के लिए इसे घटाइए।',
-          'Nakṣatra needs longitude measured from the stars (nirayana). But the equinox — the tropical zero — slips ~50″ a year (precession), so the star-zodiac and the season-zodiac have drifted ~24° apart. That gap is the ayanāṁśa; subtract it to go sidereal.',
+          'Nakshatra needs longitude measured from the stars (nirayana). But the equinox — the tropical zero — slips ~50″ a year (precession), so the star-zodiac and the season-zodiac have drifted ~24° apart. That gap is the ayanamsa; subtract it to go sidereal.',
         )}
       </p>
       <div class="code">
         <span class="code__tag">{hi('सूत्र', 'formula')}</span>
         <div class="code__body">
           <div>
-            {hi('अयनांश', 'ayanāṁśa')} = <span class="out">{d1(ayan)}</span>
+            {hi('अयनांश', 'ayanamsa')} = <span class="out">{d1(ayan)}</span>
             <span class="muted">({hi('आज', 'today')})</span>
           </div>
           <div>
@@ -582,14 +582,14 @@
             : hi('सायन (ऋतु)', 'Tropical (seasons)')}
         </button>
         <span class="actions__hint"
-          >{hi('वलय अयनांश जितना घूमता है', 'the ring turns by the ayanāṁśa')}</span
+          >{hi('वलय अयनांश जितना घूमता है', 'the ring turns by the ayanamsa')}</span
         >
       </div>
       <aside class="aha">
         <strong>{hi('सुंदर बात:', 'A lovely twist:')}</strong>
         {hi(
           'तिथि को अयनांश से फ़र्क़ नहीं पड़ता — वह एक अंतर है, और घटाने में अयनांश दोनों से कट जाता है। पर नक्षत्र व राशि निरपेक्ष स्थिति हैं, सो उन्हें यह चाहिए ही।',
-          'The tithi doesn’t care about the ayanāṁśa — it’s a difference, so the offset cancels from both terms. But nakṣatra and rāśi are absolute positions, so they genuinely need it.',
+          'The tithi doesn’t care about the ayanamsa — it’s a difference, so the offset cancels from both terms. But nakshatra and rashi are absolute positions, so they genuinely need it.',
         )}
       </aside>
     </div>
@@ -604,7 +604,7 @@
       <p class="prose">
         {hi(
           'पंचांग = “पाँच अंग”। तिथि और चन्द्र-स्थिति के बाद शेष तीन उसी मशीन के रूप हैं।',
-          'Pañcāṅga means “five limbs.” After the tithi and the Moon’s place, the remaining three are variations on the same machine.',
+          'Panchanga means “five limbs.” After the tithi and the Moon’s place, the remaining three are variations on the same machine.',
         )}
       </p>
       <div class="mini">
@@ -619,7 +619,7 @@
           {hi('घटाने के बजाय जोड़ें, 27 में बाँटें।', 'Add instead of subtract, slice into 27.')}
         </p>
         <div class="mini__row">
-          <span class="mini__name">{hi('करण', 'Karaṇa')}</span>
+          <span class="mini__name">{hi('करण', 'Karana')}</span>
           <span class="mini__f"
             >⌊ {hi('अंतर', 'gap')} / 6° ⌋ →
             <span class="out">{karanaNameByPosition(karanaPos, lang)}</span></span
@@ -628,11 +628,11 @@
         <p class="mini__note">
           {hi(
             'तिथि का आधा — मास में 60, ग्यारह नामों में। एक, भद्रा, कुछ कर्मों को रोकता है।',
-            'Half a tithi — 60 a month over 11 names. One, Bhadrā, blocks certain rites.',
+            'Half a tithi — 60 a month over 11 names. One, Bhadra, blocks certain rites.',
           )}
         </p>
         <div class="mini__row">
-          <span class="mini__name">{hi('वार', 'Vāra')}</span>
+          <span class="mini__name">{hi('वार', 'Vara')}</span>
           <span class="mini__f"
             >{hi('सूर्योदय का दिन', 'the sunrise day')} →
             <span class="out"
@@ -672,7 +672,7 @@
       <p class="prose">
         {hi(
           'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। किसी पिंड पर टैप करें, ⚙ से ग्रह जोड़ें या राशिचक्र बदलें, और ऊपर समय चलाकर हर मान को बदलते देखें। यही पूरे पंचांग की जड़ है।',
-          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and play time above to watch every value move. This is the root the whole pañcāṅga grows from.',
+          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and play time above to watch every value move. This is the root the whole panchanga grows from.',
         )}
       </p>
       <SkyPanel date={simDate} />
@@ -685,16 +685,16 @@
     </div>
   </article>
 
-  <!-- ════ CELL 10 — At a glance: the simplified pañcāṅga ════ -->
+  <!-- ════ CELL 10 — At a glance: the simplified panchanga ════ -->
   <article class="cell cell--sum">
     <div class="cell__no">[10]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('एक नज़र में', 'At a glance')}</p>
-      <h3>{hi('इस क्षण का पंचांग', 'This moment’s pañcāṅga')}</h3>
+      <h3>{hi('इस क्षण का पंचांग', 'This moment’s panchanga')}</h3>
       <p class="prose">
         {hi(
           'और यही सब एक पंक्ति में — ठीक वैसा जैसा छपा पंचांग छापता है, सब इसी क्षण के λ☉ और λ☽ से निकला।',
-          'And the same thing in one line — exactly what a printed pañcāṅga prints, all of it from λ☉ and λ☽ at this moment.',
+          'And the same thing in one line — exactly what a printed panchanga prints, all of it from λ☉ and λ☽ at this moment.',
         )}
       </p>
       <dl class="summary">
@@ -703,11 +703,11 @@
           <dd>{paksha} {tithiNameByIndex(tithiNum, lang)}</dd>
         </div>
         <div>
-          <dt>{hi('वार', 'Vāra')}</dt>
+          <dt>{hi('वार', 'Vara')}</dt>
           <dd>{varaIdx >= 0 ? tn(VARA[varaIdx].dev, VARA[varaIdx].tr, VARA[varaIdx].en) : '—'}</dd>
         </div>
         <div>
-          <dt>{hi('नक्षत्र', 'Nakṣatra')}</dt>
+          <dt>{hi('नक्षत्र', 'Nakshatra')}</dt>
           <dd>{nakshatraNameByIndex(nakNum, lang)}</dd>
         </div>
         <div>
@@ -715,11 +715,11 @@
           <dd>{yogaNameByIndex(yogaNum, lang)}</dd>
         </div>
         <div>
-          <dt>{hi('करण', 'Karaṇa')}</dt>
+          <dt>{hi('करण', 'Karana')}</dt>
           <dd>{karanaNameByPosition(karanaPos, lang)}</dd>
         </div>
         <div>
-          <dt>{hi('मास', 'Māsa')}</dt>
+          <dt>{hi('मास', 'Masa')}</dt>
           <dd>{hi(SIGN_MONTH[sunRashi].mon.hi, SIGN_MONTH[sunRashi].mon.en)}</dd>
         </div>
       </dl>

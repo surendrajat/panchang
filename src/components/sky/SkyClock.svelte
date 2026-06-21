@@ -3,7 +3,7 @@
   // Owns the time model (a capped rAF loop) and exposes the current moment via a
   // bindable `date` (and `speed`/`live` so a parent's per-cell "Run" buttons can
   // drive it). The clock is fixed-width with tabular figures so the date never
-  // wobbles as it ticks or plays; the vāra (weekday) sits on its own line.
+  // wobbles as it ticks or plays; the vara (weekday) sits on its own line.
   import type { Snippet } from 'svelte';
   import { preferences } from '$lib/state/preferences.svelte';
   import { applyNumerals } from '$lib/format/numerals';
@@ -61,7 +61,7 @@
     date = new Date();
   }
 
-  // "Wed 24 Jun 2026, 16:01" — the weekday (vāra) leads the date; the day is
+  // "Wed 24 Jun 2026, 16:01" — the weekday (vara) leads the date; the day is
   // 2-digit and figures are tabular so nothing shifts sideways as time ticks/plays.
   const wdFmt = $derived(
     new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'en-GB', {

@@ -1,7 +1,7 @@
 <script lang="ts">
   // A short ANIMATED primer that builds the one idea the notebook rests on, before
   // any formulas: celestial sphere → the ecliptic → ecliptic longitude (λ) → the
-  // twelve rāśi → the two "hands" (Sun & Moon). One evolving canvas; the Sun
+  // twelve rashi → the two "hands" (Sun & Moon). One evolving canvas; the Sun
   // really crawls and the Moon really races (~13× faster), so the gap that becomes
   // the tithi is felt, not just told. The dark "sky" sits inside a paper card so
   // it belongs to the page. Self-paced — independent of the notebook's kernel.
@@ -41,7 +41,7 @@
       t: { hi: 'बारह राशियाँ', en: 'The twelve signs' },
       b: {
         hi: 'इस वृत्त को 30° के बारह बराबर भागों में बाँटिए — यही राशियाँ हैं (मेष, वृषभ…)। यही वह रंगमंच है जिस पर सब घटित होता है।',
-        en: 'Cut that circle into twelve equal 30° slices and you get the rāśi — the zodiac signs (Meṣa, Vṛṣabha…). This is the stage it all plays out on.',
+        en: 'Cut that circle into twelve equal 30° slices and you get the rashi — the zodiac signs (Mesha, Vrishabha…). This is the stage it all plays out on.',
       },
     },
     {
@@ -192,7 +192,7 @@
       <!-- the ecliptic circle (faint until named in step 2) -->
       <circle cx={CX} cy={CY} r={R} class="ci-ecliptic" class:lit fill="none" />
 
-      <!-- the twelve rāśi divisions (step 4) -->
+      <!-- the twelve rashi divisions (step 4) -->
       <g class="ci-layer ci-signs" class:show={showSigns} class:dim={showMoon}>
         {#each SIGNS as i (i)}
           {@const a = pt(i * 30, R - 7)}

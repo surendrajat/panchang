@@ -6,8 +6,8 @@
   // The local sky as an all-sky dome (zenith at the centre, horizon at the rim;
   // N up, E left, S down, W right) — extracted from routes/Sky.svelte so the
   // #/learn notebook can reuse it. Bright stars carry their Sanskrit names, many
-  // of which ARE nakṣatras (Rohiṇī = Aldebaran, Citrā = Spica…), so the dome
-  // doubles as a nakṣatra map. Pass atmosphere={false} for a planetarium look
+  // of which ARE nakshatras (Rohini = Aldebaran, Chitra = Spica…), so the dome
+  // doubles as a nakshatra map. Pass atmosphere={false} for a planetarium look
   // (always-dark sky → stars visible regardless of the local time of day).
   import { preferences } from '$lib/state/preferences.svelte';
   import { bodyAltAz, starAltAz, bodyArc, type SkyBody } from '$lib/astro';
@@ -214,7 +214,7 @@
     };
   });
 
-  // brightest stars (J2000 RA h, Dec °, mag); many are nakṣatra junction-stars
+  // brightest stars (J2000 RA h, Dec °, mag); many are nakshatra junction-stars
   const BRIGHT_STARS = [
     { ra: 6.752, dec: -16.72, mag: -1.46, n: { hi: 'लुब्धक', tr: 'Lubdhaka', en: 'Sirius' } },
     {

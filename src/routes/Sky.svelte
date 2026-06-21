@@ -865,8 +865,8 @@
     </div>
     <p class="speed-hint">
       {hi(
-        'समय की गति बदलने के लिए ऊपर टैप करें — आकाश घूमता हुआ देखें',
-        'Tap a chip above to scrub time and watch the sky move',
+        '💡 ग्रहों की गति यहाँ टैप करके बढ़ाई जा सकती है',
+        '💡 The speed of planets can be increased by tapping here',
       )}
     </p>
   </div>

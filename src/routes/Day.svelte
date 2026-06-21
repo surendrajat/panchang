@@ -32,34 +32,23 @@
     return !isValidCivilDate(Number(m[1]), Number(m[2]), Number(m[3]));
   });
 
-  let panchanga = $state<Panchanga | null>(null);
+  // Sync-compute: computePanchanga is pure and fast (~2 ms). Computing
+  // synchronously eliminates the "loading…" flash between mount and async cache
+  // resolution. With the DayPager sticky, that brief shorter-content moment let
+  // the browser snap scrollY to 0 during today↔day navigation.
+  const panchanga = $derived.by<Panchanga | null>(() => {
+    const loc = preferences.location;
+    if (!loc || !preferences.hydrated || !date || Number.isNaN(date.getTime())) return null;
+    return computePanchanga(date, loc, panchangaOptionsFrom(preferences));
+  });
 
   $effect(() => {
     const loc = preferences.location;
-    const hydrated = preferences.hydrated;
-    const opts = panchangaOptionsFrom(preferences);
-    if (!loc || !hydrated || !date || Number.isNaN(date.getTime())) {
-      panchanga = null;
-      return;
-    }
-    const d = date;
-    const key = cacheKey(d, loc, opts);
-    let cancelled = false;
-    getCached(key).then((cached) => {
-      if (cancelled) return;
-      if (cached) {
-        panchanga = cached;
-        return;
-      }
-      const result = computePanchanga(d, loc, opts);
-      if (!cancelled) {
-        panchanga = result;
-        void putCached(key, result);
-      }
+    if (!loc || !date || !panchanga) return;
+    const key = cacheKey(date, loc, panchangaOptionsFrom(preferences));
+    void getCached(key).then((cached) => {
+      if (!cached) void putCached(key, panchanga);
     });
-    return () => {
-      cancelled = true;
-    };
   });
 
   // Day navigation lives in DayPager.svelte now — single source of

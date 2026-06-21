@@ -8,7 +8,6 @@
   } from '$lib/state/preferences.svelte';
   import { swUpdate, applySwUpdate, dismissSwUpdate } from '$lib/state/sw-update.svelte';
   import { clock } from '$lib/state/clock.svelte';
-  import Today from './routes/Today.svelte';
   import Day from './routes/Day.svelte';
   import Month from './routes/Month.svelte';
   import Festivals from './routes/Festivals.svelte';
@@ -17,6 +16,7 @@
   import { t, type TranslationKey, samvatsaraNameByIndex } from '$lib/i18n';
   import { SAMVATSARA_NAMES } from '$lib/panchanga/names';
   import { applyNumerals } from '$lib/format/numerals';
+  import { localYMD } from '$lib/format/time';
   import { evictStale } from '$lib/storage';
 
   // Component-local translator that picks up the user's active language
@@ -31,19 +31,25 @@
   // Settings lives behind a dedicated icon button.
 
   let hash = $state(typeof location !== 'undefined' ? location.hash : '');
-  // Remember scroll position per route so switching tabs and coming back doesn't
-  // jump to the top. Plain Map (not reactive state) — read only in the restore
-  // effect below.
+  // Remember scroll position per top-level SECTION (not per route name) so
+  // switching tabs and coming back doesn't jump to the top — and so navigating
+  // within the same section (today↔day, day↔day) keeps the scroll where it is.
+  // Plain Map (not reactive state); read only in the restore effect below.
   // eslint-disable-next-line svelte/prefer-svelte-reactivity
-  const scrollByRoute = new Map<string, number>();
+  const scrollBySection = new Map<string, number>();
+  // Today and Day are the same logical section (Day is just "any" day); the
+  // muhurta/festival info is laid out identically, so the user expects scroll
+  // continuity when paging next/prev or jumping to today from a scrolled day.
+  function sectionOf(name: string): string {
+    return name === 'today' || name === 'day' ? 'day' : name;
+  }
 
   onMount(() => {
     hydratePreferences();
     void evictStale();
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     const handler = () => {
-      // Save where we were on the route we're leaving, then switch.
-      scrollByRoute.set(parseHash(hash).name, window.scrollY);
+      scrollBySection.set(sectionOf(parseHash(hash).name), window.scrollY);
       hash = location.hash;
     };
     window.addEventListener('hashchange', handler);
@@ -61,15 +67,22 @@
 
   const route = $derived<ResolvedRoute>(parseHash(hash));
 
-  // On entering a route, restore its remembered scroll (or top on a first visit).
-  // Two rAFs so the new view has painted before we scroll.
+  // Restore scroll position only on CROSS-SECTION transitions. Same-section
+  // navigation (day↔today, day→day next/prev) leaves the scroll where it is —
+  // the user's reading position is preserved as they page through dates. The
+  // initial mount also leaves the browser's scrollY alone.
+  let lastSection: string | null = null;
   $effect(() => {
-    const y = scrollByRoute.get(route.name) ?? 0;
+    const cur = sectionOf(route.name);
+    const prev = lastSection;
+    lastSection = cur;
+    if (prev === null || prev === cur) return;
+    const y = scrollBySection.get(cur) ?? 0;
+    // Two rAFs so the new view has painted before we restore scroll.
     let r2 = 0;
     const r1 = requestAnimationFrame(() => {
       r2 = requestAnimationFrame(() => window.scrollTo(0, y));
     });
-    // Cancel on route change so a stale scroll can't land on the new view.
     return () => {
       cancelAnimationFrame(r1);
       cancelAnimationFrame(r2);
@@ -111,6 +124,11 @@
     const d = new Date();
     return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
   }
+  // Today's YMD in the user's location — reactive (rolls over at midnight via
+  // the shared clock store). The `today` route uses the same <Day> component
+  // as `day`, just parameterised with this value, so navigating today↔day
+  // does not unmount/remount the view (no flash, no .view animation re-fire).
+  const liveTodayYMD = $derived(localYMD(clock.now, preferences.location?.timezone ?? 'UTC'));
 
   function toggleLanguage(): void {
     void updatePreferences({ language: preferences.language === 'hi' ? 'en' : 'hi' });
@@ -122,6 +140,11 @@
     if (!loc?.name) return loc ? `${loc.latitude.toFixed(2)}, ${loc.longitude.toFixed(2)}` : '—';
     return loc.name.split(',')[0];
   });
+
+  // Tab strip ref (declared here so the markup below can bind to it). The
+  // auto-scroll effect lives just after `activeTab` is computed, since it
+  // depends on that derived.
+  let tabsEl = $state<HTMLElement | null>(null);
 
   // Which tab is the "current section" — Today and Day share the Today
   // tab since Day is conceptually a single-day variant of Today.
@@ -140,6 +163,17 @@
               ? 'sky'
               : null,
   );
+
+  // On narrow phones the 5 tabs overflow horizontally; tabs to the right
+  // (Kundli, Sky) can sit off-screen. Whenever the active tab changes, scroll
+  // it into view (centred) so the selected section is always visible.
+  $effect(() => {
+    void activeTab; // tracked
+    const nav = tabsEl;
+    if (!nav) return;
+    const el = nav.querySelector<HTMLElement>('.tab[aria-current="page"]');
+    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  });
 
   function tabHref(view: 'today' | 'month' | 'festivals' | 'kundli' | 'sky'): string {
     if (view === 'today') return '#/';
@@ -319,7 +353,7 @@
       </button>
     </nav>
   {:else}
-    <nav class="tabs" aria-label="Primary views">
+    <nav class="tabs" bind:this={tabsEl} aria-label="Primary views">
       {#each [{ id: 'today' as const, labelKey: 'tab.day' as const }, { id: 'month' as const, labelKey: 'tab.month' as const }, { id: 'festivals' as const, labelKey: 'tab.festivals' as const }, { id: 'kundli' as const, labelKey: 'tab.kundli' as const }, { id: 'sky' as const, labelKey: 'tab.sky' as const }] as tab (tab.id)}
         <a
           class="tab"
@@ -335,10 +369,11 @@
   {/if}
 
   <main id="main">
-    {#if route.name === 'today'}
-      <Today />
-    {:else if route.name === 'day'}
-      <Day yyyymmdd={route.yyyymmdd} />
+    {#if route.name === 'today' || route.name === 'day'}
+      <!-- Today and Day share one component instance, parameterised by the YMD.
+           Same-section navigation (today↔day, day↔day) becomes a prop update —
+           no remount, no .view mount-animation re-fire, no flash mid-transition. -->
+      <Day yyyymmdd={route.name === 'today' ? liveTodayYMD : route.yyyymmdd} />
     {:else if route.name === 'month'}
       <Month yyyymm={route.yyyymm} />
     {:else if route.name === 'festivals'}

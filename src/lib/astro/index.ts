@@ -23,6 +23,7 @@ export {
   bodyLongitudeAtJD,
   gastHoursAtJD,
   trueNodeLongitudeAtJD,
+  trueObliquityDeg,
   Body,
 } from './ephemeris';
 

@@ -27,28 +27,23 @@
 // unaffected — they match every source (incl. Drik) to ≤0.04′.
 // Proven in tests/regression/kundli-vs-drik.test.ts (run via pyswisseph).
 
-import { dateToJulian, gastHoursAtJD, ayanamsa, JD_J2000 } from '$lib/astro';
+import { dateToJulian, gastHoursAtJD, ayanamsa, trueObliquityDeg } from '$lib/astro';
 import type { AyanamsaSystem, Location } from '$lib/panchanga/types';
 import type { Lagna } from './types';
 
 const DEG = Math.PI / 180;
-const JULIAN_CENTURY_DAYS = 36525;
 
 function norm360(d: number): number {
   return ((d % 360) + 360) % 360;
 }
 
-// Mean obliquity of the ecliptic (IAU 1980), degrees. Nutation in
-// obliquity (< 9″) is far below birth-time uncertainty, so mean is fine.
-function meanObliquityDeg(jd: number): number {
-  const T = (jd - JD_J2000) / JULIAN_CENTURY_DAYS;
-  return 23.439291111 - 0.0130041667 * T - 1.638889e-7 * T * T + 5.036111e-7 * T * T * T;
-}
-
 export function computeLagna(instant: Date, location: Location, system: AyanamsaSystem): Lagna {
   const jd = dateToJulian(instant);
+  // RAMC and obliquity are in the TRUE equator/ecliptic of date: GAST is
+  // apparent (includes the equation of equinoxes) and the obliquity includes
+  // nutation, so the frame is self-consistent and matches Swiss Ephemeris.
   const ramc = norm360(gastHoursAtJD(jd) * 15 + location.longitude) * DEG;
-  const eps = meanObliquityDeg(jd) * DEG;
+  const eps = trueObliquityDeg(jd) * DEG;
   const phi = location.latitude * DEG;
 
   const y = Math.cos(ramc);

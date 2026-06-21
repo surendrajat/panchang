@@ -17,6 +17,7 @@ import {
   Illumination,
   MoonPhase as AeMoonPhase,
   Vector,
+  e_tilt,
   type AstroTime,
 } from 'astronomy-engine';
 
@@ -78,6 +79,15 @@ export function bodyLongitudeAtJD(body: Body, jd: number): number {
   const rot = Rotation_EQJ_ECT(time);
   const ect = RotateVector(rot, eqj);
   return normalize(SphereFromVector(ect).lon);
+}
+
+// True obliquity of the ecliptic (mean + IAU 2000B nutation in obliquity), in
+// degrees — the value Swiss Ephemeris's house engine uses. Needed for the
+// lagna: nutation in obliquity (≤9″) shifts the ascendant by up to ~0.5′ at
+// high latitudes, so using the true (not mean) obliquity matches the gold
+// standard there.
+export function trueObliquityDeg(jd: number): number {
+  return e_tilt(jdToAstroTime(jd)).tobl;
 }
 
 // Tropical ecliptic-of-date longitude of the Moon's TRUE (osculating)

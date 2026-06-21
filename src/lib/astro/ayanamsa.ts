@@ -28,26 +28,22 @@ const JULIAN_CENTURY_DAYS = 36525;
 // plus per-system precession coefficients in arcseconds per Julian
 // century (T) and arcseconds per T² for the second-order correction.
 //
-// The Lahiri J2000 anchor (23.8635°) is back-derived from Drik
-// Panchang's computational ayanamsa values read from their 'Other
-// Calendars and Epoch' section:
-//   2024-10-31 → 24.210700°  (JD 2460614.5)  ⟹ J2000 base 23.8633°
-//   2025-01-01 → 24.213073°  (JD 2460676.5)  ⟹ J2000 base 23.8636°
-// Mean: 23.8635°. This reproduces Drik Panchang to ~0.02′.
+// The Lahiri J2000 anchor (23.85709°) is Swiss Ephemeris's SE_SIDM_LAHIRI —
+// the value Swiss Ephemeris documents as the official Indian Astronomical
+// Ephemeris realization (in use since 1985), and what astro.com, Jagannatha
+// Hora, and ProKerala compute. Verified directly with pyswisseph across
+// 1950–2050 (our IAU-2006 precession rate matches Swiss-Eph's to <0.01′, so a
+// single base anchor reproduces it everywhere). This is the SAME accuracy-first
+// choice we make for the kundli LAGNA (see jyotish/lagna.ts): match the
+// independent gold standard, not any one panchang site.
 //
-// ⚠ ACCURACY NOTE (verified with pyswisseph): "Lahiri" has several slightly
-// different numerical realizations. Ours (= Drik's) is ~0.38′ (≈23″) HIGHER
-// than Swiss Ephemeris's SE_SIDM_LAHIRI (23.857° at J2000), which Swiss
-// Ephemeris documents as the official Indian Astronomical Ephemeris value
-// since 1985. (Drik − Swiss-Eph = +0.40′ at the cited dates; ours − Swiss-Eph
-// = +0.38′, constant across 1950–2050.) We deliberately follow DRIK here so
-// the panchanga's nakshatra/yoga end times match the reference most users
-// check — note this is the opposite trade-off from the kundli LAGNA, where we
-// match Swiss Ephemeris (see jyotish/lagna.ts). The 0.38′ shifts all sidereal
-// positions by ~0.38′ and nakshatra/yoga end times by ~45 s vs Swiss-Eph —
-// below practical significance, but it IS a small Drik bias, not "the" value.
-// (The earlier value 23.8267° was 2.2′ lower still — a transcription of Drik's
-// display text, not its computational value — and is wrong; do not revert.)
+// ⚠ "Lahiri" has several numerical realizations within ~0.6′. Notably,
+// drikpanchang.com uses a value ~0.40′ HIGHER (24.213073° vs our 24.20634° on
+// 2025-01-01). We do NOT follow Drik's here — the 0.40′ shifts sidereal
+// positions by 0.40′ and nakshatra/yoga end times by ~45 s, which is below
+// practical significance but is still a measurable bias. (Two earlier values
+// were wrong and must not be restored: 23.8635° = Drik's variant; 23.8267° =
+// a transcription of Drik's rounded *display text*, 2.2′ low.)
 // KP shifts Lahiri by 6′ (Krishnamurti); Raman and Yukteshwar use
 // independent reference values.
 interface AyanamsaCoeffs {
@@ -62,7 +58,7 @@ interface AyanamsaCoeffs {
   precessionArcsecPerCenturyTSq: number;
 }
 
-const LAHIRI_J2000_DEG = 23.8635;
+const LAHIRI_J2000_DEG = 23.85709;
 const IAU_PRECESSION_T = 5028.796195; // arcsec/century
 const IAU_PRECESSION_T_SQ = 1.1054348; // arcsec/century²
 

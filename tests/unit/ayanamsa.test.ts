@@ -3,9 +3,9 @@ import { ayanamsa, dateToJulian } from '$lib/astro';
 import { siderealFromTropical } from '$lib/astro/ayanamsa';
 
 describe('Lahiri ayanamsa', () => {
-  it('is ~23.864° at J2000 (Swiss Ephemeris SE_SIDM_LAHIRI)', () => {
+  it('is 23.857° at J2000 (Swiss Ephemeris SE_SIDM_LAHIRI / official IAE)', () => {
     const jd = dateToJulian(new Date('2000-01-01T12:00:00Z'));
-    expect(ayanamsa(jd, 'lahiri')).toBeCloseTo(23.8635, 3);
+    expect(ayanamsa(jd, 'lahiri')).toBeCloseTo(23.8571, 3);
   });
 
   it('drifts at ~50.29 arcseconds/year', () => {
@@ -16,12 +16,14 @@ describe('Lahiri ayanamsa', () => {
     expect(drift * 3600).toBeCloseTo(expectedArcsec, 0);
   });
 
-  it('matches Drik computational value within 1 arcminute (Jan 2025)', () => {
-    // Drik Panchang "Other Calendars and Epoch" section shows
-    // Lahiri Ayanamsha = 24.213073 for 2025-01-01 (New Delhi).
+  it('matches Swiss-Eph SE_SIDM_LAHIRI, ~0.4′ below Drik (Jan 2025)', () => {
+    // We use the Swiss-Eph / official-IAE Lahiri. Swiss-Eph gives 24.20634 for
+    // 2025-01-01; Drik's computational value is 24.213073 (0.40′ higher) —
+    // documented in astro/ayanamsa.ts.
     const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
     const ayan = ayanamsa(jd, 'lahiri');
-    expect(Math.abs(ayan - 24.213073) * 60).toBeLessThan(1);
+    expect(Math.abs(ayan - 24.20634) * 60).toBeLessThan(0.2); // matches Swiss-Eph
+    expect((24.213073 - ayan) * 60).toBeCloseTo(0.4, 1); // ~0.4′ below Drik
   });
 
   it('KP is exactly 6 arcminutes less than Lahiri', () => {
@@ -30,23 +32,18 @@ describe('Lahiri ayanamsa', () => {
     expect(diff * 60).toBeCloseTo(6, 4);
   });
 
-  // Golden Lahiri values published by Drik / Lahiri's tables.
-  // Tolerance: 1 arcminute for years inside the Drik-verified range
-  // (2000–2025); 2 arcminutes for extrapolated historical / future
-  // years where my IAU-2006 polynomial may differ slightly from
-  // hand-computed almanac entries. These are regression guards — if
-  // any value drifts more than the tolerance, the ayanamsa formula
-  // has changed and the cache CALCULATION_VERSION must be bumped.
+  // Golden Lahiri values = Swiss Ephemeris SE_SIDM_LAHIRI (the official IAE
+  // value, verified directly with pyswisseph). Regression guards — if any value
+  // drifts beyond tolerance, the ayanamsa formula changed and the cache
+  // CALCULATION_VERSION must be bumped.
   const goldenLahiri: Array<[string, number, number]> = [
     // [ISO date, expected Lahiri (decimal degrees), tolerance (arcmin)]
-    // Values computed from base 23.8635° + IAU 2006 precession polynomial.
-    // 2025 row independently verified against Drik's displayed 24.213073°.
-    ['1900-01-01T00:00:00Z', 22.4669, 2], // polynomial extrapolation
-    ['1950-01-01T00:00:00Z', 23.1651, 2],
-    ['2000-01-01T00:00:00Z', 23.8635, 1], // SE_SIDM_LAHIRI J2000 anchor
-    ['2025-01-01T00:00:00Z', 24.2129, 1], // verified vs Drik 24.213073°
-    ['2050-01-01T00:00:00Z', 24.562, 2],
-    ['2100-01-01T00:00:00Z', 25.2607, 2],
+    ['1900-01-01T00:00:00Z', 22.4606, 2], // polynomial extrapolation
+    ['1950-01-01T00:00:00Z', 23.1587, 1], // pyswisseph 23.15873
+    ['2000-01-01T00:00:00Z', 23.8571, 1], // pyswisseph 23.85707
+    ['2025-01-01T00:00:00Z', 24.2063, 1], // pyswisseph 24.20634
+    ['2050-01-01T00:00:00Z', 24.5556, 1], // pyswisseph 24.55561
+    ['2100-01-01T00:00:00Z', 25.2543, 2],
   ];
   it.each(goldenLahiri)('matches expected value at %s', (iso, expected, tol) => {
     const jd = dateToJulian(new Date(iso));

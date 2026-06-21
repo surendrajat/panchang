@@ -1,12 +1,17 @@
-// Regression: the kundli engine vs Drik Panchang's sidereal planetary-
-// positions page (Lahiri/Chitra Paksha). Every number below is verbatim
-// from drikpanchang.com/planet/position/planetary-positions-sidereal.html
-// for the stated instant + city (Drik's own displayed coordinates).
+// Regression: how the kundli engine RELATES to Drik Panchang. Every Drik
+// number below is verbatim from drikpanchang.com (its sidereal planetary-
+// positions page / lagna), captured for the stated instant + city.
 //
-// Grahas are pure ephemeris + ayanamsa and match Drik to arcseconds. The
-// lagna matches Drik's local-sidereal-time convention (see lagna.ts) across
-// both hemispheres and the full day. These are hard, data-backed assertions
-// — do not loosen them to paper over a future formula change.
+// We deliberately differ from Drik in two bounded, fully-explained ways — and
+// this file locks BOTH to exact magnitudes so any *other* drift is caught:
+//   1. Grahas: we use Swiss-Eph's SE_SIDM_LAHIRI ayanamsa, ~0.38′ below Drik's
+//      Lahiri variant, so each Drik graha is ~0.38′ lower in sidereal longitude
+//      than ours — a clean constant, nothing else (astro/ayanamsa.ts).
+//   2. Lagna: Drik applies the sidereal/solar factor to longitude (the "Local
+//      Mean Time" method); we use the geometric rising point (lagna.ts). The
+//      gap is ∝ longitude and sign-flips across hemispheres.
+// Accuracy itself is pinned to the gold standard in kundli-vs-swisseph.test.ts;
+// here we pin the *relationship* to Drik. Do not loosen these bands.
 
 import { describe, it, expect } from 'vitest';
 import { computeBirthChart, computeLagna, grahaSiderealLongitude, type GrahaKey } from '$lib/jyotish';
@@ -26,18 +31,21 @@ function signedSep(a: number, b: number): number {
   if (d < -180) d += 360;
   return d;
 }
+// DMS → decimal degrees. The degree's sign applies to the WHOLE value, so
+// [-74, 0, 21] is −74°0′21″ = −74.00583 (not −74 + 21/3600 = −73.994). This
+// matters for western/southern coordinates — getting it wrong shifts the lagna.
+function dms([d, m, s]: [number, number, number]): number {
+  return (d < 0 ? -1 : 1) * (Math.abs(d) + m / 60 + s / 3600);
+}
 function loc(name: string, lat: [number, number, number], lon: [number, number, number], tz = 'Asia/Kolkata'): Location {
-  return {
-    name,
-    latitude: lat[0] + lat[1] / 60 + lat[2] / 3600,
-    longitude: lon[0] + lon[1] / 60 + lon[2] / 3600,
-    altitude: 0,
-    timezone: tz,
-  };
+  return { name, latitude: dms(lat), longitude: dms(lon), altitude: 0, timezone: tz };
 }
 
-const PLANET_TOL_ARCMIN = 0.2; // grahas matched to ≤0.04′; 5× margin
-
+// The only systematic difference from Drik's published grahas is the ayanamsa
+// offset: Drik's Lahiri is ~0.38′ higher ⟹ its sidereal longitudes are ~0.38′
+// LOWER than ours. So (ours − Drik) ≈ +0.38′ for every graha. The band [0.25,
+// 0.50] is 0.38′ ± the ≤0.04′ theory residual + margin — tight enough that any
+// non-ayanamsa drift (a broken graha, wrong node) falls outside it.
 describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
   const DELHI = loc('New Delhi', [28, 38, 8], [77, 13, 28]);
   const inst = new Date('1990-08-15T21:06:58+05:30');
@@ -55,9 +63,11 @@ describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
     ketu: abs(3, 12, 43, 24),
   };
   for (const key of Object.keys(DRIK) as GrahaKey[]) {
-    it(`${key} within ${PLANET_TOL_ARCMIN}′`, () => {
+    it(`${key}: ours − Drik = +0.38′ ayanamsa offset only`, () => {
       const mine = grahaSiderealLongitude(key, jd, 'lahiri', 'mean');
-      expect(sep(mine, DRIK[key]) * 60).toBeLessThan(PLANET_TOL_ARCMIN);
+      const gap = signedSep(mine, DRIK[key]) * 60; // ours − Drik, arcmin
+      expect(gap).toBeGreaterThan(0.25);
+      expect(gap).toBeLessThan(0.5);
     });
   }
 
@@ -115,9 +125,11 @@ describe("lagna 'swiss' method vs Swiss Ephemeris (pyswisseph, run directly)", (
     ['New York 06:30', loc('New York', [40, 42, 51], [-74, 0, 21], 'America/New_York'), '1990-08-15T06:30:00-04:00', 122.3826],
   ];
   for (const [label, location, iso, swissEph] of SWISS) {
-    it(`${label} matches Swiss Ephemeris within 1′`, () => {
+    it(`${label} matches Swiss Ephemeris within 0.3′`, () => {
       const mine = computeLagna(new Date(iso), location, 'lahiri').longitude;
-      expect(sep(mine, swissEph) * 60).toBeLessThan(1);
+      // ~0.24′ everywhere — the astronomy-engine vs Swiss-Eph sidereal-time
+      // difference (≈1 s of birth time), the irreducible floor for the lagna.
+      expect(sep(mine, swissEph) * 60).toBeLessThan(0.3);
     });
   }
 });

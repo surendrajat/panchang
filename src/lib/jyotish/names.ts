@@ -86,11 +86,12 @@ export function grahaAbbr(key: GrahaKey, lang: 'en' | 'hi'): string {
 // (naming) ceremony the child's name is chosen to begin with this sound. Each
 // nakshatra (13°20′) has four padas (3°20′), one syllable each.
 //
-// Standard nakshatra-pada table (cross-checked against Wikipedia and baby-
-// naming references). The Devanagari akshar is the canonical form; the Latin
-// romanization below varies a little by tradition (e.g. Va/Ba, Pha/Bha), so
-// treat it as a guide to the sound, not a fixed spelling.
-const NAME_SYLLABLES: readonly (readonly [string, string, string, string])[] = [
+// The Devanagari akshar is the canonical form (shown in Hindi mode); the Latin
+// is its romanization (shown in English mode). Both rows below are from
+// Wikipedia's nakshatra-pada table; the Latin loses the retroflex/dental
+// distinction, so where they could disagree the Devanagari is authoritative.
+type Quad = readonly [string, string, string, string];
+const NAME_SYLLABLES_LATIN: readonly Quad[] = [
   ['Chu', 'Che', 'Cho', 'La'], // 1 Ashwini
   ['Li', 'Lu', 'Le', 'Lo'], // 2 Bharani
   ['A', 'I', 'U', 'E'], // 3 Krittika
@@ -112,20 +113,54 @@ const NAME_SYLLABLES: readonly (readonly [string, string, string, string])[] = [
   ['Ye', 'Yo', 'Bha', 'Bhi'], // 19 Mula
   ['Bhu', 'Dha', 'Pha', 'Dha'], // 20 Purva Ashadha
   ['Bhe', 'Bho', 'Ja', 'Ji'], // 21 Uttara Ashadha
-  ['Ju', 'Je', 'Jo', 'Gha'], // 22 Shravana
+  ['Khi', 'Khu', 'Khe', 'Kho'], // 22 Shravana
   ['Ga', 'Gi', 'Gu', 'Ge'], // 23 Dhanishta
   ['Go', 'Sa', 'Si', 'Su'], // 24 Shatabhisha
   ['Se', 'So', 'Da', 'Di'], // 25 Purva Bhadrapada
-  ['Du', 'Tha', 'Jha', 'Da'], // 26 Uttara Bhadrapada
+  ['Du', 'Tha', 'Jha', 'Tra'], // 26 Uttara Bhadrapada
   ['De', 'Do', 'Cha', 'Chi'], // 27 Revati
 ];
+const NAME_SYLLABLES_DEVA: readonly Quad[] = [
+  ['चु', 'चे', 'चो', 'ला'], // 1 Ashwini
+  ['ली', 'लू', 'ले', 'लो'], // 2 Bharani
+  ['अ', 'ई', 'उ', 'ए'], // 3 Krittika
+  ['ओ', 'वा', 'वी', 'वु'], // 4 Rohini
+  ['वे', 'वो', 'का', 'की'], // 5 Mrigashira
+  ['कु', 'घ', 'ङ', 'छ'], // 6 Ardra
+  ['के', 'को', 'हा', 'ही'], // 7 Punarvasu
+  ['हु', 'हे', 'हो', 'ड'], // 8 Pushya
+  ['डी', 'डू', 'डे', 'डो'], // 9 Ashlesha
+  ['मा', 'मी', 'मू', 'मे'], // 10 Magha
+  ['नो', 'टा', 'टी', 'टू'], // 11 Purva Phalguni
+  ['टे', 'टो', 'पा', 'पी'], // 12 Uttara Phalguni
+  ['पू', 'ष', 'ण', 'ठ'], // 13 Hasta
+  ['पे', 'पो', 'रा', 'री'], // 14 Chitra
+  ['रू', 'रे', 'रो', 'ता'], // 15 Swati
+  ['ती', 'तू', 'ते', 'तो'], // 16 Vishakha
+  ['ना', 'नी', 'नू', 'ने'], // 17 Anuradha
+  ['नो', 'या', 'यी', 'यू'], // 18 Jyeshtha
+  ['ये', 'यो', 'भा', 'भी'], // 19 Mula
+  ['भू', 'धा', 'फा', 'ढा'], // 20 Purva Ashadha
+  ['भे', 'भो', 'जा', 'जी'], // 21 Uttara Ashadha
+  ['खी', 'खू', 'खे', 'खो'], // 22 Shravana
+  ['गा', 'गी', 'गु', 'गे'], // 23 Dhanishta
+  ['गो', 'सा', 'सी', 'सू'], // 24 Shatabhisha
+  ['से', 'सो', 'दा', 'दी'], // 25 Purva Bhadrapada
+  ['दू', 'थ', 'झ', 'त्र'], // 26 Uttara Bhadrapada
+  ['दे', 'दो', 'च', 'ची'], // 27 Revati
+];
 
-// The naming syllable for a given nakshatra (1–27) and pada (1–4).
-export function nameSyllable(nakshatra1to27: number, pada1to4: 1 | 2 | 3 | 4): string {
-  return NAME_SYLLABLES[nakshatra1to27 - 1][pada1to4 - 1];
+function table(lang: 'en' | 'hi'): readonly Quad[] {
+  return lang === 'hi' ? NAME_SYLLABLES_DEVA : NAME_SYLLABLES_LATIN;
+}
+
+// The naming syllable for a given nakshatra (1–27) and pada (1–4), in the
+// active language's script (Devanagari akshar for Hindi, Latin for English).
+export function nameSyllable(nakshatra1to27: number, pada1to4: 1 | 2 | 3 | 4, lang: 'en' | 'hi' = 'en'): string {
+  return table(lang)[nakshatra1to27 - 1][pada1to4 - 1];
 }
 
 // All four pada syllables of a nakshatra (e.g. to show the alternatives).
-export function nakshatraSyllables(nakshatra1to27: number): readonly string[] {
-  return NAME_SYLLABLES[nakshatra1to27 - 1];
+export function nakshatraSyllables(nakshatra1to27: number, lang: 'en' | 'hi' = 'en'): readonly string[] {
+  return table(lang)[nakshatra1to27 - 1];
 }

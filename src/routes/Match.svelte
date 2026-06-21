@@ -168,8 +168,8 @@
     <h2 class="title">{lang === 'hi' ? 'कुण्डली मिलान' : 'Kundli Milan'}</h2>
     <p class="muted">
       {lang === 'hi'
-        ? 'अष्टकूट गुण मिलान — चन्द्र नक्षत्र और राशि से ३६ में से गुण।'
-        : 'Ashtakoota guna milan — 36-point compatibility from the Moon’s nakshatra and rashi.'}
+        ? `अष्टकूट गुण मिलान — चन्द्र नक्षत्र और राशि से ${num(36)} में से गुण।`
+        : `Ashtakoota guna milan — ${num(36)}-point compatibility from the Moon’s nakshatra and rashi.`}
     </p>
   </div>
 

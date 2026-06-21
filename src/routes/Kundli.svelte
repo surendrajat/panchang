@@ -311,7 +311,7 @@
          nakshatra + pada. -->
     <div class="naamakshar" role="note">
       <span class="naam-lab">{lang === 'hi' ? 'नामाक्षर' : 'Name syllable'}</span>
-      <span class="naam-val">{nameSyllable(chart.moonNakshatra.index, chart.moonNakshatra.pada)}</span>
+      <span class="naam-val">{nameSyllable(chart.moonNakshatra.index, chart.moonNakshatra.pada, lang)}</span>
       <span class="naam-hint"
         >{lang === 'hi'
           ? 'परंपरा से नाम इसी ध्वनि से आरम्भ होता है'

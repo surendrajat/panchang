@@ -9,12 +9,24 @@ describe('Naamakshar — name syllable by nakshatra + pada', () => {
     }
   });
 
-  it('unambiguous anchors match the standard table', () => {
+  it('anchors match the standard table (incl. the two corrected rows)', () => {
     expect(nakshatraSyllables(1)).toEqual(['Chu', 'Che', 'Cho', 'La']); // Ashwini
     expect(nakshatraSyllables(3)).toEqual(['A', 'I', 'U', 'E']); // Krittika
     expect(nakshatraSyllables(4)).toEqual(['O', 'Va', 'Vi', 'Vu']); // Rohini
     expect(nakshatraSyllables(10)).toEqual(['Ma', 'Mi', 'Mu', 'Me']); // Magha
+    expect(nakshatraSyllables(22)).toEqual(['Khi', 'Khu', 'Khe', 'Kho']); // Shravana (corrected)
+    expect(nameSyllable(26, 4)).toBe('Tra'); // Uttara Bhadrapada p4 (corrected)
     expect(nakshatraSyllables(27)).toEqual(['De', 'Do', 'Cha', 'Chi']); // Revati
+  });
+
+  it('returns the Devanagari akshar in Hindi mode', () => {
+    expect(nakshatraSyllables(1, 'hi')).toEqual(['चु', 'चे', 'चो', 'ला']); // Ashwini
+    expect(nameSyllable(4, 3, 'hi')).toBe('वी'); // Rohini pada 3 (the "Vi" of the screenshots)
+    expect(nameSyllable(22, 1, 'hi')).toBe('खी'); // Shravana
+    // Latin and Devanagari tables align row-for-row.
+    for (let n = 1; n <= 27; n++) {
+      expect(nakshatraSyllables(n, 'hi')).toHaveLength(4);
+    }
   });
 
   it('nameSyllable indexes nakshatra and pada correctly', () => {

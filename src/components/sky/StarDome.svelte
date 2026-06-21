@@ -195,7 +195,12 @@
   // brightest stars (J2000 RA h, Dec °, mag); many are nakṣatra junction-stars
   const BRIGHT_STARS = [
     { ra: 6.752, dec: -16.72, mag: -1.46, n: { hi: 'लुब्धक', tr: 'Lubdhaka', en: 'Sirius' } },
-    { ra: 5.278, dec: 45.998, mag: 0.08, n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' } },
+    {
+      ra: 5.278,
+      dec: 45.998,
+      mag: 0.08,
+      n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' },
+    },
     { ra: 5.242, dec: -8.2, mag: 0.13, n: { hi: 'रिगेल', tr: 'Rigel', en: 'Rigel' } },
     { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाति', tr: 'Svati', en: 'Arcturus' } },
     { ra: 18.616, dec: 38.78, mag: 0.03, n: { hi: 'अभिजित्', tr: 'Abhijit', en: 'Vega' } },
@@ -232,28 +237,106 @@
   const CONSTELLATIONS = [
     {
       name: { hi: 'सप्तर्षि', tr: 'Saptarishi', en: 'Big Dipper' },
-      stars: [[11.06, 61.75], [11.03, 56.38], [11.9, 53.69], [12.26, 57.03], [12.9, 55.96], [13.4, 54.93], [13.79, 49.31]],
-      lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5], [5, 6]],
+      stars: [
+        [11.06, 61.75],
+        [11.03, 56.38],
+        [11.9, 53.69],
+        [12.26, 57.03],
+        [12.9, 55.96],
+        [13.4, 54.93],
+        [13.79, 49.31],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+      ],
     },
     {
       name: { hi: 'मृग', tr: 'Mriga', en: 'Orion' },
-      stars: [[5.92, 7.41], [5.42, 6.35], [5.68, -1.94], [5.6, -1.2], [5.53, -0.3], [5.8, -9.67], [5.24, -8.2]],
-      lines: [[0, 1], [0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6], [5, 6]],
+      stars: [
+        [5.92, 7.41],
+        [5.42, 6.35],
+        [5.68, -1.94],
+        [5.6, -1.2],
+        [5.53, -0.3],
+        [5.8, -9.67],
+        [5.24, -8.2],
+      ],
+      lines: [
+        [0, 1],
+        [0, 2],
+        [1, 4],
+        [2, 3],
+        [3, 4],
+        [2, 5],
+        [4, 6],
+        [5, 6],
+      ],
     },
     {
       name: { hi: 'वृश्चिक', tr: 'Vrishchika', en: 'Scorpius' },
-      stars: [[16.09, -19.8], [16.0, -22.62], [15.98, -26.11], [16.49, -26.43], [16.6, -28.22], [16.84, -34.29], [17.56, -37.1], [17.51, -37.3]],
-      lines: [[0, 1], [1, 2], [1, 3], [3, 4], [4, 5], [5, 6], [6, 7]],
+      stars: [
+        [16.09, -19.8],
+        [16.0, -22.62],
+        [15.98, -26.11],
+        [16.49, -26.43],
+        [16.6, -28.22],
+        [16.84, -34.29],
+        [17.56, -37.1],
+        [17.51, -37.3],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [1, 3],
+        [3, 4],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+      ],
     },
     {
       name: { hi: 'कैसिओपिया', tr: 'Cassiopeia', en: 'Cassiopeia' },
-      stars: [[0.15, 59.15], [0.68, 56.54], [0.95, 60.72], [1.43, 60.24], [1.91, 63.67]],
-      lines: [[0, 1], [1, 2], [2, 3], [3, 4]],
+      stars: [
+        [0.15, 59.15],
+        [0.68, 56.54],
+        [0.95, 60.72],
+        [1.43, 60.24],
+        [1.91, 63.67],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+      ],
     },
     {
       name: { hi: 'धनु', tr: 'Dhanu', en: 'Sagittarius' },
-      stars: [[18.47, -25.42], [18.35, -29.83], [18.4, -34.38], [18.76, -26.99], [18.92, -26.3], [19.04, -29.88], [19.12, -27.67]],
-      lines: [[0, 1], [1, 2], [2, 5], [5, 4], [4, 3], [3, 0], [4, 6], [6, 5]],
+      stars: [
+        [18.47, -25.42],
+        [18.35, -29.83],
+        [18.4, -34.38],
+        [18.76, -26.99],
+        [18.92, -26.3],
+        [19.04, -29.88],
+        [19.12, -27.67],
+      ],
+      lines: [
+        [0, 1],
+        [1, 2],
+        [2, 5],
+        [5, 4],
+        [4, 3],
+        [3, 0],
+        [4, 6],
+        [6, 5],
+      ],
     },
   ];
   const domeConstellations = $derived.by(() => {
@@ -323,7 +406,10 @@
       class:labels-shown={fLabels}
       viewBox="12 12 {DOME - 24} {DOME - 24}"
       role="img"
-      aria-label={hi('आज आपके आकाश में सूर्य, चन्द्र व ग्रह', 'The Sun, Moon and planets in your sky')}
+      aria-label={hi(
+        'आज आपके आकाश में सूर्य, चन्द्र व ग्रह',
+        'The Sun, Moon and planets in your sky',
+      )}
     >
       <defs>
         <radialGradient id="{uid}-grad" cx="50%" cy="38%" r="64%">
@@ -387,9 +473,17 @@
               aria-label={tn(s.n.hi, s.n.tr, s.n.en)}
               use:revealable={'star-' + s.ra}
             />
-            <circle cx={s.pt[0]} cy={s.pt[1]} r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))} class="dome-star" />
-            <text x={s.pt[0]} y={s.pt[1] < DC ? s.pt[1] + 8 : s.pt[1] - 5} class="dome-star-name" text-anchor="middle"
-              >{tn(s.n.hi, s.n.tr, s.n.en)}</text
+            <circle
+              cx={s.pt[0]}
+              cy={s.pt[1]}
+              r={Math.min(2, Math.max(0.6, 1.4 - s.mag * 0.3))}
+              class="dome-star"
+            />
+            <text
+              x={s.pt[0]}
+              y={s.pt[1] < DC ? s.pt[1] + 8 : s.pt[1] - 5}
+              class="dome-star-name"
+              text-anchor="middle">{tn(s.n.hi, s.n.tr, s.n.en)}</text
             >
           </g>
         {/each}
@@ -436,8 +530,11 @@
                   use:revealable={b.body}
                 />
                 <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={5.5} />
-                <text x={b.pt[0]} y={b.pt[1] < DC ? b.pt[1] + 11 : b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
-                  >{grahaLabel(b.body)}</text
+                <text
+                  x={b.pt[0]}
+                  y={b.pt[1] < DC ? b.pt[1] + 11 : b.pt[1] - 7.5}
+                  class="dome-label"
+                  text-anchor="middle">{grahaLabel(b.body)}</text
                 >
               </g>
             {/if}
@@ -457,16 +554,31 @@
               aria-label={grahaLabel('moon')}
               use:revealable={'moon'}
             />
-            <circle cx={m.pt[0]} cy={m.pt[1]} r="8" fill="#363842" stroke="rgba(255,255,255,0.4)" stroke-width="0.6" />
+            <circle
+              cx={m.pt[0]}
+              cy={m.pt[1]}
+              r="8"
+              fill="#363842"
+              stroke="rgba(255,255,255,0.4)"
+              stroke-width="0.6"
+            />
             <path d={litD} fill="#f1e7cb" />
             <clipPath id="{uid}-moonclip"><path d={litD} /></clipPath>
             <g clip-path="url(#{uid}-moonclip)">
               {#each craters as [dx, dy, cr] (`${dx},${dy}`)}
-                <circle cx={m.pt[0] + dx * 0.67} cy={m.pt[1] + dy * 0.67} r={cr * 0.67} class="crater" />
+                <circle
+                  cx={m.pt[0] + dx * 0.67}
+                  cy={m.pt[1] + dy * 0.67}
+                  r={cr * 0.67}
+                  class="crater"
+                />
               {/each}
             </g>
-            <text x={m.pt[0]} y={m.pt[1] < DC ? m.pt[1] + 17 : m.pt[1] - 15} class="dome-label" text-anchor="middle"
-              >{grahaLabel('moon')}</text
+            <text
+              x={m.pt[0]}
+              y={m.pt[1] < DC ? m.pt[1] + 17 : m.pt[1] - 15}
+              class="dome-label"
+              text-anchor="middle">{grahaLabel('moon')}</text
             >
           </g>
         {/if}
@@ -485,8 +597,11 @@
             />
             <circle cx={sn.pt[0]} cy={sn.pt[1]} r="19" fill="url(#{uid}-sunglow)" />
             <circle cx={sn.pt[0]} cy={sn.pt[1]} r="8" fill="url(#{uid}-sun)" />
-            <text x={sn.pt[0]} y={sn.pt[1] < DC ? sn.pt[1] + 18 : sn.pt[1] - 14} class="dome-label" text-anchor="middle"
-              >{grahaLabel('sun')}</text
+            <text
+              x={sn.pt[0]}
+              y={sn.pt[1] < DC ? sn.pt[1] + 18 : sn.pt[1] - 14}
+              class="dome-label"
+              text-anchor="middle">{grahaLabel('sun')}</text
             >
           </g>
         {/if}
@@ -495,8 +610,11 @@
       {#if fDirs}
         <text x={DC} y={DC - DR + 9} class="dome-card" text-anchor="middle">{hi('उ', 'N')}</text>
         <text x={DC} y={DC + DR - 3} class="dome-card" text-anchor="middle">{hi('द', 'S')}</text>
-        <text x={DC - DR + 9} y={DC + 3} class="dome-card" text-anchor="middle">{hi('पू', 'E')}</text>
-        <text x={DC + DR - 9} y={DC + 3} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text>
+        <text x={DC - DR + 9} y={DC + 3} class="dome-card" text-anchor="middle"
+          >{hi('पू', 'E')}</text
+        >
+        <text x={DC + DR - 9} y={DC + 3} class="dome-card" text-anchor="middle">{hi('प', 'W')}</text
+        >
       {/if}
     </svg>
     {#if caption}

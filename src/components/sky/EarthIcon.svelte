@@ -38,11 +38,25 @@
     <path d={conts} fill="#4f9d5a" />
     <path d={conts} fill="#3c7e49" opacity="0.5" transform="translate({r * 0.04} {r * 0.05})" />
     <!-- north polar cap -->
-    <ellipse cx={cx} cy={cy - r * 0.84} rx={r * 0.52} ry={r * 0.22} fill="#eef6ff" opacity="0.85" />
+    <ellipse {cx} cy={cy - r * 0.84} rx={r * 0.52} ry={r * 0.22} fill="#eef6ff" opacity="0.85" />
     <!-- specular sheen (top-left) -->
-    <ellipse cx={cx - r * 0.34} cy={cy - r * 0.36} rx={r * 0.42} ry={r * 0.3} fill="#ffffff" opacity="0.16" />
+    <ellipse
+      cx={cx - r * 0.34}
+      cy={cy - r * 0.36}
+      rx={r * 0.42}
+      ry={r * 0.3}
+      fill="#ffffff"
+      opacity="0.16"
+    />
   </g>
-  <circle {cx} {cy} {r} fill="none" stroke="rgba(8,28,58,0.4)" stroke-width={Math.max(0.5, r * 0.06)} />
+  <circle
+    {cx}
+    {cy}
+    {r}
+    fill="none"
+    stroke="rgba(8,28,58,0.4)"
+    stroke-width={Math.max(0.5, r * 0.06)}
+  />
 </g>
 
 <style>

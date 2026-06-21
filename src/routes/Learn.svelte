@@ -32,6 +32,7 @@
   import { RASHI_ELEMENT, ELEMENT_LABEL } from '$lib/jyotish/rashi-art';
   import EclipticWheel, { type WheelPick } from '../components/sky/EclipticWheel.svelte';
   import OrbitalView from '../components/sky/OrbitalView.svelte';
+  import SkyPanel from '../components/sky/SkyPanel.svelte';
   import MoonPhase from '../components/MoonPhase.svelte';
   import CelestialMark from '../components/CelestialMark.svelte';
   import BodyIcon from '../components/BodyIcon.svelte';
@@ -746,44 +747,28 @@
     </div>
   </article>
 
-  <!-- ════ CELL 9 — Run the whole thing ════ -->
-  <article class="cell cell--sum">
+  <!-- ════ CELL 9 — Everything together: the live interactive sky ════ -->
+  <article class="cell">
     <div class="cell__no">[9]</div>
     <div class="cell__body">
-      <p class="cell__kicker">{hi('सब एक साथ', 'Run the whole thing')}</p>
-      <h3>{hi('इस क्षण का पूरा पंचांग', 'This moment’s pañcāṅga')}</h3>
+      <p class="cell__kicker">{hi('सब एक साथ', 'Putting it all together')}</p>
+      <h3>{hi('इस क्षण का पूरा आकाश', 'The whole sky, this moment')}</h3>
       <p class="prose">
         {hi(
-          'एक पंक्ति में रखिए और वही मिलता है जो छपा पंचांग छापता है — ऊपर का हर मान, इसी क्षण के λ☉ और λ☽ से सजीव निकाला हुआ।',
-          'Put them in a row and you have exactly what a printed pañcāṅga prints — every value above, derived live from just λ☉ and λ☽ at this moment.',
+          'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। किसी पिंड पर टैप करें, ⚙ से ग्रह जोड़ें या राशिचक्र बदलें, और ऊपर समय खिसकाकर हर मान को बदलते देखें। यही पूरे पंचांग की जड़ है।',
+          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and scrub time above to watch every value move. This is the root the whole pañcāṅga grows from.',
         )}
       </p>
-      <dl class="summary">
-        <div>
-          <dt>{hi('तिथि', 'Tithi')}</dt>
-          <dd>{paksha} {tithiNameByIndex(tithiNum, lang)}</dd>
-        </div>
-        <div>
-          <dt>{hi('वार', 'Vāra')}</dt>
-          <dd>{varaIdx >= 0 ? tn(VARA[varaIdx].dev, VARA[varaIdx].tr, VARA[varaIdx].en) : '—'}</dd>
-        </div>
-        <div>
-          <dt>{hi('नक्षत्र', 'Nakṣatra')}</dt>
-          <dd>{nakshatraNameByIndex(nakNum, lang)}</dd>
-        </div>
-        <div>
-          <dt>{hi('योग', 'Yoga')}</dt>
-          <dd>{yogaNameByIndex(yogaNum, lang)}</dd>
-        </div>
-        <div>
-          <dt>{hi('करण', 'Karaṇa')}</dt>
-          <dd>{karanaNameByPosition(karanaPos, lang)}</dd>
-        </div>
-        <div>
-          <dt>{hi('मास', 'Māsa')}</dt>
-          <dd>{hi(SIGN_MONTH[sunRashi].mon.hi, SIGN_MONTH[sunRashi].mon.en)}</dd>
-        </div>
-      </dl>
+      <SkyPanel date={simDate} />
+      <p class="alsoline">
+        {hi('और (कोण-रहित अंग):', 'Plus (the non-angle limbs):')}
+        <b>{hi('वार', 'Vāra')}</b>
+        {varaIdx >= 0 ? tn(VARA[varaIdx].dev, VARA[varaIdx].tr, VARA[varaIdx].en) : '—'} ·
+        <b>{hi('करण', 'Karaṇa')}</b>
+        {karanaNameByPosition(karanaPos, lang)} ·
+        <b>{hi('मास', 'Māsa')}</b>
+        {hi(SIGN_MONTH[sunRashi].mon.hi, SIGN_MONTH[sunRashi].mon.en)}
+      </p>
       <p class="seedoc">
         {hi('इसके पीछे का पूरा गणित:', 'The full math behind this:')}
         <a
@@ -974,11 +959,6 @@
      whole page to overflow horizontally on narrow phones */
   .cell__body {
     min-width: 0;
-  }
-  .cell--sum .cell__body {
-    background: var(--paper-2);
-    border-radius: var(--radius-md);
-    padding: 0.9rem 1rem;
   }
   /* phones: drop the left number gutter (it wastes ~10% width); the cell number
      sits on its own compact line, notebook-prompt style, and content goes full-width */
@@ -1294,27 +1274,15 @@
   }
 
   /* summary (cell 9) */
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.5rem 0.9rem;
-    margin: 0.8rem 0 0;
+  .alsoline {
+    margin: 0.9rem 0 0;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
   }
-  .summary div {
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 0.35rem;
-  }
-  .summary dt {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-faint);
-  }
-  .summary dd {
-    margin: 0.1rem 0 0;
-    font-size: 1.02rem;
-    font-weight: 600;
+  .alsoline b {
     color: var(--ink);
+    font-weight: 600;
   }
   .seedoc {
     margin: 0.9rem 0 0;

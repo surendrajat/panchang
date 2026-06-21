@@ -78,7 +78,13 @@
     <!-- craters faintly across the whole disc, so the dark limb isn't featureless -->
     <g clip-path="url(#{fullClipId})">
       {#each CRATERS as [dx, dy, cr] (`dk${dx},${dy}`)}
-        <ellipse cx={cx + dx * R} cy={cy + dy * R} rx={cr * R} ry={cr * R * 0.82} class="crater-dark" />
+        <ellipse
+          cx={cx + dx * R}
+          cy={cy + dy * R}
+          rx={cr * R}
+          ry={cr * R * 0.82}
+          class="crater-dark"
+        />
       {/each}
     </g>
     <path d={litPath} fill="url(#{gradientId})" />

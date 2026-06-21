@@ -42,6 +42,16 @@
     return () => cancelAnimationFrame(raf);
   });
 
+  // Show the bar's divider line ONLY while it's pinned to the top (stuck) — at
+  // rest it blends into the page with no line under it. A zero-height sentinel
+  // just above the bar tells us when we've scrolled past its resting position.
+  let stuck = $state(false);
+  function stickSentinel(node: HTMLElement) {
+    const io = new IntersectionObserver(([e]) => (stuck = !e.isIntersecting), { threshold: 0 });
+    io.observe(node);
+    return { destroy: () => io.disconnect() };
+  }
+
   // Full speed labels — same text as the original Sky tab (not abbreviated).
   const SPEEDS = [
     { key: 'pause', live: false, speed: 0, hi: 'रोकें', en: 'Pause' },
@@ -85,7 +95,8 @@
   const clockLabel = $derived(`${wdFmt.format(date)} ${num(fmt.format(date))}`);
 </script>
 
-<div class="timebar">
+<div class="timebar-sentinel" use:stickSentinel aria-hidden="true"></div>
+<div class="timebar" class:stuck>
   <div class="topline">
     <span class="clock">{clockLabel}</span>
     {#if extra}{@render extra()}{/if}
@@ -98,6 +109,14 @@
       >
     {/each}
   </div>
+  {#if !stuck}
+    <p class="speed-hint">
+      {hi(
+        '💡 गति बढ़ाएँ — सूर्य, चन्द्र व ग्रहों को तेज़ चलते देखें।',
+        '💡 Tap a speed to fast-forward — watch the Sun, Moon and planets move.',
+      )}
+    </p>
+  {/if}
 </div>
 
 <style>
@@ -110,7 +129,13 @@
     padding: 0.4rem 0 0.45rem;
     background: color-mix(in srgb, var(--paper) 92%, transparent);
     backdrop-filter: blur(6px);
+  }
+  /* the divider appears only while pinned; at rest there's no line under the bar */
+  .timebar.stuck {
     border-bottom: 1px solid var(--line);
+  }
+  .timebar-sentinel {
+    height: 0;
   }
   /* backdrop blur is a known jank source on mobile GPUs (continuously re-sampled
      while a wheel animates under the sticky bar) — drop it on touch / small screens */
@@ -198,5 +223,12 @@
     color: var(--paper);
     font-weight: 600;
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+  }
+  /* a one-line tip shown only at rest (in the lesson), hidden once the bar sticks */
+  .speed-hint {
+    margin: 0.45rem 0 0;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    color: var(--ink-soft);
   }
 </style>

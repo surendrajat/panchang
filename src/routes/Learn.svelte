@@ -202,8 +202,8 @@
           <span class="choice__icon"><CelestialMark body="moon" size={18} /></span>
           <span>
             <b>{hi('केवल चन्द्र', 'Moon only')}</b> — {hi(
-              'मास सटीक रहते हैं, पर ऋतुएँ हर साल ~11 दिन खिसक जाती हैं (जैसे इस्लामी पंचांग)।',
-              'months stay perfect, but the seasons drift ~11 days a year (the Islamic calendar).',
+              'मास सटीक रहते हैं, पर ऋतुएँ हर साल ~11 दिन खिसक जाती हैं (जैसे हिजरी पंचांग)।',
+              'months stay perfect, but the seasons drift ~11 days a year (the Hijri calendar).',
             )}
           </span>
         </div>
@@ -253,12 +253,30 @@
     </div>
   </article>
 
-  <p class="nb__transition">
-    {hi('अब इन दो कोणों को सजीव देखिए — कोई भी क्षण चुनें ↓', 'Now watch those two angles live — pick any moment ↓')}
-  </p>
+  <!-- ════ CHAPTER 3 — Everything is two numbers. The idea text leads into the
+       shared clock (which shows those two live angles), then the wheel plots them. ════ -->
+  <article class="cell">
+    <div class="cell__no">[3]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('मूल विचार', 'The whole idea')}</p>
+      <h3>{hi('सब कुछ दो संख्याओं से', 'Two numbers run everything')}</h3>
+      <p class="prose">
+        {hi(
+          'पंचांग जटिल दिखता है, पर टिका है बस दो मापों पर: राशिचक्र पर सूर्य कहाँ है (λ',
+          'A panchanga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ',
+        )}<sub>☉</sub>{hi(') और चन्द्र कहाँ है (λ', '), and how far the Moon is (λ')}<sub>☽</sub
+        >{hi(
+          ')। नीचे घड़ी से कोई भी क्षण चुनिए — ये दो कोण तय हो जाते हैं, और आगे का हर अंग बस इन्हीं का गणित है।',
+          '). Pick any moment with the clock below and these two angles are fixed — every limb that follows is just arithmetic on them.',
+        )}
+      </p>
+    </div>
+  </article>
 
-  <!-- The moment everything below is computed for — pick it with the shared
-       time/speed widget; the two angles (λ☉, λ☽) are the only inputs. -->
+  <!-- The shared time control. It is sticky, so it stays pinned through every
+       computed chapter below — which is why it lives here, between this chapter's
+       idea and its wheel, rather than inside any one chapter's box (it would
+       scroll away). It shows the two live angles λ☉, λ☽ — the only inputs. -->
   <SkyClock bind:date={now} bind:speed bind:live>
     {#snippet extra()}
       <div class="watch">
@@ -268,18 +286,10 @@
     {/snippet}
   </SkyClock>
 
-  <!-- ════ CELL 3 — Two numbers ════ -->
-  <article class="cell">
-    <div class="cell__no">[3]</div>
+  <!-- chapter 3's wheel — the two angles plotted on the zodiac (continuation of [3]) -->
+  <article class="cell cell--cont">
+    <div class="cell__no" aria-hidden="true"></div>
     <div class="cell__body">
-      <p class="cell__kicker">{hi('मूल विचार', 'The whole idea')}</p>
-      <h3>{hi('सब कुछ दो संख्याओं से', 'Two numbers run everything')}</h3>
-      <p class="prose">
-        {hi(
-          'पंचांग जटिल दिखता है, पर टिका है बस दो मापों पर: राशिचक्र पर सूर्य कहाँ है (λ☉) और चन्द्र कहाँ है (λ☽)। ऊपर कोई भी क्षण चुनिए — ये दो कोण तय हो जाते हैं, और नीचे का हर अंग बस इन्हीं का गणित है।',
-          'A panchanga looks elaborate, but it rests on two measurements: how far along the zodiac the Sun is (λ☉), and how far the Moon is (λ☽). Pick any moment above and these two angles are fixed — every limb below is just arithmetic on them.',
-        )}
-      </p>
       <div class="viz">
         <EclipticWheel
           moonLon={moonSid}
@@ -731,9 +741,9 @@
       <h3>{hi('इस क्षण का पंचांग', 'This moment’s panchanga')}</h3>
       <p class="prose">
         {hi(
-          'और यही सब एक पंक्ति में — ठीक वैसा जैसा छपा पंचांग छापता है, सब इसी क्षण के λ☉ और λ☽ से निकला।',
-          'And the same thing in one line — exactly what a printed panchanga prints, all of it from λ☉ and λ☽ at this moment.',
-        )}
+          'और यही सब एक पंक्ति में — ठीक वैसा जैसा छपा पंचांग छापता है, सब इसी क्षण के λ',
+          'And the same thing in one line — exactly what a printed panchanga prints, all of it from λ',
+        )}<sub>☉</sub>{hi(' और λ', ' and λ')}<sub>☽</sub>{hi(' से निकला।', ' at this moment.')}
       </p>
       <dl class="summary">
         <div>
@@ -836,12 +846,10 @@
     background: color-mix(in srgb, var(--gold) 12%, var(--paper-2));
     border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
   }
-  .nb__transition {
-    margin: 1rem 0 1.5rem;
-    text-align: center;
-    font-size: 0.86rem;
-    font-style: italic;
-    color: var(--ink-soft);
+  /* a chapter's continuation (ch3's wheel, which follows the clock) — no top
+     divider (the .cell + .cell--cont specificity beats the base .cell border) */
+  .cell.cell--cont {
+    border-top: none;
   }
 
   /* ── time model (sticky) ── */

@@ -573,6 +573,12 @@
     if (!sun || !moon || sun.altitude < 0) return false;
     return Math.hypot(sun.pt[0] - moon.pt[0], sun.pt[1] - moon.pt[1]) < 13;
   });
+  // Daylight washes things out: once the Sun is up, fade the Moon & planets (the
+  // Sun itself stays full). Full at/below the horizon → ~0.45 in broad daylight.
+  const dayFade = $derived.by(() => {
+    const sunAlt = domeSunMoon[0]?.altitude ?? -90;
+    return sunAlt <= 0 ? 1 : Math.max(0.45, 1 - sunAlt / 15);
+  });
 
   function lerpRGB(a: number[], b: number[], t: number): string {
     const k = Math.max(0, Math.min(1, t));
@@ -1354,7 +1360,7 @@
           {#if showGrahas}
             {#each domePlanets as b (b.body)}
               {#if b.altitude >= -14}
-                <g class="dome-body">
+                <g class="dome-body" opacity={dayFade}>
                   <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
                   {#if showLabels}
                     <text x={b.pt[0]} y={b.pt[1] - 7.5} class="dome-label" text-anchor="middle"
@@ -1368,7 +1374,7 @@
           <!-- Moon first → behind the Sun; hidden when lost in the Sun's glare -->
           {#if domeSunMoon[1] && domeSunMoon[1].altitude >= -14 && !domeMoonHidden}
             {@const m = domeSunMoon[1]}
-            <g class="dome-body">
+            <g class="dome-body" opacity={dayFade}>
               <circle
                 cx={m.pt[0]}
                 cy={m.pt[1]}

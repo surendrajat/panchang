@@ -9,6 +9,7 @@
   import { bodyArc, bodyAltAz, bodyMagnitude, type SkyBody } from '$lib/astro';
   import { grahaLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
+  import { COMPASS } from '$lib/sky';
   import BodyIcon from '../BodyIcon.svelte';
 
   let { date }: { date: Date } = $props();
@@ -18,8 +19,6 @@
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
 
   const BODIES: SkyBody[] = ['moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
-  const DIRS_EN = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  const DIRS_HI = ['उ', 'उ-पू', 'पू', 'द-पू', 'द', 'द-प', 'प', 'उ-प'];
   const DAY = 86_400_000;
 
   const timeFmt = $derived(
@@ -33,7 +32,7 @@
   );
   const fmtTime = (ms: number) => num(timeFmt.format(new Date(ms)));
   const compass = (az: number) =>
-    (lang === 'hi' ? DIRS_HI : DIRS_EN)[Math.round((((az % 360) + 360) % 360) / 45) % 8];
+    (lang === 'hi' ? COMPASS.hi : COMPASS.en)[Math.round((((az % 360) + 360) % 360) / 45) % 8];
 
   const loc = $derived(preferences.location);
   const locName = $derived(loc?.name?.split(',')[0] ?? '');

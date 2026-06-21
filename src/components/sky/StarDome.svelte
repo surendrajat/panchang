@@ -12,6 +12,7 @@
   import { preferences } from '$lib/state/preferences.svelte';
   import { bodyAltAz, starAltAz, bodyArc, type SkyBody } from '$lib/astro';
   import { grahaLabel } from '$lib/labels';
+  import { moonLitPath, BRIGHT_STARS, CONSTELLATIONS, POLARIS } from '$lib/sky';
   import BodyIcon from '../BodyIcon.svelte';
 
   let {
@@ -99,14 +100,6 @@
     const r = (DR * (90 - alt)) / 90; // zenith → centre, horizon → rim
     const a = (az * Math.PI) / 180;
     return [DC - r * Math.sin(a), DC - r * Math.cos(a)];
-  }
-  function moonLitPath(cx: number, cy: number, r: number, lit: number, phaseAngle: number): string {
-    const waxing = phaseAngle < 180;
-    const rx = Math.abs(r * Math.cos(lit * Math.PI));
-    const gibbous = lit > 0.5;
-    const limbSweep = waxing ? 1 : 0;
-    const termSweep = waxing ? (gibbous ? 1 : 0) : gibbous ? 0 : 1;
-    return `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${limbSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r} Z`;
   }
   function domeTrack(body: SkyBody, centerMs: number, lat: number, lon: number): string {
     const pts: string[] = [];
@@ -214,32 +207,6 @@
     };
   });
 
-  // brightest stars (J2000 RA h, Dec °, mag); many are nakshatra junction-stars
-  const BRIGHT_STARS = [
-    { ra: 6.752, dec: -16.72, mag: -1.46, n: { hi: 'लुब्धक', tr: 'Lubdhaka', en: 'Sirius' } },
-    {
-      ra: 5.278,
-      dec: 45.998,
-      mag: 0.08,
-      n: { hi: 'ब्रह्महृदय', tr: 'Brahmahridaya', en: 'Capella' },
-    },
-    { ra: 5.242, dec: -8.2, mag: 0.13, n: { hi: 'रिगेल', tr: 'Rigel', en: 'Rigel' } },
-    { ra: 14.261, dec: 19.18, mag: -0.05, n: { hi: 'स्वाती', tr: 'Svati', en: 'Arcturus' } },
-    { ra: 18.616, dec: 38.78, mag: 0.03, n: { hi: 'अभिजित्', tr: 'Abhijit', en: 'Vega' } },
-    { ra: 7.655, dec: 5.225, mag: 0.34, n: { hi: 'प्रोसायन', tr: 'Procyon', en: 'Procyon' } },
-    { ra: 5.919, dec: 7.407, mag: 0.5, n: { hi: 'आर्द्रा', tr: 'Ardra', en: 'Betelgeuse' } },
-    { ra: 4.599, dec: 16.51, mag: 0.85, n: { hi: 'रोहिणी', tr: 'Rohini', en: 'Aldebaran' } },
-    { ra: 19.846, dec: 8.868, mag: 0.76, n: { hi: 'श्रवण', tr: 'Shravana', en: 'Altair' } },
-    { ra: 13.42, dec: -11.16, mag: 0.97, n: { hi: 'चित्रा', tr: 'Chitra', en: 'Spica' } },
-    { ra: 16.49, dec: -26.43, mag: 0.96, n: { hi: 'ज्येष्ठा', tr: 'Jyeshtha', en: 'Antares' } },
-    { ra: 7.755, dec: 28.03, mag: 1.14, n: { hi: 'पुनर्वसु', tr: 'Punarvasu', en: 'Pollux' } },
-    { ra: 10.139, dec: 11.97, mag: 1.35, n: { hi: 'मघा', tr: 'Magha', en: 'Regulus' } },
-    { ra: 20.69, dec: 45.28, mag: 1.25, n: { hi: 'डेनेब', tr: 'Deneb', en: 'Deneb' } },
-    { ra: 22.96, dec: -29.62, mag: 1.16, n: { hi: 'फ़ोमलहॉट', tr: 'Fomalhaut', en: 'Fomalhaut' } },
-    { ra: 6.399, dec: -52.7, mag: -0.74, n: { hi: 'अगस्त्य', tr: 'Agastya', en: 'Canopus' } },
-    { ra: 1.629, dec: -57.24, mag: 0.46, n: { hi: 'एकरनार', tr: 'Achernar', en: 'Achernar' } },
-    { ra: 22.137, dec: -46.96, mag: 1.74, n: { hi: 'मयूर', tr: 'Peacock', en: 'Peacock' } },
-  ];
   const domeStars = $derived.by(() => {
     const loc = preferences.location;
     if (!loc || !showStars) return [];
@@ -251,116 +218,11 @@
   const domePolaris = $derived.by(() => {
     const loc = preferences.location;
     if (!loc || !showStars) return null;
-    const { azimuth, altitude } = starAltAz(2.53, 89.26, date, loc.latitude, loc.longitude);
+    const { azimuth, altitude } = starAltAz(POLARIS.ra, POLARIS.dec, date, loc.latitude, loc.longitude);
     if (altitude < 0) return null;
     return { pt: domePt(azimuth, altitude) };
   });
 
-  const CONSTELLATIONS = [
-    {
-      name: { hi: 'सप्तर्षि', tr: 'Saptarishi', en: 'Big Dipper' },
-      stars: [
-        [11.06, 61.75],
-        [11.03, 56.38],
-        [11.9, 53.69],
-        [12.26, 57.03],
-        [12.9, 55.96],
-        [13.4, 54.93],
-        [13.79, 49.31],
-      ],
-      lines: [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 0],
-        [3, 4],
-        [4, 5],
-        [5, 6],
-      ],
-    },
-    {
-      name: { hi: 'मृग', tr: 'Mriga', en: 'Orion' },
-      stars: [
-        [5.92, 7.41],
-        [5.42, 6.35],
-        [5.68, -1.94],
-        [5.6, -1.2],
-        [5.53, -0.3],
-        [5.8, -9.67],
-        [5.24, -8.2],
-      ],
-      lines: [
-        [0, 1],
-        [0, 2],
-        [1, 4],
-        [2, 3],
-        [3, 4],
-        [2, 5],
-        [4, 6],
-        [5, 6],
-      ],
-    },
-    {
-      name: { hi: 'वृश्चिक', tr: 'Vrishchika', en: 'Scorpius' },
-      stars: [
-        [16.09, -19.8],
-        [16.0, -22.62],
-        [15.98, -26.11],
-        [16.49, -26.43],
-        [16.6, -28.22],
-        [16.84, -34.29],
-        [17.56, -37.1],
-        [17.51, -37.3],
-      ],
-      lines: [
-        [0, 1],
-        [1, 2],
-        [1, 3],
-        [3, 4],
-        [4, 5],
-        [5, 6],
-        [6, 7],
-      ],
-    },
-    {
-      name: { hi: 'कैसिओपिया', tr: 'Cassiopeia', en: 'Cassiopeia' },
-      stars: [
-        [0.15, 59.15],
-        [0.68, 56.54],
-        [0.95, 60.72],
-        [1.43, 60.24],
-        [1.91, 63.67],
-      ],
-      lines: [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 4],
-      ],
-    },
-    {
-      name: { hi: 'धनु', tr: 'Dhanu', en: 'Sagittarius' },
-      stars: [
-        [18.47, -25.42],
-        [18.35, -29.83],
-        [18.4, -34.38],
-        [18.76, -26.99],
-        [18.92, -26.3],
-        [19.04, -29.88],
-        [19.12, -27.67],
-      ],
-      lines: [
-        [0, 1],
-        [1, 2],
-        [2, 5],
-        [5, 4],
-        [4, 3],
-        [3, 0],
-        [4, 6],
-        [6, 5],
-      ],
-    },
-  ];
   const domeConstellations = $derived.by(() => {
     const loc = preferences.location;
     if (!loc || !showStars) return [];
@@ -518,7 +380,7 @@
               class="dome-hit"
               role="button"
               tabindex="0"
-              aria-label={tn('ध्रुव', 'Dhruva', 'Pole Star')}
+              aria-label={tn(POLARIS.n.hi, POLARIS.n.tr, POLARIS.n.en)}
               use:revealable={'polaris'}
             />
             <circle cx={domePolaris.pt[0]} cy={domePolaris.pt[1]} r="3" class="dome-polaris-halo" />
@@ -527,7 +389,7 @@
               x={domePolaris.pt[0]}
               y={domePolaris.pt[1] < DC ? domePolaris.pt[1] + 9 : domePolaris.pt[1] - 6}
               class="dome-con-name"
-              text-anchor="middle">{tn('ध्रुव', 'Dhruva', 'Pole Star')}</text
+              text-anchor="middle">{tn(POLARIS.n.hi, POLARIS.n.tr, POLARIS.n.en)}</text
             >
           </g>
         {/if}

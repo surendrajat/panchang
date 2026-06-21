@@ -29,6 +29,7 @@
   import { rashiLabel, grahaLabel } from '$lib/labels';
   import { applyNumerals } from '$lib/format/numerals';
   import CelestialMark from '../CelestialMark.svelte';
+  import { SIGN_MONTH, PLANET_INFO } from '$lib/sky';
   import EclipticWheel, { type WheelPick } from './EclipticWheel.svelte';
 
   let { date }: { date: Date } = $props();
@@ -40,54 +41,6 @@
     lang === 'hi' ? dev : preferences.transliteration ? tr : en;
   const signName = (i: number) => rashiLabel(i);
   const earthLabel = $derived(tn('पृथ्वी', 'Prithvi', 'Earth'));
-
-  type MonInfo = { mon: { en: string; hi: string }; greg: { en: string; hi: string } };
-  const SIGN_MONTH: readonly MonInfo[] = [
-    { mon: { en: 'Vaishakha', hi: 'वैशाख' }, greg: { en: 'Apr–May', hi: 'अप्रैल–मई' } },
-    { mon: { en: 'Jyeshtha', hi: 'ज्येष्ठ' }, greg: { en: 'May–Jun', hi: 'मई–जून' } },
-    { mon: { en: 'Ashadha', hi: 'आषाढ़' }, greg: { en: 'Jun–Jul', hi: 'जून–जुलाई' } },
-    { mon: { en: 'Shravana', hi: 'श्रावण' }, greg: { en: 'Jul–Aug', hi: 'जुलाई–अगस्त' } },
-    { mon: { en: 'Bhadrapada', hi: 'भाद्रपद' }, greg: { en: 'Aug–Sep', hi: 'अगस्त–सितंबर' } },
-    { mon: { en: 'Ashvina', hi: 'आश्विन' }, greg: { en: 'Sep–Oct', hi: 'सितंबर–अक्तूबर' } },
-    { mon: { en: 'Kartika', hi: 'कार्तिक' }, greg: { en: 'Oct–Nov', hi: 'अक्तूबर–नवंबर' } },
-    { mon: { en: 'Margashirsha', hi: 'मार्गशीर्ष' }, greg: { en: 'Nov–Dec', hi: 'नवंबर–दिसंबर' } },
-    { mon: { en: 'Pausha', hi: 'पौष' }, greg: { en: 'Dec–Jan', hi: 'दिसंबर–जनवरी' } },
-    { mon: { en: 'Magha', hi: 'माघ' }, greg: { en: 'Jan–Feb', hi: 'जनवरी–फरवरी' } },
-    { mon: { en: 'Phalguna', hi: 'फाल्गुन' }, greg: { en: 'Feb–Mar', hi: 'फरवरी–मार्च' } },
-    { mon: { en: 'Chaitra', hi: 'चैत्र' }, greg: { en: 'Mar–Apr', hi: 'मार्च–अप्रैल' } },
-  ];
-  const PLANET_INFO: Record<GrahaKey, { en: string; hi: string }> = {
-    sun: { en: 'The soul, vitality and the self.', hi: 'आत्मा, ओज और स्वत्व।' },
-    moon: { en: 'The mind, emotion and nourishment.', hi: 'मन, भावना और पोषण।' },
-    mars: {
-      en: 'Energy, courage and drive — lord of Mesha & Vrishchika.',
-      hi: 'ऊर्जा, साहस, कर्म — मेष व वृश्चिक का स्वामी।',
-    },
-    mercury: {
-      en: 'Intellect, speech and commerce — lord of Mithuna & Kanya.',
-      hi: 'बुद्धि, वाणी, व्यापार — मिथुन व कन्या का स्वामी।',
-    },
-    jupiter: {
-      en: 'Wisdom, growth and fortune — lord of Dhanu & Meena.',
-      hi: 'ज्ञान, विस्तार, भाग्य — धनु व मीन का स्वामी।',
-    },
-    venus: {
-      en: 'Love, beauty and the arts — lord of Vrishabha & Tula.',
-      hi: 'प्रेम, सौन्दर्य, कला — वृषभ व तुला का स्वामी।',
-    },
-    saturn: {
-      en: 'Discipline, time and karma — lord of Makara & Kumbha.',
-      hi: 'अनुशासन, समय, कर्मफल — मकर व कुम्भ का स्वामी।',
-    },
-    rahu: {
-      en: 'A shadow-graha, not a real body — the north point where the Moon’s path crosses the Sun’s. Eclipses happen here; it stands for ambition and the unconventional.',
-      hi: 'छाया-ग्रह (कोई वास्तविक पिंड नहीं) — चन्द्रपथ का सूर्यपथ से उत्तर संधि-बिंदु। यहीं ग्रहण होते हैं; महत्वाकांक्षा व अपरंपरा।',
-    },
-    ketu: {
-      en: 'A shadow-graha, not a real body — the south crossing point, always opposite Rahu. Detachment, insight and liberation.',
-      hi: 'छाया-ग्रह (कोई वास्तविक पिंड नहीं) — दक्षिण संधि-बिंदु, सदा राहु के सम्मुख। वैराग्य, अंतर्दृष्टि व मोक्ष।',
-    },
-  };
 
   // wheel display toggles (behind the gear)
   let wheelGrahas = $state(false);

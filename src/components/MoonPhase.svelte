@@ -8,6 +8,7 @@
   //   - lit limb on the right when waxing, left when waning
   //   - terminator is a half-ellipse with semi-minor axis |cos(angle)|·R
   //   - crescent vs. gibbous flips the terminator's sweep flag
+  import { moonLitPath } from '$lib/sky';
 
   interface Props {
     illumination: number; // 0..1
@@ -20,20 +21,7 @@
   const R = $derived((size - 8) / 2);
   const cx = $derived(size / 2);
   const cy = $derived(size / 2);
-  const waxing = $derived(phaseAngle < 180);
-  // For path geometry we want a 0..1 "lit fraction" measured from
-  // illumination, but the terminator ellipse's semi-minor axis tracks
-  // cos(illum * π) — matching the mockup's `rx = R * cos(illum * π)`.
-  const rx = $derived(Math.abs(R * Math.cos(illumination * Math.PI)));
-  const gibbous = $derived(illumination > 0.5);
-  const limbSweep = $derived(waxing ? 1 : 0);
-  const termSweep = $derived(waxing ? (gibbous ? 1 : 0) : gibbous ? 0 : 1);
-
-  const litPath = $derived.by(() => {
-    const top = `${cx} ${cy - R}`;
-    const bot = `${cx} ${cy + R}`;
-    return `M ${top} A ${R} ${R} 0 0 ${limbSweep} ${bot} A ${rx} ${R} 0 0 ${termSweep} ${top} Z`;
-  });
+  const litPath = $derived(moonLitPath(cx, cy, R, illumination, phaseAngle));
 
   // stable, deterministic ids (module counter) — same pattern as BodyIcon/StarDome
   _uid += 1;

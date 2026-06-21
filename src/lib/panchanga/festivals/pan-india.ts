@@ -580,22 +580,21 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: inShukla(15, 'Kartika'),
   },
 
-  // Vaikuntha Ekadashi — we compute Margashirsha Shukla Ekadashi = MOKSHADA
-  // Ekadashi, which in NORTH India is observed as Vaikuntha Ekadashi (also Gita
-  // Jayanti). Sunrise/udaya (standard Smarta Ekadashi). Verified vs Drik's
-  // Mokshada page, New Delhi 2025 = Dec 1 = ours.
-  //
-  // REGIONAL SPLIT (not a bug): the SOUTH Indian Vaikuntha Ekadashi
-  // (Tirupati/Srirangam) is the DHANURMASA (solar Sagittarius month) Shukla
-  // Ekadashi — a DIFFERENT date, and because it is solar-anchored a Gregorian year
-  // can carry 0, 1 or 2 of them. We use the North-Indian lunar convention (the
-  // app's default); a solar Dhanurmasa variant would need a solar-month rule and
-  // is a documented future addition, not folded in here.
+  // Vaikuntha Ekadashi — the real (Sri Vaishnava / Tirumala Vaikunta Dwaram /
+  // Srirangam Paramapada Vasal) festival is SOLAR-anchored: the Shukla Ekadashi
+  // falling while the Sun is in DHANURMASA (sidereal Dhanu/Sagittarius, sign 8).
+  // Because it is solar-anchored, a Gregorian year carries 0, 1 or 2 of them. This
+  // is NOT the lunar Margashirsha Shukla Ekadashi (= Mokshada / Gita Jayanti, the
+  // North-Indian conflation) — the two coincide only in some years. Smarta
+  // (vriddhi-aware/purvaviddha) Ekadashi day. Verified vs Drik: 2024 none, 2025
+  // Jan 10 + Dec 30, 2026 Dec 20, 2027 none, 2028 Jan 8 + Dec 27. (Mokshada Ekadashi
+  // could be added as a separate North-Indian entry in future.)
   {
     key: 'vaikuntha_ekadashi',
     displayName: 'Vaikuntha Ekadashi',
     displayNameHi: 'वैकुण्ठ एकादशी',
-    matches: inShukla(11, 'Margashirsha'),
+    matches: (p) =>
+      p.solar.signAtDayStart === 8 && sunriseTithiObservedForDate(p.location, p.date, 11),
   },
 
   // --- Monthly recurring observances ---

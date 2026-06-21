@@ -20,8 +20,11 @@ Two runtime dependencies only: **`astronomy-engine`** (ephemeris) and **`dexie`*
 ## Principles
 
 - **Pure compute, isolated I/O.** The calculation layers are pure functions of
-  `(instant, location, options)`. Caching and persistence live in the storage
-  layer, never inside the math.
+  `(instant, location, options)`. Result caching and persistence live in the
+  storage layer, never inside the math. (The compute layer does *transparently*
+  memoize a few pure, hot sub-computations — sunrise/moonrise and new-moon
+  instants — which is referentially invisible: identical inputs give identical
+  outputs, distinct from the storage result cache.)
 - **One swappable astronomy backend.** Everything reads positions through
   `lib/astro`; swapping `ephemeris.ts` + `ayanamsa.ts` would change the engine
   without touching anything above.

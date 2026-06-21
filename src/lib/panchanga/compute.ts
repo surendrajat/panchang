@@ -5,7 +5,10 @@
 // reported as they are at that sunrise; their end times are computed by
 // bisection from that anchor forward.
 //
-// Pure function. No I/O, no caching. Memoization is the storage layer's job.
+// Pure function. No I/O. computePanchanga does not cache its own RESULT — that
+// is the storage layer's job (lib/storage/cache.ts). It does call helpers that
+// transparently memoize pure sub-computations (sunRiseSet, new-moon search);
+// those return identical values, so purity is preserved.
 
 import {
   civilMidnightInZone,

@@ -54,6 +54,10 @@ interface NewMoonCacheEntry {
   jds: number[];
 }
 const NEW_MOON_CACHE = new Map<number, NewMoonCacheEntry>();
+// Bounded like the rise/set memo (sunrise.ts): each entry is a 30-day bucket, so
+// 4096 covers ~340 years — never reached in normal use — but caps the worst case
+// (an extreme date range) at a fixed size. Clearing just forces a cheap re-warm.
+const NEW_MOON_CACHE_MAX = 4096;
 const BUCKET_DAYS = 30;
 
 function newMoonsAround(jd: number): number[] {
@@ -80,6 +84,7 @@ function newMoonsAround(jd: number): number[] {
     // Advance by 24h after the found moon to find the next.
     cursor = new Date(r.date.getTime() + MS_PER_DAY);
   }
+  if (NEW_MOON_CACHE.size >= NEW_MOON_CACHE_MAX) NEW_MOON_CACHE.clear();
   NEW_MOON_CACHE.set(bucket, { jds });
   return jds;
 }

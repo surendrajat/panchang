@@ -177,6 +177,49 @@ describe('monthly-observance key integrity', () => {
   });
 });
 
+describe('recurrence-frequency guards (catch a mis-classified festival)', () => {
+  const yearCounts = () => {
+    const occ = findFestivals(new Date(Date.UTC(2026, 0, 1, 6)), new Date(Date.UTC(2026, 11, 31, 6)), DELHI);
+    const c = new Map<string, number>();
+    for (const o of occ) c.set(o.key, (c.get(o.key) ?? 0) + 1);
+    return c;
+  };
+
+  it('any festival firing frequently (>6x/year) is a known monthly recurrence', () => {
+    // Annual festivals fire ~once a year; the monthly recurrences fire 11-25x. So
+    // a future monthly-style rule added WITHOUT its key in MONTHLY_OBSERVANCE_KEYS
+    // would fire ~12x here and trip this test — stopping it from silently swamping
+    // the annual Festivals list (the maintainability gap called out in review).
+    for (const [key, n] of yearCounts()) {
+      if (n > 6) {
+        expect(MONTHLY_OBSERVANCE_KEYS.has(key), `"${key}" fires ${n}x/yr but is not flagged monthly`).toBe(true);
+      }
+    }
+  });
+
+  it('each monthly recurrence fires within its expected yearly range (regression smoke)', () => {
+    // Frequency coverage for the 6 monthly rules (whose exact dates are not yet
+    // Drik-pinned): a broken vyapini/chandrodaya rule that stopped matching, or
+    // one that over-matched, moves the count out of range. ~24 = twice a month
+    // (Ekadashi/Pradosh, both pakshas), ~12 = once a month. Ranges are loose to
+    // tolerate adhika-masa years.
+    const c = yearCounts();
+    const ranges: Record<string, [number, number]> = {
+      ekadashi: [22, 27],
+      pradosh: [22, 27],
+      sankashti_chaturthi: [10, 14],
+      amavasya: [10, 14],
+      purnima: [10, 14],
+      masik_shivaratri: [10, 14],
+    };
+    for (const [key, [lo, hi]] of Object.entries(ranges)) {
+      const n = c.get(key) ?? 0;
+      expect(n, `${key} fired ${n}x (expected ${lo}-${hi})`).toBeGreaterThanOrEqual(lo);
+      expect(n, `${key} fired ${n}x (expected ${lo}-${hi})`).toBeLessThanOrEqual(hi);
+    }
+  });
+});
+
 describe('sunRiseSet / moonRiseSet memo correctness', () => {
   const refSun = (loc: Location, dayStart: Date) => {
     const obs = new Observer(loc.latitude, loc.longitude, loc.altitude ?? 0);

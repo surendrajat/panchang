@@ -139,7 +139,7 @@ describe('monthly-observance key integrity', () => {
     for (const k of MONTHLY_OBSERVANCE_KEYS) {
       expect(ruleKeys.has(k), `monthly key "${k}" has no matching rule`).toBe(true);
     }
-    expect(MONTHLY_OBSERVANCE_KEYS.size).toBe(6);
+    expect(MONTHLY_OBSERVANCE_KEYS.size).toBe(7);
   });
 
   it('each monthly recurrence actually fires in a full year (not a dead rule)', () => {

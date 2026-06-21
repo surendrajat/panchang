@@ -213,6 +213,7 @@ export const MONTHLY_OBSERVANCE_KEYS: ReadonlySet<string> = new Set([
   'pradosh',
   'sankashti_chaturthi',
   'amavasya',
+  'amavasya_devakarya',
   'purnima',
   'masik_shivaratri',
 ]);
@@ -628,18 +629,31 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     // sunrise tithi.
     matches: (p) => vyapiniWithSunriseFallback(p, 'chandrodaya', 19, 'earlier'),
   },
+  // Amavasya is observed on TWO civil days when the tithi spans two (the digests
+  // bifurcate it): the PITRU-KARYA (ancestor / Darsha Shraddha) day vs the
+  // DEVA-KARYA (auspicious / deity) day. We surface both in the monthly calendar.
   {
     key: 'amavasya',
-    displayName: 'Amavasya',
-    displayNameHi: 'अमावस्या',
-    // SOURCED. Darsha Amavasya = the day the Amavasya tithi (30) prevails at
-    // APARAHNA (afternoon), even when it is not present at sunrise. Basis: shraddha
-    // is an aparahna rite — Dharmasindhu, Shraddha prakarana, states "Parvana
-    // shraddha has to be of aparahna-prapti" — so the Darsha (monthly-amavasya)
-    // shraddha is taken on the aparahna-vyapini Amavasya. Cross-checked vs
-    // drikpanchang per-city: Delhi 2026 + Kolkata 2025, 24/24. Sunrise fallback
-    // keeps a kshaya Amavasya at exactly one day per lunar month.
+    displayName: 'Amavasya (Pitru Karya)',
+    displayNameHi: 'अमावस्या (पितृ कार्य)',
+    // PITRU-KARYA / Darsha (Shraddha) Amavasya = the day the Amavasya tithi (30)
+    // prevails at APARAHNA (afternoon), even when not present at sunrise — shraddha
+    // is an aparahna rite (Dharmasindhu, Shraddha prakarana: "Parvana shraddha has
+    // to be of aparahna-prapti"). On a two-day span this is the EARLIER day.
+    // Cross-checked vs drikpanchang's Darsha Amavasya per-city (Delhi 2026 +
+    // Kolkata 2025, 24/24). Sunrise fallback keeps a kshaya Amavasya once per month.
     matches: (p) => vyapiniWithSunriseFallback(p, 'aparahna', 30, 'earlier'),
+  },
+  {
+    key: 'amavasya_devakarya',
+    displayName: 'Amavasya (Deva Karya)',
+    displayNameHi: 'अमावस्या (देव कार्य)',
+    // DEVA-KARYA Amavasya = the UDAYA (sunrise) day — the general/auspicious
+    // observance follows the day the tithi prevails at sunrise (purva-viddha,
+    // vriddhi-aware). On a two-day span this is the LATER day (e.g. 2026 Chaitra:
+    // pitru/aparahna Mar 18, deva/udaya Mar 19). Coincides with the Pitru day on
+    // single-day and kshaya months.
+    matches: (p) => sunriseTithiObservedForDate(p.location, p.date, 30),
   },
   {
     key: 'purnima',

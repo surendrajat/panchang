@@ -144,16 +144,25 @@ export function tithiOverlapsNishitaKaal(loc: Location, date: Date, tithiIndex: 
 }
 
 // Coverage, in ms, of `tithiIndex` within the PURVAHNA (forenoon = sunrise→midday)
-// of a civil day. Sampled at 5-min steps (precision << the 6-ghatika threshold).
+// of a civil day. The tithi index is monotonic across the forenoon, so a cheap
+// 2-sample pre-check (indices at sunrise and midday) rules out the common
+// "not present" case before the finer 10-min scan — keeps the per-day cost low.
 function tithiForenoonCoverageMs(loc: Location, date: Date, tithiIndex: number): number {
   const ev = sunRiseSet(loc, date);
   if (!ev.rise || !ev.set) return 0;
   const sunrise = ev.rise.getTime();
   const midday = sunrise + (ev.set.getTime() - sunrise) / 2;
-  const STEP = 5 * 60_000;
+  const idxAt = (t: number) => tithiAtJD(dateToJulian(new Date(t))).index;
+  const lo = idxAt(sunrise);
+  const hi = idxAt(midday);
+  // monotonic, but can wrap 30→1 at the new moon
+  const present =
+    lo <= hi ? tithiIndex >= lo && tithiIndex <= hi : tithiIndex >= lo || tithiIndex <= hi;
+  if (!present) return 0;
+  const STEP = 10 * 60_000;
   let covered = 0;
   for (let t = sunrise; t < midday; t += STEP) {
-    if (tithiAtJD(dateToJulian(new Date(t))).index === tithiIndex) covered += STEP;
+    if (idxAt(t) === tithiIndex) covered += STEP;
   }
   return covered;
 }

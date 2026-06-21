@@ -463,7 +463,13 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     key: 'thiruvonam',
     displayName: 'Thiruvonam (Onam)',
     displayNameHi: 'थिरुओणम (ओणम)',
-    matches: (p) => isThiruvonamOnam(p.location, p.date, p.options.ayanamsa),
+    // Cheap pre-gate on the precomputed solar sign (Sun in Simha = Chingam) so the
+    // expensive sunRiseSet + look-ahead in isThiruvonamOnam runs ~1 month/year, not
+    // every day. Onam is mid-Chingam, so signAtDayStart is Simha on the day itself;
+    // the signAtDayEnd branch keeps the Chingam-entry day in scope too.
+    matches: (p) =>
+      (p.solar.signAtDayStart === 4 || p.solar.signAtDayEnd === 4) &&
+      isThiruvonamOnam(p.location, p.date, p.options.ayanamsa),
   },
 
   // Sharad Navaratri / Ghatasthapana — Ashvina Shukla 1 (Pratipada). The puja is

@@ -41,9 +41,10 @@
       <stop offset="52%" stop-color={g[1]} />
       <stop offset="100%" stop-color={g[2]} />
     </radialGradient>
-    <radialGradient id="{id}s" cx="38%" cy="32%" r="72%">
-      <stop offset="58%" stop-color="#000" stop-opacity="0" />
-      <stop offset="100%" stop-color="#000" stop-opacity="0.34" />
+    <radialGradient id="{id}s" cx="40%" cy="34%" r="74%">
+      <stop offset="46%" stop-color="#000" stop-opacity="0" />
+      <stop offset="82%" stop-color="#000" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000" stop-opacity="0.5" />
     </radialGradient>
     <clipPath id="{id}c"><circle {cx} {cy} {r} /></clipPath>
   </defs>

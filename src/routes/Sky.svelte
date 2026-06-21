@@ -1366,6 +1366,13 @@
             <stop offset="62%" stop-color="rgba(0,0,0,0)" />
             <stop offset="100%" stop-color="rgba(0,0,0,0.22)" />
           </radialGradient>
+          <!-- soft sun bloom (glow instead of spiky rays) -->
+          <radialGradient id="dome-sun-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff3c0" stop-opacity="0.98" />
+            <stop offset="34%" stop-color="#ffd24d" stop-opacity="0.7" />
+            <stop offset="62%" stop-color="#ffab35" stop-opacity="0.26" />
+            <stop offset="100%" stop-color="#ff9824" stop-opacity="0" />
+          </radialGradient>
           <clipPath id="dome-clip"><circle cx={DC} cy={DC} r={DR} /></clipPath>
         </defs>
         <circle cx={DC} cy={DC} r={DR} fill="url(#dome-grad)" />
@@ -1454,7 +1461,7 @@
                     aria-label={grahaLabel(b.body)}
                     use:revealable={b.body}
                   />
-                  <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={4.5} />
+                  <BodyIcon kind={b.body} cx={b.pt[0]} cy={b.pt[1]} r={5.5} />
                   <text
                     x={b.pt[0]}
                     y={b.pt[1] < DC ? b.pt[1] + 11 : b.pt[1] - 7.5}
@@ -1522,27 +1529,9 @@
                 aria-label={grahaLabel('sun')}
                 use:revealable={'sun'}
               />
-              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="11" fill="url(#sun-glow)" />
-              {#each rayAngles as a (a)}
-                {@const c = Math.cos((a * Math.PI) / 180)}
-                {@const s = Math.sin((a * Math.PI) / 180)}
-                <line
-                  x1={sn.pt[0] + c * 8}
-                  y1={sn.pt[1] - s * 8}
-                  x2={sn.pt[0] + c * 13}
-                  y2={sn.pt[1] - s * 13}
-                  class="sun-ray"
-                  stroke-width="0.7"
-                />
-              {/each}
-              <circle
-                cx={sn.pt[0]}
-                cy={sn.pt[1]}
-                r="6.5"
-                fill="url(#sun-grad)"
-                stroke="#e07b00"
-                stroke-width="0.6"
-              />
+              <!-- a soft glowing orb (no rays) — gentler than the spiky version -->
+              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="19" fill="url(#dome-sun-glow)" />
+              <circle cx={sn.pt[0]} cy={sn.pt[1]} r="6.5" fill="url(#sun-grad)" />
               <text
                 x={sn.pt[0]}
                 y={sn.pt[1] < DC ? sn.pt[1] + 18 : sn.pt[1] - 14}
@@ -1699,13 +1688,14 @@
     z-index: 5;
     display: grid;
     place-items: center;
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
     color: var(--ink-soft);
+    box-shadow: 0 1px 4px var(--shadow);
     cursor: pointer;
     transition:
       color 0.15s,
@@ -1713,8 +1703,8 @@
       transform 0.2s;
   }
   .view-gear svg {
-    width: 17px;
-    height: 17px;
+    width: 20px;
+    height: 20px;
     fill: currentColor;
   }
   .view-gear:hover,

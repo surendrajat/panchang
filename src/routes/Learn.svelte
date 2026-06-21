@@ -719,17 +719,11 @@
       <h3>{hi('इस क्षण का पूरा आकाश', 'The whole sky, this moment')}</h3>
       <p class="prose">
         {hi(
-          'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। किसी पिंड पर टैप करें, ⚙ से ग्रह जोड़ें या राशिचक्र बदलें, और ऊपर समय चलाकर हर मान को बदलते देखें। यही पूरे पंचांग की जड़ है।',
-          'And here it all is at once — the live, interactive wheel and readout. Tap a body, add planets or flip the zodiac with ⚙, and play time above to watch every value move. This is the root the whole panchanga grows from.',
+          'और यह रहा सब एक साथ — सजीव, अंतःक्रियात्मक चक्र और पठन। यही पूरे पंचांग की जड़ है।',
+          'And here it all is at once — the live, interactive wheel and readout. This is the root the whole panchanga grows from.',
         )}
       </p>
       <SkyPanel date={simDate} />
-      <p class="caption">
-        {hi(
-          '⚙ से ग्रह जोड़ें या राशिचक्र बदलें · किसी पिंड पर टैप करके जानें · ऊपर समय चलाकर सब बदलते देखें।',
-          'Use ⚙ to add planets or flip the zodiac · tap a body to learn · play time above to watch it all move.',
-        )}
-      </p>
     </div>
   </article>
 
@@ -778,8 +772,6 @@
           target="_blank"
           rel="noopener">{hi('मार्गदर्शिका →', 'the guide →')}</a
         >
-        ·
-        <a href="#/">{hi('आज का दिन देखें →', 'see today →')}</a>
       </p>
     </div>
   </article>

@@ -4,8 +4,8 @@
 //
 // We deliberately differ from Drik in two bounded, fully-explained ways — and
 // this file locks BOTH to exact magnitudes so any *other* drift is caught:
-//   1. Grahas: we use Swiss-Eph's SE_SIDM_LAHIRI ayanamsa, ~0.38′ below Drik's
-//      Lahiri variant, so each Drik graha is ~0.38′ lower in sidereal longitude
+//   1. Grahas: we use Swiss-Eph's SE_SIDM_LAHIRI ayanamsa, ~0.40′ below Drik's
+//      Lahiri variant, so each Drik graha is ~0.40′ lower in sidereal longitude
 //      than ours — a clean constant, nothing else (astro/ayanamsa.ts).
 //   2. Lagna: Drik applies the sidereal/solar factor to longitude (the "Local
 //      Mean Time" method); we use the geometric rising point (lagna.ts). The
@@ -42,9 +42,9 @@ function loc(name: string, lat: [number, number, number], lon: [number, number, 
 }
 
 // The only systematic difference from Drik's published grahas is the ayanamsa
-// offset: Drik's Lahiri is ~0.38′ higher ⟹ its sidereal longitudes are ~0.38′
-// LOWER than ours. So (ours − Drik) ≈ +0.38′ for every graha. The band [0.25,
-// 0.50] is 0.38′ ± the ≤0.04′ theory residual + margin — tight enough that any
+// offset: Drik's Lahiri is ~0.40′ higher ⟹ its sidereal longitudes are ~0.40′
+// LOWER than ours. So (ours − Drik) ≈ +0.40′ for every graha. The band [0.25,
+// 0.50] is 0.40′ ± the ≤0.04′ theory residual + margin — tight enough that any
 // non-ayanamsa drift (a broken graha, wrong node) falls outside it.
 describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
   const DELHI = loc('New Delhi', [28, 38, 8], [77, 13, 28]);
@@ -63,7 +63,7 @@ describe('grahas vs Drik — New Delhi 1990-08-15 21:06:58 IST', () => {
     ketu: abs(3, 12, 43, 24),
   };
   for (const key of Object.keys(DRIK) as GrahaKey[]) {
-    it(`${key}: ours − Drik = +0.38′ ayanamsa offset only`, () => {
+    it(`${key}: ours − Drik = +0.40′ ayanamsa offset only`, () => {
       const mine = grahaSiderealLongitude(key, jd, 'lahiri', 'mean');
       const gap = signedSep(mine, DRIK[key]) * 60; // ours − Drik, arcmin
       expect(gap).toBeGreaterThan(0.25);

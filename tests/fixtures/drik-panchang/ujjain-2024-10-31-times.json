@@ -2,7 +2,7 @@
   "label": "Ujjain — 2024-10-31 (Amavasya transition with timed references)",
   "source": {
     "urls": ["https://www.prokerala.com/astrology/panchang/2024-october-31.html"],
-    "notes": "Prokerala Ujjain Panchang gives Krishna Chaturdashi ending 15:53, Shakuni ending 15:53. Drik Panchang confirms Chitra ending Nov 01 00:45 (global) and Vishkambha ending 09:51 (global). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), Chitra end is exact and Vishkambha end is +1 min — both well within 2-min tolerance."
+    "notes": "Prokerala Ujjain Panchang gives Krishna Chaturdashi ending 15:53, Shakuni ending 15:53. Drik Panchang confirms Chitra ending Nov 01 00:45 (global) and Vishkambha ending 09:51 (global). After Swiss-Eph ayanamsa (LAHIRI_J2000_DEG=23.85709), Chitra end is exact and Vishkambha end is +1 min — both well within 2-min tolerance."
   },
   "location": {
     "name": "Ujjain, India",

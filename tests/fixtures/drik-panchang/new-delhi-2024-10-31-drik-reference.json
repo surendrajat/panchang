@@ -4,7 +4,7 @@
     "urls": [
       "https://www.drikpanchang.com/panchang/day-panchang.html?date=31%2F10%2F2024&time-format=24hour"
     ],
-    "notes": "Drik Panchang New Delhi (geoname 1261481). Sunrise 06:32, sunset 17:36, Chaturdashi end 15:52, Chitra end Nov 01 00:45, Vishkambha end 09:51, Shakuni end 15:52. Sunrise/sunset exceed 30s tolerance; tithi/karana exceed 2-min tolerance by ~3s (irreducible Moon accuracy floor). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), Chitra end is exact and Vishkambha end is +1 min — both well within 2-min tolerance."
+    "notes": "Drik Panchang New Delhi (geoname 1261481). Sunrise 06:32, sunset 17:36, Chaturdashi end 15:52, Chitra end Nov 01 00:45, Vishkambha end 09:51, Shakuni end 15:52. Sunrise/sunset exceed 30s tolerance; tithi/karana exceed 2-min tolerance by ~3s (irreducible Moon accuracy floor). After Swiss-Eph ayanamsa (LAHIRI_J2000_DEG=23.85709), Chitra end is exact and Vishkambha end is +1 min — both well within 2-min tolerance."
   },
   "location": {
     "name": "New Delhi, India",

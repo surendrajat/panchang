@@ -6,7 +6,7 @@
       "https://www.panchangam.org/dailypanchangam.php?date=2024-08-26",
       "https://www.prokerala.com/astrology/panchang/2024-august-26.html"
     ],
-    "notes": "Prokerala Tamil Panchangam gives Ashtami ending Aug 27 02:20, Balava ending 14:55. Drik Panchang New Delhi (geoname 1261481) confirms Krittika ending 15:55 (global, model +1 min) and Vyaghata ending 22:17 (global, model exact). After ayanamsa fix (LAHIRI_J2000_DEG=23.8635), nakshatra/yoga end times are within 2-min tolerance."
+    "notes": "Prokerala Tamil Panchangam gives Ashtami ending Aug 27 02:20, Balava ending 14:55. Drik Panchang New Delhi (geoname 1261481) confirms Krittika ending 15:55 (global, model +1 min) and Vyaghata ending 22:17 (global, model exact). After Swiss-Eph ayanamsa (LAHIRI_J2000_DEG=23.85709), nakshatra/yoga end times are within 2-min tolerance."
   },
   "location": {
     "name": "Chennai, India",

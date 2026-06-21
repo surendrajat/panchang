@@ -78,7 +78,7 @@ LAGNA_CASES = [  # label, lat, lon, iso(UTC)
     ('NewYork 06:30', 40.7142, -74.0058, '1990-08-15T10:30:00Z'),
 ]
 def section_lagna():
-    print("\n# kundli-vs-drik.test.ts — sidereal Lahiri ascendant (swe.houses_ex, Placidus)")
+    print("\n# kundli-vs-drik.test.ts — sidereal Lahiri ascendant (swe.houses_ex, flag 'A' — ascendant is house-system-independent)")
     for label, lat, lo, iso in LAGNA_CASES:
         asc = swe.houses_ex(jd_iso(iso), lat, lo, b'A', swe.FLG_SIDEREAL)[1][0]
         print(f"  ['{label}', {asc:.4f}],")

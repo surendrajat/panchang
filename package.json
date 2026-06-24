@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "vite build && playwright test",
     "lint": "tsc --noEmit && svelte-check --tsconfig ./tsconfig.json && eslint .",
     "format": "prettier --write \"src/**/*.{ts,svelte,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,svelte,css}\""
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.61.1",
     "@sveltejs/vite-plugin-svelte": "7.1.2",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/svelte": "5.4.2",

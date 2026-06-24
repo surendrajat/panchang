@@ -38,3 +38,20 @@ jobs:
 
       - name: Unit tests
         run: pnpm test
+
+      # E2E runs against the production build from the step above (vite preview).
+      - name: Resolve Playwright version
+        id: pwv
+        run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pwv.outputs.v }}
+
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E tests (Playwright)
+        run: pnpm exec playwright test

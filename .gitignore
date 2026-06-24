@@ -8,6 +8,9 @@ dist-types
 .env.local
 .vite
 coverage
+test-results
+playwright-report
+/playwright/.cache
 .svelte-kit
 .idea
 .vscode

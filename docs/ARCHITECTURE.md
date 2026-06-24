@@ -93,7 +93,7 @@ proxies don't structured-clone).
 `lib/state/*.svelte.ts` are runes stores — `preferences` (language, numerals,
 ayanamsa, node type, month system, week start, location, theme), `clock`,
 `jyotish-draft`, `sw-update`. `lib/storage` is Dexie (versioned schema, currently
-**v3**) with a compute `cache`, `cachedFestivals`, `birthProfiles`, and
+**v3**) with `cachedPanchangas`, `cachedFestivals`, `birthProfiles`, and
 saved-locations/preferences mirrors.
 
 ### i18n & format
@@ -139,7 +139,7 @@ on unmount.
 
 - `pnpm dev` (Vite, port 5173) · `pnpm build` (static bundle + `vite-plugin-pwa`
   service worker) · `pnpm test` (Vitest) · `pnpm run lint` — the one gate:
-  `tsc --noEmit` + `svelte-check` + ESLint (typescript-eslint + svelte a11y).
+  `tsc --noEmit` + `svelte-check` (types + a11y) + ESLint (typescript-eslint + svelte).
 - Output is fully static and offline-capable; deploy anywhere that serves files.
 - Node pinned via `.nvmrc` and `package.json` (`engines`/`volta`).
 

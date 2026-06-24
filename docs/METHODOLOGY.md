@@ -178,8 +178,8 @@ All windows are returned on `panchanga.muhurta`.
 ## Festivals
 
 Each festival is a predicate over a `Panchanga` value. Simple
-festivals are "tithi N of paksha P of masa M, non-Adhika" (e.g., Rama
-Navami = Chaitra Shukla 9). The major festivals where Drik's published
+festivals are "tithi N of paksha P of masa M, non-Adhika" (e.g., Ugadi
+= Chaitra Shukla 1). The major festivals where Drik's published
 date diverges from the naive sunrise-tithi check are routed through
 the tiebreaker engine in `src/lib/panchanga/tiebreakers.ts`.
 

@@ -39,7 +39,7 @@ Two runtime dependencies only: **`astronomy-engine`** (ephemeris) and **`dexie`*
 
 ```
 lib/astro/        julian · ephemeris (Sun/Moon/planets/nodes) · ayanamsa ·
-                  sunrise · altaz · angle · bisect            ← swappable backend
+                  sunrise · altaz · angle                     ← swappable backend
   ↓                                   ↓
 lib/panchanga/                    lib/jyotish/
   tithi nakshatra yoga karana       grahas · lagna · chart (+ houses) ·
@@ -61,15 +61,15 @@ planets, true node, obliquity, sidereal time — EQJ vectors rotated to
 ecliptic-of-date), `ayanamsa.ts` (IAU-2006 precession; Lahiri/KP/Raman/
 Yukteshwar/True-Chitra, anchored to Drik's *computational* values), `sunrise.ts`,
 `altaz.ts` (horizontal coords, rise/set arcs and magnitudes for the Sky dome +
-the tonight observation table), `angle.ts`,
-`bisect.ts` (angular-crossing root-finder for anga end-times).
+the tonight observation table), `angle.ts`.
 
 ### `lib/panchanga` — the almanac
 `compute.ts` exposes the pure `computePanchanga()`; one file per anga, plus masa
 (with adhik-maas), samvat, ritu, ayana, muhurta, moon-phase. `festivals/` holds
 the rule set (`pan-india.ts` + `rules.ts`); `tiebreakers.ts` (one level up, in
 `panchanga/`) is the vyapini-window / tie-break engine — the single place
-complexity concentrates and the highest-risk file.
+complexity concentrates and the highest-risk file. `bisect.ts` is the
+angular-crossing root-finder that locates anga end times.
 
 ### `lib/jyotish` — the birth chart
 Pure arithmetic on top of the same astro backend: `grahas.ts` (sidereal graha

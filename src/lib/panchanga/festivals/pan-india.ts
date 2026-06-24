@@ -262,9 +262,6 @@ export const PAN_INDIA_FESTIVALS: readonly FestivalRule[] = [
     matches: vyapiniKrishna(14, 'Magha', 'nishita', 'earlier'),
   },
 
-  // Vasant Panchami — Magha Shukla 5. Drik uses Purvahna-vyapini
-  // (morning) Panchami, which for the years we audit matches the
-  // simple "tithi at sunrise" rule exactly. Keep the simpler rule.
   {
     key: 'vasant_panchami',
     displayName: 'Vasant Panchami',

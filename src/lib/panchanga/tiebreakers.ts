@@ -89,15 +89,16 @@ function thiruvonamMadhyahnaInSimha(
 }
 
 // Onam / Thiru Onam: the Thiruvonam nakshatra prevailing at midday in the solar
-// month Chingam (Sun in Simha). When TWO Thiruvonams fall in Chingam (the nakshatra
-// recurs every ~27.3 days, shorter than the ~30-day solar month — e.g. 2024), Onam
-// is the LATER one, so we require that no further qualifying day exists within the
-// next nakshatra return (~5 weeks).
+// month Chingam (Sun in Simha). Onam is the LATER qualifying day, in two cases:
+//   (a) the nakshatra (~24 h) sits at midday on two ADJACENT days (k=1), and
+//   (b) TWO Thiruvonams fall in Chingam ~27.3 days apart (k≈27, e.g. 2024).
+// So today is Onam only if NO later qualifying day exists in the next ~5 weeks —
+// we must scan from k=1 (not 20), or the two-adjacent-midday case fires twice.
 export function isThiruvonamOnam(loc: Location, date: Date, ayanamsaSys: AyanamsaSystem): boolean {
   if (!thiruvonamMadhyahnaInSimha(loc, date, ayanamsaSys)) return false;
-  for (let k = 20; k <= 34; k++) {
+  for (let k = 1; k <= 34; k++) {
     if (thiruvonamMadhyahnaInSimha(loc, new Date(date.getTime() + k * MS_PER_DAY), ayanamsaSys)) {
-      return false; // a later Thiruvonam is still in Chingam → today is not Onam
+      return false; // a later qualifying Thiruvonam exists → today is not Onam
     }
   }
   return true;

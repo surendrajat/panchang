@@ -203,11 +203,15 @@ export function computePanchanga(
   return partial;
 }
 
+// `fast` (opt-in): skip yoga/karana(s)/moonrise-set — for callers like the month
+// grid that read only tithi/masa/festivals (festivals are byte-identical on the
+// fast path). Defaults off so the public contract stays a full panchanga per day.
 export function computeMonth(
   year: number,
   month: number, // 1..12 Gregorian
   location: Location,
   options?: Partial<PanchangaOptions>,
+  fast = false,
 ): Panchanga[] {
   // setUTCFullYear (not Date.UTC) so years 0-99 aren't coerced to 1900-1999.
   const dim = new Date(0);
@@ -216,7 +220,7 @@ export function computeMonth(
   const result: Panchanga[] = [];
   for (let d = 1; d <= daysInMonth; d++) {
     const guess = civilTimeInZone(year, month, d, location.timezone, 12);
-    result.push(computePanchanga(guess, location, options));
+    result.push(computePanchanga(guess, location, options, { fast }));
   }
   return result;
 }

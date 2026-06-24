@@ -5,7 +5,6 @@
   import { applyNumerals } from '$lib/format/numerals';
   import { localYMD } from '$lib/format/time';
   import { t, type TranslationKey, masaNameByIndex, localeMetaOf } from '$lib/i18n';
-  import { cacheKey, putCached } from '$lib/storage';
 
   const tr = (k: TranslationKey, vars?: Record<string, string | number>) =>
     t(k, vars, preferences.language);
@@ -32,18 +31,8 @@
       parsed.month,
       preferences.location,
       panchangaOptionsFrom(preferences),
+      true, // fast: the grid reads only tithi/masa/festival markers
     );
-  });
-
-  // Populate the per-day cache after each month computation so
-  // subsequent Day.svelte visits to those dates are instant.
-  $effect(() => {
-    const loc = preferences.location;
-    if (!days.length || !loc) return;
-    const opts = panchangaOptionsFrom(preferences);
-    for (const p of days) {
-      void putCached(cacheKey(p.date, loc, opts), p);
-    }
   });
 
   function adjacentMonth(delta: number): string {

@@ -6,12 +6,12 @@
 
 import {
   Body,
-  GeoMoon,
+  Ecliptic,
+  EclipticGeoMoon,
   GeoMoonState,
   GeoVector,
   Rotation_EQJ_ECT,
   RotateVector,
-  SphereFromVector,
   SiderealTime,
   SunPosition,
   MakeTime,
@@ -51,40 +51,27 @@ export function sunLongitudeAtJD(jd: number): number {
   return memoByJd(sunLonCache, jd, () => norm360(SunPosition(jdToDateForAstronomy(jd)).elon));
 }
 
-// Apparent geocentric ecliptic longitude of the Moon — GeoMoon's J2000 equatorial
-// vector rotated into the true-of-date ecliptic (same frame as the Sun).
+// Apparent geocentric ecliptic longitude of the Moon, true ecliptic of date
+// (same frame as the Sun).
 export function moonLongitudeAtJD(jd: number): number {
-  return memoByJd(moonLonCache, jd, () => {
-    const time = jdToAstroTime(jd);
-    const ectMoon = RotateVector(Rotation_EQJ_ECT(time), GeoMoon(time));
-    return norm360(SphereFromVector(ectMoon).lon);
-  });
+  return memoByJd(moonLonCache, jd, () => norm360(EclipticGeoMoon(jdToAstroTime(jd)).lon));
 }
 
-// Convenience for the simultaneous case (cheaper if called together —
-// AstroTime is built once).
+// Convenience for the simultaneous case — the AstroTime is built once and shared
+// by both library calls.
 export function sunMoonLongitudeAtJD(jd: number): { sun: number; moon: number } {
   const time = jdToAstroTime(jd);
-  const sun = norm360(SunPosition(time).elon);
-  const eqjMoon = GeoMoon(time);
-  const rot = Rotation_EQJ_ECT(time);
-  const ectMoon = RotateVector(rot, eqjMoon);
-  const moon = norm360(SphereFromVector(ectMoon).lon);
-  return { sun, moon };
+  return { sun: norm360(SunPosition(time).elon), moon: norm360(EclipticGeoMoon(time).lon) };
 }
 
 // Apparent geocentric ecliptic-of-date longitude of any planetary body
-// (Mercury, Venus, Mars, Jupiter, Saturn, …), in degrees [0, 360). Uses
-// the same EQJ→ECT rotation as moonLongitudeAtJD so every graha lands in
-// the identical reference frame as the Sun and Moon — one ayanamsa then
-// converts all of them to sidereal consistently. This is the seam the
-// jyotish (kundli) layer builds on; the panchanga layer doesn't use it.
+// (Mercury, Venus, Mars, Jupiter, Saturn, …), in degrees [0, 360). Same true
+// ecliptic of date as the Sun and Moon, so one ayanamsa converts all of them to
+// sidereal consistently. This is the seam the jyotish (kundli) layer builds on;
+// the panchanga layer doesn't use it.
 export function bodyLongitudeAtJD(body: Body, jd: number): number {
-  const time = jdToAstroTime(jd);
-  const eqj = GeoVector(body, time, true); // apparent: aberration-corrected
-  const rot = Rotation_EQJ_ECT(time);
-  const ect = RotateVector(rot, eqj);
-  return norm360(SphereFromVector(ect).lon);
+  // apparent (aberration-corrected) geocentric vector → true ecliptic of date.
+  return norm360(Ecliptic(GeoVector(body, jdToAstroTime(jd), true)).elon);
 }
 
 // True obliquity of the ecliptic (mean + IAU 2000B nutation in obliquity), in

@@ -369,9 +369,9 @@ so users can see the day's full tithi sequence.
 
 ## Numerical accuracy
 
-- **Ephemeris**: astronomy-engine's `SunPosition` and `GeoMoon` rotated
-  into the ecliptic of date are accurate to ≪ 1 arcsec for Sun and
-  ~1 arcmin for Moon — translating to tithi-end-time errors of
+- **Ephemeris**: astronomy-engine's `SunPosition` and `EclipticGeoMoon`
+  (Sun and Moon in the true ecliptic of date) are accurate to ≪ 1 arcsec
+  for Sun and ~1 arcmin for Moon — translating to tithi-end-time errors of
   < 5 seconds.
 - **Ayanamsa**: tuned Lahiri J2000 anchor plus IAU-2006 precession
   polynomial, checked against Drik computational values in unit tests.

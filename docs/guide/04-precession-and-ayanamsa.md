@@ -107,9 +107,13 @@ defensible value and document the gap rather than fudge it. (The full reasoning,
 including two earlier *wrong* values that must never be restored, is in the long
 comment atop `astro/ayanamsa.ts`.)
 
-Other systems — **KP** (Lahiri − 6′), **Raman**, **Yukteshwar**, **True
-Citrā** — are offered as alternatives; each is just a different `base` (and
-sometimes rate) in the same formula.
+**Raman** (B.V. Raman school, ~1.4° behind Lahiri) is offered as the one
+alternative — a different `base` in the same formula, and the only one that
+meaningfully changes a chart. We *used* to offer **KP** (Lahiri − 6′),
+**Yukteshwar** and **True Citrā** too, but dropped them: KP and True-Citrā
+(Lahiri − 1′) are visually identical to Lahiri, Yukteshwar is a twin of Raman,
+and KP's real machinery (its sub-lord system) isn't implemented here anyway. So
+the menu is just the two that actually produce different charts.
 
 ---
 

@@ -7,10 +7,7 @@
 
   const ayanamsaOptions: { value: AyanamsaSystem; key: TranslationKey }[] = [
     { value: 'lahiri', key: 'ayanamsa.lahiri' },
-    { value: 'true_chitra', key: 'ayanamsa.trueChitra' },
     { value: 'raman', key: 'ayanamsa.raman' },
-    { value: 'kp', key: 'ayanamsa.kp' },
-    { value: 'yukteshwar', key: 'ayanamsa.yukteshwar' },
   ];
 
   const monthOptions: { value: MonthSystem; key: TranslationKey }[] = [

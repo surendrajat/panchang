@@ -230,10 +230,7 @@ export const en = {
 
   // ── ayanamsa options
   'ayanamsa.lahiri': 'Lahiri (Indian government standard)',
-  'ayanamsa.trueChitra': 'True Chitra Paksha',
-  'ayanamsa.raman': 'Raman',
-  'ayanamsa.kp': 'KP (Krishnamurti)',
-  'ayanamsa.yukteshwar': 'Yukteshwar',
+  'ayanamsa.raman': 'Raman (B.V. Raman school)',
 
   // ── month system options
   'monthSystem.amanta': 'Amanta (new-moon to new-moon — South India)',

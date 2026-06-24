@@ -58,8 +58,9 @@ lib/location/           cities (curated metros + diaspora) · GPS
 `julian.ts` (instants, civil-midnight fixpoint that survives DST/extreme offsets),
 `ephemeris.ts` (the adapter over `astronomy-engine`: Sun, Moon, the five visible
 planets, true node, obliquity, sidereal time — EQJ vectors rotated to
-ecliptic-of-date), `ayanamsa.ts` (IAU-2006 precession; Lahiri/KP/Raman/
-Yukteshwar/True-Chitra, anchored to Drik's *computational* values), `sunrise.ts`,
+ecliptic-of-date), `ayanamsa.ts` (IAU-2006 precession; **Lahiri** default +
+**Raman**, anchored to Swiss-Ephemeris realizations — KP/Yukteshwar/True-Chitra
+were dropped as near-duplicates, see METHODOLOGY_JYOTISH §3.3), `sunrise.ts`,
 `altaz.ts` (horizontal coords, rise/set arcs and magnitudes for the Sky dome +
 the tonight observation table), `angle.ts`.
 

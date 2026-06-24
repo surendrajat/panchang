@@ -239,10 +239,7 @@ export const hi: Record<TranslationKey, string> = {
 
   // ── ayanamsa options
   'ayanamsa.lahiri': 'लाहिरी (भारत सरकार मानक)',
-  'ayanamsa.trueChitra': 'चित्रापक्ष',
-  'ayanamsa.raman': 'रमण',
-  'ayanamsa.kp': 'के.पी. (कृष्णमूर्ति)',
-  'ayanamsa.yukteshwar': 'युक्तेश्वर',
+  'ayanamsa.raman': 'रमण (बी.वी. रमण)',
 
   // ── month system options
   'node.mean': 'मध्य (औसत) नोड',

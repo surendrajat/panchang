@@ -79,6 +79,18 @@ J2000** = Swiss Ephemeris's `SE_SIDM_LAHIRI`.
 > nakshatra end-time, ≈ 1.6 s of birth time. See guide ch. 4 for the full
 > story; verified directly via `pyswisseph` in `tests/reference/`.
 
+**Selectable systems — why only two.** Only **Lahiri** (default) and **Raman**
+(B.V. Raman school, ~1.4° behind Lahiri) are offered. KP, Yukteshwar and
+True-Chitra were removed. Measured over 5,000 random charts: KP differs from
+Lahiri in only **~5.7%** of placements — and the app doesn't implement KP's
+*defining* sub-lord system, so its ayanamsa alone is effectively Lahiri;
+True-Chitra differs in **~0.9%** (visually identical); Yukteshwar is a
+near-duplicate of Raman (0.07° apart). Raman is the one alternative that actually
+changes a chart (a different nakshatra somewhere in **~65%** of charts) and has a
+real practitioner following, so it stays. The lunar node keeps **both** true
+(default) and mean — a genuine classical-vs-modern split (KP and many traditional
+panchangs mandate mean nodes), shifting Rahu/Ketu's nakshatra ~7% of the time.
+
 ### 3.4 Chart facts from longitude
 
 - **Rashi** (0–11): `floor(λ / 30)` — 30° per sign, Mesha (Aries) = 0.
@@ -158,7 +170,7 @@ not yet applied — that part is labelled "preview."
 
 | Choice | Default | Alternatives |
 |--------|---------|--------------|
-| Ayanamsa | Lahiri (Chitrapaksha) | KP, Raman, Yukteshwar, True Chitra *(selectable)* |
+| Ayanamsa | Lahiri (Chitrapaksha) | Raman *(selectable; KP/Yukteshwar/True-Chitra removed — see §3.3)* |
 | Lunar node | **True** (osculating) | Mean *(selectable)* |
 | Houses | Whole-sign (bhava = rashi) | Bhava-chalit/Sripati, equal *(future)* |
 | Ascendant LST | `GST + longitude` (standard) | — *(we don't replicate Drik's variant)* |

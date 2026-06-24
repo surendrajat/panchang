@@ -32,10 +32,7 @@ export function grahaLabel(key: GrahaKey): string {
 // a hardcoded "Lahiri · mean node" that drifts from the real defaults.
 const AYANAMSA_SHORT: Record<AyanamsaSystem, { en: string; hi: string }> = {
   lahiri: { en: 'Lahiri', hi: 'लाहिरी' },
-  true_chitra: { en: 'True Chitra', hi: 'चित्रापक्ष' },
   raman: { en: 'Raman', hi: 'रमण' },
-  kp: { en: 'KP', hi: 'के.पी.' },
-  yukteshwar: { en: 'Yukteshwar', hi: 'युक्तेश्वर' },
 };
 
 export function ayanamsaShortLabel(system: AyanamsaSystem): string {

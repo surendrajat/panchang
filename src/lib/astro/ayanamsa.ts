@@ -46,8 +46,8 @@ const JULIAN_CENTURY_DAYS = 36525;
 // practical significance but is still a measurable bias. (Two earlier values
 // were wrong and must not be restored: 23.8635° = Drik's variant; 23.8267° =
 // a transcription of Drik's rounded *display text*, 2.2′ low.)
-// KP, Raman, and Yukteshwar are likewise pinned to Swiss Ephemeris's
-// realizations at J2000 (see COEFFS below) — not approximations.
+// Raman is likewise pinned to Swiss Ephemeris's SE_SIDM_RAMAN realization at
+// J2000 (see COEFFS below) — not an approximation.
 interface AyanamsaCoeffs {
   baseDegreesAtJ2000: number;
   // Arcseconds per Julian century (T) — the leading-order precession.
@@ -70,35 +70,13 @@ const COEFFS: Record<AyanamsaSystem, AyanamsaCoeffs> = {
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },
-  // KP, Raman, and Yukteshwar are pinned to Swiss Ephemeris's realizations
-  // (SE_SIDM_KRISHNAMURTI / _RAMAN / _YUKTESHWAR) at J2000 and carried by the
-  // same IAU-2006 precession — the same accuracy-first choice as Lahiri. Each
-  // matches Swiss-Eph to <0.01′ across 1900–2100. (Earlier values were
-  // independent realizations that drifted from Swiss-Eph by up to ~3′ for Raman
-  // and ~7′ for Yukteshwar, whose literal 54″/yr rate was the worst offender.)
-  kp: {
-    baseDegreesAtJ2000: 23.76024, // SE_SIDM_KRISHNAMURTI (≈ Lahiri − 5.8′)
-    precessionArcsecPerCenturyT: IAU_PRECESSION_T,
-    precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
-  },
+  // Raman (B.V. Raman school) — pinned to Swiss Ephemeris's SE_SIDM_RAMAN at
+  // J2000 and carried by the same IAU-2006 precession (matches Swiss-Eph to
+  // <0.01′ across 1900–2100). ~1.4° behind Lahiri, so it genuinely shifts
+  // placements. (KP, Yukteshwar and True-Chitra were dropped — see types.ts and
+  // docs/METHODOLOGY_JYOTISH.md; they were near-duplicates of Lahiri or Raman.)
   raman: {
     baseDegreesAtJ2000: 22.410791, // SE_SIDM_RAMAN
-    precessionArcsecPerCenturyT: IAU_PRECESSION_T,
-    precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
-  },
-  yukteshwar: {
-    baseDegreesAtJ2000: 22.478803, // SE_SIDM_YUKTESHWAR
-    precessionArcsecPerCenturyT: IAU_PRECESSION_T,
-    precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
-  },
-  true_chitra: {
-    // True Chitra-paksha: ayanamsa such that the ecliptic longitude of Spica
-    // (Chitra) is exactly 180° sidereal. Anchored to Swiss Ephemeris's
-    // SE_SIDM_TRUE_CITRA at J2000 (23.84002°, ~1′ below Lahiri) and carried
-    // forward by the same IAU precession. Matches Swiss-Eph's dynamic
-    // TRUE_CITRA to ≤14″ over 1900–2100 (~1″ near J2000); the residual is
-    // nutation, which the true node tracks and this smooth polynomial omits.
-    baseDegreesAtJ2000: 23.84002,
     precessionArcsecPerCenturyT: IAU_PRECESSION_T,
     precessionArcsecPerCenturyTSq: IAU_PRECESSION_T_SQ,
   },

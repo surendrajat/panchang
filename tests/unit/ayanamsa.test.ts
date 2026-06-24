@@ -26,20 +26,18 @@ describe('Lahiri ayanamsa', () => {
     expect((24.213073 - ayan) * 60).toBeCloseTo(0.4, 1); // ~0.4′ below Drik
   });
 
-  it('KP, Raman, Yukteshwar match their Swiss-Eph realizations (regression guards)', () => {
-    // Golden values = Swiss Ephemeris SE_SIDM_KRISHNAMURTI / _RAMAN /
-    // _YUKTESHWAR (pyswisseph), within 0.5′. Guards against drift like the
-    // earlier independent values that ran 3–7′ off Swiss-Eph.
-    const golden: Record<'kp' | 'raman' | 'yukteshwar', Array<[string, number]>> = {
-      kp: [['1950-01-01T00:00:00Z', 23.0619], ['2000-01-01T00:00:00Z', 23.7602], ['2025-01-01T00:00:00Z', 24.1095], ['2100-01-01T00:00:00Z', 25.1574]],
-      raman: [['1950-01-01T00:00:00Z', 21.7124], ['2000-01-01T00:00:00Z', 22.4108], ['2025-01-01T00:00:00Z', 22.76], ['2100-01-01T00:00:00Z', 23.808]],
-      yukteshwar: [['1950-01-01T00:00:00Z', 21.7804], ['2000-01-01T00:00:00Z', 22.4788], ['2025-01-01T00:00:00Z', 22.8281], ['2100-01-01T00:00:00Z', 23.876]],
-    };
-    for (const system of ['kp', 'raman', 'yukteshwar'] as const) {
-      for (const [iso, expected] of golden[system]) {
-        const ayan = ayanamsa(dateToJulian(new Date(iso)), system);
-        expect(Math.abs(ayan - expected) * 60, `${system} @ ${iso}`).toBeLessThan(0.5);
-      }
+  it('Raman matches its Swiss-Eph realization (regression guard)', () => {
+    // Golden values = Swiss Ephemeris SE_SIDM_RAMAN (pyswisseph), within 0.5′.
+    // (KP and Yukteshwar were removed as options — see astro/ayanamsa.ts.)
+    const golden: Array<[string, number]> = [
+      ['1950-01-01T00:00:00Z', 21.7124],
+      ['2000-01-01T00:00:00Z', 22.4108],
+      ['2025-01-01T00:00:00Z', 22.76],
+      ['2100-01-01T00:00:00Z', 23.808],
+    ];
+    for (const [iso, expected] of golden) {
+      const ayan = ayanamsa(dateToJulian(new Date(iso)), 'raman');
+      expect(Math.abs(ayan - expected) * 60, `raman @ ${iso}`).toBeLessThan(0.5);
     }
   });
 
@@ -88,12 +86,13 @@ describe('siderealFromTropical', () => {
     expect(result).toBeLessThan(360);
   });
 
-  it('KP system gives a slightly larger sidereal longitude than Lahiri', () => {
+  it('Raman gives a larger sidereal longitude than Lahiri (~1.4° smaller ayanamsa)', () => {
     const jd = dateToJulian(new Date('2025-01-01T00:00:00Z'));
     const tropical = 120.0;
     const lahiri = siderealFromTropical(tropical, jd, 'lahiri');
-    const kp = siderealFromTropical(tropical, jd, 'kp');
-    // KP ayanamsa is ~6 arcmin LESS than Lahiri, so KP sidereal is larger
-    expect(kp).toBeGreaterThan(lahiri);
+    const raman = siderealFromTropical(tropical, jd, 'raman');
+    // Raman ayanamsa is ~1.4° LESS than Lahiri, so Raman sidereal is larger.
+    expect(raman).toBeGreaterThan(lahiri);
+    expect(raman - lahiri).toBeGreaterThan(1.0); // ~1.4°
   });
 });

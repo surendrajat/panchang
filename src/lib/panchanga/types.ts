@@ -9,7 +9,11 @@ export interface Location {
   name?: string; // "Bengaluru, India"
 }
 
-export type AyanamsaSystem = 'lahiri' | 'raman' | 'kp' | 'yukteshwar' | 'true_chitra';
+// Two systems are offered: Lahiri (Indian-government / Drik standard, default) and
+// Raman (B.V. Raman school, ~1.4° behind Lahiri). KP, Yukteshwar and True-Chitra
+// were removed — KP's ayanamsa ≈ Lahiri (and the app doesn't implement KP's sub-lord
+// system), Yukteshwar ≈ Raman, True-Chitra ≈ Lahiri. See docs/METHODOLOGY_JYOTISH.md.
+export type AyanamsaSystem = 'lahiri' | 'raman';
 export type MonthSystem = 'amanta' | 'purnimanta';
 export type Paksha = 'shukla' | 'krishna';
 

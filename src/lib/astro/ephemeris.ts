@@ -16,7 +16,6 @@ import {
   SunPosition,
   MakeTime,
   Illumination,
-  MoonPhase as AeMoonPhase,
   Vector,
   e_tilt,
   type AstroTime,
@@ -112,9 +111,13 @@ export function moonIlluminationAtJD(jd: number): number {
   return Illumination(Body.Moon, jdToDateForAstronomy(jd)).phase_fraction;
 }
 
-// Sun-to-Moon elongation, deg [0,360), matching the tithi definition. Memoized.
+// Sun-to-Moon elongation, deg [0,360) — the tithi/karana definition (moon − sun).
+// Computed from the SAME apparent longitudes nakshatra/yoga use (SunPosition +
+// EclipticGeoMoon) so all five limbs share one ephemeris basis. astronomy-engine's
+// MoonPhase() omits solar aberration (~21″ ≈ 40 s of tithi), which previously
+// desynced tithi/karana from the other limbs and the Swiss-Eph reference. Memoized.
 export function sunMoonElongationAtJD(jd: number): number {
-  return memoByJd(elongCache, jd, () => norm360(AeMoonPhase(jdToDateForAstronomy(jd))));
+  return memoByJd(elongCache, jd, () => norm360(moonLongitudeAtJD(jd) - sunLongitudeAtJD(jd)));
 }
 
 // astronomy-engine accepts native Date or its own AstroTime. We prefer

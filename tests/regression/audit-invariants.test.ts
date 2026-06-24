@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { computePanchanga, type Location } from '$lib/panchanga';
 import { computeGrahas, computeMatch, vimshottariMahadashas } from '$lib/jyotish';
+import { sunMoonElongationAtJD, moonLongitudeAtJD, sunLongitudeAtJD, dateToJulian } from '$lib/astro';
 
 const NAK_ARC = 360 / 27; // 13°20′
 const PADA_ARC = NAK_ARC / 4; // 3°20′
@@ -104,4 +105,17 @@ describe('panchanga robustness — extreme geography never crashes; indices stay
         expect(p.solar.sign).toBeLessThanOrEqual(11);
       });
     }
+});
+
+describe('ephemeris — tithi/karana elongation stays on the apparent longitude basis', () => {
+  // Guard against a regression to geometric MoonPhase() (which omits ~21″ of solar
+  // aberration ≈ 40 s of tithi and would desync tithi/karana from nakshatra/yoga).
+  const norm360 = (x: number) => ((x % 360) + 360) % 360;
+  it('sunMoonElongationAtJD equals the apparent (moon − sun) across 1950–2100', () => {
+    for (let y = 1950; y <= 2100; y += 10) {
+      const jd = dateToJulian(new Date(`${y}-06-15T00:00:00Z`));
+      const apparent = norm360(moonLongitudeAtJD(jd) - sunLongitudeAtJD(jd));
+      expect(Math.abs(sunMoonElongationAtJD(jd) - apparent)).toBeLessThan(1e-6);
+    }
+  });
 });

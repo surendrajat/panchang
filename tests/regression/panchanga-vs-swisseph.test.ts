@@ -72,11 +72,13 @@ const REFS: Ref[] = [
 
 const secs = (a: Date, iso: string) => Math.abs(a.getTime() - new Date(iso).getTime()) / 1000;
 
-// End-time floor is the astronomy-engine vs Moshier theory difference in the
-// Moon's longitude (~0.3–0.4′) divided by the angle's rate. Measured maxima:
-// tithi 41 s, nakshatra 16 s, yoga 27 s. Tolerances are ~2× that — tight
-// enough to catch any real drift, loose enough to absorb the theory floor.
-const TOL = { sunrise: 30, tithi: 80, nakshatra: 45, yoga: 60 };
+// End-time floor is the astronomy-engine (CalcMoon) vs Swiss-Eph (Moshier) Moon
+// theory difference (~0.3–0.4′) divided by the angle's rate. All five limbs now
+// share one APPARENT basis (SunPosition + EclipticGeoMoon), so measured maxima are
+// tithi ~7 s, nakshatra 16 s, yoga 27 s. Tolerances are ~2× that — tight enough to
+// catch real drift, including a regression of tithi/karana back to the geometric
+// MoonPhase() elongation, which would re-add ~40 s of solar aberration and trip this.
+const TOL = { sunrise: 30, tithi: 15, nakshatra: 45, yoga: 60 };
 
 describe('panchanga vs Swiss Ephemeris', () => {
   for (const r of REFS) {

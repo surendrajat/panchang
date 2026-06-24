@@ -30,12 +30,6 @@
   const numerals = $derived(preferences.numerals);
   const num = (s: string | number) => applyNumerals(String(s), numerals);
 
-  // The methodology note must state what the chart was ACTUALLY computed with
-  // (ayanamsa + node are user-selectable in Settings), not hardcoded values —
-  // otherwise it misreports e.g. "mean node" while the default is the true node.
-  const methodAyanamsa = $derived(ayanamsaShortLabel(preferences.ayanamsa));
-  const methodNode = $derived(nodeShortLabel(preferences.nodeType));
-
   // The two jyotish tools live on one page: a single birth chart, and Milan
   // (two-chart compatibility) — switched here, not via a separate route.
   let mode = $state<'chart' | 'match'>('chart');
@@ -51,6 +45,17 @@
   let editing = $state(kundliDraft.editing); // form open vs. result shown
   let error = $state<string | null>(null);
   let vargaView = $state<1 | 9>(1); // Rashi (D1) or Navamsa (D9)
+
+  // The methodology note states what the chart was ACTUALLY computed with — read
+  // from chart.options (frozen at cast), NOT live preferences, so changing the
+  // ayanamsa/node in Settings after casting can't make the caption contradict the
+  // displayed chart. Falls back to the live preference only while editing (no chart).
+  const methodAyanamsa = $derived(
+    ayanamsaShortLabel(chart ? chart.options.ayanamsa : preferences.ayanamsa),
+  );
+  const methodNode = $derived(
+    nodeShortLabel(chart ? chart.options.nodeType : preferences.nodeType),
+  );
 
   // ── saved profiles ──
   let profiles = $state<BirthProfile[]>([]);

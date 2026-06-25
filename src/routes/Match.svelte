@@ -116,7 +116,17 @@
 
 <section class="view stack stack--lg">
   {#snippet personForm(p: Person, role: 'groom' | 'bride')}
-    <div class="person card">
+    <div
+      class="person card"
+      role="group"
+      aria-label={role === 'groom'
+        ? lang === 'hi'
+          ? 'वर'
+          : 'Groom'
+        : lang === 'hi'
+          ? 'वधू'
+          : 'Bride'}
+    >
       <h3>
         {#if role === 'groom'}
           {lang === 'hi' ? 'वर' : 'Groom'}

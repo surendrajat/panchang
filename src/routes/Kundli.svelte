@@ -425,6 +425,7 @@
         <button
           class="vt"
           class:vt--on={vargaView === 1}
+          aria-pressed={vargaView === 1}
           type="button"
           onclick={() => (vargaView = 1)}
         >
@@ -433,6 +434,7 @@
         <button
           class="vt"
           class:vt--on={vargaView === 9}
+          aria-pressed={vargaView === 9}
           type="button"
           onclick={() => (vargaView = 9)}
         >

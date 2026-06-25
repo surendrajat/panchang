@@ -98,14 +98,19 @@
 <div class="timebar-sentinel" use:stickSentinel aria-hidden="true"></div>
 <div class="timebar" class:stuck>
   <div class="topline">
-    <span class="clock">{clockLabel}</span>
+    <time class="clock">{clockLabel}</time>
     {#if extra}{@render extra()}{/if}
   </div>
   <div class="speeds" role="group" aria-label={hi('समय गति', 'Time speed')}>
-    <button type="button" class:on={live} onclick={goNow}>● {hi('अभी', 'Now')}</button>
+    <button type="button" class:on={live} aria-pressed={live} onclick={goNow}
+      >● {hi('अभी', 'Now')}</button
+    >
     {#each SPEEDS as s (s.key)}
-      <button type="button" class:on={activeKey === s.key} onclick={() => setSpeed(s)}
-        >{hi(s.hi, s.en)}</button
+      <button
+        type="button"
+        class:on={activeKey === s.key}
+        aria-pressed={activeKey === s.key}
+        onclick={() => setSpeed(s)}>{hi(s.hi, s.en)}</button
       >
     {/each}
   </div>

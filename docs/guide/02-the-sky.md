@@ -119,7 +119,7 @@ You now have the full coordinate setup:
 - **sidereal time**, which tells you how the rotating Earth is oriented under
   that circle at a given instant and longitude.
 
-Everything from here is: compute λ☉ and λ☽ (Lesson 3), pick the right origin
+Everything from here is: compute λ<sub>☉</sub> and λ<sub>☽</sub> (Lesson 3), pick the right origin
 (Lesson 4), and slice the circle (Lesson 5).
 
 ---
@@ -142,5 +142,5 @@ Everything from here is: compute λ☉ and λ☽ (Lesson 3), pick the right orig
 
 ---
 *Next: [Lesson 3 · Sūrya and Candra](./03-sun-and-moon.md) — actually computing
-λ☉ and λ☽, the two numbers the whole calendar runs on.*
+λ<sub>☉</sub> and λ<sub>☽</sub>, the two numbers the whole calendar runs on.*
 </content>

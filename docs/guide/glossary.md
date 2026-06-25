@@ -23,8 +23,8 @@ perfectly — they're here so the words are unambiguous.
 
 | Term | Devanagari | Literally | Meaning |
 | --- | --- | --- | --- |
-| sūrya | सूर्य | "the Sun" | the Sun; λ☉ · *[3](./03-sun-and-moon.md)* |
-| candra | चन्द्र | "shining/Moon" | the Moon; λ☽ · *[3](./03-sun-and-moon.md)* |
+| sūrya | सूर्य | "the Sun" | the Sun; λ<sub>☉</sub> · *[3](./03-sun-and-moon.md)* |
+| candra | चन्द्र | "shining/Moon" | the Moon; λ<sub>☽</sub> · *[3](./03-sun-and-moon.md)* |
 | krāntivṛtta | क्रान्तिवृत्त | "circle of declination" | the **ecliptic** — the Sun's yearly path · *[2](./02-the-sky.md)* |
 | sūryodaya | सूर्योदय | "Sun-rising" | **sunrise** — where the Hindu day begins · *[8](./08-the-day.md)* |
 
@@ -44,10 +44,10 @@ perfectly — they're here so the words are unambiguous.
 
 | Term | Devanagari | Literally | Meaning |
 | --- | --- | --- | --- |
-| tithi | तिथि | "lunar day" | 1/30 of the lunar month; from λ☽ − λ☉ · *[6](./06-tithi.md)* |
+| tithi | तिथि | "lunar day" | 1/30 of the lunar month; from λ<sub>☽</sub> − λ<sub>☉</sub> · *[6](./06-tithi.md)* |
 | vāra | वार | "day/turn" | the weekday (of the sunrise) · *[7](./07-yoga-karana-vara.md)* |
-| nakṣatra | नक्षत्र | "star/mansion" | one of 27 lunar mansions (13°20′); from λ☽ · *[5](./05-nakshatra-and-rashi.md)* |
-| yoga | योग | "union, sum" | one of 27 divisions of λ☽ + λ☉ · *[7](./07-yoga-karana-vara.md)* |
+| nakṣatra | नक्षत्र | "star/mansion" | one of 27 lunar mansions (13°20′); from λ<sub>☽</sub> · *[5](./05-nakshatra-and-rashi.md)* |
+| yoga | योग | "union, sum" | one of 27 divisions of λ<sub>☽</sub> + λ<sub>☉</sub> · *[7](./07-yoga-karana-vara.md)* |
 | karaṇa | करण | "doer/half" | half a tithi (11 names) · *[7](./07-yoga-karana-vara.md)* |
 | pakṣa | पक्ष | "side, wing" | a fortnight (half the lunar month) · *[6](./06-tithi.md)* |
 | śukla pakṣa | शुक्ल पक्ष | "bright side" | the waxing fortnight (new→full) |

@@ -13,18 +13,18 @@ The five, side by side:
 
 | # | Limb | From | Count | Needs ayanāṁśa? |
 | --- | --- | --- | --- | --- |
-| 1 | **तिथि** tithi | λ☽ − λ☉ | 30 | no (difference) |
+| 1 | **तिथि** tithi | λ<sub>☽</sub> − λ<sub>☉</sub> | 30 | no (difference) |
 | 2 | **वार** vāra | the sunrise day | 7 | no (not a λ) |
-| 3 | **नक्षत्र** nakṣatra | λ☽ | 27 | yes |
-| 4 | **योग** yoga | λ☽ + λ☉ | 27 | **yes (doubly)** |
-| 5 | **करण** karaṇa | λ☽ − λ☉ | 11 (×60/month) | no (difference) |
+| 3 | **नक्षत्र** nakṣatra | λ<sub>☽</sub> | 27 | yes |
+| 4 | **योग** yoga | λ<sub>☽</sub> + λ<sub>☉</sub> | 27 | **yes (doubly)** |
+| 5 | **करण** karaṇa | λ<sub>☽</sub> − λ<sub>☉</sub> | 11 (×60/month) | no (difference) |
 
 ---
 
 ## 1. योग (yoga) — the sum of the two lights
 
 Take the tithi machine and change **one sign**. Instead of the *difference*
-λ☽ − λ☉, the **yoga** uses the *sum* λ☽ + λ☉, sliced into 27 parts of 13°20′
+λ<sub>☽</sub> − λ<sub>☉</sub>, the **yoga** uses the *sum* λ<sub>☽</sub> + λ<sub>☉</sub>, sliced into 27 parts of 13°20′
 (the same arc as a nakṣatra):
 
 ```
@@ -65,7 +65,7 @@ and seven *cara* (moving) karaṇas repeat eight times through the month.
 karaṇa boundary every 6° of (λ☽ − λ☉)  →  60 per month, cycling through 11 names
 ```
 
-Because it's built on the **difference** λ☽ − λ☉, the karaṇa is **ayanāṁśa-free**,
+Because it's built on the **difference** λ<sub>☽</sub> − λ<sub>☉</sub>, the karaṇa is **ayanāṁśa-free**,
 exactly like the tithi. One karaṇa in particular matters operationally:
 **Viṣṭi**, better known as **भद्रा** (*bhadrā*) — an inauspicious window that
 *blocks* certain festival observances (you'll see it decide Holikā Dahan and

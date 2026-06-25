@@ -43,7 +43,7 @@ export function nakshatraAtInstant(instant): NakshatraInfo {
 ```
 
 Note the end-time again: just like a tithi, "the Moon is in Rohiṇī" has an exact
-**instant it ends**, found by solving λ☽(sidereal) = (index)·13°20′ with the
+**instant it ends**, found by solving λ<sub>☽</sub>(sidereal) = (index)·13°20′ with the
 bracketed bisection from Lesson 6.
 
 **Why nakṣatra is everywhere.** It's the *fine* ruler of the sky (13°20′ vs a
@@ -68,8 +68,8 @@ rāśi index =  ⌊ λ(sidereal) / 30° ⌋                     →  0 … 11
                   Meṣa(0)  Vṛṣabha(1)  …  Mīna(11)
 ```
 
-Applied to **λ☽** it gives the Moon-sign (राशि as people usually mean it, the
-"moon sign"). Applied to **λ☉** it gives the solar month and drives sankrānti and
+Applied to **λ<sub>☽</sub>** it gives the Moon-sign (राशि as people usually mean it, the
+"moon sign"). Applied to **λ<sub>☉</sub>** it gives the solar month and drives sankrānti and
 ऋतु ([Lesson 10](./10-the-year.md)). Applied to each planet's λ it builds the
 **kundli** ([Lesson 12](./12-jyotish.md)).
 

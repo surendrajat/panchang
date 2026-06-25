@@ -1,6 +1,6 @@
 # Lesson 6 · तिथि — the lunar day
 
-*Prerequisites: [Lesson 3](./03-sun-and-moon.md) (computing λ☉ and λ☽).
+*Prerequisites: [Lesson 3](./03-sun-and-moon.md) (computing λ<sub>☉</sub> and λ<sub>☽</sub>).
 Curiously, this lesson does **not** need [Lesson 4](./04-precession-and-ayanamsa.md)
 — and we'll see exactly why.*
 
@@ -70,7 +70,7 @@ export function tithiAtJD(jd: number): { index: number; elongation: number } {
 }
 ```
 
-**Worked example.** Suppose at some instant λ☽ = 145.46° and λ☉ = 118.40°. Then
+**Worked example.** Suppose at some instant λ<sub>☽</sub> = 145.46° and λ<sub>☉</sub> = 118.40°. Then
 elongation = 27.06°. ⌊27.06 / 12⌋ + 1 = 2 + 1 = **3** → Śukla Tṛtīyā, the third
 day of the waxing fortnight. We are 27.06 − 24 = 3.06° into a 12° tithi, so the
 tithi is `3.06/12 ≈ 26%` elapsed (the `fraction` field in the code).
@@ -130,7 +130,7 @@ Caturthī"). The tithi ends when the elongation next reaches a multiple of 12°:
 this tithi (index i) ends when    λ☽ − λ☉   first reaches   i × 12°
 ```
 
-There's no closed-form solution — λ☽ and λ☉ are themselves the outputs of
+There's no closed-form solution — λ<sub>☽</sub> and λ<sub>☉</sub> are themselves the outputs of
 ephemeris series — so we **find the root numerically**. The elongation is
 smooth and monotonically increasing over a single tithi, so a bracketed
 bisection converges fast and robustly:
@@ -149,7 +149,7 @@ const endTime = bisectAngularCrossing(
 
 `bisectAngularCrossing` (in `panchanga/bisect.ts`) repeatedly halves the
 30-hour bracket, evaluating the elongation at the midpoint, until it pins the
-crossing to sub-second precision. Because the inputs (λ☽, λ☉) are accurate to a
+crossing to sub-second precision. Because the inputs (λ<sub>☽</sub>, λ<sub>☉</sub>) are accurate to a
 fraction of an arc-second, the **end time is accurate to a few seconds** — and
 we prove it: `tests/regression/panchanga-vs-swisseph.test.ts` checks these end
 times against the Swiss Ephemeris and requires agreement within tens of seconds.
@@ -165,7 +165,7 @@ times against the Swiss Ephemeris and requires agreement within tens of seconds.
 ## 5. Why this lesson didn't need the ayanāṁśa
 
 A lovely consequence falls out of the definition. The tithi depends on
-**λ☽ − λ☉**, a *difference*. The ayanāṁśa (Lesson 4) is a single offset
+**λ<sub>☽</sub> − λ<sub>☉</sub>**, a *difference*. The ayanāṁśa (Lesson 4) is a single offset
 subtracted from *both* longitudes to go sidereal:
 
 ```
@@ -180,7 +180,7 @@ genuinely useful, property: the tithi is one of the few quantities a pañcāṅg
 can get *exactly* right regardless of the (slightly debated) ayanāṁśa value.
 
 The Nakshatra and Yoga of [Lesson 7](./07-yoga-karana-vara.md) are **not** so
-lucky — they depend on λ☽ and λ☽+λ☉ *absolutely*, so they need the sidereal
+lucky — they depend on λ<sub>☽</sub> and λ<sub>☽</sub>+λ<sub>☉</sub> *absolutely*, so they need the sidereal
 frame. That contrast is the best possible motivation for Lesson 4.
 
 ---
@@ -195,8 +195,8 @@ You now have the central machine:
 (Lesson 3)                   (this lesson)            (this lesson)
 ```
 
-- Apply the *same* root-finder to **λ☽** alone and you get the Nakshatra and its
-  end time. To **λ☽ + λ☉**, the Yoga. (Lesson 7.)
+- Apply the *same* root-finder to **λ<sub>☽</sub>** alone and you get the Nakshatra and its
+  end time. To **λ<sub>☽</sub> + λ<sub>☉</sub>**, the Yoga. (Lesson 7.)
 - Track the tithi across a **whole month** between two new moons and you can name
   the month and detect leap months. (Lesson 9.)
 - Ask "*which* tithi was running at this place's sunrise, and does it qualify a
@@ -220,10 +220,10 @@ You now have the central machine:
 ## The code
 - `src/lib/panchanga/tithi.ts` — `tithiAtJD`, `tithiAtInstant`.
 - `src/lib/panchanga/bisect.ts` — `bisectAngularCrossing`, the root-finder.
-- `src/lib/astro/ephemeris.ts` — `sunMoonElongationAtJD`, the λ☽ − λ☉ source.
+- `src/lib/astro/ephemeris.ts` — `sunMoonElongationAtJD`, the λ<sub>☽</sub> − λ<sub>☉</sub> source.
 - `tests/regression/panchanga-vs-swisseph.test.ts` — end times vs Swiss Ephemeris.
 
 ---
 *Next: [Lesson 7 · Yoga, Karana, Vara](./07-yoga-karana-vara.md) — the same
-machine, pointed at different combinations of λ☉ and λ☽.*
+machine, pointed at different combinations of λ<sub>☉</sub> and λ<sub>☽</sub>.*
 </content>

@@ -53,19 +53,19 @@ Here is the secret that turns "a 2000-year-old astronomical tradition" into
 > position of the Moon along the zodiac, at the instant you care about.
 
 "Position along the zodiac" means the **ecliptic longitude**: an angle from
-0° to 360° measured along the Sun's yearly path. Call them λ☉ (Sun) and
-λ☽ (Moon). Then, astonishingly, *all five limbs of the pañcāṅga are just
+0° to 360° measured along the Sun's yearly path. Call them λ<sub>☉</sub> (Sun) and
+λ<sub>☽</sub> (Moon). Then, astonishingly, *all five limbs of the pañcāṅga are just
 arithmetic on these two angles*:
 
 | Limb | Hindi | What it is | Formula (sketch) |
 | --- | --- | --- | --- |
-| **Tithi** | तिथि | lunar day | from **λ☽ − λ☉** (Moon's lead over Sun) |
-| **Nakshatra** | नक्षत्र | lunar mansion | from **λ☽** alone |
-| **Yoga** | योग | a Sun+Moon angle | from **λ☽ + λ☉** |
-| **Karana** | करण | half-tithi | from **λ☽ − λ☉** |
+| **Tithi** | तिथि | lunar day | from **λ<sub>☽</sub> − λ<sub>☉</sub>** (Moon's lead over Sun) |
+| **Nakshatra** | नक्षत्र | lunar mansion | from **λ<sub>☽</sub>** alone |
+| **Yoga** | योग | a Sun+Moon angle | from **λ<sub>☽</sub> + λ<sub>☉</sub>** |
+| **Karana** | करण | half-tithi | from **λ<sub>☽</sub> − λ<sub>☉</sub>** |
 | **Vara** | वार | weekday | from the civil day (the one piece that isn't λ) |
 
-So the course has a natural shape. **First** we learn to compute λ☉ and λ☽
+So the course has a natural shape. **First** we learn to compute λ<sub>☉</sub> and λ<sub>☽</sub>
 accurately for any time and place (Lessons 1–5). **Then** everything else is
 definitions and bookkeeping on top (Lessons 6–12).
 
@@ -73,7 +73,7 @@ definitions and bookkeeping on top (Lessons 6–12).
 
 ## 3. The accuracy philosophy (what makes *this* implementation trustworthy)
 
-Old pañcāṅgas computed λ☉ and λ☽ with the *Sūrya Siddhānta* — clever
+Old pañcāṅgas computed λ<sub>☉</sub> and λ<sub>☽</sub> with the *Sūrya Siddhānta* — clever
 medieval formulas that drift by up to a degree today. Modern ones use **dṛk
 gaṇita** (दृक् गणित, "observation-based mathematics"): real ephemeris models
 fit to centuries of telescope and spacecraft data. This project is dṛk gaṇita.
@@ -111,7 +111,7 @@ the files in `src/` that implement it.
   longitude, and sidereal time. Where a "position in the zodiac" actually is.
 
 **Part II — The two lights and the fixed zodiac**
-- **[3 · Sūrya and Candra](./03-sun-and-moon.md)** — computing λ☉ and λ☽:
+- **[3 · Sūrya and Candra](./03-sun-and-moon.md)** — computing λ<sub>☉</sub> and λ<sub>☽</sub>:
   apparent geocentric longitudes, and why "apparent" matters. `astro/ephemeris.ts`.
 - **[4 · Precession and the अयनांश](./04-precession-and-ayanamsa.md)** — the
   *tropical* vs *sidereal* zodiac, the slow wobble of the equinox, and the

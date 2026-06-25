@@ -3,7 +3,7 @@
 *Prerequisites: [Lesson 2](./02-the-sky.md) (the two origins for longitude),
 [Lesson 3](./03-sun-and-moon.md) (we have tropical λ).*
 
-In Lesson 3 we computed λ☉ and λ☽ as **tropical** (सायन, *sāyana*) longitudes —
+In Lesson 3 we computed λ<sub>☉</sub> and λ<sub>☽</sub> as **tropical** (सायन, *sāyana*) longitudes —
 measured from the vernal equinox. Hindu astronomy measures from the **fixed
 stars** instead — **निरयन** (*nirayana*, "sidereal"). This lesson explains why
 the two disagree, by how much, and the single correction that converts between
@@ -121,12 +121,12 @@ the menu is just the two that actually produce different charts.
 
 The ayanāṁśa is needed by everything defined on an *absolute* sidereal position:
 
-- **Nakṣatra** (from λ☽) and **Yoga** (from λ☉ + λ☽) — Lessons 5, 7.
+- **Nakṣatra** (from λ<sub>☽</sub>) and **Yoga** (from λ<sub>☉</sub> + λ<sub>☽</sub>) — Lessons 5, 7.
 - **Rāśi**, the month's name, sankrānti, and the entire **kundli** — Lessons 5,
   9, 10, 12.
 
 But it is **not** needed for anything defined on a *difference* of longitudes,
-because the offset cancels: (λ☽ − a) − (λ☉ − a) = λ☽ − λ☉. So **tithi and
+because the offset cancels: (λ<sub>☽</sub> − a) − (λ<sub>☉</sub> − a) = λ<sub>☽</sub> − λ<sub>☉</sub>. So **tithi and
 karaṇa are ayanāṁśa-free** ([Lesson 6](./06-tithi.md) proves it). This split —
 who needs the ayanāṁśa and who doesn't — is one of the most clarifying facts in
 the whole calendar, and it falls straight out of "is this a position or a

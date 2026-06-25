@@ -4,7 +4,7 @@
 (ecliptic longitude).*
 
 This is the lesson where we finally get the **two numbers** the entire calendar
-is built from: λ☉, the ecliptic longitude of सूर्य (*sūrya*, the Sun), and λ☽,
+is built from: λ<sub>☉</sub>, the ecliptic longitude of सूर्य (*sūrya*, the Sun), and λ<sub>☽</sub>,
 the longitude of चन्द्र (*candra*, the Moon). Everything in Part III is arithmetic
 on these; everything before this lesson was preparation to compute them
 *accurately*.
@@ -122,7 +122,7 @@ the point of this lesson is that the number is also *correct*, and provably so.
 
 ## 5. For any place and time
 
-λ☉ and λ☽ are **geocentric** — they depend only on the *instant*, not on the
+λ<sub>☉</sub> and λ<sub>☽</sub> are **geocentric** — they depend only on the *instant*, not on the
 observer. So a single JD gives the same λ for Delhi, Tokyo, or a ship at sea. The
 observer's location re-enters the story only later and only twice: sunrise needs
 latitude/longitude ([Lesson 8](./08-the-day.md)), and the ascendant needs local

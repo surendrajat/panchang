@@ -31,21 +31,18 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      # Build before tests so the offline-assets PWA budget test sees dist/
-      # (it self-skips when dist/ is absent — see tests/unit/offline-assets.test.ts).
       - name: Production build
         run: pnpm build
 
       - name: Unit tests
         run: pnpm test
 
-      # E2E runs against the production build from the step above (vite preview).
       - name: Resolve Playwright version
         id: pwv
         run: echo "v=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Cache Playwright browser
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pwv.outputs.v }}

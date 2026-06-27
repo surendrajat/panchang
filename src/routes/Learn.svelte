@@ -38,11 +38,16 @@
   import BodyIcon from '../components/BodyIcon.svelte';
   import ConceptIntro from '../components/sky/ConceptIntro.svelte';
   import SkyClock from '../components/sky/SkyClock.svelte';
+  import EclipseTheatre from '../components/sky/EclipseTheatre.svelte';
 
   // ── display helpers ─────────────────────────────────────────────────────────
   const lang = $derived(preferences.language);
   const num = (s: string | number) => applyNumerals(String(s), preferences.numerals);
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
+
+  // Learn is split into lessons; the panchanga notebook is lesson 1, eclipses lesson 2.
+  let lesson = $state<'panchanga' | 'eclipse'>('panchanga');
+
   const tn = (dev: string, tr: string, en: string) =>
     lang === 'hi' ? dev : preferences.transliteration ? tr : en;
   const d1 = (x: number) => num(x.toFixed(1)) + '°';
@@ -172,7 +177,16 @@
   </button>
 {/snippet}
 
-<section class="nb">
+<nav class="lessons" aria-label={hi('पाठ', 'Lessons')}>
+  <button type="button" class:on={lesson === 'panchanga'} onclick={() => (lesson = 'panchanga')}>
+    {hi('पंचांग कैसे बनता है', 'How it works')}
+  </button>
+  <button type="button" class:on={lesson === 'eclipse'} onclick={() => (lesson = 'eclipse')}>
+    {hi('ग्रहण', 'Eclipses')}
+  </button>
+</nav>
+
+<section class="nb" class:lesson-hidden={lesson !== 'panchanga'}>
   <header class="nb__head">
     <p class="nb__kicker">{hi('सजीव मार्गदर्शिका', 'An interactive guide')}</p>
     <h2>{hi('पंचांग कैसे बनता है', 'How the Panchanga Works')}</h2>
@@ -793,7 +807,65 @@
   </article>
 </section>
 
+<section class="nb" class:lesson-hidden={lesson !== 'eclipse'}>
+  <header class="nb__head">
+    <p class="nb__kicker">{hi('राहु · केतु', 'Rāhu · Ketu')}</p>
+    <h2>{hi('ग्रहण', 'Eclipses')}</h2>
+    <p class="nb__lede">
+      {hi(
+        'पुरा-कथा में राहु सूर्य या चन्द्र को निगल जाता है। खगोल में राहु और केतु चन्द्र-कक्षा के दो नोड हैं — और ग्रहण केवल वहीं हो सकता है। एक ही सत्य, दो भाषाओं में।',
+        'In the old story, Rāhu swallows the Sun or Moon. Astronomically, Rāhu and Ketu ARE the two lunar nodes — and an eclipse can only happen at one. Same truth, two languages.',
+      )}
+    </p>
+  </header>
+
+  <article class="cell">
+    <div class="cell__no">[1]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('क्यों दुर्लभ', 'Why they’re rare')}</p>
+      <h3>{hi('ग्रहण केवल नोड पर', 'An eclipse can only happen at a node')}</h3>
+      <p class="prose">
+        {hi(
+          'चन्द्रमा हर माह सूर्य की परिक्रमा करता है, पर उसकी कक्षा ~5° झुकी है — इसलिए अधिकांश अमावस्या को वह सूर्य के ऊपर या नीचे से निकल जाता है। केवल जब अमावस्या या पूर्णिमा ठीक क्रांतिवृत्त पर — किसी नोड (राहु या केतु) पर — हो, तभी छाया जुड़ती है। समय खिसकाइए और चन्द्रमा को क्रांतिवृत्त पार करते देखिए।',
+          'The Moon laps the Sun every month, but its orbit is tilted ~5°, so at most new moons it rides above or below the Sun. Only when a new or full Moon lands exactly on the ecliptic — at a node, Rāhu or Ketu — does the shadow connect. Scrub time and watch the Moon bob across the line.',
+        )}
+      </p>
+      <EclipseTheatre {lang} numerals={preferences.numerals} />
+    </div>
+  </article>
+</section>
+
 <style>
+  .lessons {
+    display: flex;
+    gap: 4px;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 1.3rem;
+    padding: 3px;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill, 999px);
+  }
+  .lessons button {
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: var(--radius-pill, 999px);
+    background: none;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .lessons button.on {
+    background: var(--red);
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .lesson-hidden {
+    display: none;
+  }
   .nb {
     max-width: 760px;
     margin: 0 auto;

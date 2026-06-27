@@ -17,6 +17,7 @@ export type { CivilYMD } from './julian';
 export {
   sunLongitudeAtJD,
   moonLongitudeAtJD,
+  moonLatitudeAtJD,
   sunMoonLongitudeAtJD,
   sunMoonElongationAtJD,
   moonIlluminationAtJD,
@@ -37,3 +38,6 @@ export type { RiseSetEvents } from './sunrise';
 
 export { bodyAltAz, starAltAz, bodyArc, bodyMagnitude } from './altaz';
 export type { AltAz, SkyBody } from './altaz';
+
+export { upcomingEclipses, EclipseKind } from './eclipses';
+export type { EclipseEvent, EclipseType } from './eclipses';

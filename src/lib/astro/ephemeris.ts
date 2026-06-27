@@ -56,6 +56,12 @@ export function moonLongitudeAtJD(jd: number): number {
   return memoByJd(moonLonCache, jd, () => norm360(EclipticGeoMoon(jdToAstroTime(jd)).lon));
 }
 
+// Apparent geocentric ecliptic latitude of the Moon (degrees, ±~5.3°). It is ~0
+// when the Moon sits at a node — the geometric precondition for an eclipse.
+export function moonLatitudeAtJD(jd: number): number {
+  return EclipticGeoMoon(jdToAstroTime(jd)).lat;
+}
+
 // Convenience for the simultaneous case — the AstroTime is built once and shared
 // by both library calls.
 export function sunMoonLongitudeAtJD(jd: number): { sun: number; moon: number } {

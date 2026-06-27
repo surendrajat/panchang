@@ -137,9 +137,42 @@
     role="img"
     aria-label={hi('ग्रहण ज्यामिति', 'Eclipse geometry')}
   >
+    <defs>
+      <radialGradient id="et-space" cx="50%" cy="50%" r="62%">
+        <stop offset="0%" stop-color="#1b1f36" />
+        <stop offset="100%" stop-color="#0b0c18" />
+      </radialGradient>
+      <radialGradient id="et-sun" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fff7da" />
+        <stop offset="58%" stop-color="#ffce3a" />
+        <stop offset="100%" stop-color="#f08a00" />
+      </radialGradient>
+      <radialGradient id="et-sunglow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffcf4d" stop-opacity="0.5" />
+        <stop offset="100%" stop-color="#ffcf4d" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="et-moon" cx="38%" cy="34%" r="72%">
+        <stop offset="0%" stop-color="#fbf4df" />
+        <stop offset="100%" stop-color="#cdba8e" />
+      </radialGradient>
+      <radialGradient id="et-flash-solar" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffd24a" stop-opacity="0.85" />
+        <stop offset="100%" stop-color="#ffd24a" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="et-flash-lunar" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#c0392b" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#c0392b" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+
+    <rect x="0" y="0" width={W} height={H} fill="url(#et-space)" />
+    {#each [[36, 34], [110, 26], [200, 48], [250, 24], [350, 60], [420, 34], [452, 92], [60, 182], [160, 198], [300, 188], [400, 172]] as [sx, sy] (sx)}
+      <circle cx={sx} cy={sy} r="0.8" fill="#fff" opacity="0.45" />
+    {/each}
+
     <!-- the ecliptic: the Sun's path, latitude 0 -->
     <line x1={M} y1={midY} x2={W - M} y2={midY} class="ecliptic" />
-    <text x={W - M} y={midY - 5} class="axis" text-anchor="end"
+    <text x={W - M} y={midY - 6} class="axis" text-anchor="end"
       >{hi('क्रांतिवृत्त', 'ecliptic')}</text
     >
 
@@ -150,22 +183,29 @@
     <text x={W - M} y={H - 8} class="zone" text-anchor="middle">{hi('पूर्णिमा', 'full')}</text>
 
     <!-- new-moon (centre) = the Sun → solar eclipse zone -->
-    <circle cx={W / 2} cy={midY} r="13" class="sun" />
+    <circle cx={W / 2} cy={midY} r="21" fill="url(#et-sunglow)" />
+    <circle cx={W / 2} cy={midY} r="12" fill="url(#et-sun)" />
     <text x={W / 2} y={H - 8} class="zone" text-anchor="middle">{hi('अमावस्या', 'new')}</text>
 
-    <!-- the Moon's path over a month: dots fading from old → now -->
+    <!-- the Moon's path over a month: glowing dots fading from old → now -->
     {#each trail as p (p.k)}
-      <circle cx={X(p.e)} cy={Y(p.lat)} r="1.7" class="trail" style="opacity:{0.12 + 0.5 * p.k}" />
+      <circle
+        cx={X(p.e)}
+        cy={Y(p.lat)}
+        r={1.3 + 1.4 * p.k}
+        class="trail"
+        style="opacity:{0.1 + 0.55 * p.k}"
+      />
     {/each}
     <!-- nodes: where the path crosses the ecliptic -->
-    <text x={W / 2 - 70} y={midY - 8} class="node">☊ {nodeLabel('rahu')}</text>
-    <text x={W / 2 + 70} y={midY + 16} class="node">☋ {nodeLabel('ketu')}</text>
+    <text x={W / 2 - 74} y={midY - 9} class="node">☊ {nodeLabel('rahu')}</text>
+    <text x={W / 2 + 74} y={midY + 17} class="node">☋ {nodeLabel('ketu')}</text>
 
-    <!-- the Moon, now -->
+    <!-- the Moon, now (an eclipse glow when it lands on a node at syzygy) -->
     {#if eclipseNow}
-      <circle cx={moonX} cy={moonY} r="22" class="flash flash--{eclipseNow}" />
+      <circle cx={moonX} cy={moonY} r="26" class="flash" fill="url(#et-flash-{eclipseNow})" />
     {/if}
-    <circle cx={moonX} cy={moonY} r="7" class="moon" />
+    <circle cx={moonX} cy={moonY} r="7" fill="url(#et-moon)" stroke="#0c0d1a" stroke-width="0.75" />
 
     <!-- latitude callout -->
     <text x={M} y={M - 8} class="axis">+5°</text>
@@ -246,65 +286,52 @@
   .diagram {
     width: 100%;
     display: block;
-    background: var(--paper-2);
     border: 1px solid var(--line);
     border-radius: var(--radius, 12px);
   }
   .ecliptic {
-    stroke: var(--ink-soft);
+    stroke: #5d6488;
     stroke-width: 1;
     stroke-dasharray: 4 4;
   }
   .axis {
     font-size: 9px;
-    fill: var(--ink-faint, #999);
+    fill: #7e84a4;
   }
   .zone {
     font-size: 9.5px;
-    fill: var(--ink-soft);
-  }
-  .sun {
-    fill: #f5a623;
-    stroke: #e07b00;
-    stroke-width: 0.75;
+    fill: #aab0cc;
   }
   .shadow {
-    fill: var(--paper-3);
-    stroke: var(--ink-soft);
+    fill: #14111c;
+    stroke: #4a4663;
     stroke-width: 1;
     stroke-dasharray: 2 2;
   }
   .trail {
-    fill: var(--ink-soft);
+    fill: #d3d8ef;
   }
   .node {
     font-size: 10px;
-    fill: var(--red);
+    fill: #ff8a63;
     font-weight: 600;
   }
-  .moon {
-    fill: #f1ecdd;
-    stroke: var(--ink);
-    stroke-width: 1;
-  }
   .flash {
-    animation: pulse 1.1s ease-in-out infinite;
-  }
-  .flash--solar {
-    fill: #f5a623;
-    opacity: 0.35;
-  }
-  .flash--lunar {
-    fill: var(--red);
-    opacity: 0.3;
+    animation: pulse 1.2s ease-in-out infinite;
   }
   @keyframes pulse {
     0%,
     100% {
-      opacity: 0.18;
+      opacity: 0.55;
     }
     50% {
-      opacity: 0.42;
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flash {
+      animation: none;
+      opacity: 0.8;
     }
   }
   .caption {

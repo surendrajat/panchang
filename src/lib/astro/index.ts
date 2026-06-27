@@ -39,5 +39,11 @@ export type { RiseSetEvents } from './sunrise';
 export { bodyAltAz, starAltAz, bodyArc, bodyMagnitude } from './altaz';
 export type { AltAz, SkyBody } from './altaz';
 
-export { upcomingEclipses, EclipseKind } from './eclipses';
-export type { EclipseEvent, EclipseType } from './eclipses';
+export {
+  upcomingEclipses,
+  eclipseGeometry,
+  eclipseSeparationDeg,
+  eclipseCoverageAt,
+  EclipseKind,
+} from './eclipses';
+export type { EclipseEvent, EclipseType, EclipseGeometry } from './eclipses';

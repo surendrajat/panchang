@@ -39,6 +39,7 @@
   import ConceptIntro from '../components/sky/ConceptIntro.svelte';
   import SkyClock from '../components/sky/SkyClock.svelte';
   import EclipseTheatre from '../components/sky/EclipseTheatre.svelte';
+  import EclipseDisk from '../components/sky/EclipseDisk.svelte';
 
   // ── display helpers ─────────────────────────────────────────────────────────
   const lang = $derived(preferences.language);
@@ -831,6 +832,21 @@
         )}
       </p>
       <EclipseTheatre {lang} numerals={preferences.numerals} />
+    </div>
+  </article>
+
+  <article class="cell">
+    <div class="cell__no">[2]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('जो आप देखेंगे', 'What you’d see')}</p>
+      <h3>{hi('ग्रहण की झाँकी', 'The eclipse itself')}</h3>
+      <p class="prose">
+        {hi(
+          'और ग्रहण के समय आकाश में यह दिखता है — वास्तविक कोणीय आकारों पर। पूर्ण सूर्यग्रहण में किरीट (corona) चमकता है; वलयाकार में चन्द्रमा छोटा होने से सूर्य का छल्ला बचता है; चन्द्रग्रहण में चन्द्रमा पृथ्वी की छाया में ताम्र-लाल हो जाता है। प्रथम से अंतिम स्पर्श तक समय खिसकाइए।',
+          'And this is what the sky shows during one — drawn at the real apparent sizes. A total solar eclipse reveals the corona; an annular one leaves a ring of fire (the Moon is too far to cover the Sun); a lunar eclipse turns the Moon copper-red in Earth’s umbra. Scrub from first to last contact.',
+        )}
+      </p>
+      <EclipseDisk {lang} numerals={preferences.numerals} />
     </div>
   </article>
 </section>

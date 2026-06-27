@@ -102,8 +102,10 @@ describe('offline asset contract', () => {
     // Budget guard for the offline precache — raise it deliberately, never let it
     // creep silently. Bumped 25 → 34 when the interactive Learn guide and the
     // shared Sky/Learn chunks (SkyClock + sky CSS) shipped as precached routes.
+    // Bumped 1000 → 1100 KiB for the Eclipses lesson (real-geometry disk, line-up
+    // and node views in the Learn chunk).
     const MAX_ENTRIES = 34;
-    const MAX_KIB = 1000;
+    const MAX_KIB = 1100;
 
     // Extract unique precache URLs from the workbox precacheAndRoute call.
     const urls = [...sw.matchAll(/url:"([^"]+)"/g)].map((m) => m[1]);

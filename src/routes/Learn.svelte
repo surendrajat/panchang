@@ -40,6 +40,7 @@
   import SkyClock from '../components/sky/SkyClock.svelte';
   import EclipseTheatre from '../components/sky/EclipseTheatre.svelte';
   import EclipseDisk from '../components/sky/EclipseDisk.svelte';
+  import EclipseLineup from '../components/sky/EclipseLineup.svelte';
 
   // ── display helpers ─────────────────────────────────────────────────────────
   const lang = $derived(preferences.language);
@@ -814,39 +815,63 @@
     <h2>{hi('ग्रहण', 'Eclipses')}</h2>
     <p class="nb__lede">
       {hi(
-        'पुरा-कथा में राहु सूर्य या चन्द्र को निगल जाता है। खगोल में राहु और केतु चन्द्र-कक्षा के दो नोड हैं — और ग्रहण केवल वहीं हो सकता है। एक ही सत्य, दो भाषाओं में।',
-        'In the old story, Rāhu swallows the Sun or Moon. Astronomically, Rāhu and Ketu ARE the two lunar nodes — and an eclipse can only happen at one. Same truth, two languages.',
+        'ग्रहण साल में दो-चार बार ही क्यों, हर महीने क्यों नहीं? उत्तर एक झुकी कक्षा और दो बिंदुओं — राहु और केतु — में है। शून्य से बनाते हैं।',
+        'Why do eclipses come only a few times a year, not every month? The answer hides in a tilted orbit and two points — Rāhu and Ketu. Let’s build it from nothing.',
       )}
     </p>
   </header>
 
+  <!-- [1] the simplest idea: an eclipse is a shadow in a line-up -->
   <article class="cell">
     <div class="cell__no">[1]</div>
     <div class="cell__body">
-      <p class="cell__kicker">{hi('क्यों दुर्लभ', 'Why they’re rare')}</p>
-      <h3>{hi('ग्रहण केवल नोड पर', 'An eclipse can only happen at a node')}</h3>
+      <p class="cell__kicker">{hi('सबसे पहले', 'First, the picture')}</p>
+      <h3>{hi('ग्रहण बस एक छाया है', 'An eclipse is just a shadow')}</h3>
       <p class="prose">
         {hi(
-          'चन्द्रमा हर माह सूर्य की परिक्रमा करता है, पर उसकी कक्षा ~5° झुकी है — इसलिए अधिकांश अमावस्या को वह सूर्य के ऊपर या नीचे से निकल जाता है। केवल जब अमावस्या या पूर्णिमा ठीक क्रांतिवृत्त पर — किसी नोड (राहु या केतु) पर — हो, तभी छाया जुड़ती है। समय खिसकाइए और चन्द्रमा को क्रांतिवृत्त पार करते देखिए।',
-          'The Moon laps the Sun every month, but its orbit is tilted ~5°, so at most new moons it rides above or below the Sun. Only when a new or full Moon lands exactly on the ecliptic — at a node, Rāhu or Ketu — does the shadow connect. Scrub time and watch the Moon bob across the line.',
+          'तीन गोले एक सीध में आ जाते हैं। सूर्य ग्रहण में चन्द्रमा हमारे और सूर्य के बीच आकर अपनी छाया पृथ्वी पर डालता है। चन्द्र ग्रहण में पृथ्वी बीच में होती है और उसकी छाया चन्द्रमा पर पड़ती है। दोनों को टॉगल करके देखिए।',
+          'Three balls fall into a line. In a solar eclipse the Moon comes between us and the Sun and casts its shadow on Earth. In a lunar eclipse, Earth is in the middle and its shadow falls on the Moon. Toggle to see both.',
+        )}
+      </p>
+      <EclipseLineup {lang} />
+    </div>
+  </article>
+
+  <!-- [2] why it's rare: the 5° tilt + the two crossings (nodes) -->
+  <article class="cell">
+    <div class="cell__no">[2]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('पहेली', 'The puzzle')}</p>
+      <h3>{hi('फिर हर महीने क्यों नहीं?', 'So why not every month?')}</h3>
+      <p class="prose">
+        {hi(
+          'चन्द्रमा हर अमावस्या को सूर्य के पास से गुज़रता है — फिर हर महीने ग्रहण क्यों नहीं? क्योंकि उसकी कक्षा सूर्य-मार्ग (क्रांतिवृत्त) से ~5° झुकी है, इसलिए अधिकांश अमावस्या को वह सूर्य से ज़रा ऊपर या नीचे रहता है और छाया चूक जाती है। नीचे रेखा क्रांतिवृत्त है, और बिन्दु चन्द्रमा का ऊपर-नीचे डोलना। वह जिन दो जगह रेखा को काटता है वही राहु और केतु — और केवल वहीं की अमावस्या/पूर्णिमा ग्रहण बनाती है। किसी वास्तविक ग्रहण तक खिसकाइए।',
+          'The Moon passes the Sun at every new moon — so why no eclipse every month? Because its path is tilted ~5° to the Sun’s path (the ecliptic), so at most new moons it rides a touch above or below the Sun and the shadow misses. Below, the line is the ecliptic and the dots are the Moon bobbing above and below it. The two places it crosses the line are Rāhu and Ketu — and only a new or full Moon there makes an eclipse. Scrub to a real one.',
         )}
       </p>
       <EclipseTheatre {lang} numerals={preferences.numerals} />
     </div>
   </article>
 
+  <!-- [3] what it looks like, up close -->
   <article class="cell">
-    <div class="cell__no">[2]</div>
+    <div class="cell__no">[3]</div>
     <div class="cell__body">
-      <p class="cell__kicker">{hi('जो आप देखेंगे', 'What you’d see')}</p>
-      <h3>{hi('ग्रहण की झाँकी', 'The eclipse itself')}</h3>
+      <p class="cell__kicker">{hi('पास से', 'Up close')}</p>
+      <h3>{hi('ग्रहण कैसा दिखता है', 'What you’d actually see')}</h3>
       <p class="prose">
         {hi(
-          'और ग्रहण के समय आकाश में यह दिखता है — वास्तविक कोणीय आकारों पर। पूर्ण सूर्यग्रहण में किरीट (corona) चमकता है; वलयाकार में चन्द्रमा छोटा होने से सूर्य का छल्ला बचता है; चन्द्रग्रहण में चन्द्रमा पृथ्वी की छाया में ताम्र-लाल हो जाता है। प्रथम से अंतिम स्पर्श तक समय खिसकाइए।',
-          'And this is what the sky shows during one — drawn at the real apparent sizes. A total solar eclipse reveals the corona; an annular one leaves a ring of fire (the Moon is too far to cover the Sun); a lunar eclipse turns the Moon copper-red in Earth’s umbra. Scrub from first to last contact.',
+          'और पास से यह ऐसा दिखता है — वास्तविक आकारों पर। पूर्ण सूर्यग्रहण में किरीट चमकता है; वलयाकार में चन्द्रमा छोटा होने से छल्ला बच जाता है; चन्द्रग्रहण में चन्द्रमा ताम्र-लाल हो जाता है। आगामी ग्रहण चुनकर स्पर्श-से-स्पर्श खिसकाइए।',
+          'And up close it looks like this, at the real apparent sizes. A total solar eclipse reveals the corona; an annular one leaves a ring (the Moon is too far to cover the Sun); a lunar eclipse turns the Moon copper-red. Pick an upcoming eclipse and scrub contact to contact.',
         )}
       </p>
       <EclipseDisk {lang} numerals={preferences.numerals} />
+      <p class="seedoc">
+        {hi('इस वर्ष के सब ग्रहण:', 'Every eclipse this year:')}
+        <a href={'#/festivals/' + new Date().getUTCFullYear()}
+          >{hi('त्योहार पृष्ठ →', 'the Festivals page →')}</a
+        >
+      </p>
     </div>
   </article>
 </section>

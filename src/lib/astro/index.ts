@@ -41,6 +41,7 @@ export type { AltAz, SkyBody } from './altaz';
 
 export {
   upcomingEclipses,
+  eclipsesBetween,
   eclipseGeometry,
   eclipseSeparationDeg,
   eclipseCoverageAt,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PAN_INDIA_FESTIVALS, type FestivalOccurrence } from '$lib/panchanga';
-  import { MS_PER_DAY } from '$lib/astro';
+  import { MS_PER_DAY, eclipsesBetween, type EclipseEvent } from '$lib/astro';
   import { preferences } from '$lib/state/preferences.svelte';
   import { formatDate, localYMD } from '$lib/format/time';
   import { applyNumerals } from '$lib/format/numerals';
@@ -29,6 +29,39 @@
     if (!Number.isFinite(n) || n < 1900 || n > 2100) return null;
     return n;
   });
+
+  // Eclipses (grahan) for the year — a real astronomical event the calendar marks.
+  const eclipses = $derived.by<EclipseEvent[]>(() =>
+    parsedYear === null
+      ? []
+      : eclipsesBetween(
+          new Date(Date.UTC(parsedYear, 0, 1)),
+          new Date(Date.UTC(parsedYear + 1, 0, 1)),
+        ),
+  );
+  const KIND_HI: Record<string, string> = {
+    total: 'पूर्ण',
+    partial: 'आंशिक',
+    annular: 'वलयाकार',
+    penumbral: 'उपछाया',
+  };
+  const eclKind = (e: EclipseEvent) => (preferences.language === 'hi' ? KIND_HI[e.kind] : e.kind);
+  const eclType = (e: EclipseEvent) =>
+    e.type === 'solar'
+      ? preferences.language === 'hi'
+        ? 'सूर्य ग्रहण'
+        : 'Solar eclipse'
+      : preferences.language === 'hi'
+        ? 'चन्द्र ग्रहण'
+        : 'Lunar eclipse';
+  const eclNode = (e: EclipseEvent) =>
+    e.node === 'rahu'
+      ? preferences.language === 'hi'
+        ? 'राहु'
+        : 'Rāhu'
+      : preferences.language === 'hi'
+        ? 'केतु'
+        : 'Ketu';
 
   // Festival compute (cache-first; a miss runs ~a year of dates off the main
   // thread in a shared worker) lives in $lib/festival-loader — the same module
@@ -133,6 +166,21 @@
         </a>
       </div>
     </header>
+    {#if eclipses.length > 0}
+      <div class="grahan">
+        <div class="grahan__lab">{tr('fest.eclipses')}</div>
+        {#each eclipses as e (e.peak.getTime())}
+          <a class="grahan__row" href={'#/day/' + localYMD(e.peak, tz())}>
+            <span class="grahan__icon" aria-hidden="true">{e.type === 'solar' ? '☀' : '🌑'}</span>
+            <span class="grahan__date num"
+              >{num(formatDate(e.peak, tz(), localeMetaOf(preferences.language).intlLocale))}</span
+            >
+            <span class="grahan__name serif">{eclKind(e)} {eclType(e)}</span>
+            <span class="grahan__node">{e.node === 'rahu' ? '☊' : '☋'} {eclNode(e)}</span>
+          </a>
+        {/each}
+      </div>
+    {/if}
     {#if loading}
       <Loading label={tr('fest.computing')} />
     {:else if occurrences.length > 0}
@@ -158,6 +206,52 @@
 </section>
 
 <style>
+  .grahan {
+    margin-bottom: var(--space-4, 1.2rem);
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper-2);
+  }
+  .grahan__lab {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint, #999);
+    margin-bottom: 0.4rem;
+  }
+  .grahan__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.32rem 0;
+    text-decoration: none;
+    color: var(--ink);
+    border-top: 1px solid var(--line);
+  }
+  .grahan__row:first-of-type {
+    border-top: none;
+  }
+  .grahan__icon {
+    flex: none;
+  }
+  .grahan__date {
+    flex: none;
+    min-width: 5.5rem;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .grahan__name {
+    flex: 1;
+    text-transform: capitalize;
+  }
+  .grahan__node {
+    flex: none;
+    color: var(--red);
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
   .head {
     display: flex;
     align-items: center;

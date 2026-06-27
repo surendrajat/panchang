@@ -66,6 +66,39 @@ export function upcomingEclipses(from: Date, count: number): EclipseEvent[] {
   return events.sort((a, b) => a.peak.getTime() - b.peak.getTime()).slice(0, count);
 }
 
+/** All eclipses (solar + lunar) whose peak falls in [from, to). */
+export function eclipsesBetween(from: Date, to: Date): EclipseEvent[] {
+  const toMs = to.getTime();
+  const out: EclipseEvent[] = [];
+  for (
+    let lun = SearchLunarEclipse(from);
+    lun.peak.date.getTime() < toMs;
+    lun = NextLunarEclipse(lun.peak)
+  ) {
+    out.push({
+      type: 'lunar',
+      kind: lun.kind,
+      peak: lun.peak.date,
+      obscuration: lun.obscuration,
+      node: nodeAtPeak(lun.peak.date),
+    });
+  }
+  for (
+    let sol = SearchGlobalSolarEclipse(from);
+    sol.peak.date.getTime() < toMs;
+    sol = NextGlobalSolarEclipse(sol.peak)
+  ) {
+    out.push({
+      type: 'solar',
+      kind: sol.kind,
+      peak: sol.peak.date,
+      obscuration: sol.obscuration ?? null,
+      node: nodeAtPeak(sol.peak.date),
+    });
+  }
+  return out.sort((a, b) => a.peak.getTime() - b.peak.getTime());
+}
+
 // ── disk geometry: what the eclipse actually looks like ──────────────────────────
 const AU_KM = 1.495978707e8;
 const SUN_RADIUS_KM = 695700;

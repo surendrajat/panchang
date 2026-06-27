@@ -163,6 +163,7 @@ export const hi: Record<TranslationKey, string> = {
   'fest.todayLabel': 'आज का त्योहार',
   'fest.todayLabelMulti': 'आज',
   'fest.festivalsYear': 'त्योहार · {year}',
+  'fest.eclipses': 'ग्रहण',
   'fest.today': 'आज',
   'fest.inDays': '{days} दिन में',
   'fest.inOneDay': '{days} दिन में',

@@ -154,6 +154,7 @@ export const en = {
   'fest.todayLabel': 'Festival Today',
   'fest.todayLabelMulti': 'Today',
   'fest.festivalsYear': 'Festivals · {year}',
+  'fest.eclipses': 'Eclipses · Grahan',
   'fest.today': 'today',
   'fest.inDays': 'in {days} days',
   'fest.inOneDay': 'in {days} day',

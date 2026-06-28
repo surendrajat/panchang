@@ -41,6 +41,7 @@
   import EclipseTheatre from '../components/sky/EclipseTheatre.svelte';
   import EclipseDisk from '../components/sky/EclipseDisk.svelte';
   import EclipseLineup from '../components/sky/EclipseLineup.svelte';
+  import EclipseNodes from '../components/sky/EclipseNodes.svelte';
 
   // ── display helpers ─────────────────────────────────────────────────────────
   const lang = $derived(preferences.language);
@@ -853,9 +854,25 @@
     </div>
   </article>
 
-  <!-- [3] what it looks like, up close -->
+  <!-- [3] what Rāhu and Ketu actually are: the two crossing points -->
   <article class="cell">
     <div class="cell__no">[3]</div>
+    <div class="cell__body">
+      <p class="cell__kicker">{hi('दो द्वार', 'The two doorways')}</p>
+      <h3>{hi('राहु और केतु असल में क्या हैं', 'What Rāhu and Ketu actually are')}</h3>
+      <p class="prose">
+        {hi(
+          'तो राहु और केतु कोई पिंड नहीं — वे दो बिंदु हैं जहाँ चन्द्रमा की झुकी कक्षा सूर्य-मार्ग (क्रांतिवृत्त) को काटती है। एक से चन्द्रमा उत्तर की ओर चढ़ता है (राहु — आरोही नोड), दूसरे से दक्षिण को उतरता है (केतु — अवरोही नोड)। पुरा-कथा इन्हें छाया-दानव के दो टुकड़े कहती है; खगोल इन्हें चन्द्र-नोड कहता है। ग्रहण तभी होता है जब अमावस्या या पूर्णिमा ठीक इन्हीं में से किसी एक बिंदु पर पड़े। (यहाँ झुकाव स्पष्टता के लिए बढ़ाकर दिखाया है।)',
+          'So Rāhu and Ketu aren’t objects — they’re the two points where the Moon’s tilted orbit cuts the Sun’s path (the ecliptic). Through one the Moon climbs north (Rāhu, the ascending node); through the other it dips south (Ketu, the descending node). The old story calls them a shadow-demon’s two halves; astronomy calls them the lunar nodes. An eclipse happens only when a new or full Moon lands right on one. (The tilt is exaggerated here so you can see the crossing.)',
+        )}
+      </p>
+      <EclipseNodes {lang} />
+    </div>
+  </article>
+
+  <!-- [4] what it looks like, up close -->
+  <article class="cell">
+    <div class="cell__no">[4]</div>
     <div class="cell__body">
       <p class="cell__kicker">{hi('पास से', 'Up close')}</p>
       <h3>{hi('ग्रहण कैसा दिखता है', 'What you’d actually see')}</h3>

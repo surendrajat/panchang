@@ -834,7 +834,7 @@
           'Three balls fall into a line. In a solar eclipse the Moon comes between us and the Sun and casts its shadow on Earth. In a lunar eclipse, Earth is in the middle and its shadow falls on the Moon. Toggle to see both.',
         )}
       </p>
-      <EclipseLineup {lang} />
+      <EclipseLineup {lang} active={lesson === 'eclipse'} />
     </div>
   </article>
 
@@ -866,7 +866,7 @@
           'So Rāhu and Ketu aren’t objects — they’re the two points where the Moon’s tilted orbit cuts the Sun’s path (the ecliptic). Through one the Moon climbs north (Rāhu, the ascending node); through the other it dips south (Ketu, the descending node). The old story calls them a shadow-demon’s two halves; astronomy calls them the lunar nodes. An eclipse happens only when a new or full Moon lands right on one. (The tilt is exaggerated here so you can see the crossing.)',
         )}
       </p>
-      <EclipseNodes {lang} />
+      <EclipseNodes {lang} active={lesson === 'eclipse'} />
     </div>
   </article>
 

@@ -6,7 +6,7 @@
   // light arrives parallel), with a Solar/Lunar toggle and a slow sweep so you can
   // watch the shadow track across.
   import EarthIcon from './EarthIcon.svelte';
-  let { lang = 'en' }: { lang?: 'en' | 'hi' } = $props();
+  let { lang = 'en', active = true }: { lang?: 'en' | 'hi'; active?: boolean } = $props();
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
 
   let mode = $state<'solar' | 'lunar'>('solar');
@@ -21,7 +21,7 @@
   $effect(() => {
     const reduce =
       typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
+    if (reduce || !active) {
       phase = 0.5;
       return;
     }

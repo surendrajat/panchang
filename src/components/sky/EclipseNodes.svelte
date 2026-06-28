@@ -6,7 +6,7 @@
   // An eclipse needs a new or full Moon to land right on one. (Tilt exaggerated so
   // the crossing is visible — the real tilt is ~5°.)
   import EarthIcon from './EarthIcon.svelte';
-  let { lang = 'en' }: { lang?: 'en' | 'hi' } = $props();
+  let { lang = 'en', active = true }: { lang?: 'en' | 'hi'; active?: boolean } = $props();
   const hi = (h: string, e: string) => (lang === 'hi' ? h : e);
 
   const W = 440;
@@ -22,7 +22,7 @@
   $effect(() => {
     const reduce =
       typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
+    if (reduce || !active) {
       theta = Math.PI * 0.5;
       return;
     }
